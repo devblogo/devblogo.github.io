@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5199;&amp;#x5728;&amp;#x6587;&amp;#x7AE0;&amp;#x5F00;&amp;#x5934;go&amp;#x8BED;&amp;#x8A00;&amp;#x7684;&amp;#x7CBE;&amp;#x534E;&amp;#x5C31;&amp;#x5728;&amp;#x4E8E;&amp;#x534F;&amp;#x7A0B;&amp;#x7684;&amp;#x8BBE;&amp;#x8BA1;&amp;#xFF0C;&amp;#x53EA;&amp;#x6709;&amp;#x7406;&amp;#x89E3;&amp;#x534">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="go语言是如何实现协程的">
+<meta property="og:url" content="https://dev.newban.cn/7359083767564795919.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x5199;&amp;#x5728;&amp;#x6587;&amp;#x7AE0;&amp;#x5F00;&amp;#x5934;go&amp;#x8BED;&amp;#x8A00;&amp;#x7684;&amp;#x7CBE;&amp;#x534E;&amp;#x5C31;&amp;#x5728;&amp;#x4E8E;&amp;#x534F;&amp;#x7A0B;&amp;#x7684;&amp;#x8BBE;&amp;#x8BA1;&amp;#xFF0C;&amp;#x53EA;&amp;#x6709;&amp;#x7406;&amp;#x89E3;&amp;#x534">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/b231c2cf2efa76b739a757c889700c7e3b0e5df17d6f44a4685a63cdc34da777">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/cc5e08f46f41722a78eec887a399b58dc6faa5cd50760dfc014a006ee88f694a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/fadee10358da21e3205f3d4ab4905f35840a0a372d3021332b0b77591d5b637c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/becb6b23e5cc1710193a22f486133323c8b2faae8379df0382015bb1c5377a0a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/a7d8241129c186004355b2a67382372e9cbf7a493830864364ce5ea90c7999df">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/010663761676d3b15cab65c855e8765c963fd6f297397fe69d33a99caba0e519">
+<meta property="og:updated_time" content="2024-04-19T02:05:07.653Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="go语言是如何实现协程的">
+<meta name="twitter:description" content="&amp;#x5199;&amp;#x5728;&amp;#x6587;&amp;#x7AE0;&amp;#x5F00;&amp;#x5934;go&amp;#x8BED;&amp;#x8A00;&amp;#x7684;&amp;#x7CBE;&amp;#x534E;&amp;#x5C31;&amp;#x5728;&amp;#x4E8E;&amp;#x534F;&amp;#x7A0B;&amp;#x7684;&amp;#x8BBE;&amp;#x8BA1;&amp;#xFF0C;&amp;#x53EA;&amp;#x6709;&amp;#x7406;&amp;#x89E3;&amp;#x534">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/b231c2cf2efa76b739a757c889700c7e3b0e5df17d6f44a4685a63cdc34da777">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7359083767564795919.html">
+
+
+
+
+
+  <title>go语言是如何实现协程的 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">go语言是如何实现协程的</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-04-19T08:52:52+08:00">
+                2024-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x5199;&#x5728;&#x6587;&#x7AE0;&#x5F00;&#x5934;"><a href="#&#x5199;&#x5728;&#x6587;&#x7AE0;&#x5F00;&#x5934;" class="headerlink" title="&#x5199;&#x5728;&#x6587;&#x7AE0;&#x5F00;&#x5934;"></a>&#x5199;&#x5728;&#x6587;&#x7AE0;&#x5F00;&#x5934;</h2><p><code>go&#x8BED;&#x8A00;</code>&#x7684;&#x7CBE;&#x534E;&#x5C31;&#x5728;&#x4E8E;&#x534F;&#x7A0B;&#x7684;&#x8BBE;&#x8BA1;&#xFF0C;&#x53EA;&#x6709;&#x7406;&#x89E3;&#x534F;&#x7A0B;&#x7684;&#x8BBE;&#x8BA1;&#x601D;&#x60F3;&#x548C;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#xFF0C;&#x624D;&#x80FD;&#x786E;&#x4FDD;&#x6211;&#x4EEC;&#x80FD;&#x591F;&#x5B8C;&#x5168;&#x7684;&#x5229;&#x7528;&#x534F;&#x7A0B;&#x7F16;&#x5199;&#x5F3A;&#x5927;&#x7684;&#x5E76;&#x53D1;&#x7A0B;&#x5E8F;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/b231c2cf2efa76b739a757c889700c7e3b0e5df17d6f44a4685a63cdc34da777" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;</p>
+<p>Hi&#xFF0C;&#x6211;&#x662F; <strong>sharkChili</strong> &#xFF0C;&#x662F;&#x4E2A;&#x4E0D;&#x65AD;&#x5728;&#x786C;&#x6838;&#x6280;&#x672F;&#x4E0A;&#x4F5C;&#x6B7B;&#x7684; <strong>java coder</strong> &#xFF0C;&#x662F; <strong>CSDN&#x7684;&#x535A;&#x5BA2;&#x4E13;&#x5BB6;</strong> &#xFF0C;&#x4E5F;&#x662F;&#x5F00;&#x6E90;&#x9879;&#x76EE; <strong>Java Guide</strong> &#x7684;&#x7EF4;&#x62A4;&#x8005;&#x4E4B;&#x4E00;&#xFF0C;&#x719F;&#x6089; <strong>Java</strong> &#x4E5F;&#x4F1A;&#x4E00;&#x70B9; <strong>Go</strong> &#xFF0C;&#x5076;&#x5C14;&#x4E5F;&#x4F1A;&#x5728; <strong>C&#x6E90;&#x7801;</strong> &#x8FB9;&#x7F18;&#x5F98;&#x5F8A;&#x3002;&#x5199;&#x8FC7;&#x5F88;&#x591A;&#x6709;&#x610F;&#x601D;&#x7684;&#x6280;&#x672F;&#x535A;&#x5BA2;&#xFF0C;&#x4E5F;&#x8FD8;&#x5728;&#x7814;&#x7A76;&#x5E76;&#x8F93;&#x51FA;&#x6280;&#x672F;&#x7684;&#x8DEF;&#x4E0A;&#xFF0C;&#x5E0C;&#x671B;&#x6211;&#x7684;&#x6587;&#x7AE0;&#x5BF9;&#x4F60;&#x6709;&#x5E2E;&#x52A9;&#xFF0C;&#x975E;&#x5E38;&#x6B22;&#x8FCE;&#x4F60;&#x5173;&#x6CE8;&#x6211;&#x7684;&#x516C;&#x4F17;&#x53F7;&#xFF1A; <strong>&#x5199;&#x4EE3;&#x7801;&#x7684;SharkChili</strong> &#x3002;</p>
+<p>&#x56E0;&#x4E3A;&#x8FD1;&#x671F;&#x6536;&#x5230;&#x5F88;&#x591A;&#x8BFB;&#x8005;&#x7684;&#x79C1;&#x4FE1;&#xFF0C;&#x6240;&#x4EE5;&#x4E5F;&#x4E13;&#x95E8;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;&#x4EA4;&#x6D41;&#x7FA4;&#xFF0C;&#x611F;&#x5174;&#x8DA3;&#x7684;&#x8BFB;&#x8005;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4E0A;&#x65B9;&#x7684;&#x516C;&#x4F17;&#x53F7;&#x83B7;&#x53D6;&#x7B14;&#x8005;&#x7684;&#x8054;&#x7CFB;&#x65B9;&#x5F0F;&#x5B8C;&#x6210;&#x597D;&#x53CB;&#x6DFB;&#x52A0;&#xFF0C;&#x70B9;&#x51FB;&#x5907;&#x6CE8; <strong>&#x201C;&#x52A0;&#x7FA4;&#x201D;</strong> &#x5373;&#x53EF;&#x548C;&#x7B14;&#x8005;&#x548C;&#x7B14;&#x8005;&#x7684;&#x670B;&#x53CB;&#x4EEC;&#x8FDB;&#x884C;&#x6DF1;&#x5165;&#x4EA4;&#x6D41;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/cc5e08f46f41722a78eec887a399b58dc6faa5cd50760dfc014a006ee88f694a" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;</p>
+<h2 id="&#x8BE6;&#x89E3;&#x534F;&#x7A0B;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x548C;&#x5B9E;&#x73B0;"><a href="#&#x8BE6;&#x89E3;&#x534F;&#x7A0B;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x548C;&#x5B9E;&#x73B0;" class="headerlink" title="&#x8BE6;&#x89E3;&#x534F;&#x7A0B;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x548C;&#x5B9E;&#x73B0;"></a>&#x8BE6;&#x89E3;&#x534F;&#x7A0B;&#x5DE5;&#x4F5C;&#x673A;&#x5236;&#x548C;&#x5B9E;&#x73B0;</h2><h3 id="&#x534F;&#x7A0B;&#x793A;&#x4F8B;"><a href="#&#x534F;&#x7A0B;&#x793A;&#x4F8B;" class="headerlink" title="&#x534F;&#x7A0B;&#x793A;&#x4F8B;"></a>&#x534F;&#x7A0B;&#x793A;&#x4F8B;</h3><p>&#x6B63;&#x5F0F;&#x4ECB;&#x7ECD;&#x5E95;&#x5C42;&#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x4EEC;&#x7ED9;&#x51FA;&#x4E00;&#x6BB5;&#x534F;&#x7A0B;&#x7684;&#x4EE3;&#x7801;&#x793A;&#x4F8B;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x7B14;&#x8005;&#x5F00;&#x542F;&#x4E00;&#x4E2A;&#x534F;&#x7A0B;&#x8FDB;&#x884C;&#x51FD;&#x6570;&#x5185;&#x90E8;&#x8C03;&#x7528;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;func&#xA0;foo1()&#xA0;{</span><br><span class="line">&#xA0;fmt.Println(&quot;foo1&#xA0;&#x8C03;&#x7528;&#xA0;foo2&quot;)</span><br><span class="line">&#xA0;foo2()</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func&#xA0;foo2()&#xA0;{</span><br><span class="line">&#xA0;fmt.Println(&quot;foo2&#x8C03;&#x7528;foo3&quot;)</span><br><span class="line">&#xA0;foo3()</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func&#xA0;foo3()&#xA0;{</span><br><span class="line">&#xA0;fmt.Println(&quot;foo3&#xA0;&#x6267;&#x884C;&#x4E86;&quot;)</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func&#xA0;main()&#xA0;{</span><br><span class="line">&#xA0;//&#x8BBE;&#x7F6E;WaitGroup&#x7B49;&#x5F85;&#x534F;&#x7A0B;&#x7ED3;&#x675F;</span><br><span class="line">&#xA0;var&#xA0;wg&#xA0;sync.WaitGroup</span><br><span class="line">&#xA0;wg.Add(1)</span><br><span class="line"></span><br><span class="line">&#xA0;go&#xA0;func()&#xA0;{</span><br><span class="line">&#xA0;&#xA0;foo1()</span><br><span class="line">&#xA0;&#xA0;defer&#xA0;wg.Done()</span><br><span class="line">&#xA0;}()</span><br><span class="line"></span><br><span class="line">&#xA0;//&#x7B49;&#x5F85;&#x4E0A;&#x8FF0;&#x534F;&#x7A0B;&#x8FD0;&#x884C;&#x7ED3;&#x675F;</span><br><span class="line">&#xA0;wg.Wait()</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD0;&#x884C;&#x7ED3;&#x679C;&#x5982;&#x4E0B;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;foo1&#xA0;&#x8C03;&#x7528;&#xA0;foo2</span><br><span class="line">foo2&#x8C03;&#x7528;foo3</span><br><span class="line">foo3&#xA0;&#x6267;&#x884C;&#x4E86;</span><br></pre></td></tr></table></figure>
+
+<p>&#x7ED3;&#x5408;debug&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5F53;&#x524D;&#x534F;&#x7A0B;&#x7684;&#x8C03;&#x7528;&#x6808;&#x5E27;&#xFF0C;&#x5728;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x524D;&#x63D2;&#x5165;&#x4E00;&#x4E2A;<code>goexit</code>&#x7684;&#x4E1C;&#x897F;&#xFF0C;&#x7ED3;&#x5408;&#x8FD9;&#x4E00;&#x70B9;&#x6211;&#x4EEC;&#x5F00;&#x59CB;&#x5BF9;&#x534F;&#x7A0B;&#x7684;&#x6DF1;&#x5165;&#x5256;&#x6790;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/fadee10358da21e3205f3d4ab4905f35840a0a372d3021332b0b77591d5b637c" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;</p>
+<h3 id="&#x534F;&#x7A0B;&#x5B9E;&#x73B0;&#x7ED3;&#x6784;"><a href="#&#x534F;&#x7A0B;&#x5B9E;&#x73B0;&#x7ED3;&#x6784;" class="headerlink" title="&#x534F;&#x7A0B;&#x5B9E;&#x73B0;&#x7ED3;&#x6784;"></a>&#x534F;&#x7A0B;&#x5B9E;&#x73B0;&#x7ED3;&#x6784;</h3><p>&#x5728;<code>go&#x8BED;&#x8A00;</code>&#x7684;&#x534F;&#x7A0B;&#x7ED3;&#x6784;&#x4E3A;:</p>
+<ol>
+<li>&#x901A;&#x8FC7;&#x4E00;&#x4E2A;<code>stack</code>&#x8BB0;&#x5F55;&#x5176;&#x9AD8;&#x5730;&#x5740;&#x548C;&#x4F4E;&#x5730;&#x5740;&#x3002;</li>
+<li>&#x901A;&#x8FC7;<code>sched</code>&#x7684;<code>sp(&#x5373;stackpointer)&#x6808;&#x5E27;&#x7684;&#x6307;&#x9488;</code>&#x548C;<code>&#x7A0B;&#x5E8F;&#x8BA1;&#x6570;&#x5668;pc(&#x6307;&#x5411;&#x4E0B;&#x4E00;&#x6761;&#x8FD0;&#x884C;&#x7684;&#x6307;&#x4EE4;)</code>.</li>
+<li>&#x91C7;&#x7528;<code>goid</code>&#x751F;&#x6210;&#x552F;&#x4E00;&#x6807;&#x8BC6;&#x3002;</li>
+<li>&#x7136;&#x540E;&#x518D;&#x7528;<code>atomicstatus</code>&#x8BB0;&#x5F55;&#x5176;&#x6267;&#x884C;&#x72B6;&#x6001;&#x3002;</li>
+</ol>
+<p>&#x57FA;&#x4E8E;&#x8FD9;&#x51E0;&#x70B9;&#x6211;&#x4EEC;&#x7ED3;&#x5408;&#x4E0A;&#x8FF0;&#x7684;&#x4EE3;&#x7801;&#x7ED9;&#x51FA;&#x534F;&#x7A0B;&#x7684;&#x5E95;&#x5C42;&#x7ED3;&#x6784;&#xFF0C;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF0C;&#x5F53;&#x524D;&#x534F;&#x7A0B;&#x7684;<code>stack</code>&#x8BB0;&#x5F55;&#x6574;&#x4E2A;foo1&#x51FD;&#x6570;&#x7684;&#x9AD8;&#x4F4E;&#x5730;&#x5740;&#xFF0C;&#x5047;&#x8BBE;&#x6211;&#x4EEC;&#x5F53;&#x524D;&#x7684;&#x534F;&#x7A0B;<code>go</code>&#x6765;&#x5230;<code>foo2</code>&#x51FD;&#x6570;&#x51C6;&#x5907;&#x8C03;&#x7528;<code>foo3</code>&#x51FD;&#x6570;&#xFF0C;&#x6211;&#x4EEC;&#x7684;<code>sched</code>&#x4E2D;&#x7684;sp&#x5373;<code>stackpointer</code>&#x8BB0;&#x5F55;foo2&#x7684;&#x6307;&#x9488;&#xFF0C;&#x540C;&#x65F6;&#x56E0;&#x4E3A;<code>foo2</code>&#x5185;&#x90E8;&#x4F1A;&#x8C03;&#x7528;<code>foo3</code>&#x6240;&#x4EE5;&#x7A0B;&#x5E8F;&#x8BA1;&#x6570;&#x5668;<code>pc</code>&#x8BB0;&#x5F55;&#x7740;&#x8C03;&#x7528;<code>foo3</code>&#x7684;&#x6307;&#x4EE4;&#x3002;</p>
+<p>&#x6700;&#x540E;&#x56E0;&#x4E3A;&#x534F;&#x7A0B;&#x90FD;&#x662F;&#x7531;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x534F;&#x7A0B;&#x7684;&#x5185;&#x90E8;&#x4E5F;&#x6709;&#x4E00;&#x4E2A;&#x53D8;&#x91CF;&#x8BB0;&#x5F55;&#x7740;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x7684;&#x6307;&#x9488;m&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/becb6b23e5cc1710193a22f486133323c8b2faae8379df0382015bb1c5377a0a" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;</p>
+<p>&#x5230;&#x6B64;&#x6211;&#x4EEC;&#x4E86;&#x89E3;&#x4E86;&#x534F;&#x7A0B;&#x6838;&#x5FC3;&#x7ED3;&#x6784;&#xFF0C;&#x540C;&#x65F6;&#x6211;&#x4EEC;&#x4E5F;&#x5728;<code>runtime2.go</code>&#x8FD9;&#x4E00;&#x6587;&#x4EF6;&#x4E2D;&#x5373;&#x7ED9;&#x51FA;&#x4E0A;&#x8FF0;&#x6240;&#x8BF4;&#x7684;&#x6838;&#x5FC3;&#x53D8;&#x91CF;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;type&#xA0;g&#xA0;struct&#xA0;{</span><br><span class="line">&#xA0;//&#x8BB0;&#x5F55;&#x6808;&#x5E27;&#x7684;&#x9AD8;&#x5730;&#x5740;&#x548C;&#x4F4E;&#x5730;&#x5740;</span><br><span class="line">&#xA0;stack&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;stack&#xA0;&#xA0;&#xA0;//&#xA0;offset&#xA0;known&#xA0;to&#xA0;runtime/cgo</span><br><span class="line">&#xA0;//......</span><br><span class="line">&#xA0;m&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;*m&#xA0;//&#x6267;&#x884C;&#x5F53;&#x524D;&#x534F;&#x7A0B;&#x7684;&#x7EBF;&#x7A0B;&#x6307;&#x9488;</span><br><span class="line">&#xA0;//&#x8BB0;&#x5F55;&#x5F53;&#x524D;&#x5806;&#x6808;&#x7684;&#x6307;&#x9488;&#x4EE5;&#x53CA;&#x4E0B;&#x4E00;&#x6761;&#x6307;&#x4EE4;&#x7684;&#x8FD0;&#x884C;&#x5730;&#x5740;</span><br><span class="line">&#xA0;sched&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;gobuf</span><br><span class="line">&#xA0;atomicstatus&#xA0;atomic.Uint32</span><br><span class="line">&#xA0;goid&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;uint64</span><br><span class="line">&#xA0;</span><br><span class="line">&#xA0;//......</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6B65;&#x5165;<code>stack</code>&#x53EF;&#x4EE5;&#x770B;&#x5230;<code>lo</code>&#x548C;<code>hi</code>&#x4E24;&#x4E2A;&#x4E13;&#x95E8;&#x8BB0;&#x5F55;&#x6808;&#x5E27;&#x9AD8;&#x4F4E;&#x5730;&#x5740;&#x7684;&#x6307;&#x9488;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;type&#xA0;stack&#xA0;struct&#xA0;{</span><br><span class="line">&#xA0;lo&#xA0;uintptr</span><br><span class="line">&#xA0;hi&#xA0;uintptr</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;&#x5E94;&#x7684;&#x6211;&#x4EEC;&#x4E5F;&#x7ED9;&#x51FA;<code>sched</code> &#x7684;&#x7C7B;&#x578B;<code>gobuf</code>&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;<code>sp</code>&#x548C;<code>pc</code>&#x4E24;&#x4E2A;&#x6838;&#x5FC3;&#x6307;&#x9488;&#x53D8;&#x91CF;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;type&#xA0;gobuf&#xA0;struct&#xA0;{</span><br><span class="line">&#xA0;</span><br><span class="line">&#xA0;sp&#xA0;&#xA0;&#xA0;uintptr</span><br><span class="line">&#xA0;pc&#xA0;&#xA0;&#xA0;uintptr</span><br><span class="line">&#xA0;//......</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x8C08;&#x8C08;go&#x8BED;&#x8A00;&#x5BF9;&#x4E8E;&#x7EBF;&#x7A0B;&#x7684;&#x62BD;&#x8C61;"><a href="#&#x8C08;&#x8C08;go&#x8BED;&#x8A00;&#x5BF9;&#x4E8E;&#x7EBF;&#x7A0B;&#x7684;&#x62BD;&#x8C61;" class="headerlink" title="&#x8C08;&#x8C08;go&#x8BED;&#x8A00;&#x5BF9;&#x4E8E;&#x7EBF;&#x7A0B;&#x7684;&#x62BD;&#x8C61;"></a>&#x8C08;&#x8C08;go&#x8BED;&#x8A00;&#x5BF9;&#x4E8E;&#x7EBF;&#x7A0B;&#x7684;&#x62BD;&#x8C61;</h3><p>&#x4E0A;&#x6587;&#x6211;&#x4EEC;&#x63D0;&#x51FA;&#x7EBF;&#x7A0B;&#x7684;&#x7528;<code>m</code>&#x6307;&#x9488;&#x8BB0;&#x5F55;&#xFF0C;&#x5982;&#x4E0B;&#x6E90;&#x7801;&#x6240;&#x793A;&#xFF0C;&#x6211;&#x4EEC;&#x90FD;&#x77E5;&#x9053;&#x5728;go&#x8BED;&#x8A00;&#x4E2D;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x90FD;&#x4F1A;&#x4ECE;&#x4E00;&#x4E2A;&#x534F;&#x7A0B;&#x961F;&#x5217;&#x4E2D;&#x83B7;&#x53D6;&#x534F;&#x7A0B;&#x6267;&#x884C;&#xFF0C;&#x6240;&#x4EE5;&#x6267;&#x884C;&#x65F6;&#x5B83;&#x4F1A;&#x7528;<code>curg</code>&#x8BB0;&#x5F55;&#x5F53;&#x524D;&#x8FD0;&#x884C;&#x7684;&#x534F;&#x7A0B;&#xFF0C;&#x7136;&#x540E;&#x901A;&#x8FC7;id&#x5BF9;&#x81EA;&#x5DF1;&#x8FDB;&#x884C;&#x552F;&#x4E00;&#x6807;&#x8BC6;&#xFF0C;&#x800C;<code>mOS</code>&#x5219;&#x662F;&#x53CA;&#x8BB0;&#x5F55;&#x5F53;&#x524D;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x4FE1;&#x606F;&#xFF0C;&#x8FD9;&#x5176;&#x4E2D;&#x6700;&#x6838;&#x5FC3;&#x7684;&#x5C31;&#x662F;<code>g0</code>&#x5B83;&#x5C31;&#x662F;&#x6BCF;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x7684;&#x64CD;&#x4F5C;&#x8C03;&#x5EA6;&#x5668;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;type&#xA0;m&#xA0;struct&#xA0;{</span><br><span class="line">&#xA0;g0&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;*g&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;//&#xA0;goroutine&#xA0;with&#xA0;scheduling&#xA0;stack</span><br><span class="line">&#xA0;id&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;int64&#xA0;</span><br><span class="line">&#xA0;</span><br><span class="line">&#xA0;curg&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;*g&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;//&#xA0;current&#xA0;running&#xA0;goroutine</span><br><span class="line">&#xA0;</span><br><span class="line">&#xA0;mOS</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E86;&#x89E3;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x4E4B;&#x540E;&#x6211;&#x4EEC;&#x518D;&#x6765;&#x804A;&#x804A;go&#x8BED;&#x8A00;&#x7EBF;&#x7A0B;&#x7684;g0&#x6808;&#x662F;&#x5982;&#x4F55;&#x5DE5;&#x4F5C;&#x7684;&#xFF0C;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF0C;&#x6BCF;&#x4E00;&#x4E2A;g0&#x6808;&#x90FD;&#x4F1A;&#x901A;&#x8FC7;schedule&#x5F00;&#x59CB;&#x5DE5;&#x4F5C;&#xFF1A;</p>
+<ol>
+<li>&#x901A;&#x8FC7;execute&#x4ECE;&#x534F;&#x7A0B;&#x961F;&#x5217;&#x4E2D;&#x83B7;&#x53D6;&#x4EFB;&#x52A1;&#x3002;</li>
+<li>&#x8C03;&#x7528;gogo&#x65B9;&#x6CD5;&#x5728;&#x534F;&#x7A0B;&#x8C03;&#x7528;&#x524D;&#x63D2;&#x5165;<code>go exit</code>&#x6307;&#x9488;&#x5B83;&#x8BB0;&#x5F55;g0&#x6808;&#x5E27;&#xFF0C;&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x5C31;&#x662F;&#x7528;&#x4E8E;&#x534F;&#x7A0B;&#x6267;&#x884C;&#x9000;&#x51FA;&#x6216;&#x8005;&#x6302;&#x8D77;&#x662F;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x8DF3;&#x56DE;<code>g0</code>&#x6808;&#x3002;</li>
+<li>&#x7136;&#x540E;&#x5C31;&#x662F;&#x6267;&#x884C;&#x5F53;&#x524D;&#x534F;&#x7A0B;&#x3002;</li>
+<li>&#x534F;&#x7A0B;&#x6267;&#x884C;&#x5B8C;&#x6210;&#x5207;&#x6362;&#x56DE;<code>g0</code>&#x6808;&#xFF0C;&#x91CD;&#x65B0;&#x8C03;&#x7528;schedule&#x65B9;&#x6CD5;&#x518D;&#x6B21;&#x4ECE;&#x6B65;&#x9AA4;1&#x5F00;&#x59CB;&#x6267;&#x884C;&#xFF0C;&#x7531;&#x6B64;&#x6784;&#x6210;&#x4E00;&#x4E2A;&#x5FAA;&#x73AF;&#x3002;</li>
+</ol>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/a7d8241129c186004355b2a67382372e9cbf7a493830864364ce5ea90c7999df" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;</p>
+<p>&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x4E5F;&#x7ED9;&#x51FA;<code>asm_amd64.s</code>&#x4E2D;&#x5173;&#x4E8E;<code>gogo</code>&#x7684;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;gobuf_sp&#x65B9;&#x6CD5;&#x5B83;&#x4F1A;&#x8BB0;&#x5F55;&#x5F53;&#x524D;<code>stack pointer</code>&#x4E5F;&#x5C31;&#x662F;&#x6211;&#x4EEC;&#x4E0A;&#x6587;&#x9488;&#x5BF9;<code>g0</code>&#x6240;&#x8BF4;&#x7684;<code>g0</code>&#x6808;&#x5730;&#x5740;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;TEXT&#xA0;gogo&lt;&gt;(SB),&#xA0;NOSPLIT,&#xA0;$0</span><br><span class="line">&#xA0;get_tls(CX)</span><br><span class="line">&#xA0;MOVQ&#xA0;DX,&#xA0;g(CX)</span><br><span class="line">&#xA0;MOVQ&#xA0;DX,&#xA0;R14&#xA0;&#xA0;//&#xA0;set&#xA0;the&#xA0;g&#xA0;register</span><br><span class="line">&#xA0;//&#x8BB0;&#x5F55;g0&#x6808;&#x5730;&#x5740;</span><br><span class="line">&#xA0;MOVQ&#xA0;gobuf_sp(BX),&#xA0;SP&#xA0;//&#xA0;restore&#xA0;SP</span><br><span class="line">&#xA0;MOVQ&#xA0;gobuf_ret(BX),&#xA0;AX</span><br><span class="line">&#xA0;MOVQ&#xA0;gobuf_ctxt(BX),&#xA0;DX</span><br><span class="line">&#xA0;MOVQ&#xA0;gobuf_bp(BX),&#xA0;BP</span><br><span class="line">&#xA0;MOVQ&#xA0;$0,&#xA0;gobuf_sp(BX)&#xA0;//&#xA0;clear&#xA0;to&#xA0;help&#xA0;garbage&#xA0;collector</span><br><span class="line">&#xA0;MOVQ&#xA0;$0,&#xA0;gobuf_ret(BX)</span><br><span class="line">&#xA0;MOVQ&#xA0;$0,&#xA0;gobuf_ctxt(BX)</span><br><span class="line">&#xA0;MOVQ&#xA0;$0,&#xA0;gobuf_bp(BX)</span><br><span class="line">&#xA0;MOVQ&#xA0;gobuf_pc(BX),&#xA0;BX</span><br><span class="line">&#xA0;JMP&#xA0;BX</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x5C0F;&#x7ED3;"><a href="#&#x5C0F;&#x7ED3;" class="headerlink" title="&#x5C0F;&#x7ED3;"></a>&#x5C0F;&#x7ED3;</h2><p>&#x81EA;&#x6B64;&#x6211;&#x4EEC;&#x4ECE;go&#x8BED;&#x8A00;&#x5E95;&#x5C42;&#x5B9E;&#x73B0;&#x7684;&#x89D2;&#x5EA6;&#x5B8C;&#x6574;&#x7684;&#x5256;&#x6790;&#x7684;&#x534F;&#x7A0B;&#x4E0E;&#x7EBF;&#x7A0B;&#x7684;&#x5173;&#x7CFB;&#x548C;&#x5B9E;&#x73B0;&#xFF0C;&#x5E0C;&#x671B;&#x5BF9;&#x4F60;&#x6709;&#x5E2E;&#x52A9;&#x3002;</p>
+<p>&#x6211;&#x662F; <strong>sharkchili</strong> &#xFF0C;<strong>CSDN Java &#x9886;&#x57DF;&#x535A;&#x5BA2;&#x4E13;&#x5BB6;</strong>&#xFF0C;<strong>&#x5F00;&#x6E90;&#x9879;&#x76EE;&#x2014;JavaGuide contributor</strong>&#xFF0C;&#x6211;&#x60F3;&#x5199;&#x4E00;&#x4E9B;&#x6709;&#x610F;&#x601D;&#x7684;&#x4E1C;&#x897F;&#xFF0C;&#x5E0C;&#x671B;&#x5BF9;&#x4F60;&#x6709;&#x5E2E;&#x52A9;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x60F3;&#x5B9E;&#x65F6;&#x6536;&#x5230;&#x6211;&#x5199;&#x7684;&#x786C;&#x6838;&#x7684;&#x6587;&#x7AE0;&#x4E5F;&#x6B22;&#x8FCE;&#x4F60;&#x5173;&#x6CE8;&#x6211;&#x7684;&#x516C;&#x4F17;&#x53F7;&#xFF1A; <strong>&#x5199;&#x4EE3;&#x7801;&#x7684;SharkChili</strong> &#x3002; &#x56E0;&#x4E3A;&#x8FD1;&#x671F;&#x6536;&#x5230;&#x5F88;&#x591A;&#x8BFB;&#x8005;&#x7684;&#x79C1;&#x4FE1;&#xFF0C;&#x6240;&#x4EE5;&#x4E5F;&#x4E13;&#x95E8;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;&#x4EA4;&#x6D41;&#x7FA4;&#xFF0C;&#x611F;&#x5174;&#x8DA3;&#x7684;&#x8BFB;&#x8005;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4E0A;&#x65B9;&#x7684;&#x516C;&#x4F17;&#x53F7;&#x83B7;&#x53D6;&#x7B14;&#x8005;&#x7684;&#x8054;&#x7CFB;&#x65B9;&#x5F0F;&#x5B8C;&#x6210;&#x597D;&#x53CB;&#x6DFB;&#x52A0;&#xFF0C;&#x70B9;&#x51FB;&#x5907;&#x6CE8; <strong>&#x201C;&#x52A0;&#x7FA4;&#x201D;</strong> &#x5373;&#x53EF;&#x548C;&#x7B14;&#x8005;&#x548C;&#x7B14;&#x8005;&#x7684;&#x670B;&#x53CB;&#x4EEC;&#x8FDB;&#x884C;&#x6DF1;&#x5165;&#x4EA4;&#x6D41;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/010663761676d3b15cab65c855e8765c963fd6f297397fe69d33a99caba0e519" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;</p>
+<h2 id="&#x53C2;&#x8003;"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</h2><p>&#x7A0B;&#x5E8F;&#x8BA1;&#x6570;&#x5668;&#xFF08;PC&#xFF09;&#x3001;&#x5806;&#x6808;&#x6307;&#x9488;&#xFF08;SP&#xFF09;&#x4E0E;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x8FC7;&#x7A0B;:<a href="/external_links/f5619a0b97f2cb1afc5ac9a0d2e0b63d.html" target="blank" rel="noopener">www.cnblogs.com/uestcliming&#x2026;</a></p>
+<p>&#x672C;&#x6587;&#x4F7F;&#x7528; <a href="/external_links/93d301f6597903977ae0dde24dc54956.html" target="blank" rel="noopener">markdown.com.cn</a> &#x6392;&#x7248;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/73e7dd12ecebc06fa82389f99fea42df.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端/" rel="tag"># 后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7359138355181043739.html" rel="next" title="systemd学习之udevudev">
+                <i class="fa fa-chevron-left"></i> systemd学习之udevudev
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7359138355181600795.html" rel="prev" title="强烈推荐，好用的时序图开源插件PlantUML！">
+                强烈推荐，好用的时序图开源插件PlantUML！ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">68</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#写在文章开头"><span class="nav-number">1.</span> <span class="nav-text">写在文章开头</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#详解协程工作机制和实现"><span class="nav-number">2.</span> <span class="nav-text">详解协程工作机制和实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#协程示例"><span class="nav-number">2.1.</span> <span class="nav-text">协程示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#协程实现结构"><span class="nav-number">2.2.</span> <span class="nav-text">协程实现结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#谈谈go语言对于线程的抽象"><span class="nav-number">2.3.</span> <span class="nav-text">谈谈go语言对于线程的抽象</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

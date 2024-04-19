@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,Java,MyBatis,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x524D;&amp;#x8A00;&amp;#x5206;&amp;#x5E03;&amp;#x5F0F;&amp;#x94FE;&amp;#x8DEF;&amp;#x8FFD;&amp;#x8E2A;&amp;#x4E2D;&amp;#xFF0C;&amp;#x8BB0;&amp;#x5F55;&amp;#x6570;&amp;#x636E;&amp;#x5E93;&amp;#x7684;&amp;#x8C03;&amp;#x7528;&amp;#x662F;&amp;#x5FC5;&amp;#x4E0D;&amp;#x53EF;&amp;#x5C11;&amp;#x7684;">
+<meta name="keywords" content="后端,Java,MyBatis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="10.数据库链路追踪实现设计">
+<meta property="og:url" content="https://dev.newban.cn/7358688805157404709.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x5206;&amp;#x5E03;&amp;#x5F0F;&amp;#x94FE;&amp;#x8DEF;&amp;#x8FFD;&amp;#x8E2A;&amp;#x4E2D;&amp;#xFF0C;&amp;#x8BB0;&amp;#x5F55;&amp;#x6570;&amp;#x636E;&amp;#x5E93;&amp;#x7684;&amp;#x8C03;&amp;#x7528;&amp;#x662F;&amp;#x5FC5;&amp;#x4E0D;&amp;#x53EF;&amp;#x5C11;&amp;#x7684;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-18T10:25:11.165Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="10.数据库链路追踪实现设计">
+<meta name="twitter:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x5206;&amp;#x5E03;&amp;#x5F0F;&amp;#x94FE;&amp;#x8DEF;&amp;#x8FFD;&amp;#x8E2A;&amp;#x4E2D;&amp;#xFF0C;&amp;#x8BB0;&amp;#x5F55;&amp;#x6570;&amp;#x636E;&amp;#x5E93;&amp;#x7684;&amp;#x8C03;&amp;#x7528;&amp;#x662F;&amp;#x5FC5;&amp;#x4E0D;&amp;#x53EF;&amp;#x5C11;&amp;#x7684;">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7358688805157404709.html">
+
+
+
+
+
+  <title>10.数据库链路追踪实现设计 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">10.数据库链路追踪实现设计</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-04-17T22:58:54+08:00">
+                2024-04-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h2><p>&#x5206;&#x5E03;&#x5F0F;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x4E2D;&#xFF0C;&#x8BB0;&#x5F55;&#x6570;&#x636E;&#x5E93;&#x7684;&#x8C03;&#x7528;&#x662F;&#x5FC5;&#x4E0D;&#x53EF;&#x5C11;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x6570;&#x636E;&#x5E93;&#x7684;&#x5206;&#x5E03;&#x5F0F;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#xFF0C;&#x4E0E;&#x8C03;&#x7528;&#x4E0B;&#x6E38;&#x670D;&#x52A1;&#x6216;&#x8005;&#x53D1;&#x9001;<strong>Kafka</strong>&#x6709;&#x7740;&#x663E;&#x8457;&#x7684;&#x4E0D;&#x540C;&#xFF0C;&#x90A3;&#x5C31;&#x662F;&#x94FE;&#x8DEF;&#x4FE1;&#x606F;&#x4E0D;&#x9700;&#x8981;&#x4F20;&#x9012;&#x5230;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x6240;&#x4EE5;&#x5C31;&#x4E0D;&#x9700;&#x8981;&#x5C06;<strong>Span</strong>&#x901A;&#x8FC7;&#x67D0;&#x79CD;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x4F20;&#x9012;&#xFF0C;&#x800C;&#x9700;&#x8981;&#x505A;&#x7684;&#xFF0C;&#x5C31;&#x662F;&#x628A;&#x8BF7;&#x6C42;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x65F6;&#x7684;&#x4E00;&#x4E9B;&#x4FE1;&#x606F;&#x8BB0;&#x5F55;&#x4E0B;&#x6765;&#x5E76;&#x4F5C;&#x4E3A;&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x8F93;&#x51FA;&#x3002;</p>
+<p>&#x8FD9;&#x91CC;&#x9009;&#x62E9;&#x57FA;&#x4E8E;<strong>MyBatis</strong>&#x5B9E;&#x73B0;&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#xFF0C;&#x5B9E;&#x73B0;&#x7684;&#x673A;&#x5236;&#x662F;&#x57FA;&#x4E8E;<strong>MyBatis</strong>&#x7684;&#x62E6;&#x622A;&#x5668;&#xFF0C;&#x56E0;&#x6B64;&#x5B9E;&#x9645;&#x4E0A;<strong>MyBatis-Plus</strong>&#x4E5F;&#x662F;&#x9002;&#x7528;&#x7684;&#x3002;</p>
+<p><strong>github</strong>&#x5730;&#x5740;&#xFF1A;<a href="/external_links/963378bc0f292c2872c460eb37de362b.html" target="blank" rel="noopener">honey-tracing</a></p>
+<h2 id="&#x6B63;&#x6587;"><a href="#&#x6B63;&#x6587;" class="headerlink" title="&#x6B63;&#x6587;"></a>&#x6B63;&#x6587;</h2><h3 id="&#x4E00;-&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6539;&#x9020;&#x8BF4;&#x660E;"><a href="#&#x4E00;-&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6539;&#x9020;&#x8BF4;&#x660E;" class="headerlink" title="&#x4E00;. &#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6539;&#x9020;&#x8BF4;&#x660E;"></a>&#x4E00;. &#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6539;&#x9020;&#x8BF4;&#x660E;</h3><p>&#x4E4B;&#x524D;&#x7684;&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x683C;&#x5F0F;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">json&#x590D;&#x5236;&#x4EE3;&#x7801;{</span><br><span class="line">    &quot;traceId&quot;: &quot;testTraceId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x6240;&#x5C5E;&#x94FE;&#x8DEF;&#x7684;Id</span><br><span class="line">    &quot;spanId&quot;: &quot;testSpanId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;SpanId</span><br><span class="line">    &quot;parentSpanId&quot;: &quot;testparentSpanId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x7236;&#x8282;&#x70B9;&#x7684;SpanId</span><br><span class="line">    &quot;timestamp&quot;: &quot;1704038400000&quot;, // &#x63A5;&#x6536;&#x5230;&#x8BF7;&#x6C42;&#x90A3;&#x4E00;&#x523B;&#x7684;&#x6BEB;&#x79D2;&#x65F6;&#x95F4;&#x6233;</span><br><span class="line">    &quot;duration&quot;: &quot;10&quot;, // &#x8868;&#x793A;&#x63A5;&#x6536;&#x8BF7;&#x6C42;&#x5230;&#x54CD;&#x5E94;&#x8BF7;&#x6C42;&#x7684;&#x8017;&#x65F6;</span><br><span class="line">    &quot;httpCode&quot;: &quot;200&quot;, // &#x8BF7;&#x6C42;&#x7684;HTTP&#x72B6;&#x6001;&#x7801;</span><br><span class="line">    &quot;host&quot;: &quot;127.0.0.1&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x4E3B;&#x673A;&#x5730;&#x5740;</span><br><span class="line">    &quot;requestStacks&quot;: [ // &#x8BF7;&#x6C42;&#x5806;&#x6808;</span><br><span class="line">        {</span><br><span class="line">            &quot;subSpanId&quot;: &quot;testSubSpanId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x5B50;&#x8282;&#x70B9;&#x7684;SpanId</span><br><span class="line">            &quot;subHttpCode&quot;: &quot;200&quot;, // &#x8BF7;&#x6C42;&#x5B50;&#x8282;&#x70B9;&#x7684;HTTP&#x72B6;&#x6001;&#x7801;</span><br><span class="line">            &quot;subTimestamp&quot;: &quot;1704038401000&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x8BF7;&#x6C42;&#x5B50;&#x8282;&#x70B9;&#x7684;&#x6BEB;&#x79D2;&#x65F6;&#x95F4;&#x6233;</span><br><span class="line">            &quot;subDuration&quot;: &quot;5&quot;, // &#x8868;&#x793A;&#x53D1;&#x8D77;&#x8BF7;&#x6C42;&#x5230;&#x6536;&#x5230;&#x54CD;&#x5E94;&#x7684;&#x8017;&#x65F6;</span><br><span class="line">            &quot;subHost&quot;: &quot;192.168.10.5&quot; // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x5B50;&#x8282;&#x70B9;&#x7684;&#x4E3B;&#x673A;&#x5730;&#x5740;</span><br><span class="line">        }</span><br><span class="line">    ]</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5176;&#x4E2D;<strong>requestStacks</strong>&#x5B57;&#x6BB5;&#x7528;&#x4E8E;&#x8BB0;&#x5F55;&#x4E0B;&#x6E38;&#x7684;<strong>Span</strong>&#x4FE1;&#x606F;&#xFF0C;&#x800C;&#x7531;&#x4E8E;&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x4E2D;&#x5E76;&#x4E0D;&#x9700;&#x8981;&#x5C06;&#x94FE;&#x8DEF;&#x4FE1;&#x606F;&#x4F20;&#x9012;&#x7ED9;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x6240;&#x4EE5;<strong>requestStacks</strong>&#x5B57;&#x6BB5;&#x4E0D;&#x518D;&#x9002;&#x7528;&#xFF0C;&#x6211;&#x4EEC;&#x65B0;&#x589E;&#x52A0;&#x4E00;&#x4E2A;<strong>dbStacks</strong>&#x5B57;&#x6BB5;&#x6765;&#x8BB0;&#x5F55;&#x6570;&#x636E;&#x5E93;&#x64CD;&#x4F5C;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x793A;&#x4F8B;&#x5982;&#x4E0B;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">json&#x590D;&#x5236;&#x4EE3;&#x7801;{</span><br><span class="line">    &quot;traceId&quot;: &quot;testTraceId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x6240;&#x5C5E;&#x94FE;&#x8DEF;&#x7684;Id</span><br><span class="line">    &quot;spanId&quot;: &quot;testSpanId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;SpanId</span><br><span class="line">    &quot;parentSpanId&quot;: &quot;testparentSpanId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x7236;&#x8282;&#x70B9;&#x7684;SpanId</span><br><span class="line">    &quot;timestamp&quot;: &quot;1704038400000&quot;, // &#x63A5;&#x6536;&#x5230;&#x8BF7;&#x6C42;&#x90A3;&#x4E00;&#x523B;&#x7684;&#x6BEB;&#x79D2;&#x65F6;&#x95F4;&#x6233;</span><br><span class="line">    &quot;duration&quot;: &quot;10&quot;, // &#x8868;&#x793A;&#x63A5;&#x6536;&#x8BF7;&#x6C42;&#x5230;&#x54CD;&#x5E94;&#x8BF7;&#x6C42;&#x7684;&#x8017;&#x65F6;</span><br><span class="line">    &quot;httpCode&quot;: &quot;200&quot;, // &#x8BF7;&#x6C42;&#x7684;HTTP&#x72B6;&#x6001;&#x7801;</span><br><span class="line">    &quot;host&quot;: &quot;127.0.0.1&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x4E3B;&#x673A;&#x5730;&#x5740;</span><br><span class="line">    &quot;requestStacks&quot;: [ // &#x8BF7;&#x6C42;&#x5806;&#x6808;</span><br><span class="line">        {</span><br><span class="line">            &quot;subSpanId&quot;: &quot;testSubSpanId&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x5B50;&#x8282;&#x70B9;&#x7684;SpanId</span><br><span class="line">            &quot;subHttpCode&quot;: &quot;200&quot;, // &#x8BF7;&#x6C42;&#x5B50;&#x8282;&#x70B9;&#x7684;HTTP&#x72B6;&#x6001;&#x7801;</span><br><span class="line">            &quot;subTimestamp&quot;: &quot;1704038401000&quot;, // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x8BF7;&#x6C42;&#x5B50;&#x8282;&#x70B9;&#x7684;&#x6BEB;&#x79D2;&#x65F6;&#x95F4;&#x6233;</span><br><span class="line">            &quot;subDuration&quot;: &quot;5&quot;, // &#x8868;&#x793A;&#x53D1;&#x8D77;&#x8BF7;&#x6C42;&#x5230;&#x6536;&#x5230;&#x54CD;&#x5E94;&#x7684;&#x8017;&#x65F6;</span><br><span class="line">            &quot;subHost&quot;: &quot;192.168.10.5&quot; // &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x5B50;&#x8282;&#x70B9;&#x7684;&#x4E3B;&#x673A;&#x5730;&#x5740;</span><br><span class="line">        }</span><br><span class="line">    ],</span><br><span class="line">    &quot;dbStacks&quot;: [</span><br><span class="line">        {</span><br><span class="line">            &quot;dbServer&quot;: &quot;127.0.0.1:3306&quot;, // &#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;</span><br><span class="line">            &quot;dbName&quot;: &quot;test&quot;, // &#x6570;&#x636E;&#x5E93;&#x540D;</span><br><span class="line">            &quot;sqlText&quot;: &quot;SELECT * FROM book WHERE id=?&quot;, // SQL&#x8BED;&#x53E5;</span><br><span class="line">            &quot;sqlParams&quot;: &quot;50&quot;, // SQL&#x8BED;&#x53E5;&#x53C2;&#x6570;</span><br><span class="line">            &quot;sqlDuration&quot;: &quot;5&quot;, // &#x6570;&#x636E;&#x5E93;&#x64CD;&#x4F5C;&#x8017;&#x65F6;</span><br><span class="line">            &quot;sqlTimestamp&quot;: &quot;1704038402000&quot; // &#x6570;&#x636E;&#x5E93;&#x64CD;&#x4F5C;&#x65F6;&#x7684;&#x6BEB;&#x79D2;&#x65F6;&#x95F4;&#x6233;</span><br><span class="line">        }</span><br><span class="line">    ]</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x65B0;&#x589E;&#x5B57;&#x6BB5;&#x8BF4;&#x660E;&#x5982;&#x4E0B;&#x3002;</p>
+<ol>
+<li><strong>dbServer</strong>&#x3002;&#x8868;&#x793A;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#xFF0C;&#x4ECE;<strong>url</strong>&#x8FDE;&#x63A5;&#x4E32;&#x4E2D;&#x89E3;&#x6790;&#x51FA;&#xFF1B;</li>
+<li><strong>dbName</strong>&#x3002;&#x8868;&#x793A;&#x64CD;&#x4F5C;&#x7684;&#x6570;&#x636E;&#x5E93;&#x540D;&#xFF0C;&#x4ECE;<strong>url</strong>&#x8FDE;&#x63A5;&#x4E32;&#x4E2D;&#x89E3;&#x6790;&#x51FA;&#xFF1B;</li>
+<li><strong>sqlText</strong>&#x3002;&#x8868;&#x793A;&#x6267;&#x884C;&#x7684;<strong>SQL</strong>&#x8BED;&#x53E5;&#x4FE1;&#x606F;&#xFF0C;&#x4ECE;<strong>MyBatis</strong>&#x7684;<strong>BoundSql</strong>&#x4E2D;&#x83B7;&#x53D6;&#xFF1B;</li>
+<li><strong>sqlParams</strong>&#x3002;&#x8868;&#x793A;&#x6267;&#x884C;&#x7684;<strong>SQL</strong>&#x53C2;&#x6570;&#xFF0C;&#x540C;&#x6837;&#x4ECE;<strong>MyBatis</strong>&#x7684;<strong>BoundSql</strong>&#x4E2D;&#x83B7;&#x53D6;&#xFF1B;</li>
+<li><strong>sqlDuration</strong>&#x3002;&#x8868;&#x793A;&#x64CD;&#x4F5C;&#x6570;&#x636E;&#x5E93;&#x7684;&#x8017;&#x65F6;&#xFF0C;&#x5355;&#x4F4D;<strong>ms</strong>&#xFF0C;&#x7531;&#x4E8E;<strong>MyBatis</strong>&#x62E6;&#x622A;&#x5668;&#x7684;&#x62E6;&#x622A;&#x65F6;&#x673A;&#x662F;&#x5148;&#x4E8E;&#x4ECE;&#x6570;&#x636E;&#x6E90;&#x4E2D;&#x62FF;&#x51FA;&#x8FDE;&#x63A5;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x7684;&#x8017;&#x65F6;&#x5305;&#x62EC;&#x7B49;&#x5F85;&#x83B7;&#x53D6;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#x7684;&#x65F6;&#x95F4;&#xFF1B;</li>
+<li><strong>sqlTimestamp</strong>&#x3002;&#x8868;&#x793A;&#x5F00;&#x59CB;&#x64CD;&#x4F5C;&#x6570;&#x636E;&#x5E93;&#x7684;&#x65F6;&#x95F4;&#x70B9;&#x7684;&#x6BEB;&#x79D2;&#x65F6;&#x95F4;&#x6233;&#x3002;</li>
+</ol>
+<h3 id="&#x4E8C;-MyBatis&#x62E6;&#x622A;&#x5668;&#x56DE;&#x987E;"><a href="#&#x4E8C;-MyBatis&#x62E6;&#x622A;&#x5668;&#x56DE;&#x987E;" class="headerlink" title="&#x4E8C;. MyBatis&#x62E6;&#x622A;&#x5668;&#x56DE;&#x987E;"></a>&#x4E8C;. MyBatis&#x62E6;&#x622A;&#x5668;&#x56DE;&#x987E;</h3><p><strong>MyBatis</strong>&#x7684;&#x62E6;&#x622A;&#x5668;&#x4E5F;&#x5C31;&#x662F;&#x5E38;&#x8BF4;&#x7684;&#x63D2;&#x4EF6;&#xFF0C;&#x53EF;&#x4EE5;&#x4F5C;&#x7528;&#x4E8E;<strong>Executor</strong>&#xFF0C;<strong>ParameterHandler</strong>&#xFF0C;<strong>ResultSetHandler</strong>&#x548C;<strong>StatementHandler</strong>&#x8FD9;&#x56DB;&#x4E2A;&#x7EC4;&#x4EF6;&#xFF0C;&#x6240;&#x6709;&#x62E6;&#x622A;&#x5668;&#x90FD;&#x9700;&#x8981;&#x5B9E;&#x73B0;<strong>org.apache.ibatis.plugin.Interceptor</strong>&#x63A5;&#x53E3;&#xFF0C;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x62E6;&#x622A;&#x5668;&#x793A;&#x4F8B;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Intercepts({</span><br><span class="line">        @Signature(type = Executor.class, method = &quot;update&quot;, args = {MappedStatement.class, Object.class}),</span><br><span class="line">        @Signature(type = Executor.class, method = &quot;query&quot;, args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class}),</span><br><span class="line">        @Signature(type = Executor.class, method = &quot;query&quot;, args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class})</span><br><span class="line">})</span><br><span class="line">public class TestInterceptor implements Interceptor {</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object intercept(Invocation invocation) throws Throwable {</span><br><span class="line">        // &#x83B7;&#x53D6;&#x88AB;&#x62E6;&#x622A;&#x7684;&#x5BF9;&#x8C61;</span><br><span class="line">        Object target = invocation.getTarget();</span><br><span class="line">        // &#x83B7;&#x53D6;&#x88AB;&#x62E6;&#x622A;&#x7684;&#x65B9;&#x6CD5;</span><br><span class="line">        Method method = invocation.getMethod();</span><br><span class="line">        // &#x83B7;&#x53D6;&#x88AB;&#x62E6;&#x622A;&#x7684;&#x65B9;&#x6CD5;&#x7684;&#x53C2;&#x6570;</span><br><span class="line">        Object[] args = invocation.getArgs();</span><br><span class="line"></span><br><span class="line">        // &#x6267;&#x884C;&#x88AB;&#x62E6;&#x622A;&#x7684;&#x65B9;&#x6CD5;&#x524D;&#xFF0C;&#x505A;&#x4E00;&#x4E9B;&#x4E8B;&#x60C5;</span><br><span class="line"></span><br><span class="line">        // &#x6267;&#x884C;&#x88AB;&#x62E6;&#x622A;&#x7684;&#x65B9;&#x6CD5;</span><br><span class="line">        Object result = invocation.proceed();</span><br><span class="line"></span><br><span class="line">        // &#x6267;&#x884C;&#x88AB;&#x62E6;&#x622A;&#x7684;&#x65B9;&#x6CD5;&#x540E;&#xFF0C;&#x505A;&#x4E00;&#x4E9B;&#x4E8B;&#x60C5;</span><br><span class="line"></span><br><span class="line">        // &#x8FD4;&#x56DE;&#x6267;&#x884C;&#x7ED3;&#x679C;</span><br><span class="line">        return result;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x9762;&#x51FA;&#x73B0;&#x7684;@<strong>Signature</strong>&#x6CE8;&#x89E3;&#x7684;<strong>type</strong>&#xFF0C;<strong>method</strong>&#x548C;<strong>args</strong>&#x4E09;&#x4E2A;&#x5B57;&#x6BB5;&#x5171;&#x540C;&#x51B3;&#x5B9A;&#x62E6;&#x622A;&#x5668;&#x4F1A;&#x4F5C;&#x7528;&#x4E8E;&#x54EA;&#x4E2A;&#x7EC4;&#x4EF6;&#x7684;&#x54EA;&#x4E2A;&#x65B9;&#x6CD5;&#x4E0A;&#xFF0C;&#x4F8B;&#x5982;&#x4E0A;&#x9762;&#x793A;&#x4F8B;&#x4E2D;&#xFF0C;&#x5C31;&#x4F1A;&#x4F5C;&#x7528;&#x4E8E;<strong>Executor</strong>&#x7EC4;&#x4EF6;&#x7684;<strong>update()</strong> &#x65B9;&#x6CD5;&#x548C;&#x4E24;&#x4E2A;&#x91CD;&#x8F7D;&#x7684;<strong>query()</strong> &#x65B9;&#x6CD5;&#xFF0C;&#x800C;&#x6211;&#x4EEC;&#x53C8;&#x77E5;&#x9053;&#xFF0C;<strong>MyBatis</strong>&#x6267;&#x884C;<strong>SQL</strong>&#x65F6;&#xFF0C;&#x65E0;&#x8BBA;&#x662F;&#x589E;&#x5220;&#x6539;&#x67E5;&#xFF0C;&#x5176;&#x5B9E;&#x90FD;&#x662F;&#x4F1A;&#x8C03;&#x7528;&#x5230;<strong>Executor</strong>&#x7684;<strong>update()</strong> &#x65B9;&#x6CD5;&#x6216;&#x8005;<strong>query()</strong> &#x65B9;&#x6CD5;&#xFF0C;&#x6240;&#x4EE5;&#x4E0A;&#x9762;&#x793A;&#x4F8B;&#x7684;&#x62E6;&#x622A;&#x5668;&#xFF0C;&#x5176;&#x5B9E;&#x5C31;&#x53EF;&#x4EE5;&#x62E6;&#x622A;&#x6240;&#x6709;<strong>SQL</strong>&#x7684;&#x6267;&#x884C;&#x3002;</p>
+<h3 id="&#x4E09;-&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;MyBatis&#x62E6;&#x622A;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;"><a href="#&#x4E09;-&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;MyBatis&#x62E6;&#x622A;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;" class="headerlink" title="&#x4E09;. &#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;MyBatis&#x62E6;&#x622A;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;"></a>&#x4E09;. &#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;MyBatis&#x62E6;&#x622A;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;</h3><p>&#x5728;&#x5F00;&#x59CB;&#x524D;&#xFF0C;&#x9700;&#x8981;&#x5728;<strong>pom</strong>&#x6587;&#x4EF6;&#x4E2D;&#x5148;&#x6DFB;&#x52A0;&#x5982;&#x4E0B;&#x4F9D;&#x8D56;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">xml&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;2.2.2&lt;/version&gt;</span><br><span class="line">    &lt;scope&gt;provided&lt;/scope&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;druid&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;1.2.11&lt;/version&gt;</span><br><span class="line">    &lt;scope&gt;provided&lt;/scope&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.tomcat&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;tomcat-jdbc&lt;/artifactId&gt;</span><br><span class="line">    &lt;scope&gt;provided&lt;/scope&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x8981;&#x5B9E;&#x73B0;&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#xFF0C;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x8BB0;&#x5F55;&#x64CD;&#x4F5C;&#x6570;&#x636E;&#x5E93;&#x7684;&#x884C;&#x4E3A;&#xFF0C;&#x6240;&#x4EE5;&#x9700;&#x8981;&#x62E6;&#x622A;&#x6BCF;&#x4E00;&#x6761;<strong>SQL</strong>&#x7684;&#x6267;&#x884C;&#xFF0C;&#x56E0;&#x6B64;&#x62E6;&#x622A;&#x5668;&#x4F5C;&#x7528;&#x7684;&#x76EE;&#x6807;&#x7EC4;&#x4EF6;&#x5C31;&#x662F;<strong>Executor</strong>&#xFF0C;&#x4F5C;&#x7528;&#x7684;&#x76EE;&#x6807;&#x65B9;&#x6CD5;&#x5C31;&#x662F;<strong>update()</strong> &#x548C;&#x4E24;&#x4E2A;&#x91CD;&#x8F7D;&#x7684;<strong>query()</strong> &#x65B9;&#x6CD5;&#xFF0C;&#x62E6;&#x622A;&#x5668;&#x5B9E;&#x73B0;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * MyBaits&#x4F5C;&#x7528;&#x4E8E;{@link Executor}&#x7528;&#x4E8E;&#x8BB0;&#x5F55;{@link Span}&#x7684;&#x62E6;&#x622A;&#x5668;&#x3002;</span><br><span class="line"> */</span><br><span class="line">@Intercepts({</span><br><span class="line">        @Signature(type = Executor.class, method = &quot;update&quot;, args = {MappedStatement.class, Object.class}),</span><br><span class="line">        @Signature(type = Executor.class, method = &quot;query&quot;, args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class}),</span><br><span class="line">        @Signature(type = Executor.class, method = &quot;query&quot;, args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class})</span><br><span class="line">})</span><br><span class="line">public class HoneyDbExecutorTracingInterceptor implements Interceptor {</span><br><span class="line"></span><br><span class="line">    private final Tracer tracer;</span><br><span class="line">    private final List&lt;HoneyDbExecutorTracingDecorator&gt; decorators;</span><br><span class="line"></span><br><span class="line">    public HoneyDbExecutorTracingInterceptor(Tracer tracer, List&lt;HoneyDbExecutorTracingDecorator&gt; decorators) {</span><br><span class="line">        this.tracer = tracer;</span><br><span class="line">        this.decorators = decorators;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object intercept(Invocation invocation) throws Throwable {</span><br><span class="line">        if (null == tracer.activeSpan()) {</span><br><span class="line">            return invocation.proceed();</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        Span span = tracer.buildSpan(HONEY_DB_NAME)</span><br><span class="line">                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_CLIENT)</span><br><span class="line">                .start();</span><br><span class="line">        for (HoneyDbExecutorTracingDecorator decorator : decorators) {</span><br><span class="line">            try {</span><br><span class="line">                decorator.onExecute(invocation, span);</span><br><span class="line">            } catch (Exception e) {</span><br><span class="line">                // do nothing</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        Object result;</span><br><span class="line">        try (Scope scope = tracer.activateSpan(span)) {</span><br><span class="line">            try {</span><br><span class="line">                result = invocation.proceed();</span><br><span class="line">            } catch (Exception e1) {</span><br><span class="line">                for (HoneyDbExecutorTracingDecorator decorator : decorators) {</span><br><span class="line">                    try {</span><br><span class="line">                        decorator.onError(invocation, e1, span);</span><br><span class="line">                    } catch (Exception e2) {</span><br><span class="line">                        // do nothing</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">                throw e1;</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            for (HoneyDbExecutorTracingDecorator decorator : decorators) {</span><br><span class="line">                try {</span><br><span class="line">                    decorator.onFinish(invocation, span);</span><br><span class="line">                } catch (Exception e) {</span><br><span class="line">                    // do nothing</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        } finally {</span><br><span class="line">            span.finish();</span><br><span class="line">            tracer.activeSpan().log(DbStackUtil.assembleDbStack((JaegerSpan) span));</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        return result;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x8FF0;&#x5B9E;&#x73B0;&#x7684;&#x62E6;&#x622A;&#x5668;&#xFF0C;&#x4E3B;&#x8981;&#x5E72;&#x4E86;&#x4E0B;&#x9762;&#x51E0;&#x4EF6;&#x4E8B;&#x60C5;&#x3002;</p>
+<ol>
+<li>&#x9488;&#x5BF9;&#x5F53;&#x524D;&#x64CD;&#x4F5C;&#x6570;&#x636E;&#x5E93;&#x7684;&#x884C;&#x4E3A;&#x521B;&#x5EFA;<strong>Span</strong>&#x3002;&#x8FD9;&#x91CC;&#x521B;&#x5EFA;<strong>Span</strong>&#x5E76;&#x4E0D;&#x662F;&#x8981;&#x628A;<strong>Span</strong>&#x4F20;&#x9012;&#x7ED9;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x800C;&#x662F;&#x901A;&#x8FC7;<strong>Span</strong>&#x6765;&#x8BB0;&#x5F55;&#x5F00;&#x59CB;&#x65F6;&#x95F4;&#xFF0C;&#x6267;&#x884C;&#x8017;&#x65F6;&#x4EE5;&#x53CA;&#x6570;&#x636E;&#x5E93;&#x64CD;&#x4F5C;&#x7684;&#x4E00;&#x4E9B;&#x4FE1;&#x606F;&#xFF1B;</li>
+<li>&#x5728;<strong>SQL</strong>&#x6267;&#x884C;&#x524D;&#xFF0C;&#x6267;&#x884C;&#x6210;&#x529F;&#x548C;&#x6267;&#x884C;&#x5931;&#x8D25;&#x65F6;&#x5206;&#x522B;&#x5E94;&#x7528;&#x88C5;&#x9970;&#x5668;&#x7684;&#x903B;&#x8F91;&#x3002;&#x62E6;&#x622A;&#x5668;&#x5E76;&#x6CA1;&#x6709;&#x5199;&#x5F88;&#x91CD;&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x89E3;&#x6790;<strong>url</strong>&#xFF0C;&#x89E3;&#x6790;<strong>SQL</strong>&#x7B49;&#x903B;&#x8F91;&#x5168;&#x90E8;&#x653E;&#x5230;&#x88C5;&#x9970;&#x5668;&#x4E2D;&#xFF0C;&#x8BA9;&#x62E6;&#x622A;&#x5668;&#x548C;&#x8BB0;&#x5F55;&#x4FE1;&#x606F;&#x7684;&#x884C;&#x4E3A;&#x89E3;&#x8026;&#xFF0C;&#x65B9;&#x4FBF;&#x540E;&#x7EED;&#x6269;&#x5145;<strong>dbStack</strong>&#x7684;&#x5185;&#x5BB9;&#xFF1B;</li>
+<li>&#x5728;&#x62E6;&#x622A;&#x5668;&#x7684;&#x6700;&#x540E;&#x751F;&#x6210;<strong>dbStack</strong>&#x5E76;&#x8BB0;&#x5F55;&#x5728;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;<strong>Span</strong>&#x4E2D;&#x3002;&#x6CE8;&#x610F;&#xFF0C;&#x751F;&#x6210;<strong>dbStack</strong>&#x662F;&#x57FA;&#x4E8E;&#x6211;&#x4EEC;&#x5728;&#x62E6;&#x622A;&#x5668;&#x4E2D;&#x521B;&#x5EFA;&#x51FA;&#x6765;&#x7684;<strong>Span</strong>&#xFF0C;&#x5728;<strong>dbStack</strong>&#x751F;&#x6210;&#x51FA;&#x6765;&#x540E;&#xFF0C;&#x5728;&#x62E6;&#x622A;&#x5668;&#x4E2D;&#x521B;&#x5EFA;&#x51FA;&#x6765;&#x7684;<strong>Span</strong>&#x7684;&#x4F7F;&#x547D;&#x5C31;&#x5B8C;&#x6210;&#x4E86;&#xFF0C;&#x540E;&#x7EED;&#x5C31;&#x9700;&#x8981;&#x628A;&#x751F;&#x6210;&#x51FA;&#x6765;&#x7684;<strong>dbStack</strong>&#x8BB0;&#x5F55;&#x5728;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;<strong>Span</strong>&#x4E2D;&#x3002;</li>
+</ol>
+<p>&#x57FA;&#x4E8E;<strong>Span</strong>&#x751F;&#x6210;<strong>dbStack</strong>&#x7684;&#x5DE5;&#x5177;&#x7C7B;<strong>DbStackUtil</strong>&#x5B9E;&#x73B0;&#x5982;&#x4E0B;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * dbStack&#x8BB0;&#x5F55;&#x5DE5;&#x5177;&#x3002;</span><br><span class="line"> */</span><br><span class="line">public class DbStackUtil {</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x751F;&#x6210;&#x64CD;&#x4F5C;&#x6570;&#x636E;&#x5E93;&#x65F6;&#x7684;dbStack&#x3002;</span><br><span class="line">     */</span><br><span class="line">    public static Map&lt;String, Object&gt; assembleDbStack(JaegerSpan span) {</span><br><span class="line">        Map&lt;String, Object&gt; requestStack = new HashMap&lt;&gt;();</span><br><span class="line">        requestStack.put(LOG_EVENT_KIND, LOG_EVENT_KIND_DB_STACK);</span><br><span class="line">        requestStack.put(FIELD_DB_SERVER, span.getTags().get(FIELD_DB_SERVER));</span><br><span class="line">        requestStack.put(FIELD_DB_NAME, span.getTags().get(FIELD_DB_NAME));</span><br><span class="line">        requestStack.put(FIELD_SQL_TEXT, span.getTags().get(FIELD_SQL_TEXT));</span><br><span class="line">        requestStack.put(FIELD_SQL_PARAMS, span.getTags().get(FIELD_SQL_PARAMS));</span><br><span class="line">        requestStack.put(FIELD_SQL_DURATION, span.getDuration());</span><br><span class="line">        requestStack.put(FIELD_SQL_TIMESTAMP, span.getStart());</span><br><span class="line">        return requestStack;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class CommonConstants {</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">     public static final String LOG_EVENT_KIND = &quot;logEventKind&quot;;</span><br><span class="line">     public static final String LOG_EVENT_KIND_DB_STACK = &quot;dbStack&quot;;</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5176;&#x4E2D;&#x5F88;&#x5173;&#x952E;&#x7684;&#x4E00;&#x70B9;&#x662F;&#x5728;&#x4E8E;&#x5C06;<strong>logEventKind</strong>&#x8BBE;&#x7F6E;&#x4E3A;&#x4E86;<strong>dbStack</strong>&#xFF0C;&#x8FD9;&#x6837;&#x5728;&#x6253;&#x5370;&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x6839;&#x636E;<strong>logEventKind</strong>&#x6765;&#x77E5;&#x9053;&#x5F53;&#x524D;&#x8981;&#x6309;&#x7167;<strong>dbStack</strong>&#x7684;&#x683C;&#x5F0F;&#x6765;&#x7EC4;&#x88C5;&#x65E5;&#x5FD7;&#x3002;</p>
+<p>&#x6700;&#x540E;&#x518D;&#x770B;&#x4E00;&#x4E0B;&#x88C5;&#x9970;&#x5668;&#x63A5;&#x53E3;&#x7684;&#x5B9A;&#x4E49;&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * &#x4F5C;&#x7528;&#x4E8E;{@link Executor}&#x7684;&#x88C5;&#x9970;&#x5668;&#x3002;</span><br><span class="line"> */</span><br><span class="line">public interface HoneyDbExecutorTracingDecorator {</span><br><span class="line"></span><br><span class="line">    void onExecute(Invocation invocation, Span span);</span><br><span class="line"></span><br><span class="line">    void onFinish(Invocation invocation, Span span);</span><br><span class="line"></span><br><span class="line">    void onError(Invocation invocation, Exception exception, Span span);</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x56DB;-&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x88C5;&#x9970;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;"><a href="#&#x56DB;-&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x88C5;&#x9970;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;" class="headerlink" title="&#x56DB;. &#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x88C5;&#x9970;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;"></a>&#x56DB;. &#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x88C5;&#x9970;&#x5668;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;</h3><p>&#x63D0;&#x4F9B;&#x4E00;&#x4E2A;<strong>HoneyDbExecutorTracingDecorator</strong>&#x63A5;&#x53E3;&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#xFF0C;&#x5728;<strong>SQL</strong>&#x6267;&#x884C;&#x524D;&#xFF0C;&#x5B8C;&#x6210;&#x8BB0;&#x5F55;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#xFF0C;&#x6570;&#x636E;&#x5E93;&#x540D;&#xFF0C;<strong>SQL</strong>&#x8BED;&#x53E5;&#x548C;<strong>SQL</strong>&#x53C2;&#x6570;&#xFF0C;&#x8FD9;&#x4E9B;&#x8BB0;&#x5F55;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x5168;&#x90E8;&#x5B58;&#x50A8;&#x5728;<strong>Span</strong>&#x7684;<strong>Tags</strong>&#x5B57;&#x6BB5;&#x4E2D;&#x3002;</p>
+<h4 id="1-&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x548C;&#x6570;&#x636E;&#x5E93;&#x540D;&#x83B7;&#x53D6;"><a href="#1-&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x548C;&#x6570;&#x636E;&#x5E93;&#x540D;&#x83B7;&#x53D6;" class="headerlink" title="1. &#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x548C;&#x6570;&#x636E;&#x5E93;&#x540D;&#x83B7;&#x53D6;"></a>1. &#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x548C;&#x6570;&#x636E;&#x5E93;&#x540D;&#x83B7;&#x53D6;</h4><p>&#x88C5;&#x9970;&#x5668;&#x5B9E;&#x73B0;&#x5982;&#x4E0B;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * &#x4F5C;&#x7528;&#x4E8E;{@link Executor}&#x7684;&#x88C5;&#x9970;&#x5668;&#xFF0C;&#x88C5;&#x9970;{@link Span}&#x3002;</span><br><span class="line"> */</span><br><span class="line">public class HoneyDbExecutorTracingSpanDecorator implements HoneyDbExecutorTracingDecorator {</span><br><span class="line"></span><br><span class="line">    private static final String QUESTION_MARK = &quot;?&quot;;</span><br><span class="line">    private static final String COMMA = &quot;,&quot;;</span><br><span class="line">    private static final String NULL_STR = &quot;null&quot;;</span><br><span class="line">    private static final char SPACE_CHAR = &apos; &apos;;</span><br><span class="line">    private static final String LINE_BREAK_REGEX = &quot;\n&quot;;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onExecute(Invocation invocation, Span span) {</span><br><span class="line">        // &#x8BBE;&#x7F6E;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x4FE1;&#x606F;&#x548C;&#x6570;&#x636E;&#x5E93;&#x540D;</span><br><span class="line">        try {</span><br><span class="line">            DataSource dataSource = ((MappedStatement) invocation.getArgs()[0]).getConfiguration().getEnvironment().getDataSource();</span><br><span class="line">            assembleDbServerAndName(dataSource, (JaegerSpan) span);</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            // do nothing</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        ......</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onFinish(Invocation invocation, Span span) {</span><br><span class="line">        // do nothing</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onError(Invocation invocation, Exception exception, Span span) {</span><br><span class="line">        // do nothing</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private void assembleDbServerAndName(DataSource dataSource, JaegerSpan span) {</span><br><span class="line">        String url = StringUtils.EMPTY;</span><br><span class="line">        try {</span><br><span class="line">            if (dataSource instanceof HikariDataSource) {</span><br><span class="line">                url = ((HikariDataSource) dataSource).getJdbcUrl();</span><br><span class="line">            } else if (dataSource instanceof DruidDataSource) {</span><br><span class="line">                url = ((DruidDataSource) dataSource).getUrl();</span><br><span class="line">            } else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {</span><br><span class="line">                url = ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getUrl();</span><br><span class="line">            } else {</span><br><span class="line">                // &#x65E0;&#x6CD5;&#x5224;&#x65AD;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#x6C60;&#x7C7B;&#x578B;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x624D;&#x901A;&#x8FC7;&#x8FDE;&#x63A5;&#x62FF;url</span><br><span class="line">                Connection connection = dataSource.getConnection();</span><br><span class="line">                DatabaseMetaData metaData = connection.getMetaData();</span><br><span class="line">                url = metaData.getURL();</span><br><span class="line">            }</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            // do nothing</span><br><span class="line">        }</span><br><span class="line">        if (StringUtils.isNotEmpty(url)) {</span><br><span class="line">            // &#x4ECE;&#x8FDE;&#x63A5;&#x4E32;&#x4E2D;&#x89E3;&#x6790;&#x51FA;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x4FE1;&#x606F;</span><br><span class="line">            int left = url.indexOf(SLASH_DOUBLE) + 2;</span><br><span class="line">            int mid = url.indexOf(SLASH, left);</span><br><span class="line">            int right = url.indexOf(QUESTION_MARK);</span><br><span class="line">            span.setTag(FIELD_DB_SERVER, url.substring(left, mid));</span><br><span class="line">            if (right == -1) {</span><br><span class="line">                span.setTag(FIELD_DB_NAME, url.substring(mid + 1));</span><br><span class="line">            } else {</span><br><span class="line">                span.setTag(FIELD_DB_NAME, url.substring(mid + 1, right));</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x8FF0;&#x88C5;&#x9970;&#x5668;&#x9996;&#x5148;&#x4F1A;&#x4ECE;&#x62E6;&#x622A;&#x65B9;&#x6CD5;&#x7684;&#x53C2;&#x6570;&#x4E2D;&#x62FF;&#x5230;<strong>MappedStatement</strong>&#xFF0C;&#x4ECE;&#x800C;&#x6700;&#x7EC8;&#x53EF;&#x4EE5;&#x62FF;&#x5230;&#x5F53;&#x524D;&#x4F7F;&#x7528;&#x7684;&#x6570;&#x636E;&#x6E90;<strong>DataSource</strong>&#xFF0C;&#x518D;&#x7136;&#x540E;&#x5224;&#x65AD;&#x6570;&#x636E;&#x6E90;&#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x5982;&#x679C;&#x80FD;&#x591F;&#x660E;&#x786E;&#x6570;&#x636E;&#x6E90;&#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x62FF;&#x5230;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#x4E32;<strong>url</strong>&#xFF0C;&#x5982;&#x679C;&#x65E0;&#x6CD5;&#x5224;&#x65AD;&#x51FA;&#x6570;&#x636E;&#x6E90;&#x7C7B;&#x578B;&#xFF0C;&#x5219;&#x53EF;&#x4EE5;&#x9009;&#x62E9;&#x5148;&#x4ECE;&#x6570;&#x636E;&#x6E90;&#x4E2D;&#x83B7;&#x53D6;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x4ECE;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#x7684;&#x5143;&#x6570;&#x636E;&#x4FE1;&#x606F;&#x4E2D;&#x62FF;&#x5230;<strong>url</strong>&#x3002;</p>
+<p>&#x83B7;&#x53D6;&#x5230;<strong>url</strong>&#x540E;&#xFF0C;&#x5C31;&#x6309;&#x7167;&#x5982;&#x4E0B;&#x4E24;&#x79CD;<strong>url</strong>&#x683C;&#x5F0F;&#x6765;&#x89E3;&#x6790;&#x51FA;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x548C;&#x6570;&#x636E;&#x5E93;&#x540D;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">txt&#x590D;&#x5236;&#x4EE3;&#x7801;jdbc:mysql://&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;/&#x6570;&#x636E;&#x5E93;&#x540D;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">txt&#x590D;&#x5236;&#x4EE3;&#x7801;jdbc:mysql://&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;/&#x6570;&#x636E;&#x5E93;&#x540D;?&#x914D;&#x7F6E;&#x9879;1=&#x914D;&#x7F6E;&#x503C;1</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-SQL&#x8BED;&#x53E5;&#x548C;SQL&#x53C2;&#x6570;&#x83B7;&#x53D6;"><a href="#2-SQL&#x8BED;&#x53E5;&#x548C;SQL&#x53C2;&#x6570;&#x83B7;&#x53D6;" class="headerlink" title="2. SQL&#x8BED;&#x53E5;&#x548C;SQL&#x53C2;&#x6570;&#x83B7;&#x53D6;"></a>2. SQL&#x8BED;&#x53E5;&#x548C;SQL&#x53C2;&#x6570;&#x83B7;&#x53D6;</h4><p>&#x7EE7;&#x7EED;&#x5728;&#x4E0A;&#x4E00;&#x5C0F;&#x8282;&#x7684;&#x88C5;&#x9970;&#x5668;&#x4E2D;&#x6DFB;&#x52A0;&#x4EE3;&#x7801;&#xFF0C;&#x5B8C;&#x6210;<strong>SQL</strong>&#x8BED;&#x53E5;&#x548C;<strong>SQL</strong>&#x53C2;&#x6570;&#x7684;&#x83B7;&#x53D6;&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * &#x4F5C;&#x7528;&#x4E8E;{@link Executor}&#x7684;&#x88C5;&#x9970;&#x5668;&#xFF0C;&#x88C5;&#x9970;{@link Span}&#x3002;</span><br><span class="line"> */</span><br><span class="line">public class HoneyDbExecutorTracingSpanDecorator implements HoneyDbExecutorTracingDecorator {</span><br><span class="line"></span><br><span class="line">    private static final String QUESTION_MARK = &quot;?&quot;;</span><br><span class="line">    private static final String COMMA = &quot;,&quot;;</span><br><span class="line">    private static final String NULL_STR = &quot;null&quot;;</span><br><span class="line">    private static final char SPACE_CHAR = &apos; &apos;;</span><br><span class="line">    private static final String LINE_BREAK_REGEX = &quot;\n&quot;;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onExecute(Invocation invocation, Span span) {</span><br><span class="line">        // &#x8BBE;&#x7F6E;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x4FE1;&#x606F;&#x548C;&#x6570;&#x636E;&#x5E93;&#x540D;</span><br><span class="line">        try {</span><br><span class="line">            DataSource dataSource = ((MappedStatement) invocation.getArgs()[0]).getConfiguration().getEnvironment().getDataSource();</span><br><span class="line">            assembleDbServerAndName(dataSource, (JaegerSpan) span);</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            // do nothing</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        // &#x8BBE;&#x7F6E;SQL&#x8BED;&#x53E5;&#x548C;&#x53C2;&#x6570;&#x4FE1;&#x606F;</span><br><span class="line">        try {</span><br><span class="line">            assembleSqlTextAndParams(invocation.getArgs(), (JaegerSpan) span);</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            // do nothing</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onFinish(Invocation invocation, Span span) {</span><br><span class="line">        // do nothing</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void onError(Invocation invocation, Exception exception, Span span) {</span><br><span class="line">        // do nothing</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private void assembleDbServerAndName(DataSource dataSource, JaegerSpan span) {</span><br><span class="line">        String url = StringUtils.EMPTY;</span><br><span class="line">        try {</span><br><span class="line">            if (dataSource instanceof HikariDataSource) {</span><br><span class="line">                url = ((HikariDataSource) dataSource).getJdbcUrl();</span><br><span class="line">            } else if (dataSource instanceof DruidDataSource) {</span><br><span class="line">                url = ((DruidDataSource) dataSource).getUrl();</span><br><span class="line">            } else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {</span><br><span class="line">                url = ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getUrl();</span><br><span class="line">            } else {</span><br><span class="line">                // &#x65E0;&#x6CD5;&#x5224;&#x65AD;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#x6C60;&#x7C7B;&#x578B;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x624D;&#x901A;&#x8FC7;&#x8FDE;&#x63A5;&#x62FF;url</span><br><span class="line">                Connection connection = dataSource.getConnection();</span><br><span class="line">                DatabaseMetaData metaData = connection.getMetaData();</span><br><span class="line">                url = metaData.getURL();</span><br><span class="line">            }</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            // do nothing</span><br><span class="line">        }</span><br><span class="line">        if (StringUtils.isNotEmpty(url)) {</span><br><span class="line">            // &#x4ECE;&#x8FDE;&#x63A5;&#x4E32;&#x4E2D;&#x89E3;&#x6790;&#x51FA;&#x6570;&#x636E;&#x5E93;&#x670D;&#x52A1;&#x7AEF;&#x5730;&#x5740;&#x4FE1;&#x606F;</span><br><span class="line">            int left = url.indexOf(SLASH_DOUBLE) + 2;</span><br><span class="line">            int mid = url.indexOf(SLASH, left);</span><br><span class="line">            int right = url.indexOf(QUESTION_MARK);</span><br><span class="line">            span.setTag(FIELD_DB_SERVER, url.substring(left, mid));</span><br><span class="line">            if (right == -1) {</span><br><span class="line">                span.setTag(FIELD_DB_NAME, url.substring(mid + 1));</span><br><span class="line">            } else {</span><br><span class="line">                span.setTag(FIELD_DB_NAME, url.substring(mid + 1, right));</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private void assembleSqlTextAndParams(Object[] args, Span span) {</span><br><span class="line">        MappedStatement mappedStatement = ((MappedStatement) args[0]);</span><br><span class="line">        // &#x5148;&#x83B7;&#x53D6;SQL</span><br><span class="line">        BoundSql boundSql;</span><br><span class="line">        if (args.length == 6) {</span><br><span class="line">            boundSql = ((BoundSql) args[5]);</span><br><span class="line">        } else {</span><br><span class="line">            boundSql = mappedStatement.getBoundSql(args[1]);</span><br><span class="line">        }</span><br><span class="line">        span.setTag(FIELD_SQL_TEXT, toPrettySql(boundSql.getSql()));</span><br><span class="line"></span><br><span class="line">        // &#x518D;&#x83B7;&#x53D6;Params</span><br><span class="line">        List&lt;ParameterMapping&gt; parameterMappings = boundSql.getParameterMappings();</span><br><span class="line">        Object parameterObject = boundSql.getParameterObject();</span><br><span class="line">        TypeHandlerRegistry typeHandlerRegistry = mappedStatement.getConfiguration().getTypeHandlerRegistry();</span><br><span class="line">        if (null != parameterMappings) {</span><br><span class="line">            String[] paramStrs = new String[parameterMappings.size()];</span><br><span class="line">            for (int i = 0; i &lt; parameterMappings.size(); i++) {</span><br><span class="line">                ParameterMapping parameterMapping = parameterMappings.get(i);</span><br><span class="line">                if (parameterMapping.getMode() != ParameterMode.OUT) {</span><br><span class="line">                    Object value;</span><br><span class="line">                    String propertyName = parameterMapping.getProperty();</span><br><span class="line">                    if (boundSql.hasAdditionalParameter(propertyName)) {</span><br><span class="line">                        value = boundSql.getAdditionalParameter(propertyName);</span><br><span class="line">                    } else if (parameterObject == null) {</span><br><span class="line">                        value = null;</span><br><span class="line">                    } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {</span><br><span class="line">                        value = parameterObject;</span><br><span class="line">                    } else {</span><br><span class="line">                        MetaObject metaObject = mappedStatement.getConfiguration().newMetaObject(parameterObject);</span><br><span class="line">                        value = metaObject.getValue(propertyName);</span><br><span class="line">                    }</span><br><span class="line">                    if (null == value) {</span><br><span class="line">                        paramStrs[i] = NULL_STR;</span><br><span class="line">                    } else {</span><br><span class="line">                        paramStrs[i] = value.toString();</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            String sqlParamsStr = String.join(COMMA, paramStrs);</span><br><span class="line">            span.setTag(FIELD_SQL_PARAMS, sqlParamsStr);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private String toPrettySql(String sql) {</span><br><span class="line">        // &#x53BB;&#x9664;&#x6362;&#x884C;&#x7B26;</span><br><span class="line">        sql = sql.replaceAll(LINE_BREAK_REGEX, StringUtils.EMPTY);</span><br><span class="line">        // &#x53BB;&#x9664;&#x591A;&#x4F59;&#x7A7A;&#x683C;</span><br><span class="line">        StringBuilder sqlBuilder = new StringBuilder();</span><br><span class="line">        boolean necessarySpace = true;</span><br><span class="line">        for (int i = 0; i &lt; sql.length(); i++) {</span><br><span class="line">            if (sql.charAt(i) == SPACE_CHAR) {</span><br><span class="line">                if (necessarySpace) {</span><br><span class="line">                    sqlBuilder.append(sql.charAt(i));</span><br><span class="line">                }</span><br><span class="line">                necessarySpace = false;</span><br><span class="line">            } else {</span><br><span class="line">                sqlBuilder.append(sql.charAt(i));</span><br><span class="line">                necessarySpace = true;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        return sqlBuilder.toString();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5148;&#x4ECE;&#x62E6;&#x622A;&#x7684;&#x65B9;&#x6CD5;&#x7684;&#x53C2;&#x6570;&#x4E2D;&#x62FF;&#x5230;<strong>MappedStatement</strong>&#xFF0C;&#x7136;&#x540E;&#x518D;&#x4ECE;<strong>MappedStatement</strong>&#x4E2D;&#x62FF;&#x5230;<strong>BoundSql</strong>&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x7684;<strong>SQL</strong>&#x8BED;&#x53E5;&#x548C;<strong>SQL</strong>&#x53C2;&#x6570;&#xFF0C;&#x90FD;&#x5728;<strong>BoundSql</strong>&#x4E2D;&#xFF0C;&#x5176;&#x4E2D;<strong>SQL</strong>&#x8BED;&#x53E5;&#x7684;&#x83B7;&#x53D6;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x76F4;&#x63A5;&#x901A;&#x8FC7;<strong>BoundSql</strong>&#x5C31;&#x53EF;&#x4EE5;&#x62FF;&#x5230;<strong>SQL</strong>&#x8BED;&#x53E5;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x505A;&#x7684;&#x5C31;&#x662F;&#x628A;&#x591A;&#x4F59;&#x7684;&#x7A7A;&#x683C;&#x548C;&#x6362;&#x884C;&#x7B26;&#x7ED9;&#x53BB;&#x6389;&#xFF0C;&#x8BA9;<strong>SQL</strong>&#x770B;&#x8D77;&#x6765;&#x597D;&#x770B;&#x4E00;&#x4E9B;&#x3002;&#x800C;&#x53C2;&#x6570;&#x8981;&#x7A0D;&#x5FAE;&#x9EBB;&#x70E6;&#x4E00;&#x70B9;&#xFF0C;&#x56E0;&#x4E3A;&#x53C2;&#x6570;&#x662F;&#x4E0D;&#x786E;&#x5B9A;&#x7684;&#xFF0C;&#x5728;<strong>BoundSql</strong>&#x4E2D;&#x662F;&#x8FD9;&#x6837;&#x6765;&#x8868;&#x793A;&#x53C2;&#x6570;&#x7684;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class BoundSql {</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">    private final List&lt;ParameterMapping&gt; parameterMappings;</span><br><span class="line">    private final Object parameterObject;</span><br><span class="line"> </span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5B9E;&#x9645;&#x5C31;&#x662F;&#x8981;&#x4F7F;&#x7528;<strong>parameterMappings</strong>&#x548C;<strong>parameterObject</strong>&#x5171;&#x540C;&#x6765;&#x89E3;&#x6790;&#x51FA;<strong>SQL</strong>&#x53C2;&#x6570;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;&#x89E3;&#x6790;&#x903B;&#x8F91;&#xFF0C;&#x76F4;&#x63A5;&#x53C2;&#x8003;&#x7684;<strong>DefaultParameterHandler</strong>&#x4E2D;&#x7684;&#x4EE3;&#x7801;&#x3002;</p>
+<p>&#x81F3;&#x6B64;&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x88C5;&#x9970;&#x5668;&#x5C31;&#x5B9E;&#x73B0;&#x5B8C;&#x6BD5;&#x4E86;&#xFF0C;&#x4F7F;&#x7528;&#x5230;&#x7684;&#x4E00;&#x4E9B;&#x5E38;&#x91CF;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class CommonConstants {</span><br><span class="line"></span><br><span class="line">    public static final double DEFAULT_SAMPLE_RATE = 1.0;</span><br><span class="line"></span><br><span class="line">    public static final String HONEY_TRACER_NAME = &quot;HoneyTracer&quot;;</span><br><span class="line">    public static final String HONEY_REST_TEMPLATE_NAME = &quot;HoneyRestTemplate&quot;;</span><br><span class="line">    public static final String HONEY_KAFKA_NAME = &quot;HoneyKafka&quot;;</span><br><span class="line">    public static final String HONEY_DB_NAME = &quot;HoneyDb&quot;;</span><br><span class="line"></span><br><span class="line">    public static final String FIELD_HOST = &quot;host&quot;;</span><br><span class="line">    public static final String FIELD_API = &quot;api&quot;;</span><br><span class="line">    public static final String FIELD_HTTP_CODE = &quot;httpCode&quot;;</span><br><span class="line">    public static final String FIELD_SUB_SPAN_ID = &quot;subSpanId&quot;;</span><br><span class="line">    public static final String FIELD_SUB_HTTP_CODE = &quot;subHttpCode&quot;;</span><br><span class="line">    public static final String FIELD_SUB_TIMESTAMP = &quot;subTimestamp&quot;;</span><br><span class="line">    public static final String FIELD_SUB_DURATION = &quot;subDuration&quot;;</span><br><span class="line">    public static final String FIELD_SUB_HOST = &quot;subHost&quot;;</span><br><span class="line"></span><br><span class="line">    public static final String FIELD_DB_SERVER = &quot;dbServer&quot;;</span><br><span class="line">    public static final String FIELD_DB_NAME = &quot;dbName&quot;;</span><br><span class="line">    public static final String FIELD_SQL_TEXT = &quot;sqlText&quot;;</span><br><span class="line">    public static final String FIELD_SQL_PARAMS = &quot;sqlParams&quot;;</span><br><span class="line">    public static final String FIELD_SQL_DURATION = &quot;sqlDuration&quot;;</span><br><span class="line">    public static final String FIELD_SQL_TIMESTAMP = &quot;sqlTimestamp&quot;;</span><br><span class="line"></span><br><span class="line">    public static final String HOST_PATTERN_STR = &quot;(?&lt;=(https://|http://)).*?(?=/)&quot;;</span><br><span class="line"></span><br><span class="line">    public static final String SLASH = &quot;/&quot;;</span><br><span class="line">    public static final String SLASH_DOUBLE = &quot;//&quot;;</span><br><span class="line"></span><br><span class="line">    public static final String LOG_EVENT_KIND = &quot;logEventKind&quot;;</span><br><span class="line">    public static final String LOG_EVENT_KIND_REQUEST_STACK = &quot;requestStack&quot;;</span><br><span class="line">    public static final String LOG_EVENT_KIND_DB_STACK = &quot;dbStack&quot;;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x4E94;-&#x6CE8;&#x518C;MyBatis&#x62E6;&#x622A;&#x5668;"><a href="#&#x4E94;-&#x6CE8;&#x518C;MyBatis&#x62E6;&#x622A;&#x5668;" class="headerlink" title="&#x4E94;. &#x6CE8;&#x518C;MyBatis&#x62E6;&#x622A;&#x5668;"></a>&#x4E94;. &#x6CE8;&#x518C;MyBatis&#x62E6;&#x622A;&#x5668;</h3><p>&#x5728;<strong>MyBatis</strong>&#x4E2D;&#x6CE8;&#x518C;&#x62E6;&#x622A;&#x5668;&#xFF0C;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x62FF;&#x5230;<strong>MyBatis</strong>&#x7684;<strong>Configuration</strong>&#x540E;&#xFF0C;&#x8C03;&#x7528;&#x5176;<strong>addInterceptor()</strong> &#x65B9;&#x6CD5;&#x5373;&#x53EF;&#xFF0C;&#x6240;&#x4EE5;&#x6709;&#x4E24;&#x79CD;&#x5B9E;&#x73B0;&#x601D;&#x8DEF;&#x3002;</p>
+<ol>
+<li>&#x63D0;&#x4F9B;<strong>ConfigurationCustomizer</strong>&#x5E76;&#x5728;&#x5176;<strong>customize()</strong> &#x65B9;&#x6CD5;&#x4E2D;&#x6DFB;&#x52A0;&#x62E6;&#x622A;&#x5668;&#x3002;<strong>ConfigurationCustomizer</strong>&#x662F;<strong>mybatis-spring-boot-starter</strong>&#x4E2D;&#x63D0;&#x4F9B;&#x51FA;&#x6765;&#x4E13;&#x95E8;&#x7528;&#x4E8E;&#x5B9A;&#x5236;&#x5316;<strong>Configuration</strong>&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x5982;&#x679C;&#x6709;&#x4F7F;&#x7528;<strong>mybatis-spring-boot-starter</strong>&#xFF0C;&#x90A3;&#x4E48;&#x53EF;&#x4EE5;&#x57FA;&#x4E8E;<strong>ConfigurationCustomizer</strong>&#x6765;&#x6DFB;&#x52A0;&#x62E6;&#x622A;&#x5668;&#x5230;<strong>Configuration</strong>&#x4E2D;&#xFF1B;</li>
+<li>&#x81EA;&#x5B9A;&#x4E49;<strong>BeanPostProcessor</strong>&#x5E76;&#x5904;&#x7406;&#x6240;&#x6709;<strong>SqlSessionFactory</strong>&#x3002;&#x56E0;&#x4E3A;<strong>MyBatis</strong>&#x6574;&#x5408;&#x5230;<strong>Spring</strong>&#x4E2D;&#x540E;&#xFF0C;&#x5F88;&#x6838;&#x5FC3;&#x7684;&#x4E00;&#x70B9;&#x5C31;&#x662F;<strong>SqlSessionFactory</strong>&#x4F1A;&#x4F5C;&#x4E3A;<strong>bean</strong>&#x88AB;&#x6CE8;&#x518C;&#x5230;<strong>Spring</strong>&#x5BB9;&#x5668;&#x4E2D;&#xFF0C;&#x6240;&#x4EE5;&#x53EF;&#x4EE5;&#x63D0;&#x4F9B;&#x4E00;&#x4E2A;<strong>BeanPostProcessor</strong>&#x6765;&#x5904;&#x7406;&#x6240;&#x6709;&#x7684;<strong>SqlSessionFactory</strong>&#xFF0C;&#x901A;&#x8FC7;<strong>SqlSessionFactory</strong>&#x62FF;&#x5230;&#x5176;&#x6301;&#x6709;&#x7684;<strong>Configuration</strong>&#xFF0C;&#x7136;&#x540E;&#x8C03;&#x7528;<strong>addInterceptor()</strong> &#x65B9;&#x6CD5;&#x6DFB;&#x52A0;&#x62E6;&#x622A;&#x5668;&#x3002;</li>
+</ol>
+<p>&#x6CE8;&#x610F;&#xFF0C;&#x5728;&#x4F7F;&#x7528;&#x4E86;<strong>mybatis-spring-boot-starter</strong>&#x540E;&#xFF0C;&#x5176;&#x5B9E;&#x6211;&#x4EEC;&#x53EA;&#x9700;&#x8981;&#x5C06;&#x62E6;&#x622A;&#x5668;&#x6CE8;&#x518C;&#x5230;<strong>Spring</strong>&#x5BB9;&#x5668;&#x4E2D;&#x5373;&#x53EF;&#xFF0C;<strong>mybatis-spring-boot-starter</strong>&#x63D0;&#x4F9B;&#x7684;<strong>MybatisAutoConfiguration</strong>&#x4F1A;&#x83B7;&#x53D6;&#x5230;&#x6240;&#x6709;<strong>Spring</strong>&#x5BB9;&#x5668;&#x4E2D;&#x7684;&#x62E6;&#x622A;&#x5668;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x6784;&#x5EFA;<strong>SqlSessionFactory</strong>&#x65F6;&#x4F1A;&#x628A;&#x62E6;&#x622A;&#x5668;&#x90FD;&#x6DFB;&#x52A0;&#x5230;<strong>Configuration</strong>&#x4E2D;&#xFF0C;&#x6240;&#x4EE5;&#x6B64;&#x65F6;&#x6211;&#x4EEC;&#x518D;&#x63D0;&#x4F9B;&#x4E00;&#x4E2A;<strong>ConfigurationCustomizer</strong>&#xFF0C;&#x5B9E;&#x9645;&#x662F;&#x4F1A;&#x91CD;&#x590D;&#x6DFB;&#x52A0;&#x62E6;&#x622A;&#x5668;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#x4E0B;&#x9762;&#x901A;&#x8FC7;&#x81EA;&#x5B9A;&#x4E49;<strong>BeanPostProcessor</strong>&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x6CE8;&#x518C;&#x62E6;&#x622A;&#x5668;&#x3002;</p>
+<p>&#x9996;&#x5148;&#x81EA;&#x5B9A;&#x4E49;&#x4E00;&#x4E2A;<strong>BeanPostProcessor</strong>&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class SqlSessionFactoryBeanPostProcessor implements BeanPostProcessor {</span><br><span class="line"></span><br><span class="line">    private final List&lt;Interceptor&gt; interceptors;</span><br><span class="line"></span><br><span class="line">    public SqlSessionFactoryBeanPostProcessor(List&lt;Interceptor&gt; interceptors) {</span><br><span class="line">        if (null == interceptors) {</span><br><span class="line">            this.interceptors = new ArrayList&lt;&gt;();</span><br><span class="line">        } else {</span><br><span class="line">            this.interceptors = interceptors;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {</span><br><span class="line">        if (bean instanceof SqlSessionFactory) {</span><br><span class="line">            for (Interceptor interceptor : interceptors) {</span><br><span class="line">                ((SqlSessionFactory) bean).getConfiguration().addInterceptor(interceptor);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        return bean;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7136;&#x540E;&#x63D0;&#x4F9B;&#x4E00;&#x4E2A;&#x81EA;&#x52A8;&#x88C5;&#x914D;&#x7C7B;<strong>HoneyDbTracingConfig</strong>&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Configuration</span><br><span class="line">@ConditionalOnClass(org.apache.ibatis.session.Configuration.class)</span><br><span class="line">@AutoConfigureAfter(HoneyTracingConfig.class)</span><br><span class="line">public class HoneyDbTracingConfig {</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    public HoneyDbExecutorTracingInterceptor honeyDbExecutorTracingInterceptor(</span><br><span class="line">            Tracer tracer, List&lt;HoneyDbExecutorTracingDecorator&gt; honeyDbExecutorTracingDecorators) {</span><br><span class="line">        honeyDbExecutorTracingDecorators.add(new HoneyDbExecutorTracingSpanDecorator());</span><br><span class="line">        return new HoneyDbExecutorTracingInterceptor(tracer, honeyDbExecutorTracingDecorators);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Bean</span><br><span class="line">    @ConditionalOnMissingClass(&quot;org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer&quot;)</span><br><span class="line">    public BeanPostProcessor sqlSessionFactoryBeanPostProcessor(List&lt;Interceptor&gt; interceptors) {</span><br><span class="line">        return new SqlSessionFactoryBeanPostProcessor(interceptors);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6700;&#x540E;&#x5728;<strong>spring.factories</strong>&#x6587;&#x4EF6;&#x4E2D;&#x6DFB;&#x52A0;&#x4E0A;&#x8FF0;&#x81EA;&#x52A8;&#x88C5;&#x914D;&#x7C7B;&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yaml&#x590D;&#x5236;&#x4EE3;&#x7801;org.springframework.boot.autoconfigure.EnableAutoConfiguration=\</span><br><span class="line"> com.honey.tracing.config.HoneyTracingConfig,\</span><br><span class="line"> com.honey.tracing.config.HoneyTracingFilterConfig,\</span><br><span class="line"> com.honey.tracing.config.HoneyRestTemplateTracingConfig,\</span><br><span class="line"> com.honey.tracing.config.HoneyKafkaTemplateConfig,\</span><br><span class="line"> com.honey.tracing.config.HoneyKafkaTracingConfig,\</span><br><span class="line"> com.honey.tracing.config.HoneyDbTracingConfig</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x516D;-&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6253;&#x5370;"><a href="#&#x516D;-&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6253;&#x5370;" class="headerlink" title="&#x516D;. &#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6253;&#x5370;"></a>&#x516D;. &#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6253;&#x5370;</h3><p>&#x73B0;&#x5728;&#x8FD8;&#x9700;&#x8981;&#x5728;&#x539F;&#x6709;&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6253;&#x5370;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#xFF0C;&#x628A;<strong>dbStack</strong>&#x6DFB;&#x52A0;&#x8FDB;&#x53BB;&#x3002;</p>
+<p>&#x5B9A;&#x4E49;<strong>HoneyDbStack</strong>&#x8868;&#x793A;&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x4E2D;&#x7684;<strong>dbStacks</strong>&#x5B57;&#x6BB5;&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class HoneyDbStack {</span><br><span class="line"></span><br><span class="line">    private String dbServer;</span><br><span class="line">    private String dbName;</span><br><span class="line">    private String sqlText;</span><br><span class="line">    private String sqlParams;</span><br><span class="line">    private String sqlDuration;</span><br><span class="line">    private String sqlTimestamp;</span><br><span class="line"></span><br><span class="line">    private HoneyDbStack() {</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x7701;&#x7565;getter&#x548C;setter</span><br><span class="line">    </span><br><span class="line">    public static class HoneyDbStackBuilder {</span><br><span class="line">        private LogData logData;</span><br><span class="line"></span><br><span class="line">        private HoneyDbStackBuilder() {</span><br><span class="line"></span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        public static HoneyDbStackBuilder builder() {</span><br><span class="line">            return new HoneyDbStackBuilder();</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        public HoneyDbStackBuilder withLogData(LogData logData) {</span><br><span class="line">            this.logData = logData;</span><br><span class="line">            return this;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        public HoneyDbStack build() {</span><br><span class="line">            if (logData == null || logData.getFields() == null) {</span><br><span class="line">                throw new HoneyTracingException();</span><br><span class="line">            }</span><br><span class="line">            Map&lt;String, ?&gt; logDataFields = logData.getFields();</span><br><span class="line">            HoneyDbStack honeyDbStack = new HoneyDbStack();</span><br><span class="line">            honeyDbStack.dbServer = (String) logDataFields.get(FIELD_DB_SERVER);</span><br><span class="line">            honeyDbStack.dbName = (String) logDataFields.get(FIELD_DB_NAME);</span><br><span class="line">            honeyDbStack.sqlText = (String) logDataFields.get(FIELD_SQL_TEXT);</span><br><span class="line">            honeyDbStack.sqlParams = (String) logDataFields.get(FIELD_SQL_PARAMS);</span><br><span class="line">            honeyDbStack.sqlDuration = new BigDecimal(String.valueOf(logDataFields.get(FIELD_SQL_DURATION)))</span><br><span class="line">                    .divide(BigDecimal.valueOf(1000), SCALE , RoundingMode.DOWN).toString();</span><br><span class="line">            honeyDbStack.sqlTimestamp = new BigDecimal(String.valueOf(logDataFields.get(FIELD_SQL_TIMESTAMP)))</span><br><span class="line">                    .divide(BigDecimal.valueOf(1000), SCALE , RoundingMode.DOWN).toString();</span><br><span class="line">            return honeyDbStack;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7136;&#x540E;&#x5728;<strong>HoneySpanReportEntity</strong>&#x4E2D;&#x505A;&#x5982;&#x4E0B;&#x4FEE;&#x6539;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class HoneySpanReportEntity {</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">    private List&lt;HoneyDbStack&gt; dbStacks = new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public void addDbStack(HoneyDbStack honeyDbStack) {</span><br><span class="line">        dbStacks.add(honeyDbStack);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x7701;&#x7565;getter&#x548C;setter</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">    public static class HoneySpanReportEntityBuilder {</span><br><span class="line"></span><br><span class="line">        ......</span><br><span class="line">        </span><br><span class="line">        private Consumer&lt;LogData&gt; handleLogData(HoneySpanReportEntity honeySpanReportEntity) {</span><br><span class="line">            return new Consumer&lt;LogData&gt;() {</span><br><span class="line">                @Override</span><br><span class="line">                public void accept(LogData logData) {</span><br><span class="line">                    if (LOG_EVENT_KIND_REQUEST_STACK.equals(logData.getFields().get(LOG_EVENT_KIND))) {</span><br><span class="line">                        HoneyRequestStack honeyRequestStack = HoneyRequestStack.HoneyRequestStackBuilder</span><br><span class="line">                                .builder()</span><br><span class="line">                                .withLogData(logData)</span><br><span class="line">                                .build();</span><br><span class="line">                        honeySpanReportEntity.addRequestStack(honeyRequestStack);</span><br><span class="line">                    } else if (LOG_EVENT_KIND_DB_STACK.equals(logData.getFields().get(LOG_EVENT_KIND))) {</span><br><span class="line">                        HoneyDbStack honeyDbStack = HoneyDbStack.HoneyDbStackBuilder</span><br><span class="line">                                .builder()</span><br><span class="line">                                .withLogData(logData)</span><br><span class="line">                                .build();</span><br><span class="line">                        honeySpanReportEntity.addDbStack(honeyDbStack);</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">            };</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x6B64;&#xFF0C;&#x5728;&#x6253;&#x5370;&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x65F6;&#xFF0C;&#x5C31;&#x4F1A;&#x5E26;&#x4E0A;<strong>dbStack</strong>&#x4E86;&#x3002;</p>
+<h3 id="&#x4E03;-&#x6F14;&#x793A;&#x6848;&#x4F8B;"><a href="#&#x4E03;-&#x6F14;&#x793A;&#x6848;&#x4F8B;" class="headerlink" title="&#x4E03;. &#x6F14;&#x793A;&#x6848;&#x4F8B;"></a>&#x4E03;. &#x6F14;&#x793A;&#x6848;&#x4F8B;</h3><p>&#x6539;&#x9020;<strong>example-service-1</strong>&#xFF0C;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#x7684;&#x6D4B;&#x8BD5;&#x3002;</p>
+<p>&#x9996;&#x5148;<strong>pom</strong>&#x6587;&#x4EF6;&#x6DFB;&#x52A0;&#x5982;&#x4E0B;&#x4F9D;&#x8D56;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">xml&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;2.2.2&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;com.mysql&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;mysql-connector-j&lt;/artifactId&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>&#x7531;&#x4E8E;&#x9700;&#x8981;&#x628A;&#x6620;&#x5C04;&#x6587;&#x4EF6;&#x6253;&#x8FDB;<strong>jar</strong>&#x5305;&#xFF0C;<strong>pom</strong>&#x6587;&#x4EF6;&#x8FD8;&#x9700;&#x8981;&#x6DFB;&#x52A0;&#x5982;&#x4E0B;&#x6784;&#x5EFA;&#x6B65;&#x9AA4;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">xml&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;build&gt;</span><br><span class="line">    &lt;resources&gt;</span><br><span class="line">        &lt;resource&gt;</span><br><span class="line">            &lt;directory&gt;src/main/java&lt;/directory&gt;</span><br><span class="line">            &lt;includes&gt;</span><br><span class="line">                &lt;include&gt;**/*.xml&lt;/include&gt;</span><br><span class="line">            &lt;/includes&gt;</span><br><span class="line">            &lt;filtering&gt;false&lt;/filtering&gt;</span><br><span class="line">        &lt;/resource&gt;</span><br><span class="line">    &lt;/resources&gt;</span><br><span class="line">&lt;/build&gt;</span><br></pre></td></tr></table></figure>
+
+<p>&#x7136;&#x540E;&#x4F7F;&#x7528;&#x5982;&#x4E0B;<strong>DDL</strong>&#x8BED;&#x53E5;&#x5728;<strong>MySQL</strong>&#x6570;&#x636E;&#x5E93;&#x4E2D;&#x521B;&#x5EFA;&#x4E00;&#x5F20;&#x8868;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;CREATE TABLE `people` (</span><br><span class="line">  `id` int(11) NOT NULL AUTO_INCREMENT,</span><br><span class="line">  `p_name` varchar(255) NOT NULL,</span><br><span class="line">  `p_age` int(11) NOT NULL,</span><br><span class="line">  PRIMARY KEY (`id`)</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8;</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x5F20;&#x8868;&#x7684;&#x6620;&#x5C04;&#x63A5;&#x53E3;&#xFF0C;&#x6620;&#x5C04;&#x6587;&#x4EF6;&#x548C;&#x5BF9;&#x5E94;&#x5B9E;&#x4F53;&#x5BF9;&#x8C61;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public interface PeopleMapper {</span><br><span class="line"></span><br><span class="line">    People selectOne(@Param(&quot;peopleName&quot;) String peopleName,</span><br><span class="line">                     @Param(&quot;peopleAge&quot;) int peopleAge);</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">xml&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;</span><br><span class="line">        &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;</span><br><span class="line">&lt;mapper namespace=&quot;com.honey.tracing.example.mapper.PeopleMapper&quot;&gt;</span><br><span class="line">    &lt;resultMap id=&quot;peopleResultMap&quot; type=&quot;com.honey.tracing.example.entity.People&quot;&gt;</span><br><span class="line">        &lt;id property=&quot;id&quot; column=&quot;id&quot;/&gt;</span><br><span class="line">        &lt;result property=&quot;peopleName&quot; column=&quot;p_name&quot;/&gt;</span><br><span class="line">        &lt;result property=&quot;peopleAge&quot; column=&quot;p_age&quot;/&gt;</span><br><span class="line">    &lt;/resultMap&gt;</span><br><span class="line"></span><br><span class="line">    &lt;select id=&quot;selectOne&quot; resultMap=&quot;peopleResultMap&quot;&gt;</span><br><span class="line">        SELECT</span><br><span class="line">            p.id,</span><br><span class="line">            p.p_name,</span><br><span class="line">            p.p_age</span><br><span class="line">        FROM</span><br><span class="line">            people p</span><br><span class="line">        WHERE</span><br><span class="line">            p.p_name=#{peopleName}</span><br><span class="line">        AND</span><br><span class="line">            p.p_age=#{peopleAge}</span><br><span class="line">    &lt;/select&gt;</span><br><span class="line"></span><br><span class="line">&lt;/mapper&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class People {</span><br><span class="line"></span><br><span class="line">    private int id;</span><br><span class="line">    private String peopleName;</span><br><span class="line">    private int peopleAge;</span><br><span class="line"></span><br><span class="line">    // &#x7701;&#x7565;getter&#x548C;setter</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7136;&#x540E;&#x5728;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x4E2D;&#x52A0;&#x5165;&#x6570;&#x636E;&#x5E93;&#x76F8;&#x5173;&#x914D;&#x7F6E;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yaml&#x590D;&#x5236;&#x4EE3;&#x7801;spring:</span><br><span class="line">  datasource:</span><br><span class="line">    username: root</span><br><span class="line">    password: root</span><br><span class="line">    url: jdbc:mysql://192.168.101.5:3306/test</span><br><span class="line">    type: com.zaxxer.hikari.HikariDataSource</span><br><span class="line">    driver-class-name: com.mysql.cj.jdbc.Driver</span><br></pre></td></tr></table></figure>
+
+<p>&#x7531;&#x4E8E;&#x5E76;&#x6CA1;&#x6709;&#x901A;&#x8FC7;<strong>mybatis.mapper-locations</strong>&#x6765;&#x6307;&#x5B9A;&#x6620;&#x5C04;&#x6587;&#x4EF6;&#x4F4D;&#x7F6E;&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5728;&#x542F;&#x52A8;&#x7C7B;&#x4E0A;&#x6DFB;&#x52A0;@<strong>MapperScan</strong>&#x6CE8;&#x89E3;&#x6765;&#x626B;&#x63CF;&#x5F97;&#x5230;&#x6620;&#x5C04;&#x63A5;&#x53E3;&#x548C;&#x6620;&#x5C04;&#x6587;&#x4EF6;&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@MapperScan</span><br><span class="line">@EnableAsync</span><br><span class="line">@SpringBootApplication</span><br><span class="line">public class Application {</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) {</span><br><span class="line">        SpringApplication.run(Application.class, args);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6700;&#x540E;&#x63D0;&#x4F9B;&#x4E00;&#x4E2A;<strong>MyBatisController</strong>&#x6765;&#x67E5;&#x8BE2;&#x6570;&#x636E;&#x5E93;&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@RestController</span><br><span class="line">public class MyBatisController {</span><br><span class="line"></span><br><span class="line">    @Autowired</span><br><span class="line">    private PeopleMapper peopleMapper;</span><br><span class="line"></span><br><span class="line">    @GetMapping(&quot;/mybatis/select&quot;)</span><br><span class="line">    public People selectOne(@RequestParam(&quot;peopleName&quot;) String peopleName,</span><br><span class="line">                            @RequestParam(&quot;peopleAge&quot;) int peopleAge) {</span><br><span class="line">        return peopleMapper.selectOne(peopleName, peopleAge);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x542F;&#x52A8;<strong>example-service-1</strong>&#xFF0C;&#x8C03;&#x7528;&#x5982;&#x4E0B;&#x63A5;&#x53E3;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">txt&#x590D;&#x5236;&#x4EE3;&#x7801;http://localhost:8080/mybatis/select?peopleName=Lee&amp;peopleAge=20</span><br></pre></td></tr></table></figure>
+
+<p>&#x94FE;&#x8DEF;&#x65E5;&#x5FD7;&#x6253;&#x5370;&#x5982;&#x4E0B;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">json&#x590D;&#x5236;&#x4EE3;&#x7801;{</span><br><span class="line">    &quot;traceId&quot;: &quot;a33ddc958ecc4a46cf2a63b19a6fd064&quot;,</span><br><span class="line">    &quot;spanId&quot;: &quot;cf2a63b19a6fd064&quot;,</span><br><span class="line">    &quot;parentSpanId&quot;: &quot;0000000000000000&quot;,</span><br><span class="line">    &quot;timestamp&quot;: &quot;1709298263420&quot;,</span><br><span class="line">    &quot;duration&quot;: &quot;7&quot;,</span><br><span class="line">    &quot;httpCode&quot;: &quot;200&quot;,</span><br><span class="line">    &quot;host&quot;: &quot;http://localhost:8080&quot;,</span><br><span class="line">    &quot;requestStacks&quot;: [],</span><br><span class="line">    &quot;dbStacks&quot;: [</span><br><span class="line">        {</span><br><span class="line">            &quot;dbServer&quot;: &quot;192.168.101.8:3306&quot;,</span><br><span class="line">            &quot;dbName&quot;: &quot;test&quot;,</span><br><span class="line">            &quot;sqlText&quot;: &quot;SELECT p.id, p.p_name, p.p_age FROM people p WHERE p.p_name=? AND p.p_age=?&quot;,</span><br><span class="line">            &quot;sqlParams&quot;: &quot;Lee,20&quot;,</span><br><span class="line">            &quot;sqlDuration&quot;: &quot;4&quot;,</span><br><span class="line">            &quot;sqlTimestamp&quot;: &quot;1709298263421&quot;</span><br><span class="line">        }</span><br><span class="line">    ]</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x672C;&#x6587;&#x57FA;&#x4E8E;<strong>MyBatis</strong>&#x62E6;&#x622A;&#x5668;&#xFF0C;&#x5B9E;&#x73B0;&#x4E86;&#x6570;&#x636E;&#x5E93;&#x94FE;&#x8DEF;&#x8FFD;&#x8E2A;&#xFF0C;&#x6838;&#x5FC3;&#x601D;&#x8DEF;&#x5C31;&#x662F;&#x901A;&#x8FC7;&#x62E6;&#x622A;&#x5668;&#xFF0C;&#x62FF;&#x5230;&#x672C;&#x6B21;<strong>SQL</strong>&#x6267;&#x884C;&#x7684;&#x76F8;&#x5173;&#x4FE1;&#x606F;&#xFF0C;&#x5E76;&#x8F93;&#x51FA;&#x5230;&#x94FE;&#x8DEF;&#x4FE1;&#x606F;&#x4E2D;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/dadabb470aee5081a8dae8b7030a84b9.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-Java-MyBatis/" rel="tag"># 后端,Java,MyBatis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7358688805157388325.html" rel="next" title="👀那些你不知道的数据库知识：行式存储和列式存储1.列式存">
+                <i class="fa fa-chevron-left"></i> 👀那些你不知道的数据库知识：行式存储和列式存储1.列式存
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7358691823545581603.html" rel="prev" title="NopReport的可扩展设计如何实现二维码导出">
+                NopReport的可扩展设计如何实现二维码导出 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">68</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正文"><span class="nav-number">2.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一-链路日志改造说明"><span class="nav-number">2.1.</span> <span class="nav-text">一. 链路日志改造说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二-MyBatis拦截器回顾"><span class="nav-number">2.2.</span> <span class="nav-text">二. MyBatis拦截器回顾</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三-数据库链路追踪MyBatis拦截器设计与实现"><span class="nav-number">2.3.</span> <span class="nav-text">三. 数据库链路追踪MyBatis拦截器设计与实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四-数据库链路追踪装饰器设计与实现"><span class="nav-number">2.4.</span> <span class="nav-text">四. 数据库链路追踪装饰器设计与实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-数据库服务端地址和数据库名获取"><span class="nav-number">2.4.1.</span> <span class="nav-text">1. 数据库服务端地址和数据库名获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-SQL语句和SQL参数获取"><span class="nav-number">2.4.2.</span> <span class="nav-text">2. SQL语句和SQL参数获取</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五-注册MyBatis拦截器"><span class="nav-number">2.5.</span> <span class="nav-text">五. 注册MyBatis拦截器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#六-链路日志打印"><span class="nav-number">2.6.</span> <span class="nav-text">六. 链路日志打印</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#七-演示案例"><span class="nav-number">2.7.</span> <span class="nav-text">七. 演示案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
