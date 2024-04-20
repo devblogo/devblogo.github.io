@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,Java,面试,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4E2A;&amp;#x4EBA;&amp;#x521B;&amp;#x4F5C;&amp;#x516C;&amp;#x7EA6;&amp;#xFF1A;&amp;#x672C;&amp;#x4EBA;&amp;#x58F0;&amp;#x660E;&amp;#x521B;&amp;#x4F5C;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0;&amp;#x7686;&amp;#x4E3A;&amp;#x81EA;&amp;#x5DF1;&amp;#x539F;&amp;#x521B;&amp;#xFF0C">
+<meta name="keywords" content="后端,Java,面试">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全网最硬核 JVM 内存解析 - 2JVM 内存申请与使用">
+<meta property="og:url" content="https://dev.newban.cn/7225875600644407357.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4E2A;&amp;#x4EBA;&amp;#x521B;&amp;#x4F5C;&amp;#x516C;&amp;#x7EA6;&amp;#xFF1A;&amp;#x672C;&amp;#x4EBA;&amp;#x58F0;&amp;#x660E;&amp;#x521B;&amp;#x4F5C;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0;&amp;#x7686;&amp;#x4E3A;&amp;#x81EA;&amp;#x5DF1;&amp;#x539F;&amp;#x521B;&amp;#xFF0C">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/37654d11a3777af74228fae3f1e0f82e3820b06df9ce1e751dcd726ff67587ec">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/2bfce1a55955ac7570f3fa5158a3b4dda96aee30b9671d284aa1fef6e4fa40b6">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/dfc0e1fe0e531af7d976e96cbc5534bfe53d12a5af7ceb75bdddef5fb3362079">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/0ec3935f83103c99deac151a367dcdebe90635cebb99c61e1768a80f26b4b630">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/30df8d75415050ec58bb213fd64dd0fb858e6daa4f4e13e7985f75e44b51a163">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/7c9f9212f26a0b9cbb071862bb17ca04c09347768b3685a531ae91ffdddf5291">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/c384dccf0e2936cfb9f9e12ac93ebea659caf5d352801a80295ee33faf1a0d15">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/2beb14f65c9c52a78a9ec0662ea8185a7a6204d318d71bb7e824ceabd9f5513a">
+<meta property="og:updated_time" content="2024-04-20T10:24:01.276Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="全网最硬核 JVM 内存解析 - 2JVM 内存申请与使用">
+<meta name="twitter:description" content="&amp;#x4E2A;&amp;#x4EBA;&amp;#x521B;&amp;#x4F5C;&amp;#x516C;&amp;#x7EA6;&amp;#xFF1A;&amp;#x672C;&amp;#x4EBA;&amp;#x58F0;&amp;#x660E;&amp;#x521B;&amp;#x4F5C;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0;&amp;#x7686;&amp;#x4E3A;&amp;#x81EA;&amp;#x5DF1;&amp;#x539F;&amp;#x521B;&amp;#xFF0C">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/37654d11a3777af74228fae3f1e0f82e3820b06df9ce1e751dcd726ff67587ec">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7225875600644407357.html">
+
+
+
+
+
+  <title>全网最硬核 JVM 内存解析 - 2JVM 内存申请与使用 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">全网最硬核 JVM 内存解析 - 2JVM 内存申请与使用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-04-25T15:31:37+08:00">
+                2023-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x4E2A;&#x4EBA;&#x521B;&#x4F5C;&#x516C;&#x7EA6;&#xFF1A;&#x672C;&#x4EBA;&#x58F0;&#x660E;&#x521B;&#x4F5C;&#x7684;&#x6240;&#x6709;&#x6587;&#x7AE0;&#x7686;&#x4E3A;&#x81EA;&#x5DF1;&#x539F;&#x521B;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x53C2;&#x8003;&#x4EFB;&#x4F55;&#x6587;&#x7AE0;&#x7684;&#x5730;&#x65B9;&#xFF0C;&#x4F1A;&#x6807;&#x6CE8;&#x51FA;&#x6765;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x758F;&#x6F0F;&#xFF0C;&#x6B22;&#x8FCE;&#x5927;&#x5BB6;&#x6279;&#x5224;&#x3002;&#x5982;&#x679C;&#x5927;&#x5BB6;&#x53D1;&#x73B0;&#x7F51;&#x4E0A;&#x6709;&#x6284;&#x88AD;&#x672C;&#x6587;&#x7AE0;&#x7684;&#xFF0C;&#x6B22;&#x8FCE;&#x4E3E;&#x62A5;&#xFF0C;&#x5E76;&#x4E14;&#x79EF;&#x6781;&#x5411;&#x8FD9;&#x4E2A; <a href="/external_links/a7475ce7cc4a9ea6f81215803b043243.html" target="blank" rel="noopener">github &#x4ED3;&#x5E93;</a> &#x63D0;&#x4EA4; issue&#xFF0C;&#x8C22;&#x8C22;&#x652F;&#x6301;~<br>&#x53E6;&#x5916;&#xFF0C;&#x672C;&#x6587;&#x4E3A;&#x4E86;&#x907F;&#x514D;&#x6284;&#x88AD;&#xFF0C;&#x4F1A;&#x5728;&#x4E0D;&#x5F71;&#x54CD;&#x9605;&#x8BFB;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5728;&#x6587;&#x7AE0;&#x7684;&#x968F;&#x673A;&#x4F4D;&#x7F6E;&#x653E;&#x5165;&#x5BF9;&#x4E8E;&#x6284;&#x88AD;&#x548C;&#x6D17;&#x7A3F;&#x7684;&#x4EBA;&#x7684;&#x201C;&#x4EB2;&#x5207;&#x201D;&#x7684;&#x95EE;&#x5019;&#x3002;&#x5982;&#x679C;&#x662F;&#x6B63;&#x5E38;&#x8BFB;&#x8005;&#x770B;&#x5230;&#xFF0C;&#x7B14;&#x8005;&#x5728;&#x8FD9;&#x91CC;&#x8BF4;&#x58F0;&#x5BF9;&#x4E0D;&#x8D77;&#xFF0C;&#x3002;&#x5982;&#x679C;&#x88AB;&#x6284;&#x88AD;&#x72D7;&#x6216;&#x8005;&#x6D17;&#x7A3F;&#x72D7;&#x770B;&#x5230;&#x4E86;&#xFF0C;&#x5E0C;&#x671B;&#x4F60;&#x80FD;&#x591F;&#x597D;&#x597D;&#x53CD;&#x601D;&#xFF0C;&#x4E0D;&#x8981;&#x518D;&#x6284;&#x88AD;&#x4E86;&#xFF0C;&#x8C22;&#x8C22;&#x3002;<br>&#x4ECA;&#x5929;&#x53C8;&#x662F;&#x5E72;&#x8D27;&#x6EE1;&#x6EE1;&#x7684;&#x4E00;&#x5929;&#xFF0C;&#x8FD9;&#x662F;&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x89E3;&#x6790;&#x7CFB;&#x5217;&#x7B2C;&#x56DB;&#x7BC7;&#xFF0C;&#x5F80;&#x671F;&#x7CBE;&#x5F69;&#xFF1A;</p>
+<ul>
+<li><a href="https://dev.newban.cn/6925217498723778568">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; TLAB &#x89E3;&#x6790;</a></li>
+<li><a href="https://dev.newban.cn/7051386828913377316">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; Java &#x968F;&#x673A;&#x6570;&#x89E3;&#x6790;</a></li>
+<li><a href="https://dev.newban.cn/7080869319407566879">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; Java &#x65B0;&#x5185;&#x5B58;&#x6A21;&#x578B;&#x89E3;&#x6790;</a></li>
+</ul>
+</blockquote>
+<blockquote>
+<p>&#x672C;&#x7BC7;&#x662F;&#x5173;&#x4E8E; JVM &#x5185;&#x5B58;&#x7684;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;&#x7F51;&#x4E0A;&#x6709;&#x5F88;&#x591A;&#x5173;&#x4E8E; JVM &#x5185;&#x5B58;&#x7ED3;&#x6784;&#x7684;&#x5206;&#x6790;&#x4EE5;&#x53CA;&#x56FE;&#x7247;&#xFF0C;&#x4F46;&#x662F;&#x7531;&#x4E8E;&#x4E0D;&#x662F;&#x4E00;&#x624B;&#x7684;&#x8D44;&#x6599;&#x4EA6;&#x6216;&#x662F;&#x4EBA;&#x4E91;&#x4EA6;&#x4E91;&#x5BFC;&#x81F4;&#x6709;&#x5F88;&#x9519;&#x8BEF;&#xFF0C;&#x9020;&#x6210;&#x4E86;&#x5F88;&#x591A;&#x8BEF;&#x89E3;&#xFF1B;&#x5E76;&#x4E14;&#xFF0C;&#x8FD9;&#x91CC;&#x53EF;&#x80FD;&#x6700;&#x5BB9;&#x6613;&#x6DF7;&#x6DC6;&#x7684;&#x662F;&#x4E00;&#x8FB9;&#x662F; JVM Specification &#x7684;&#x5B9A;&#x4E49;&#xFF0C;&#x4E00;&#x8FB9;&#x662F; Hotspot JVM &#x7684;&#x5B9E;&#x9645;&#x5B9E;&#x73B0;&#xFF0C;&#x6709;&#x65F6;&#x5019;&#x4EBA;&#x4EEC;&#x4E00;&#x4E9B;&#x90E8;&#x5206;&#x8BF4;&#x7684;&#x662F; JVM Specification&#xFF0C;&#x4E00;&#x90E8;&#x5206;&#x8BF4;&#x7684;&#x662F; Hotspot &#x5B9E;&#x73B0;&#xFF0C;&#x7ED9;&#x4EBA;&#x4E00;&#x79CD;&#x5272;&#x88C2;&#x611F;&#x4E0E;&#x8BEF;&#x89E3;&#x3002;&#x672C;&#x7BC7;&#x4E3B;&#x8981;&#x4ECE; Hotspot &#x5B9E;&#x73B0;&#x51FA;&#x53D1;&#xFF0C;&#x4EE5; Linux x86 &#x73AF;&#x5883;&#x4E3A;&#x4E3B;&#xFF0C;&#x7D27;&#x5BC6;&#x8D34;&#x5408; JVM &#x6E90;&#x7801;&#x5E76;&#x4E14;&#x8F85;&#x4EE5;&#x5404;&#x79CD; JVM &#x5DE5;&#x5177;&#x9A8C;&#x8BC1;&#x5E2E;&#x52A9;&#x5927;&#x5BB6;&#x7406;&#x89E3; JVM &#x5185;&#x5B58;&#x7684;&#x7ED3;&#x6784;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x672C;&#x7BC7;&#x4EC5;&#x9650;&#x4E8E;&#x5BF9;&#x4E8E;&#x8FD9;&#x4E9B;&#x5185;&#x5B58;&#x7684;&#x7528;&#x9014;&#xFF0C;&#x4F7F;&#x7528;&#x9650;&#x5236;&#xFF0C;&#x76F8;&#x5173;&#x53C2;&#x6570;&#x7684;&#x5206;&#x6790;&#xFF0C;&#x6709;&#x4E9B;&#x5730;&#x65B9;&#x53EF;&#x80FD;&#x6BD4;&#x8F83;&#x6DF1;&#x5165;&#xFF0C;&#x6709;&#x4E9B;&#x5730;&#x65B9;&#x53EF;&#x80FD;&#x9700;&#x8981;&#x7ED3;&#x5408;&#x672C;&#x8EAB;&#x7528;&#x8FD9;&#x5757;&#x5185;&#x5B58;&#x6D89;&#x53CA;&#x7684; JVM &#x6A21;&#x5757;&#x53BB;&#x8BF4;&#xFF0C;&#x4F1A;&#x653E;&#x5728;&#x53E6;&#x4E00;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x8BE6;&#x7EC6;&#x63CF;&#x8FF0;&#x3002;&#x6700;&#x540E;&#xFF0C;&#x6D17;&#x7A3F;&#x6284;&#x88AD;&#x72D7;&#x4E0D;&#x5F97; house</p>
+</blockquote>
+<p>&#x672C;&#x7BC7;&#x5168;&#x7BC7;&#x76EE;&#x5F55;&#xFF08;&#x4EE5;&#x53CA;&#x6D89;&#x53CA;&#x7684; JVM &#x53C2;&#x6570;&#xFF09;&#xFF1A;</p>
+<ol>
+<li>&#x4ECE; Native Memory Tracking &#x8BF4;&#x8D77;&#xFF08;<a href="https://dev.newban.cn/7225871227743043644">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 1.&#x4ECE; Native Memory Tracking &#x8BF4;&#x8D77;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>Native Memory Tracking &#x7684;&#x5F00;&#x542F;</li>
+<li>Native Memory Tracking &#x7684;&#x4F7F;&#x7528;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>NativeMemoryTracking</code>&#xFF09;</li>
+<li>Native Memory Tracking &#x7684; summary &#x4FE1;&#x606F;&#x6BCF;&#x90E8;&#x5206;&#x542B;&#x4E49;</li>
+<li>Native Memory Tracking &#x7684; summary &#x4FE1;&#x606F;&#x7684;&#x6301;&#x7EED;&#x76D1;&#x63A7;</li>
+<li>&#x4E3A;&#x4F55; Native Memory Tracking &#x4E2D;&#x7533;&#x8BF7;&#x7684;&#x5185;&#x5B58;&#x5206;&#x4E3A; reserved &#x548C; committed</li>
+</ol>
+</li>
+<li>JVM &#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;&#xFF08;<a href="https://dev.newban.cn/7225875600644407357">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 2.JVM &#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>Linux &#x4E0B;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x6A21;&#x578B;&#x7B80;&#x8FF0;</li>
+<li>JVM commit &#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;<ol>
+<li>JVM commit &#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;</li>
+</ol>
+</li>
+<li>&#x5927;&#x9875;&#x5206;&#x914D; UseLargePages&#xFF08;<a href="https://dev.newban.cn/7225875600644489277">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 3.&#x5927;&#x9875;&#x5206;&#x914D; UseLargePages</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>Linux &#x5927;&#x9875;&#x5206;&#x914D;&#x65B9;&#x5F0F; - Huge Translation Lookaside Buffer Page (hugetlbfs)</li>
+<li>Linux &#x5927;&#x9875;&#x5206;&#x914D;&#x65B9;&#x5F0F; - Transparent Huge Pages (THP)</li>
+<li>JVM &#x5927;&#x9875;&#x5206;&#x914D;&#x76F8;&#x5173;&#x53C2;&#x6570;&#x4E0E;&#x673A;&#x5236;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>UseLargePages</code>,<code>UseHugeTLBFS</code>,<code>UseSHM</code>,<code>UseTransparentHugePages</code>,<code>LargePageSizeInBytes</code>&#xFF09;</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>Java &#x5806;&#x5185;&#x5B58;&#x76F8;&#x5173;&#x8BBE;&#x8BA1;&#xFF08;<a href="https://dev.newban.cn/7225874698906615864">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 4.Java &#x5806;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x7684;&#x786E;&#x8BA4;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x901A;&#x7528;&#x521D;&#x59CB;&#x5316;&#x4E0E;&#x6269;&#x5C55;&#x6D41;&#x7A0B;</li>
+<li>&#x76F4;&#x63A5;&#x6307;&#x5B9A;&#x4E09;&#x4E2A;&#x6307;&#x6807;&#x7684;&#x65B9;&#x5F0F;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>MaxHeapSize</code>,<code>MinHeapSize</code>,<code>InitialHeapSize</code>,<code>Xmx</code>,<code>Xms</code>&#xFF09;</li>
+<li>&#x4E0D;&#x624B;&#x52A8;&#x6307;&#x5B9A;&#x4E09;&#x4E2A;&#x6307;&#x6807;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x8FD9;&#x4E09;&#x4E2A;&#x6307;&#x6807;(MinHeapSize,MaxHeapSize,InitialHeapSize)&#x662F;&#x5982;&#x4F55;&#x8BA1;&#x7B97;&#x7684;</li>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x76F8;&#x5173;&#x673A;&#x5236;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>UseCompressedOops</code>&#xFF09;&#xFF08;<a href="https://dev.newban.cn/7225874698906714168">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 5.&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x76F8;&#x5173;&#x673A;&#x5236;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x5B58;&#x5728;&#x7684;&#x610F;&#x4E49;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>ObjectAlignmentInBytes</code>&#xFF09;</li>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x4E0E;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#x7684;&#x5173;&#x7CFB;&#x6F14;&#x8FDB;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>UseCompressedOops</code>,<code>UseCompressedClassPointers</code>&#xFF09;</li>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x7684;&#x4E0D;&#x540C;&#x6A21;&#x5F0F;&#x4E0E;&#x5BFB;&#x5740;&#x4F18;&#x5316;&#x673A;&#x5236;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>ObjectAlignmentInBytes</code>,<code>HeapBaseMinAddress</code>&#xFF09;</li>
+</ol>
+</li>
+<li>&#x4E3A;&#x4F55;&#x9884;&#x7559;&#x7B2C; 0 &#x9875;&#xFF0C;&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488; null &#x5224;&#x65AD;&#x64E6;&#x9664;&#x7684;&#x5B9E;&#x73B0;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>HeapBaseMinAddress</code>&#xFF09;</li>
+<li>&#x7ED3;&#x5408;&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x4E0E;&#x524D;&#x9762;&#x63D0;&#x5230;&#x7684;&#x5806;&#x5185;&#x5B58;&#x9650;&#x5236;&#x7684;&#x521D;&#x59CB;&#x5316;&#x7684;&#x5173;&#x7CFB;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>HeapBaseMinAddress</code>,<code>ObjectAlignmentInBytes</code>,<code>MinHeapSize</code>,<code>MaxHeapSize</code>,<code>InitialHeapSize</code>&#xFF09;</li>
+<li>&#x4F7F;&#x7528; jol + jhsdb + JVM &#x65E5;&#x5FD7;&#x67E5;&#x770B;&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x4E0E; Java &#x5806;&#x9A8C;&#x8BC1;&#x6211;&#x4EEC;&#x524D;&#x9762;&#x7684;&#x7ED3;&#x8BBA;<ol>
+<li>&#x9A8C;&#x8BC1; <code>32-bit</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+<li>&#x9A8C;&#x8BC1; <code>Zero based</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+<li>&#x9A8C;&#x8BC1; <code>Non-zero disjoint</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+<li>&#x9A8C;&#x8BC1; <code>Non-zero based</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+</ol>
+</li>
+<li>&#x5806;&#x5927;&#x5C0F;&#x7684;&#x52A8;&#x6001;&#x4F38;&#x7F29;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>MinHeapFreeRatio</code>,<code>MaxHeapFreeRatio</code>,<code>MinHeapDeltaBytes</code>&#xFF09;&#xFF08;<a href="https://dev.newban.cn/7225879698952470588">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 6.&#x5176;&#x4ED6; Java &#x5806;&#x5185;&#x5B58;&#x76F8;&#x5173;&#x7684;&#x7279;&#x6B8A;&#x673A;&#x5236;</a>&#x5F00;&#x59CB;&#xFF09;</li>
+<li>&#x9002;&#x7528;&#x4E8E;&#x957F;&#x671F;&#x8FD0;&#x884C;&#x5E76;&#x4E14;&#x5C3D;&#x91CF;&#x5C06;&#x6240;&#x6709;&#x53EF;&#x7528;&#x5185;&#x5B58;&#x88AB;&#x5806;&#x4F7F;&#x7528;&#x7684; JVM &#x53C2;&#x6570; AggressiveHeap</li>
+<li>JVM &#x53C2;&#x6570; AlwaysPreTouch &#x7684;&#x4F5C;&#x7528;</li>
+<li>JVM &#x53C2;&#x6570; UseContainerSupport - JVM &#x5982;&#x4F55;&#x611F;&#x77E5;&#x5230;&#x5BB9;&#x5668;&#x5185;&#x5B58;&#x9650;&#x5236;</li>
+<li>JVM &#x53C2;&#x6570; SoftMaxHeapSize - &#x7528;&#x4E8E;&#x5E73;&#x6ED1;&#x8FC1;&#x79FB;&#x66F4;&#x8017;&#x5185;&#x5B58;&#x7684; GC &#x4F7F;&#x7528;</li>
+</ol>
+</li>
+<li>JVM &#x5143;&#x7A7A;&#x95F4;&#x8BBE;&#x8BA1;&#xFF08;<a href="https://dev.newban.cn/7225879698952486972">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 7.&#x5143;&#x7A7A;&#x95F4;&#x5B58;&#x50A8;&#x7684;&#x5143;&#x6570;&#x636E;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x4EC0;&#x4E48;&#x662F;&#x5143;&#x6570;&#x636E;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981;&#x5143;&#x6570;&#x636E;</li>
+<li>&#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x7528;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x5143;&#x7A7A;&#x95F4;&#x4FDD;&#x5B58;&#x4EC0;&#x4E48;</li>
+<li>2.1. &#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x7528;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x4EE5;&#x53CA;&#x91CA;&#x653E;&#x65F6;&#x673A;</li>
+<li>2.2. &#x5143;&#x7A7A;&#x95F4;&#x4FDD;&#x5B58;&#x4EC0;&#x4E48;</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;&#xFF08;<a href="https://dev.newban.cn/7225879724545835045">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 8.&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6574;&#x4F53;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x76F8;&#x5173;&#x53C2;&#x6570;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>MetaspaceSize</code>,<code>MaxMetaspaceSize</code>,<code>MinMetaspaceExpansion</code>,<code>MaxMetaspaceExpansion</code>,<code>MaxMetaspaceFreeRatio</code>,<code>MinMetaspaceFreeRatio</code>,<code>UseCompressedClassPointers</code>,<code>CompressedClassSpaceSize</code>,<code>CompressedClassSpaceBaseAddress</code>,<code>MetaspaceReclaimPolicy</code>&#xFF09;</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x4E0A;&#x4E0B;&#x6587; <code>MetaspaceContext</code></li>
+<li>&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5217;&#x8868; <code>VirtualSpaceList</code></li>
+<li>&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9; <code>VirtualSpaceNode</code> &#x4E0E; <code>CompressedClassSpaceSize</code></li>
+<li><code>MetaChunk</code><ol>
+<li><code>ChunkHeaderPool</code> &#x6C60;&#x5316; <code>MetaChunk</code> &#x5BF9;&#x8C61;</li>
+<li><code>ChunkManager</code> &#x7BA1;&#x7406;&#x7A7A;&#x95F2;&#x7684; <code>MetaChunk</code></li>
+</ol>
+</li>
+<li>&#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x5165;&#x53E3; <code>SystemDictionary</code> &#x4E0E;&#x4FDD;&#x7559;&#x6240;&#x6709; <code>ClassLoaderData</code> &#x7684; <code>ClassLoaderDataGraph</code></li>
+<li>&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684; <code>ClassLoaderData</code> &#x4EE5;&#x53CA; <code>ClassLoaderMetaspace</code></li>
+<li>&#x7BA1;&#x7406;&#x6B63;&#x5728;&#x4F7F;&#x7528;&#x7684; <code>MetaChunk</code> &#x7684; <code>MetaspaceArena</code></li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5206;&#x914D;&#x6D41;&#x7A0B;&#xFF08;<a href="https://dev.newban.cn/7225879724545900581">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 9.&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5206;&#x914D;&#x6D41;&#x7A0B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x5230; <code>MetaSpaceArena</code> &#x7684;&#x6D41;&#x7A0B;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x6574;&#x4F53;&#x6D41;&#x7A0B;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - <code>FreeBlocks</code> &#x56DE;&#x6536;&#x8001;&#x7684; <code>current chunk</code> &#x4E0E;&#x7528;&#x4E8E;&#x540E;&#x7EED;&#x5206;&#x914D;&#x7684;&#x6D41;&#x7A0B;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x5C1D;&#x8BD5;&#x4ECE; <code>FreeBlocks</code> &#x5206;&#x914D;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x5C1D;&#x8BD5;&#x6269;&#x5BB9; <code>current chunk</code></li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x4ECE; <code>ChunkManager</code> &#x5206;&#x914D;&#x65B0;&#x7684; <code>MetaChunk</code></li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x4ECE; <code>ChunkManager</code> &#x5206;&#x914D;&#x65B0;&#x7684; <code>MetaChunk</code> - &#x4ECE; <code>VirtualSpaceList</code> &#x7533;&#x8BF7;&#x65B0;&#x7684; <code>RootMetaChunk</code></li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x4ECE; <code>ChunkManager</code> &#x5206;&#x914D;&#x65B0;&#x7684; <code>MetaChunk</code> - &#x5C06; <code>RootMetaChunk</code> &#x5207;&#x5272;&#x6210;&#x4E3A;&#x9700;&#x8981;&#x7684; <code>MetaChunk</code></li>
+<li><code>MetaChunk</code> &#x56DE;&#x6536; - &#x4E0D;&#x540C;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C; <code>MetaChunk</code> &#x5982;&#x4F55;&#x653E;&#x5165; <code>FreeChunkListVector</code></li>
+</ol>
+</li>
+<li><code>ClassLoaderData</code> &#x56DE;&#x6536;</li>
+</ol>
+</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x4E0E;&#x56DE;&#x6536;&#x6D41;&#x7A0B;&#x4E3E;&#x4F8B;&#xFF08;<a href="https://dev.newban.cn/7225879698952634428">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 10.&#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x4E0E;&#x56DE;&#x6536;&#x6D41;&#x7A0B;&#x4E3E;&#x4F8B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x9996;&#x5148;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 1023 &#x5B57;&#x8282;&#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x8FD8;&#x9700;&#x8981;&#x5206;&#x914D; 1023 &#x5B57;&#x8282;&#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 264 KB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 2 MB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 128KB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x65B0;&#x6765;&#x4E00;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 2&#xFF0C;&#x9700;&#x8981;&#x5206;&#x914D; 1023 Bytes &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x88AB; GC &#x56DE;&#x6536;&#x6389;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 2 &#x9700;&#x8981;&#x5206;&#x914D; 1 MB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+</ol>
+</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#x9650;&#x5236;&#x4E0E;&#x52A8;&#x6001;&#x4F38;&#x7F29;&#xFF08;<a href="https://dev.newban.cn/7225879724546015269">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 11.&#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x4E0E;&#x56DE;&#x6536;&#x6D41;&#x7A0B;&#x4E3E;&#x4F8B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li><code>CommitLimiter</code> &#x7684;&#x9650;&#x5236;&#x5143;&#x7A7A;&#x95F4;&#x53EF;&#x4EE5; commit &#x7684;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x4EE5;&#x53CA;&#x9650;&#x5236;&#x5143;&#x7A7A;&#x95F4;&#x5360;&#x7528;&#x8FBE;&#x5230;&#x591A;&#x5C11;&#x5C31;&#x5F00;&#x59CB;&#x5C1D;&#x8BD5; GC</li>
+<li>&#x6BCF;&#x6B21; GC &#x4E4B;&#x540E;&#xFF0C;&#x4E5F;&#x4F1A;&#x5C1D;&#x8BD5;&#x91CD;&#x65B0;&#x8BA1;&#x7B97; <code>_capacity_until_GC</code></li>
+</ol>
+</li>
+<li><code>jcmd VM.metaspace</code> &#x5143;&#x7A7A;&#x95F4;&#x8BF4;&#x660E;&#x3001;&#x5143;&#x7A7A;&#x95F4;&#x76F8;&#x5173; JVM &#x65E5;&#x5FD7;&#x4EE5;&#x53CA;&#x5143;&#x7A7A;&#x95F4; JFR &#x4E8B;&#x4EF6;&#x8BE6;&#x89E3;&#xFF08;<a href="https://dev.newban.cn/7225879731177013303">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 12.&#x5143;&#x7A7A;&#x95F4;&#x5404;&#x79CD;&#x76D1;&#x63A7;&#x624B;&#x6BB5;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li><code>jcmd &lt;pid&gt; VM.metaspace</code> &#x5143;&#x7A7A;&#x95F4;&#x8BF4;&#x660E;</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x76F8;&#x5173; JVM &#x65E5;&#x5FD7;</li>
+<li>&#x5143;&#x7A7A;&#x95F4; JFR &#x4E8B;&#x4EF6;&#x8BE6;&#x89E3;<ol>
+<li><code>jdk.MetaspaceSummary</code> &#x5143;&#x7A7A;&#x95F4;&#x5B9A;&#x65F6;&#x7EDF;&#x8BA1;&#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceAllocationFailure</code> &#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x5931;&#x8D25;&#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceOOM</code> &#x5143;&#x7A7A;&#x95F4; OOM &#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceGCThreshold</code> &#x5143;&#x7A7A;&#x95F4; GC &#x9608;&#x503C;&#x53D8;&#x5316;&#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceChunkFreeListSummary</code> &#x5143;&#x7A7A;&#x95F4; Chunk FreeList &#x7EDF;&#x8BA1;&#x4E8B;&#x4EF6;</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>JVM &#x7EBF;&#x7A0B;&#x5185;&#x5B58;&#x8BBE;&#x8BA1;&#xFF08;&#x91CD;&#x70B9;&#x7814;&#x7A76; Java &#x7EBF;&#x7A0B;&#xFF09;&#xFF08;<a href="https://dev.newban.cn/7225879724546113573">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 13.JVM &#x7EBF;&#x7A0B;&#x5185;&#x5B58;&#x8BBE;&#x8BA1;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>JVM &#x4E2D;&#x6709;&#x54EA;&#x51E0;&#x79CD;&#x7EBF;&#x7A0B;&#xFF0C;&#x5BF9;&#x5E94;&#x7EBF;&#x7A0B;&#x6808;&#x76F8;&#x5173;&#x7684;&#x53C2;&#x6570;&#x662F;&#x4EC0;&#x4E48;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>ThreadStackSize</code>,<code>VMThreadStackSize</code>,<code>CompilerThreadStackSize</code>,<code>StackYellowPages</code>,<code>StackRedPages</code>,<code>StackShadowPages</code>,<code>StackReservedPages</code>,<code>RestrictReservedStack</code>&#xFF09;</li>
+<li>Java &#x7EBF;&#x7A0B;&#x6808;&#x5185;&#x5B58;&#x7684;&#x7ED3;&#x6784;</li>
+<li>Java &#x7EBF;&#x7A0B;&#x5982;&#x4F55;&#x629B;&#x51FA;&#x7684; StackOverflowError<ol>
+<li>&#x89E3;&#x91CA;&#x6267;&#x884C;&#x4E0E;&#x7F16;&#x8BD1;&#x6267;&#x884C;&#x65F6;&#x5019;&#x7684;&#x5224;&#x65AD;&#xFF08;x86&#x4E3A;&#x4F8B;&#xFF09;</li>
+<li>&#x4E00;&#x4E2A; Java &#x7EBF;&#x7A0B; Xss &#x6700;&#x5C0F;&#x80FD;&#x6307;&#x5B9A;&#x591A;&#x5927;</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<ol start="2">
+<li><h1 id="JVM-&#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;"><a href="#JVM-&#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;" class="headerlink" title="JVM &#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;"></a>JVM &#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;</h1></li>
+</ol>
+<h2 id="2-1-Linux-&#x4E0B;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x6A21;&#x578B;&#x7B80;&#x8FF0;"><a href="#2-1-Linux-&#x4E0B;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x6A21;&#x578B;&#x7B80;&#x8FF0;" class="headerlink" title="2.1. Linux &#x4E0B;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x6A21;&#x578B;&#x7B80;&#x8FF0;"></a>2.1. Linux &#x4E0B;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x6A21;&#x578B;&#x7B80;&#x8FF0;</h2><p>Linux &#x5185;&#x5B58;&#x7BA1;&#x7406;&#x6A21;&#x578B;&#x4E0D;&#x662F;&#x54B1;&#x4EEC;&#x8FD9;&#x4E2A;&#x7CFB;&#x5217;&#x7684;&#x8BA8;&#x8BBA;&#x91CD;&#x70B9;&#xFF0C;&#x6211;&#x4EEC;&#x8FD9;&#x91CC;&#x53EA;&#x4F1A;&#x7B80;&#x5355;&#x63D0;&#x4E00;&#x4E9B;&#x5BF9;&#x4E8E;&#x54B1;&#x4EEC;&#x8FD9;&#x4E2A;&#x7CFB;&#x5217;&#x9700;&#x8981;&#x4E86;&#x89E3;&#x5230;&#x7684;&#xFF0C;&#x5982;&#x679C;&#x8BFB;&#x8005;&#x60F3;&#x8981;&#x6DF1;&#x5165;&#x7406;&#x89E3;&#xFF0C;&#x5EFA;&#x8BAE;&#x5927;&#x5BB6;&#x67E5;&#x770B; <strong>bin &#x795E;&#xFF08;&#x516C;&#x4F17;&#x53F7;&#xFF1A;bin &#x7684;&#x6280;&#x672F;&#x5C0F;&#x5C4B;&#xFF09;&#x7684;&#x7CFB;&#x5217;&#x6587;&#x7AE0;</strong>&#xFF1A;<a href="/external_links/699b927c8f46f6924c50328a002b4385.html" target="blank" rel="noopener">&#x4E00;&#x6B65;&#x4E00;&#x56FE;&#x5E26;&#x4F60;&#x6DF1;&#x5165;&#x7406;&#x89E3; Linux &#x865A;&#x62DF;&#x5185;&#x5B58;&#x7BA1;&#x7406;</a></p>
+<p>CPU &#x662F;&#x901A;&#x8FC7;&#x5BFB;&#x5740;&#x6765;&#x8BBF;&#x95EE;&#x5185;&#x5B58;&#x7684;&#xFF0C;&#x76EE;&#x524D;&#x5927;&#x90E8;&#x5206; CPU &#x90FD;&#x662F; 64 &#x4F4D;&#x7684;&#xFF0C;&#x5373;&#x5BFB;&#x5740;&#x8303;&#x56F4;&#x662F;&#xFF1A;<code>0x0000 0000 0000 0000 ~ 0xFFFF FFFF FFFF FFFF</code>&#xFF0C;&#x5373;&#x53EF;&#x4EE5;&#x7BA1;&#x7406; 16EB &#x7684;&#x5185;&#x5B58;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x5B9E;&#x9645;&#x7A0B;&#x5E8F;&#x5E76;&#x4E0D;&#x4F1A;&#x76F4;&#x63A5;&#x901A;&#x8FC7; CPU &#x5BFB;&#x5740;&#x8BBF;&#x95EE;&#x5230;&#x5B9E;&#x9645;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x800C;&#x662F;&#x901A;&#x8FC7;&#x5F15;&#x5165; MMU&#xFF08;Memory Management Unit &#x5185;&#x5B58;&#x7BA1;&#x7406;&#x5355;&#x5143;&#xFF09;&#x4E0E;&#x5B9E;&#x9645;&#x7269;&#x7406;&#x5730;&#x5740;&#x9694;&#x4E86;&#x4E00;&#x5C42;<strong>&#x865A;&#x62DF;&#x5185;&#x5B58;</strong>&#x7684;&#x62BD;&#x8C61;&#x3002;&#x8FD9;&#x6837;&#xFF0C;&#x7A0B;&#x5E8F;&#x7533;&#x8BF7;&#x4EE5;&#x53CA;&#x8BBF;&#x95EE;&#x7684;&#x5176;&#x5B9E;&#x662F;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5730;&#x5740;&#xFF0C;MMU &#x4F1A;&#x5C06;&#x8FD9;&#x4E2A;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5730;&#x5740;&#x6620;&#x5C04;&#x4E3A;&#x5B9E;&#x9645;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#x5730;&#x5740;&#x3002;&#x540C;&#x65F6;&#xFF0C;&#x4E3A;&#x4E86;&#x51CF;&#x5C11;&#x5185;&#x5B58;&#x788E;&#x7247;&#xFF0C;&#x4EE5;&#x53CA;&#x589E;&#x52A0;&#x5185;&#x5B58;&#x5206;&#x914D;&#x6548;&#x7387;&#xFF0C;&#x5728; MMU &#x7684;&#x57FA;&#x7840;&#x4E0A; Linux &#x62BD;&#x8C61;&#x4E86;<strong>&#x5185;&#x5B58;&#x5206;&#x9875;</strong>&#xFF08;Paging&#xFF09;&#x7684;&#x6982;&#x5FF5;&#xFF0C;&#x5C06;&#x865A;&#x62DF;&#x5730;&#x5740;&#x6309;&#x56FA;&#x5B9A;&#x5927;&#x5C0F;&#x5206;&#x5272;&#x6210;<strong>&#x9875;</strong>&#xFF08;&#x9ED8;&#x8BA4;&#x662F; 4K&#xFF0C;&#x5982;&#x679C;&#x5E73;&#x53F0;&#x652F;&#x6301;&#x66F4;&#x591A;&#x66F4;&#x5927;&#x7684;&#x9875;&#x5927;&#x5C0F; JVM &#x4E5F;&#x662F;&#x53EF;&#x4EE5;&#x5229;&#x7528;&#x7684;&#xFF0C;&#x6211;&#x4EEC;&#x540E;&#x9762;&#x5206;&#x6790;&#x76F8;&#x5173;&#x7684; JVM &#x53C2;&#x6570;&#x4F1A;&#x770B;&#x5230;&#xFF09;&#xFF0C;&#x5E76;&#x5728;&#x9875;&#x88AB;&#x5B9E;&#x9645;&#x4F7F;&#x7528;&#x5199;&#x5165;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6620;&#x5C04;&#x540C;&#x6837;&#x5927;&#x5C0F;&#x7684;&#x5B9E;&#x9645;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF08;<strong>&#x9875;&#x5E27;</strong>&#xFF0C;Page Frame&#xFF09;&#xFF0C;&#x6216;&#x8005;&#x662F;&#x5728;&#x7269;&#x7406;&#x5185;&#x5B58;&#x4E0D;&#x8DB3;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C06;&#x67D0;&#x4E9B;&#x4E0D;&#x5E38;&#x7528;&#x7684;&#x9875;&#x8F6C;&#x79FB;&#x5230;&#x5176;&#x4ED6;&#x5B58;&#x50A8;&#x8BBE;&#x5907;&#x6BD4;&#x5982;&#x78C1;&#x76D8;&#x4E0A;&#x3002;</p>
+<p>&#x4E00;&#x822C;&#x7CFB;&#x7EDF;&#x4E2D;&#x4F1A;&#x6709;&#x591A;&#x4E2A;&#x8FDB;&#x7A0B;&#x4F7F;&#x7528;&#x5185;&#x5B58;&#xFF0C;&#x6BCF;&#x4E2A;&#x8FDB;&#x7A0B;&#x90FD;&#x6709;<strong>&#x81EA;&#x5DF1;&#x72EC;&#x7ACB;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;</strong>&#xFF0C;&#x5047;&#x8BBE;&#x6211;&#x4EEC;&#x8FD9;&#x91CC;&#x6709;&#x4E09;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF0C;&#x8FDB;&#x7A0B; A &#x8BBF;&#x95EE;&#x7684;&#x865A;&#x62DF;&#x5730;&#x5740;&#x53EF;&#x4EE5;&#x4E0E;&#x8FDB;&#x7A0B; B &#x548C;&#x8FDB;&#x7A0B; C &#x7684;&#x865A;&#x62DF;&#x5730;&#x5740;&#x76F8;&#x540C;&#xFF0C;&#x90A3;&#x4E48;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5982;&#x4F55;&#x533A;&#x5206;&#x5462;&#xFF1F;&#x5373;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5982;&#x4F55;&#x5C06;&#x8FD9;&#x4E9B;&#x865A;&#x62DF;&#x5730;&#x5740;&#x8F6C;&#x6362;&#x4E3A;&#x7269;&#x7406;&#x5185;&#x5B58;&#x3002;&#x8FD9;&#x5C31;&#x9700;&#x8981;&#x9875;&#x8868;&#x4E86;&#xFF0C;<strong>&#x9875;&#x8868;&#x4E5F;&#x662F;&#x6BCF;&#x4E2A;&#x8FDB;&#x7A0B;&#x72EC;&#x7ACB;&#x7684;</strong>&#xFF0C;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x4F1A;&#x5728;&#x7ED9;&#x8FDB;&#x7A0B;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7528;&#x6765;&#x4FDD;&#x5B58;&#x7528;&#x6237;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#xFF0C;<strong>&#x5C06;&#x7269;&#x7406;&#x5185;&#x5B58;&#x4FDD;&#x5B58;&#x5230;&#x8FDB;&#x7A0B;&#x7684;&#x9875;&#x8868;&#x91CC;&#x9762;</strong>&#x3002;&#x7136;&#x540E;&#xFF0C;<strong>&#x8FDB;&#x7A0B;&#x8BBF;&#x95EE;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x901A;&#x8FC7;&#x9875;&#x8868;&#x627E;&#x5230;&#x7269;&#x7406;&#x5185;&#x5B58;</strong>&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/37654d11a3777af74228fae3f1e0f82e3820b06df9ce1e751dcd726ff67587ec" alt="image"></p>
+<p>&#x9875;&#x8868;&#x5982;&#x4F55;&#x5C06;&#x4E00;&#x4E2A;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5730;&#x5740;&#xFF08;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x4E00;&#x70B9;&#xFF0C;&#x76EE;&#x524D;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5730;&#x5740;&#xFF0C;&#x7528;&#x6237;&#x7A7A;&#x95F4;&#x4E0E;&#x5185;&#x6838;&#x7A7A;&#x95F4;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x4ECE; <code>0x0000 0000 0000 0000 ~ 0x0000 FFFF FFFF FFFF</code> &#x7684;&#x5730;&#x5740;&#xFF0C;&#x5373; 256TB&#xFF09;&#xFF0C;&#x8F6C;&#x5316;&#x4E3A;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7684;&#x5462;&#xFF1F;&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x4E3E;&#x4E00;&#x4E2A;&#x5728; x86&#xFF0C;64 &#x4F4D;&#x73AF;&#x5883;&#x4E0B;&#x56DB;&#x7EA7;&#x9875;&#x8868;&#x7684;&#x7ED3;&#x6784;&#x89C6;&#x56FE;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/2bfce1a55955ac7570f3fa5158a3b4dda96aee30b9671d284aa1fef6e4fa40b6" alt="image"></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#xFF0C;&#x9875;&#x8868;&#x5206;&#x4E3A;&#x56DB;&#x4E2A;&#x7EA7;&#x522B;&#xFF1A;PGD&#xFF08;Page Global Directory&#xFF09;&#xFF0C;PUD&#xFF08;Page Upper Directory&#xFF09;&#xFF0C;PMD&#xFF08;Page Middle Directory&#xFF09;&#xFF0C;PTE&#xFF08;Page Table Entry&#xFF09;&#x3002;&#x6BCF;&#x4E2A;&#x9875;&#x8868;&#xFF0C;&#x91CC;&#x9762;&#x7684;&#x9875;&#x8868;&#x9879;&#xFF0C;&#x4FDD;&#x5B58;&#x4E86;&#x6307;&#x5411;&#x4E0B;&#x4E00;&#x4E2A;&#x7EA7;&#x522B;&#x7684;&#x9875;&#x8868;&#x7684;&#x5F15;&#x7528;&#xFF0C;&#x9664;&#x4E86;&#x6700;&#x540E;&#x4E00;&#x5C42;&#x7684; PTE &#x91CC;&#x9762;&#x7684;&#x9875;&#x8868;&#x9879;&#x4FDD;&#x5B58;&#x7684;&#x662F;&#x6307;&#x5411;&#x7528;&#x6237;&#x6570;&#x636E;&#x5185;&#x5B58;&#x7684;&#x6307;&#x9488;&#x3002;&#x5982;&#x4F55;&#x5C06;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5730;&#x5740;&#x901A;&#x8FC7;&#x9875;&#x8868;&#x627E;&#x5230;&#x5BF9;&#x5E94;&#x7528;&#x6237;&#x6570;&#x636E;&#x5185;&#x5B58;&#x4ECE;&#x800C;&#x8BFB;&#x53D6;&#x6570;&#x636E;&#xFF0C;&#x8FC7;&#x7A0B;&#x662F;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/dfc0e1fe0e531af7d976e96cbc5534bfe53d12a5af7ceb75bdddef5fb3362079" alt="image"></p>
+<ol>
+<li>&#x53D6;&#x865A;&#x62DF;&#x5730;&#x5740;&#x7684; <code>39 ~ 47</code> &#x4F4D;&#xFF08;&#x56E0;&#x4E3A;&#x7528;&#x6237;&#x7A7A;&#x95F4;&#x4E0E;&#x5185;&#x6838;&#x7A7A;&#x95F4;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x4ECE; <code>0x0000 0000 0000 0000 ~ 0x0000 FFFF FFFF FFFF</code> &#x7684;&#x5730;&#x5740;&#xFF0C;&#x5373; 47 &#x4F4D;&#x4EE5;&#x4E0B;&#x7684;&#x5730;&#x5740;&#xFF09;&#x4F5C;&#x4E3A; offset&#xFF0C;&#x5728;&#x552F;&#x4E00;&#x7684; PGD &#x9875;&#x9762;&#x6839;&#x636E; offset &#x5B9A;&#x4F4D;&#x5230; PGD &#x9875;&#x8868;&#x9879; <code>pgd_t</code></li>
+<li>&#x4F7F;&#x7528; <code>pgd_t</code> &#x5B9A;&#x4F4D;&#x5230;&#x5177;&#x4F53;&#x7684; PUD &#x9875;&#x9762;</li>
+<li>&#x53D6;&#x865A;&#x62DF;&#x5730;&#x5740;&#x7684; <code>30 ~ 38</code> &#x4F4D;&#x4F5C;&#x4E3A; offset&#xFF0C;&#x5728;&#x5BF9;&#x5E94;&#x7684; PUD &#x9875;&#x9762;&#x6839;&#x636E; offset &#x5B9A;&#x4F4D;&#x5230; PUD &#x9875;&#x8868;&#x9879; <code>pud_t</code></li>
+<li>&#x4F7F;&#x7528; <code>pud_t</code> &#x5B9A;&#x4F4D;&#x5230;&#x5177;&#x4F53;&#x7684; PMD &#x9875;&#x9762;</li>
+<li>&#x53D6;&#x865A;&#x62DF;&#x5730;&#x5740;&#x7684; <code>21 ~ 29</code> &#x4F4D;&#x4F5C;&#x4E3A; offset&#xFF0C;&#x5728;&#x5BF9;&#x5E94;&#x7684; PMD &#x9875;&#x9762;&#x6839;&#x636E; offset &#x5B9A;&#x4F4D;&#x5230; PMD &#x9875;&#x8868;&#x9879; <code>pmd_t</code></li>
+<li>&#x4F7F;&#x7528; <code>pmd_t</code> &#x5B9A;&#x4F4D;&#x5230;&#x5177;&#x4F53;&#x7684; PTE &#x9875;&#x9762;</li>
+<li>&#x53D6;&#x865A;&#x62DF;&#x5730;&#x5740;&#x7684; <code>12 ~ 20</code> &#x4F4D;&#x4F5C;&#x4E3A; offset&#xFF0C;&#x5728;&#x5BF9;&#x5E94;&#x7684; PTE &#x9875;&#x9762;&#x6839;&#x636E; offset &#x5B9A;&#x4F4D;&#x5230; PTE &#x9875;&#x8868;&#x9879; <code>pte_t</code></li>
+<li>&#x4F7F;&#x7528; <code>pte_t</code> &#x5B9A;&#x4F4D;&#x5230;&#x5177;&#x4F53;&#x7684;&#x7528;&#x6237;&#x6570;&#x636E;&#x7269;&#x7406;&#x5185;&#x5B58;&#x9875;&#x9762;</li>
+<li>&#x4F7F;&#x7528;&#x6700;&#x540E;&#x7684; <code>0 ~ 11</code> &#x4F4D;&#x4F5C;&#x4E3A; offset&#xFF0C;&#x5BF9;&#x5E94;&#x5230;&#x7528;&#x6237;&#x6570;&#x636E;&#x7269;&#x7406;&#x5185;&#x5B58;&#x9875;&#x9762;&#x7684;&#x5BF9;&#x5E94; offset</li>
+</ol>
+<p>&#x5982;&#x679C;&#x6BCF;&#x6B21;&#x8BBF;&#x95EE;&#x865A;&#x62DF;&#x5185;&#x5B58;&#xFF0C;&#x90FD;&#x9700;&#x8981;&#x8BBF;&#x95EE;&#x8FD9;&#x4E2A;&#x9875;&#x8868;&#x7FFB;&#x8BD1;&#x6210;&#x5B9E;&#x9645;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7684;&#x8BDD;&#xFF0C;&#x6027;&#x80FD;&#x592A;&#x5DEE;&#x3002;&#x6240;&#x4EE5;&#x4E00;&#x822C; CPU &#x91CC;&#x9762;&#x90FD;&#x6709;&#x4E00;&#x4E2A; TLB&#xFF08;Translation Lookaside Buffer&#xFF0C;&#x7FFB;&#x8BD1;&#x540E;&#x5907;&#x7F13;&#x51B2;&#xFF09;&#x5B58;&#x5728;&#xFF0C;&#x4E00;&#x822C;&#x5B83;&#x5C5E;&#x4E8E; CPU &#x7684; MMU &#x7684;&#x4E00;&#x90E8;&#x5206;&#x3002;TLB &#x8D1F;&#x8D23;&#x7F13;&#x5B58;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7684;&#x6620;&#x5C04;&#x5173;&#x7CFB;&#xFF0C;&#x4E00;&#x822C; TLB &#x5BB9;&#x91CF;&#x5F88;&#x5C0F;&#x3002;&#x6BCF;&#x6B21;&#x8BBF;&#x95EE;&#x865A;&#x62DF;&#x5185;&#x5B58;&#xFF0C;&#x5148;&#x67E5;&#x770B; TLB &#x4E2D;&#x662F;&#x5426;&#x6709;&#x7F13;&#x5B58;&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x624D;&#x4F1A;&#x53BB;&#x9875;&#x8868;&#x67E5;&#x8BE2;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/0ec3935f83103c99deac151a367dcdebe90635cebb99c61e1768a80f26b4b630" alt="image"></p>
+<p>&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;TLB &#x7F13;&#x5B58;&#x7684; key &#x4E3A;&#x5730;&#x5740;&#x7684; <code>12 ~ 47</code> &#x4F4D;&#xFF0C;value &#x662F;&#x5B9E;&#x9645;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#x9875;&#x9762;&#x3002;&#x8FD9;&#x6837;&#x524D;&#x9762;&#x4ECE;&#x7B2C; 1 &#x5230;&#x7B2C; 7 &#x6B65;&#x5C31;&#x53EF;&#x4EE5;&#x88AB;&#x66FF;&#x6362;&#x6210;&#x8BBF;&#x95EE; TLB &#x4E86;&#xFF1A;</p>
+<ol>
+<li>&#x53D6;&#x865A;&#x62DF;&#x5730;&#x5740;&#x7684; <code>12 ~ 47</code> &#x4F4D;&#x4F5C;&#x4E3A; key&#xFF0C;&#x8BBF;&#x95EE; TLB&#xFF0C;&#x5B9A;&#x4F4D;&#x5230;&#x5177;&#x4F53;&#x7684;&#x7528;&#x6237;&#x6570;&#x636E;&#x7269;&#x7406;&#x5185;&#x5B58;&#x9875;&#x9762;&#x3002;</li>
+<li>&#x4F7F;&#x7528;&#x6700;&#x540E;&#x7684; <code>0 ~ 11</code> &#x4F4D;&#x4F5C;&#x4E3A; offset&#xFF0C;&#x5BF9;&#x5E94;&#x5230;&#x7528;&#x6237;&#x6570;&#x636E;&#x7269;&#x7406;&#x5185;&#x5B58;&#x9875;&#x9762;&#x7684;&#x5BF9;&#x5E94; offset&#x3002;</li>
+</ol>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/30df8d75415050ec58bb213fd64dd0fb858e6daa4f4e13e7985f75e44b51a163" alt="image"></p>
+<p>TLB &#x4E00;&#x822C;&#x5F88;&#x5C0F;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x51E0;&#x4E2A; CPU &#x4E2D;&#x7684; TLB &#x5927;&#x5C0F;&#xFF0C;&#x4EE5;&#x4E0B;&#x56FE;&#x7247;&#x6765;&#x81EA;&#x4E8E; <a href="/external_links/c209c6e74dd168388fa0a6fa4ebb10ec.html" target="blank" rel="noopener">www.bilibili.com/video/BV1Xx&#x2026;</a><br><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/7c9f9212f26a0b9cbb071862bb17ca04c09347768b3685a531ae91ffdddf5291" alt="image"></p>
+<p>&#x6211;&#x4EEC;&#x8FD9;&#x91CC;&#x4E0D;&#x7528;&#x5173;&#x5FC3; iTLB&#xFF0C;dTLB&#xFF0C;sTLB &#x5206;&#x522B;&#x662F;&#x4EC0;&#x4E48;&#x610F;&#x601D;&#xFF0C;&#x53EA;&#x8981;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x4E24;&#x70B9;&#x5373;&#x53EF;&#xFF1A;1. TLB &#x6574;&#x4F53;&#x53EF;&#x4EE5;&#x5BB9;&#x7EB3;&#x4E2A;&#x6570;&#x4E0D;&#x591A;&#xFF1B;2. &#x9875;&#x5927;&#x5C0F;&#x8D8A;&#x5927;&#xFF0C;TLB &#x80FD;&#x5BB9;&#x7EB3;&#x7684;&#x4E2A;&#x6570;&#x8D8A;&#x5C11;&#x3002;&#x4F46;&#x662F;&#x6574;&#x4F53;&#x770B;&#xFF0C;TLB &#x80FD;&#x5BB9;&#x7EB3;&#x7684;&#x9875;&#x5927;&#x5C0F;&#x8FD8;&#x662F;&#x589E;&#x591A;&#x7684;&#xFF08;&#x6BD4;&#x5982; Nehalem &#x7684; iTLB&#xFF0C;&#x9875;&#x5927;&#x5C0F; 4K &#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E00;&#x5171;&#x53EF;&#x4EE5;&#x5BB9;&#x7EB3; <code>128 * 4 = 512K</code> &#x7684;&#x5185;&#x5B58;&#xFF0C;&#x9875;&#x5927;&#x5C0F; 2M &#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E00;&#x5171;&#x53EF;&#x4EE5;&#x5BB9;&#x7EB3; <code>2 * 7 = 14M</code> &#x7684;&#x5185;&#x5B58;&#xFF09;&#x3002;</p>
+<p>JVM &#x4E2D;&#x5F88;&#x591A;&#x5730;&#x65B9;&#x9700;&#x8981;&#x77E5;&#x9053;&#x9875;&#x5927;&#x5C0F;&#xFF0C;JVM &#x5728;&#x521D;&#x59CB;&#x5316;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x901A;&#x8FC7;&#x7CFB;&#x7EDF;&#x8C03;&#x7528; <a href="/external_links/4266b9dcb61ece55df8d468eed888232.html" target="blank" rel="noopener"><code>sysconf(_SC_PAGESIZE)</code></a> &#x8BFB;&#x53D6;&#x51FA;&#x9875;&#x5927;&#x5C0F;&#xFF0C;&#x5E76;&#x4FDD;&#x5B58;&#x4E0B;&#x6765;&#x4EE5;&#x4F9B;&#x540E;&#x7EED;&#x4F7F;&#x7528;&#x3002;&#x53C2;&#x8003;&#x6E90;&#x7801;&#xFF1A;<a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B3/src/hotspot/os/linux/os_linux.cpp</code></a>&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;    //&#x8BBE;&#x7F6E;&#x5168;&#x5C40;&#x9ED8;&#x8BA4;&#x9875;&#x5927;&#x5C0F;&#xFF0C;&#x901A;&#x8FC7; Linux::page_size() &#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x5168;&#x5C40;&#x9ED8;&#x8BA4;&#x9875;&#x5927;&#x5C0F;</span><br><span class="line">    Linux::set_page_size(sysconf(_SC_PAGESIZE));</span><br><span class="line">    if (Linux::page_size() == -1) {</span><br><span class="line">        fatal(&quot;os_linux.cpp: os::init: sysconf failed (%s)&quot;,</span><br><span class="line">          os::strerror(errno));</span><br><span class="line">    }</span><br><span class="line">    //&#x5C06;&#x9ED8;&#x8BA4;&#x9875;&#x5927;&#x5C0F;&#x52A0;&#x5165;&#x53EF;&#x9009;&#x7684;&#x9875;&#x5927;&#x5C0F;&#x5217;&#x8868;&#xFF0C;&#x5728;&#x6D89;&#x53CA;&#x5927;&#x9875;&#x5206;&#x914D;&#x7684;&#x65F6;&#x5019;&#x6709;&#x7528;</span><br><span class="line">    _page_sizes.add(Linux::page_size());</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-JVM-&#x4E3B;&#x8981;&#x5185;&#x5B58;&#x7533;&#x8BF7;&#x5206;&#x914D;&#x6D41;&#x7A0B;"><a href="#2-2-JVM-&#x4E3B;&#x8981;&#x5185;&#x5B58;&#x7533;&#x8BF7;&#x5206;&#x914D;&#x6D41;&#x7A0B;" class="headerlink" title="2.2. JVM &#x4E3B;&#x8981;&#x5185;&#x5B58;&#x7533;&#x8BF7;&#x5206;&#x914D;&#x6D41;&#x7A0B;"></a>2.2. JVM &#x4E3B;&#x8981;&#x5185;&#x5B58;&#x7533;&#x8BF7;&#x5206;&#x914D;&#x6D41;&#x7A0B;</h2><p><strong>&#x7B2C;&#x4E00;&#x6B65;&#xFF0C;JVM &#x7684;&#x6BCF;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF;</strong>&#xFF08;&#x4F8B;&#x5982; Java &#x5806;&#xFF0C;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;JIT &#x4EE3;&#x7801;&#x7F13;&#x5B58;&#xFF0C;GC &#x7B49;&#x7B49;&#x7B49;&#x7B49;&#xFF09;&#xFF0C;<strong>&#x5982;&#x679C;&#x9700;&#x8981;&#x7684;&#x8BDD;&#xFF0C;&#x5728;&#x521D;&#x59CB;&#x5316;&#x7684;&#x65F6;&#x5019;&#x9996;&#x5148; Reserve &#x8981;&#x5206;&#x914D;&#x533A;&#x57DF;&#x7684;&#x6700;&#x5927;&#x9650;&#x5236;&#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;</strong>&#xFF08;&#x8FD9;&#x4E2A;&#x6700;&#x5927;&#x5927;&#x5C0F;&#xFF0C;&#x9700;&#x8981;&#x6309;&#x7167;&#x9875;&#x5927;&#x5C0F;&#x5BF9;&#x9F50;&#xFF08;&#x5373;&#x662F;&#x9875;&#x5927;&#x5C0F;&#x7684;&#x6574;&#x6570;&#x500D;&#xFF09;&#xFF0C;&#x9ED8;&#x8BA4;&#x9875;&#x5927;&#x5C0F;&#x662F;&#x524D;&#x9762;&#x63D0;&#x5230;&#x7684; <code>Linux::page_size()</code>&#xFF09;&#xFF0C;&#x4F8B;&#x5982;&#x5BF9;&#x4E8E; Java &#x5806;&#xFF0C;&#x5C31;&#x662F;&#x6700;&#x5927;&#x5806;&#x5927;&#x5C0F;&#xFF08;&#x901A;&#x8FC7; <code>-Xmx</code> &#x6216;&#x8005; <code>-XX:MaxHeapSize</code>&#x9650;&#x5236;&#xFF09;&#xFF0C;&#x8FD8;&#x6709;&#x5BF9;&#x4E8E;&#x4EE3;&#x7801;&#x7F13;&#x5B58;&#xFF0C;&#x4E5F;&#x662F;&#x6700;&#x5927;&#x4EE3;&#x7801;&#x7F13;&#x5B58;&#x5927;&#x5C0F;&#xFF08;&#x901A;&#x8FC7; <code>-XX:ReservedCodeCacheSize</code> &#x9650;&#x5236;&#xFF09;&#x3002;Reserve &#x7684;&#x76EE;&#x7684;&#x662F;&#x5728;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x5212;&#x51FA;&#x4E00;&#x5757;&#x5185;&#x5B58;&#x4E13;&#x95E8;&#x7ED9;&#x67D0;&#x4E2A;&#x533A;&#x57DF;&#x4F7F;&#x7528;&#xFF0C;&#x8FD9;&#x6837;&#x505A;&#x7684;&#x597D;&#x5904;&#x662F;&#xFF1A;</p>
+<ol>
+<li>&#x9694;&#x79BB;&#x6BCF;&#x4E2A; JVM &#x5B50;&#x7CFB;&#x7EDF;&#x4F7F;&#x7528;&#x7684;&#x5185;&#x5B58;&#x7684;&#x865A;&#x62DF;&#x7A7A;&#x95F4;&#xFF0C;&#x8FD9;&#x6837;&#x5728; JVM &#x4EE3;&#x7801;&#x6709; bug &#x7684;&#x65F6;&#x5019;&#xFF08;&#x4F8B;&#x5982;&#x53D1;&#x751F; Segment Fault &#x5F02;&#x5E38;&#xFF09;&#xFF0C;&#x901A;&#x8FC7;&#x62A5;&#x9519;&#x4E2D;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5730;&#x5740;&#x53EF;&#x4EE5;&#x5FEB;&#x901F;&#x5B9A;&#x4F4D;&#x5230;&#x662F;&#x54EA;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF;&#x51FA;&#x4E86;&#x95EE;&#x9898;&#x3002;</li>
+<li>&#x53EF;&#x4EE5;&#x5F88;&#x65B9;&#x4FBF;&#x7684;&#x9650;&#x5236;&#x8FD9;&#x4E2A;&#x533A;&#x57DF;&#x4F7F;&#x7528;&#x7684;&#x6700;&#x5927;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x3002;</li>
+<li>&#x4FBF;&#x4E8E;&#x7BA1;&#x7406;&#xFF0C;Reserve &#x4E0D;&#x4F1A;&#x89E6;&#x53D1;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5206;&#x914D;&#x6620;&#x5C04;&#x5B9E;&#x9645;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x8FD9;&#x4E2A;&#x533A;&#x57DF;&#x53EF;&#x4EE5;&#x5728; Reserve &#x7684;&#x533A;&#x57DF;&#x5185;&#x6309;&#x9700;&#x4F38;&#x7F29;&#x3002;</li>
+<li>&#x4FBF;&#x4E8E;&#x4E00;&#x4E9B; JIT &#x4F18;&#x5316;&#xFF0C;&#x4F8B;&#x5982;&#x6211;&#x4EEC;&#x6545;&#x610F;&#x5C06;&#x8FD9;&#x4E2A;&#x533A;&#x57DF;&#x4FDD;&#x7559;&#x8D77;&#x6765;&#x4F46;&#x662F;&#x6545;&#x610F;&#x4E0D;&#x5C06;&#x8FD9;&#x4E2A;&#x533A;&#x57DF;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x8BBF;&#x95EE;&#x8FD9;&#x5757;&#x5185;&#x5B58;&#x4F1A;&#x9020;&#x6210; Segment Fault &#x5F02;&#x5E38;&#x3002;JVM &#x4F1A;&#x9884;&#x8BBE; Segment Fault &#x5F02;&#x5E38;&#x7684;&#x5904;&#x7406;&#x5668;&#xFF0C;&#x5728;&#x5904;&#x7406;&#x5668;&#x91CC;&#x9762;&#x68C0;&#x67E5;&#x53D1;&#x751F; Segment Fault &#x5F02;&#x5E38;&#x7684;&#x5185;&#x5B58;&#x5730;&#x5740;&#x5C5E;&#x4E8E;&#x54EA;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF;&#x7684; Reserve &#x7684;&#x533A;&#x57DF;&#xFF0C;&#x5224;&#x65AD;&#x8981;&#x505A;&#x4EC0;&#x4E48;&#x64CD;&#x4F5C;&#x3002;&#x540E;&#x9762;&#x6211;&#x4EEC;&#x4F1A;&#x770B;&#x5230;&#xFF0C;null &#x68C0;&#x67E5;&#x629B;&#x51FA; <code>NullPointerException</code> &#x5F02;&#x5E38;&#x7684;&#x4F18;&#x5316;&#xFF0C;&#x5168;&#x5C40;&#x5B89;&#x5168;&#x70B9;&#xFF0C;&#x629B;&#x51FA; <code>StackOverflowError</code> &#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x90FD;&#x548C;&#x8FD9;&#x4E2A;&#x673A;&#x5236;&#x6709;&#x5173;&#x3002;</li>
+</ol>
+<p>&#x5728; Linux &#x7684;&#x73AF;&#x5883;&#x4E0B;&#xFF0C;Reserve &#x901A;&#x8FC7; <a href="/external_links/bfeba6ba70451f610da49e3823d75b5d.html" target="blank" rel="noopener"><code>mmap(2)</code></a> &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x5B9E;&#x73B0;&#xFF0C;&#x53C2;&#x6570;&#x4F20;&#x5165; <code>prot = PROT_NONE</code>&#xFF0C;<code>PROT_NONE</code> &#x4EE3;&#x8868;&#x4E0D;&#x4F1A;&#x4F7F;&#x7528;&#xFF0C;&#x5373;&#x4E0D;&#x80FD;&#x505A;&#x4EFB;&#x4F55;&#x64CD;&#x4F5C;&#xFF0C;&#x5305;&#x62EC;&#x8BFB;&#x548C;&#x5199;&#x3002;&#x4E3A;&#x5565;&#x8981;&#x6253;&#x51FB;&#x6284;&#x88AD;&#xFF0C;&#x7A3F;&#x4E3B;&#x88AB;&#x6284;&#x88AD;&#x592A;&#x591A;&#x6240;&#x4EE5;&#x65AD;&#x66F4;&#x5F88;&#x4E45;&#x3002;&#x5982;&#x679C; JVM &#x4F7F;&#x7528;&#x8FD9;&#x5757;&#x5185;&#x5B58;&#xFF0C;&#x4F1A;&#x53D1;&#x751F; Segment Fault &#x5F02;&#x5E38;&#x3002;Reserve &#x7684;&#x6E90;&#x7801;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x662F;&#xFF1A;</p>
+<p>&#x5165;&#x53E3;&#x4E3A;&#xFF1A;<a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21+9/src/hotspot/share/runtime/os.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;char* os::reserve_memory(size_t bytes, bool executable, MEMFLAGS flags) {</span><br><span class="line">  //&#x8C03;&#x7528;&#x6BCF;&#x4E2A;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5B9E;&#x73B0;&#x4E0D;&#x540C;&#x7684; pd_reserve_memory &#x51FD;&#x6570;&#x8FDB;&#x884C; reserve</span><br><span class="line">  char* result = pd_reserve_memory(bytes, executable);</span><br><span class="line">  if (result != NULL) {</span><br><span class="line">    MemTracker::record_virtual_memory_reserve(result, bytes, CALLER_PC, flags);</span><br><span class="line">  }&#x4E0D;&#x8981;&#x5077;&#x53D6;&#x4ED6;&#x4EBA;&#x7684;&#x52B3;&#x52A8;&#x6210;&#x679C;&#xFF0C;&#x4E5F;&#x4E0D;&#x8981;&#x6D6A;&#x8D39;&#x81EA;&#x5DF1;&#x7684;&#x65F6;&#x95F4;&#x548C;&#x7CBE;&#x529B;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x4E00;&#x8D77;&#x505A;&#x4E00;&#x4E2A;&#x6709;&#x826F;&#x77E5;&#x7684;&#x5199;&#x4F5C;&#x8005;&#x3002;</span><br><span class="line">  return result;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;&#x5E94; linux &#x7684;&#x5B9E;&#x73B0;&#x662F;&#xFF1A;<a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21+9/src/hotspot/os/linux/os_linux.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;char* os::pd_reserve_memory(size_t bytes, bool exec) {</span><br><span class="line">  return anon_mmap(nullptr, bytes);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">static char* anon_mmap(char* requested_addr, size_t bytes) {</span><br><span class="line">  const int flags = MAP_PRIVATE | MAP_NORESERVE | MAP_ANONYMOUS;</span><br><span class="line">  //&#x8FD9;&#x91CC;&#x7684;&#x5173;&#x952E;&#x662F; PROT_NONE&#xFF0C;&#x4EE3;&#x8868;&#x4EC5;&#x4EC5;&#x662F;&#x5728;&#x865A;&#x62DF;&#x7A7A;&#x95F4;&#x4FDD;&#x7559;&#xFF0C;&#x4E0D;&#x5B9E;&#x9645;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;</span><br><span class="line">  //fd &#x4F20;&#x5165;&#x7684;&#x662F; -1&#xFF0C;&#x56E0;&#x4E3A;&#x6CA1;&#x6709;&#x5B9E;&#x9645;&#x6620;&#x5C04;&#x6587;&#x4EF6;&#xFF0C;&#x6211;&#x4EEC;&#x8FD9;&#x91CC;&#x76EE;&#x7684;&#x662F;&#x4E3A;&#x4E86;&#x5206;&#x914D;&#x5185;&#x5B58;&#xFF0C;&#x4E0D;&#x662F;&#x5C06;&#x67D0;&#x4E2A;&#x6587;&#x4EF6;&#x6620;&#x5C04;&#x5230;&#x5185;&#x5B58;&#x4E2D;</span><br><span class="line">  char* addr = (char*)::mmap(requested_addr, bytes, PROT_NONE, flags, -1, 0);</span><br><span class="line">  return addr == MAP_FAILED ? NULL : addr;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x7B2C;&#x4E8C;&#x6B65;&#xFF0C;JVM &#x7684;&#x6BCF;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF;&#xFF0C;&#x6309;&#x7167;&#x5404;&#x81EA;&#x7684;&#x7B56;&#x7565;&#xFF0C;&#x901A;&#x8FC7; Commit &#x7B2C;&#x4E00;&#x6B65; Reserve &#x7684;&#x533A;&#x57DF;&#x7684;&#x4E00;&#x90E8;&#x5206;&#x6269;&#x5C55;&#x5185;&#x5B58;&#xFF08;&#x5927;&#x5C0F;&#x4E5F;&#x4E00;&#x822C;&#x9875;&#x5927;&#x5C0F;&#x5BF9;&#x9F50;&#x7684;&#xFF09;&#xFF0C;&#x4ECE;&#x800C;&#x5411;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7533;&#x8BF7;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x901A;&#x8FC7; Uncommit &#x5DF2;&#x7ECF; Commit &#x7684;&#x5185;&#x5B58;&#x6765;&#x91CA;&#x653E;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7ED9;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;</strong>&#x3002;&#x6284;&#x88AD;&#x548C;xigao&#x662F;&#x6587;&#x5316;&#x7684;&#x6BD2;&#x7624;&#xFF0C;&#x662F;&#x5BF9;&#x6587;&#x5316;&#x521B;&#x9020;&#x548C;&#x53D1;&#x5C55;&#x7684;&#x963B;&#x788D;&#xFF01;</p>
+<p>Commit &#x7684;&#x6E90;&#x7801;&#x5165;&#x53E3;&#x4E3A;&#xFF1A;<a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21+9/src/hotspot/share/runtime/os.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;bool os::commit_memory(char* addr, size_t bytes, bool executable) {</span><br><span class="line">  assert_nonempty_range(addr, bytes);</span><br><span class="line">  //&#x8C03;&#x7528;&#x6BCF;&#x4E2A;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5B9E;&#x73B0;&#x4E0D;&#x540C;&#x7684; pd_commit_memory &#x51FD;&#x6570;&#x8FDB;&#x884C; commit</span><br><span class="line">  bool res = pd_commit_memory(addr, bytes, executable);</span><br><span class="line">  if (res) {</span><br><span class="line">    MemTracker::record_virtual_memory_commit((address)addr, bytes, CALLER_PC);</span><br><span class="line">  }</span><br><span class="line">  return res;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;&#x5E94; linux &#x7684;&#x5B9E;&#x73B0;&#x662F;&#xFF1A;<a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21+9/src/hotspot/os/linux/os_linux.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;bool os::pd_commit_memory(char* addr, size_t size, bool exec) {</span><br><span class="line">  return os::Linux::commit_memory_impl(addr, size, exec) == 0;</span><br><span class="line">}</span><br><span class="line">int os::Linux::commit_memory_impl(char* addr, size_t size, bool exec) {</span><br><span class="line">  //&#x8FD9;&#x91CC;&#x7684;&#x5173;&#x952E;&#x662F; PROT_READ|PROT_WRITE&#xFF0C;&#x5373;&#x7533;&#x8BF7;&#x9700;&#x8981;&#x8BFB;&#x5199;&#x8FD9;&#x5757;&#x5185;&#x5B58;</span><br><span class="line">  int prot = exec ? PROT_READ|PROT_WRITE|PROT_EXEC : PROT_READ|PROT_WRITE;</span><br><span class="line">  uintptr_t res = (uintptr_t) ::mmap(addr, size, prot,</span><br><span class="line">                                     MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0);</span><br><span class="line">  if (res != (uintptr_t) MAP_FAILED) {</span><br><span class="line">    if (UseNUMAInterleaving) {</span><br><span class="line">      numa_make_global(addr, size);</span><br><span class="line">    }</span><br><span class="line">    return 0;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  int err = errno;  // save errno from mmap() call above</span><br><span class="line"></span><br><span class="line">  if (!recoverable_mmap_error(err)) {</span><br><span class="line">    warn_fail_commit_memory(addr, size, exec, err);</span><br><span class="line">    vm_exit_out_of_memory(size, OOM_MMAP_ERROR, &quot;committing reserved memory.&quot;);</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  return err;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>Commit &#x5185;&#x5B58;&#x4E4B;&#x540E;&#xFF0C;<strong>&#x5E76;&#x4E0D;&#x662F;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x4F1A;&#x7ACB;&#x523B;&#x5206;&#x914D;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x800C;&#x662F;&#x5728;&#x5411; Commit &#x7684;&#x5185;&#x5B58;&#x91CC;&#x9762;&#x5199;&#x5165;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x624D;&#x4F1A;&#x5B9E;&#x9645;&#x6620;&#x5C04;&#x5185;&#x5B58;</strong>&#x3002;plagiarism&#x548C;&#x6D17;&#x7A3F;&#x662F;&#x6076;&#x610F;&#x6284;&#x88AD;&#x4ED6;&#x4EBA;&#x52B3;&#x52A8;&#x6210;&#x679C;&#x7684;&#x884C;&#x4E3A;&#xFF0C;&#x662F;&#x5BF9;&#x52B3;&#x52A8;&#x4EF7;&#x503C;&#x7684;&#x6F20;&#x89C6;&#x548C;&#x8DF5;&#x8E0F;&#xFF01;JVM &#x6709;&#x5BF9;&#x5E94;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x53EF;&#x4EE5;&#x5728; Commit &#x5185;&#x5B58;&#x540E;&#x7ACB;&#x523B;&#x5199;&#x5165; 0 &#x6765;&#x5F3A;&#x5236;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5206;&#x914D;&#x5185;&#x5B58;&#xFF0C;&#x5373; <code>AlwaysPreTouch</code> &#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#xFF0C;&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x6211;&#x4EEC;&#x540E;&#x9762;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x4EE5;&#x53CA;&#x5386;&#x53F2;&#x7248;&#x672C;&#x5B58;&#x5728;&#x7684;&#x7F3A;&#x9677;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x518D;&#x6765;&#x770B;&#x4E0B;&#x4E3A;&#x4EC0;&#x4E48;&#x5148; Reserve &#x4E4B;&#x540E; Commit &#x8FD9;&#x6837;&#x597D; Debug&#x3002;&#x770B;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x6CA1;&#x6709;&#x7B2C;&#x4E00;&#x6B65; Reserve&#xFF0C;&#x76F4;&#x63A5;&#x662F;&#x7B2C;&#x4E8C;&#x6B65; Commit&#xFF0C;&#x90A3;&#x4E48;&#x6211;&#x4EEC;&#x53EF;&#x80FD;&#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#x662F;&#x8FD9;&#x4E2A;&#x6837;&#x5B50;&#x7684;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/c384dccf0e2936cfb9f9e12ac93ebea659caf5d352801a80295ee33faf1a0d15" alt="image"></p>
+<p>&#x5047;&#x8BBE;&#x6B64;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;&#x4E0D;&#x5C0F;&#x5FC3;&#x5728; JVM &#x4E2D;&#x5199;&#x4E86;&#x4E2A; bug&#xFF0C;&#x5BFC;&#x81F4;&#x6D17;&#x7A3F;&#x72D7;&#x6CA1;&#x4E86;&#x5988;&#xFF0C;&#x5BFC;&#x81F4; MetaSpace 2 &#x8FD9;&#x5757;&#x5185;&#x5B58;&#x88AB;&#x56DE;&#x6536;&#x4E86;&#xFF0C;&#x8FD9;&#x65F6;&#x5019;&#x4FDD;&#x7559;&#x6307;&#x5411; MetaSpace 2 &#x7684;&#x5185;&#x5B58;&#x7684;&#x6307;&#x9488;&#x5C31;&#x4F1A;&#x62A5; Segment Fault&#xFF0C;&#x4F46;&#x662F;&#x901A;&#x8FC7; Segment Fault &#x91CC;&#x9762;&#x5E26;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x6211;&#x4EEC;&#x5E76;&#x4E0D;&#x77E5;&#x9053;&#x662F;&#x8FD9;&#x4E2A;&#x5730;&#x5740;&#x5C5E;&#x4E8E;&#x54EA;&#x91CC;&#xFF0C;&#x9664;&#x975E;&#x6211;&#x4EEC;&#x6709;&#x53E6;&#x5916;&#x7684;&#x5185;&#x5B58;&#x7ED3;&#x6784;&#x4FDD;&#x5B58;&#x6BCF;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF; Commit &#x5185;&#x5B58;&#x7684;&#x5217;&#x8868;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x6837;&#x6548;&#x7387;&#x592A;&#x4F4E;&#x4E86;&#x3002;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x5148; Reserve &#x5927;&#x5757;&#x4E4B;&#x540E;&#x5728;&#x91CC;&#x9762; Commit&#xFF0C;&#x90A3;&#x4E48;&#x60C5;&#x51B5;&#x5C31;&#x4E0D;&#x540C;&#x4E86;&#xFF1A;<br><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/2beb14f65c9c52a78a9ec0662ea8185a7a6204d318d71bb7e824ceabd9f5513a" alt="image"></p>
+<p>&#x8FD9;&#x6837;&#xFF0C;&#x53EA;&#x9700;&#x8981;&#x5224;&#x65AD; Segment Fault &#x91CC;&#x9762;&#x5E26;&#x7684;&#x5730;&#x5740;&#x5904;&#x4E8E;&#x7684;&#x8303;&#x56F4;&#xFF0C;&#x5C31;&#x80FD;&#x77E5;&#x9053;&#x662F;&#x54EA;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF;</p>
+<h3 id="2-2-1-JVM-commit-&#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;"><a href="#2-2-1-JVM-commit-&#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;" class="headerlink" title="2.2.1. JVM commit &#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;"></a>2.2.1. JVM commit &#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;</h3><p>&#x524D;&#x9762;&#x4E00;&#x8282;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#x4E86;&#xFF0C;JVM &#x4E2D;&#x5927;&#x5757;&#x5185;&#x5B58;&#xFF0C;&#x57FA;&#x672C;&#x90FD;&#x662F;&#x5148; reserve &#x4E00;&#x5927;&#x5757;&#xFF0C;&#x4E4B;&#x540E; commit &#x5176;&#x4E2D;&#x9700;&#x8981;&#x7684;&#x4E00;&#x5C0F;&#x5757;&#xFF0C;&#x7136;&#x540E;&#x5F00;&#x59CB;&#x8BFB;&#x5199;&#x5904;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x5728; Linux &#x73AF;&#x5883;&#x4E0B;&#xFF0C;&#x5E95;&#x5C42;&#x57FA;&#x4E8E; <code>mmap(2)</code> &#x5B9E;&#x73B0;&#x3002;&#x4F46;&#x662F;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x4E00;&#x70B9;&#x7684;&#x662F;&#xFF0C;commit &#x4E4B;&#x540E;&#xFF0C;&#x5185;&#x5B58;&#x5E76;&#x4E0D;&#x662F;&#x7ACB;&#x523B;&#x88AB;&#x5206;&#x914D;&#x4E86;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x800C;&#x662F;&#x771F;&#x6B63;&#x5F80;&#x5185;&#x5B58;&#x4E2D; store &#x4E1C;&#x897F;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x624D;&#x4F1A;&#x771F;&#x6B63;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x5982;&#x679C;&#x662F; load &#x8BFB;&#x53D6;&#x4E5F;&#x662F;&#x53EF;&#x80FD;&#x4E0D;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7684;&#x3002;</p>
+<p>&#x8FD9;&#x5176;&#x5B9E;&#x662F;&#x53EF;&#x80FD;&#x4F60;&#x5E73;&#x5E38;&#x770B;&#x5230;&#x4F46;&#x662F;&#x5FFD;&#x7565;&#x7684;&#x73B0;&#x8C61;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x4F7F;&#x7528;&#x7684;&#x662F; SerialGC&#xFF0C;ParallelGC &#x6216;&#x8005; CMS GC&#xFF0C;&#x8001;&#x5E74;&#x4EE3;&#x7684;&#x5185;&#x5B58;&#x5728;&#x6709;&#x5BF9;&#x8C61;&#x664B;&#x5347;&#x5230;&#x8001;&#x5E74;&#x4EE3;&#x4E4B;&#x524D;&#xFF0C;&#x53EF;&#x80FD;&#x662F;&#x4E0D;&#x4F1A;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7684;&#xFF0C;&#x867D;&#x7136;&#x8FD9;&#x5757;&#x5185;&#x5B58;&#x5DF2;&#x7ECF;&#x88AB; commit &#x4E86;&#x3002;&#x5E76;&#x4E14;&#x5E74;&#x8F7B;&#x4EE3;&#x53EF;&#x80FD;&#x4E5F;&#x662F;&#x968F;&#x7740;&#x4F7F;&#x7528;&#x624D;&#x4F1A;&#x6620;&#x5C04;&#x7269;&#x7406;&#x5185;&#x5B58;&#x3002;&#x5982;&#x679C;&#x4F60;&#x7528;&#x7684;&#x662F; ZGC&#xFF0C;G1GC&#xFF0C;&#x6216;&#x8005; ShenandoahGC&#xFF0C;&#x90A3;&#x4E48;&#x5185;&#x5B58;&#x7528;&#x7684;&#x4F1A;&#x66F4;&#x6FC0;&#x8FDB;&#x4E9B;&#xFF08;&#x4E3B;&#x8981;&#x56E0;&#x4E3A;&#x5206;&#x533A;&#x7B97;&#x6CD5;&#x5212;&#x5206;&#x5BFC;&#x81F4;&#x5185;&#x5B58;&#x88AB;&#x5199;&#x5165;&#xFF09;&#xFF0C;<strong>&#x8FD9;&#x662F;&#x4F60;&#x5728;&#x6362; GC &#x4E4B;&#x540E;&#x770B;&#x5230;&#x7269;&#x7406;&#x5185;&#x5B58;&#x5185;&#x5B58;&#x5FEB;&#x901F;&#x4E0A;&#x6DA8;&#x7684;&#x539F;&#x56E0;&#x4E4B;&#x4E00;</strong>&#x3002;JVM &#x6709;&#x5BF9;&#x5E94;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x53EF;&#x4EE5;&#x5728; Commit &#x5185;&#x5B58;&#x540E;&#x7ACB;&#x523B;&#x5199;&#x5165; 0 &#x6765;&#x5F3A;&#x5236;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5206;&#x914D;&#x5185;&#x5B58;&#xFF0C;&#x5373; <code>AlwaysPreTouch</code> &#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#xFF0C;&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x6211;&#x4EEC;&#x540E;&#x9762;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x4EE5;&#x53CA;&#x5386;&#x53F2;&#x7248;&#x672C;&#x5B58;&#x5728;&#x7684;&#x7F3A;&#x9677;&#x3002;&#x8FD8;&#x6709;&#x7684;&#x5DEE;&#x5F02;&#xFF0C;&#x4E3B;&#x8981;&#x6765;&#x6E90;&#x4E8E;&#x5728; uncommit &#x4E4B;&#x540E;&#xFF0C;&#x7CFB;&#x7EDF;&#x53EF;&#x80FD;&#x8FD8;&#x6CA1;&#x6709;&#x6765;&#x7684;&#x53CA;&#x5C06;&#x8FD9;&#x5757;&#x7269;&#x7406;&#x5185;&#x5B58;&#x771F;&#x6B63;&#x56DE;&#x6536;&#x3002;</p>
+<p>&#x6240;&#x4EE5;&#xFF0C;JVM &#x8BA4;&#x4E3A;&#x81EA;&#x5DF1; commit &#x7684;&#x5185;&#x5B58;&#xFF0C;&#x4E0E;&#x5B9E;&#x9645;&#x7CFB;&#x7EDF;&#x5206;&#x914D;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x53EF;&#x80FD;&#x662F;&#x6709;&#x5DEE;&#x5F02;&#x7684;&#xFF0C;&#x53EF;&#x80FD; JVM &#x8BA4;&#x4E3A;&#x81EA;&#x5DF1; commit &#x7684;&#x5185;&#x5B58;&#x6BD4;&#x7CFB;&#x7EDF;&#x5206;&#x914D;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#x591A;&#xFF0C;&#x4E5F;&#x53EF;&#x80FD;&#x5C11;&#x3002;&#x8FD9;&#x5C31;&#x662F;&#x4E3A;&#x5565; Native Memory Tracking&#xFF08;JVM &#x8BA4;&#x4E3A;&#x81EA;&#x5DF1; commit &#x7684;&#x5185;&#x5B58;&#xFF09;&#x4E0E;&#x5B9E;&#x9645;&#x5176;&#x4ED6;&#x7CFB;&#x7EDF;&#x76D1;&#x63A7;&#x4E2D;&#x4F53;&#x73B0;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x6307;&#x6807;&#x5BF9;&#x4E0D;&#x4E0A;&#x7684;&#x539F;&#x56E0;&#x3002;</p>
+<blockquote>
+<p><strong>&#x5FAE;&#x4FE1;&#x641C;&#x7D22;&#x201C;&#x5E72;&#x8D27;&#x6EE1;&#x6EE1;&#x5F20;&#x54C8;&#x5E0C;&#x201D;&#x5173;&#x6CE8;&#x516C;&#x4F17;&#x53F7;&#xFF0C;&#x52A0;&#x4F5C;&#x8005;&#x5FAE;&#x4FE1;&#xFF0C;&#x6BCF;&#x65E5;&#x4E00;&#x5237;&#xFF0C;&#x8F7B;&#x677E;&#x63D0;&#x5347;&#x6280;&#x672F;&#xFF0C;&#x65A9;&#x83B7;&#x5404;&#x79CD;offer</strong><br>&#x6211;&#x4F1A;&#x7ECF;&#x5E38;&#x53D1;&#x4E00;&#x4E9B;&#x5F88;&#x597D;&#x7684;&#x5404;&#x79CD;&#x6846;&#x67B6;&#x7684;&#x5B98;&#x65B9;&#x793E;&#x533A;&#x7684;&#x65B0;&#x95FB;&#x89C6;&#x9891;&#x8D44;&#x6599;&#x5E76;&#x52A0;&#x4E0A;&#x4E2A;&#x4EBA;&#x7FFB;&#x8BD1;&#x5B57;&#x5E55;&#x5230;&#x5982;&#x4E0B;&#x5730;&#x5740;&#xFF08;&#x4E5F;&#x5305;&#x62EC;&#x4E0A;&#x9762;&#x7684;&#x516C;&#x4F17;&#x53F7;&#xFF09;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;&#xFF1A;</p>
+<ul>
+<li>&#x77E5;&#x4E4E;&#xFF1A;<a href="/external_links/371449001e02a5502b7dec21cae420e8.html" target="blank" rel="noopener">www.zhihu.com/people/zhxh&#x2026;</a></li>
+<li>B &#x7AD9;&#xFF1A;<a href="/external_links/4cb1b1096c7f68ac89bbd30f61437b90.html" target="blank" rel="noopener">space.bilibili.com/31359187</a></li>
+</ul>
+</blockquote>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/76ce35d863d5b2f74c3d3c1eb605b1fb.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-Java-面试/" rel="tag"># 后端,Java,面试</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7225871227743043644.html" rel="next" title="全网最硬核 JVM 内存解析 - 1从 Native Me">
+                <i class="fa fa-chevron-left"></i> 全网最硬核 JVM 内存解析 - 1从 Native Me
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7225875600644489277.html" rel="prev" title="全网最硬核 JVM 内存解析 - 3大页分配 UseLar">
+                全网最硬核 JVM 内存解析 - 3大页分配 UseLar <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">102</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM-内存申请与使用流程"><span class="nav-number">1.</span> <span class="nav-text">JVM 内存申请与使用流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Linux-下内存管理模型简述"><span class="nav-number">1.1.</span> <span class="nav-text">2.1. Linux 下内存管理模型简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-JVM-主要内存申请分配流程"><span class="nav-number">1.2.</span> <span class="nav-text">2.2. JVM 主要内存申请分配流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-JVM-commit-的内存与实际占用内存的差异"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.2.1. JVM commit 的内存与实际占用内存的差异</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

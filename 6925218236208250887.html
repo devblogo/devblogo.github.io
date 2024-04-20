@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4ECA;&amp;#x5929;&amp;#xFF0C;&amp;#x53C8;&amp;#x662F;&amp;#x5E72;&amp;#x8D27;&amp;#x6EE1;&amp;#x6EE1;&amp;#x7684;&amp;#x4E00;&amp;#x5929;&amp;#x3002;&amp;#x8FD9;&amp;#x662F;&amp;#x5168;&amp;#x7F51;&amp;#x6700;&amp;#x786C;&amp;#x6838; JVM &amp;#x7CFB;&amp;#x5217;&amp;#x7684;&amp;#x5F00;&amp;">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全网最硬核 JVM TLAB 分析 5 TLAB 源代码全">
+<meta property="og:url" content="https://dev.newban.cn/6925218236208250887.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4ECA;&amp;#x5929;&amp;#xFF0C;&amp;#x53C8;&amp;#x662F;&amp;#x5E72;&amp;#x8D27;&amp;#x6EE1;&amp;#x6EE1;&amp;#x7684;&amp;#x4E00;&amp;#x5929;&amp;#x3002;&amp;#x8FD9;&amp;#x662F;&amp;#x5168;&amp;#x7F51;&amp;#x6700;&amp;#x786C;&amp;#x6838; JVM &amp;#x7CFB;&amp;#x5217;&amp;#x7684;&amp;#x5F00;&amp;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-20T10:21:27.453Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="全网最硬核 JVM TLAB 分析 5 TLAB 源代码全">
+<meta name="twitter:description" content="&amp;#x4ECA;&amp;#x5929;&amp;#xFF0C;&amp;#x53C8;&amp;#x662F;&amp;#x5E72;&amp;#x8D27;&amp;#x6EE1;&amp;#x6EE1;&amp;#x7684;&amp;#x4E00;&amp;#x5929;&amp;#x3002;&amp;#x8FD9;&amp;#x662F;&amp;#x5168;&amp;#x7F51;&amp;#x6700;&amp;#x786C;&amp;#x6838; JVM &amp;#x7CFB;&amp;#x5217;&amp;#x7684;&amp;#x5F00;&amp;">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6925218236208250887.html">
+
+
+
+
+
+  <title>全网最硬核 JVM TLAB 分析 5 TLAB 源代码全 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">全网最硬核 JVM TLAB 分析 5 TLAB 源代码全</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-04T09:43:50+08:00">
+                2021-02-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<blockquote>
+<p>&#x4ECA;&#x5929;&#xFF0C;&#x53C8;&#x662F;&#x5E72;&#x8D27;&#x6EE1;&#x6EE1;&#x7684;&#x4E00;&#x5929;&#x3002;&#x8FD9;&#x662F;&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x7CFB;&#x5217;&#x7684;&#x5F00;&#x7BC7;&#xFF0C;&#x9996;&#x5148;&#x4ECE; TLAB &#x5F00;&#x59CB;&#x3002;&#x7531;&#x4E8E;&#x6587;&#x7AE0;&#x5F88;&#x957F;&#xFF0C;&#x6BCF;&#x4E2A;&#x4EBA;&#x9605;&#x8BFB;&#x4E60;&#x60EF;&#x4E0D;&#x540C;&#xFF0C;&#x6240;&#x4EE5;&#x7279;&#x6B64;&#x62C6;&#x6210;&#x5355;&#x7BC7;&#x7248;&#x548C;&#x591A;&#x7BC7;&#x7248;</p>
+</blockquote>
+<ul>
+<li><a href="https://dev.newban.cn/6925217498723778568">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790;&#xFF08;&#x5355;&#x7BC7;&#x7248;&#x4E0D;&#x5305;&#x542B;&#x989D;&#x5916;&#x52A0;&#x83DC;&#xFF09;</a></li>
+<li><a href="https://dev.newban.cn/6925217843055165454">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790; 1. &#x5185;&#x5B58;&#x5206;&#x914D;&#x601D;&#x60F3;&#x5F15;&#x5165;</a></li>
+<li><a href="https://dev.newban.cn/6925217911355211789">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790; 2. TLAB&#x751F;&#x547D;&#x5468;&#x671F;&#x4E0E;&#x5E26;&#x6765;&#x7684;&#x95EE;&#x9898;&#x601D;&#x8003;</a></li>
+<li><a href="https://dev.newban.cn/6925217757269065736">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790; 3. JVM EMA&#x671F;&#x671B;&#x7B97;&#x6CD5;&#x4E0E;TLAB&#x76F8;&#x5173;JVM&#x542F;&#x52A8;&#x53C2;&#x6570;</a></li>
+<li><a href="https://dev.newban.cn/6925218101147484167">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790; 4. TLAB &#x57FA;&#x672C;&#x6D41;&#x7A0B;&#x5168;&#x5206;&#x6790;</a></li>
+<li><a href="https://dev.newban.cn/6925218236208250887">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790; 5. TLAB &#x6E90;&#x4EE3;&#x7801;&#x5168;&#x89E3;&#x6790;</a></li>
+<li><a href="https://dev.newban.cn/6925218189395787783">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790; 6. TLAB &#x76F8;&#x5173;&#x70ED;&#x95E8;Q&amp;A&#x6C47;&#x603B;</a></li>
+<li><a href="https://dev.newban.cn/6925218324183777288">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790;(&#x989D;&#x5916;&#x52A0;&#x83DC;) 7. TLAB &#x76F8;&#x5173; JVM &#x65E5;&#x5FD7;&#x89E3;&#x6790;</a></li>
+<li><a href="https://dev.newban.cn/6925218412893306894">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM TLAB &#x5206;&#x6790;(&#x989D;&#x5916;&#x52A0;&#x83DC;) 8. &#x901A;&#x8FC7; JFR &#x76D1;&#x63A7; TLAB</a></li>
+</ul>
+</blockquote>
+<ol start="9">
+<li><h1 id="OpenJDK-HotSpot-TLAB-&#x76F8;&#x5173;&#x6E90;&#x4EE3;&#x7801;&#x5206;&#x6790;"><a href="#OpenJDK-HotSpot-TLAB-&#x76F8;&#x5173;&#x6E90;&#x4EE3;&#x7801;&#x5206;&#x6790;" class="headerlink" title="OpenJDK HotSpot TLAB &#x76F8;&#x5173;&#x6E90;&#x4EE3;&#x7801;&#x5206;&#x6790;"></a>OpenJDK HotSpot TLAB &#x76F8;&#x5173;&#x6E90;&#x4EE3;&#x7801;&#x5206;&#x6790;</h1></li>
+</ol>
+<blockquote>
+<p>&#x5982;&#x679C;&#x8FD9;&#x91CC;&#x770B;&#x7684;&#x6BD4;&#x8F83;&#x5403;&#x529B;&#xFF0C;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x770B;&#x7B2C; 10 &#x7AE0;&#xFF0C;&#x70ED;&#x95E8; Q&amp;A&#xFF0C;&#x91CC;&#x9762;&#x6709;&#x5F88;&#x591A;&#x5927;&#x5BB6;&#x5E38;&#x95EE;&#x7684;&#x95EE;&#x9898;</p>
+</blockquote>
+<h2 id="9-1-TLAB-&#x7C7B;&#x6784;&#x6210;"><a href="#9-1-TLAB-&#x7C7B;&#x6784;&#x6210;" class="headerlink" title="9.1. TLAB &#x7C7B;&#x6784;&#x6210;"></a>9.1. TLAB &#x7C7B;&#x6784;&#x6210;</h2><p>&#x7EBF;&#x7A0B;&#x521D;&#x59CB;&#x5316;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5982;&#x679C; JVM &#x542F;&#x7528;&#x4E86; TLAB&#xFF08;&#x9ED8;&#x8BA4;&#x662F;&#x542F;&#x7528;&#x7684;&#xFF0C; &#x53EF;&#x4EE5;&#x901A;&#x8FC7; -XX:-UseTLAB &#x5173;&#x95ED;&#xFF09;&#xFF0C;&#x5219;&#x4F1A;&#x521D;&#x59CB;&#x5316; TLAB&#x3002;</p>
+<p>TLAB &#x5305;&#x62EC;&#x5982;&#x4E0B;&#x51E0;&#x4E2A; field &#xFF08;HeapWord* &#x53EF;&#x4EE5;&#x7406;&#x89E3;&#x4E3A;&#x5806;&#x4E2D;&#x7684;&#x5185;&#x5B58;&#x5730;&#x5740;&#xFF09;&#xFF1A; <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x9759;&#x6001;&#x5168;&#x5C40;&#x53D8;&#x91CF;</span><br><span class="line">static size_t   _max_size;                          // &#x6240;&#x6709; TLAB &#x7684;&#x6700;&#x5927;&#x5927;&#x5C0F;</span><br><span class="line">  static int      _reserve_for_allocation_prefetch;   // CPU &#x7F13;&#x5B58;&#x4F18;&#x5316; Allocation Prefetch &#x7684;&#x4FDD;&#x7559;&#x7A7A;&#x95F4;&#xFF0C;&#x8FD9;&#x91CC;&#x5148;&#x4E0D;&#x7528;&#x5173;&#x5FC3;</span><br><span class="line">  static unsigned _target_refills;                    //&#x6BCF;&#x4E2A; GC &#x5468;&#x671F;&#x5185;&#x671F;&#x671B;&#x7684;&#x91CD;&#x586B;&#x6B21;&#x6570;</span><br><span class="line"></span><br><span class="line">//&#x4EE5;&#x4E0B;&#x662F; TLAB &#x7684;&#x4E3B;&#x8981;&#x6784;&#x6210; field</span><br><span class="line">HeapWord* _start;                              // TLAB &#x8D77;&#x59CB;&#x5730;&#x5740;&#xFF0C;&#x8868;&#x793A;&#x5806;&#x5185;&#x5B58;&#x5730;&#x5740;&#x90FD;&#x7528; HeapWord* </span><br><span class="line">HeapWord* _top;                                // &#x4E0A;&#x6B21;&#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#x5730;&#x5740;</span><br><span class="line">HeapWord* _end;                                // TLAB &#x7ED3;&#x675F;&#x5730;&#x5740;</span><br><span class="line">size_t    _desired_size;                       // TLAB &#x5927;&#x5C0F; &#x5305;&#x62EC;&#x4FDD;&#x7559;&#x7A7A;&#x95F4;&#xFF0C;&#x8868;&#x793A;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x90FD;&#x9700;&#x8981;&#x901A;&#x8FC7; size_t &#x7C7B;&#x578B;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x5B9E;&#x9645;&#x5B57;&#x8282;&#x6570;&#x9664;&#x4EE5; HeapWordSize &#x7684;&#x503C;</span><br><span class="line">size_t    _refill_waste_limit;                 // TLAB&#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#xFF0C;&#x5269;&#x4F59;&#x7A7A;&#x95F4;&#x4E0D;&#x8DB3;&#x5206;&#x914D;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#x9650;&#x5236;&#x3002;&#x5728;TLAB&#x5269;&#x4F59;&#x7A7A;&#x95F4;&#x4E0D;&#x8DB3;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6839;&#x636E;&#x8FD9;&#x4E2A;&#x503C;&#x51B3;&#x5B9A;&#x5206;&#x914D;&#x7B56;&#x7565;&#xFF0C;&#x5982;&#x679C;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#x5927;&#x4E8E;&#x8FD9;&#x4E2A;&#x503C;&#x5219;&#x76F4;&#x63A5;&#x5728; Eden &#x533A;&#x5206;&#x914D;&#xFF0C;&#x5982;&#x679C;&#x5C0F;&#x4E8E;&#x8FD9;&#x4E2A;&#x503C;&#x5219;&#x5C06;&#x5F53;&#x524D; TLAB &#x653E;&#x56DE; Eden &#x533A;&#x7BA1;&#x7406;&#x5E76;&#x4ECE; Eden &#x7533;&#x8BF7;&#x65B0;&#x7684; TLAB &#x8FDB;&#x884C;&#x5206;&#x914D;&#x3002; </span><br><span class="line">AdaptiveWeightedAverage _allocation_fraction;  // &#x5F53;&#x524D; TLAB &#x5206;&#x914D;&#x6BD4;&#x4F8B; EMA</span><br><span class="line"></span><br><span class="line">//&#x4EE5;&#x4E0B;&#x662F;&#x6211;&#x4EEC;&#x8FD9;&#x91CC;&#x4E0D;&#x7528;&#x592A;&#x5173;&#x5FC3;&#x7684; field</span><br><span class="line">HeapWord* _allocation_end;                    // TLAB &#x771F;&#x6B63;&#x53EF;&#x4EE5;&#x7528;&#x6765;&#x5206;&#x914D;&#x5185;&#x5B58;&#x7684;&#x7ED3;&#x675F;&#x5730;&#x5740;&#xFF0C;&#x8FD9;&#x4E2A;&#x662F; _end &#x7ED3;&#x675F;&#x5730;&#x5740;&#x6392;&#x9664;&#x4FDD;&#x7559;&#x7A7A;&#x95F4;&#xFF08;&#x9884;&#x7559;&#x7ED9; dummy object &#x7684;&#x5BF9;&#x8C61;&#x5934;&#x7A7A;&#x95F4;&#xFF09;</span><br><span class="line">HeapWord* _pf_top;                            // Allocation Prefetch CPU &#x7F13;&#x5B58;&#x4F18;&#x5316;&#x673A;&#x5236;&#x76F8;&#x5173;&#x9700;&#x8981;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x8FD9;&#x91CC;&#x5148;&#x4E0D;&#x7528;&#x8003;&#x8651;</span><br><span class="line">size_t    _allocated_before_last_gc;          // &#x8FD9;&#x4E2A;&#x7528;&#x4E8E;&#x8BA1;&#x7B97; &#x56FE;10 &#x4E2D;&#x7684;&#x7EBF;&#x7A0B;&#x672C;&#x8F6E; GC &#x5206;&#x914D;&#x7A7A;&#x95F4;&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x8BB0;&#x5F55;&#x4E0A;&#x6B21; GC &#x65F6;&#xFF0C;&#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x7684;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;</span><br><span class="line">unsigned  _number_of_refills;                 // &#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x5185;&#x5B58;&#x6570;&#x636E;&#x91C7;&#x96C6;&#x76F8;&#x5173;&#xFF0C;TLAB &#x5269;&#x4F59;&#x7A7A;&#x95F4;&#x4E0D;&#x8DB3;&#x5206;&#x914D;&#x6B21;&#x6570;</span><br><span class="line">unsigned  _fast_refill_waste;                 // &#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x5185;&#x5B58;&#x6570;&#x636E;&#x91C7;&#x96C6;&#x76F8;&#x5173;&#xFF0C;TLAB &#x5FEB;&#x901F;&#x5206;&#x914D;&#x6D6A;&#x8D39;&#xFF0C;&#x5FEB;&#x901F;&#x5206;&#x914D;&#x5C31;&#x662F;&#x76F4;&#x63A5;&#x5728; TLAB &#x5206;&#x914D;&#xFF0C;&#x8FD9;&#x4E2A;&#x5728;&#x73B0;&#x5728; JVM &#x4E2D;&#x5DF2;&#x7ECF;&#x7528;&#x4E0D;&#x5230;&#x4E86;</span><br><span class="line">unsigned  _slow_refill_waste;                 // &#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x5185;&#x5B58;&#x6570;&#x636E;&#x91C7;&#x96C6;&#x76F8;&#x5173;&#xFF0C;TLAB &#x6162;&#x901F;&#x5206;&#x914D;&#x6D6A;&#x8D39;&#xFF0C;&#x6162;&#x901F;&#x5206;&#x914D;&#x5C31;&#x662F;&#x91CD;&#x586B;&#x4E00;&#x4E2A; TLAB &#x5206;&#x914D;</span><br><span class="line">unsigned  _gc_waste;                          // &#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x5185;&#x5B58;&#x6570;&#x636E;&#x91C7;&#x96C6;&#x76F8;&#x5173;&#xFF0C;gc&#x6D6A;&#x8D39;</span><br><span class="line">unsigned  _slow_allocations;                  // &#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x5185;&#x5B58;&#x6570;&#x636E;&#x91C7;&#x96C6;&#x76F8;&#x5173;&#xFF0C;TLAB &#x6162;&#x901F;&#x5206;&#x914D;&#x8BA1;&#x6570; </span><br><span class="line">size_t    _allocated_size;                    // &#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#x5927;&#x5C0F;</span><br><span class="line">size_t    _bytes_since_last_sample_point;     // JVM TI &#x91C7;&#x96C6;&#x6307;&#x6807;&#x76F8;&#x5173; field&#xFF0C;&#x8FD9;&#x91CC;&#x4E0D;&#x7528;&#x5173;&#x5FC3;</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-2-TLAB-&#x521D;&#x59CB;&#x5316;"><a href="#9-2-TLAB-&#x521D;&#x59CB;&#x5316;" class="headerlink" title="9.2. TLAB &#x521D;&#x59CB;&#x5316;"></a>9.2. TLAB &#x521D;&#x59CB;&#x5316;</h2><p>&#x9996;&#x5148;&#x662F; JVM &#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5168;&#x5C40; TLAB &#x9700;&#x8981;&#x521D;&#x59CB;&#x5316;&#xFF1A; <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void ThreadLocalAllocBuffer::startup_initialization() {</span><br><span class="line">  //&#x521D;&#x59CB;&#x5316;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x5F52;&#x96F6;&#x7EDF;&#x8BA1;&#x6570;&#x636E;</span><br><span class="line">  ThreadLocalAllocStats::initialize();</span><br><span class="line"></span><br><span class="line">  // &#x5047;&#x8BBE;&#x5E73;&#x5747;&#x4E0B;&#x6765;&#xFF0C;GC &#x626B;&#x63CF;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x5F53;&#x524D;&#x7684; TLAB &#x90FD;&#x6709;&#x4E00;&#x534A;&#x7684;&#x5185;&#x5B58;&#x88AB;&#x6D6A;&#x8D39;&#xFF0C;&#x8FD9;&#x4E2A;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x4F7F;&#x7528;&#x5185;&#x5B58;&#x7684;&#x6D6A;&#x8D39;&#x7684;&#x767E;&#x5206;&#x6BD4;&#x7387;&#xFF08;&#x4E5F;&#x5C31;&#x662F; TLABWasteTargetPercent&#xFF09;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x7B49;&#x4E8E;&#xFF08;&#x6CE8;&#x610F;&#xFF0C;&#x4EC5;&#x6700;&#x65B0;&#x7684;&#x90A3;&#x4E2A; TLAB &#x6709;&#x6D6A;&#x8D39;&#xFF0C;&#x4E4B;&#x524D; refill &#x9000;&#x56DE;&#x7684;&#x5047;&#x8BBE;&#x662F;&#x6CA1;&#x6709;&#x6D6A;&#x8D39;&#x7684;&#xFF09;&#xFF1A;1/2 * (&#x6BCF;&#x4E2A; epoch &#x5185;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x671F;&#x671B; refill &#x6B21;&#x6570;) * 100</span><br><span class="line">  //&#x90A3;&#x4E48;&#x6BCF;&#x4E2A; epoch &#x5185;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B; refill &#x6B21;&#x6570;&#x914D;&#x7F6E;&#x5C31;&#x7B49;&#x4E8E; 50 / TLABWasteTargetPercent&#xFF0C; &#x9ED8;&#x8BA4;&#x4E5F;&#x5C31;&#x662F; 50 &#x6B21;&#x3002;</span><br><span class="line">  _target_refills = 100 / (2 * TLABWasteTargetPercent);</span><br><span class="line">  // &#x4F46;&#x662F;&#x521D;&#x59CB;&#x7684; _target_refills &#x9700;&#x8981;&#x8BBE;&#x7F6E;&#x6700;&#x591A;&#x4E0D;&#x8D85;&#x8FC7; 2 &#x6B21;&#x6765;&#x51CF;&#x5C11; VM &#x521D;&#x59CB;&#x5316;&#x65F6;&#x5019; GC &#x7684;&#x53EF;&#x80FD;&#x6027;</span><br><span class="line">  _target_refills = MAX2(_target_refills, 2U);</span><br><span class="line"></span><br><span class="line">//&#x5982;&#x679C; C2 JIT &#x7F16;&#x8BD1;&#x5B58;&#x5728;&#x5E76;&#x542F;&#x7528;&#xFF0C;&#x5219;&#x4FDD;&#x7559; CPU &#x7F13;&#x5B58;&#x4F18;&#x5316; Allocation Prefetch &#x7A7A;&#x95F4;&#xFF0C;&#x8FD9;&#x4E2A;&#x8FD9;&#x91CC;&#x5148;&#x4E0D;&#x7528;&#x5173;&#x5FC3;&#xFF0C;&#x4F1A;&#x5728;&#x522B;&#x7684;&#x7AE0;&#x8282;&#x8BB2;&#x8FF0;</span><br><span class="line">#ifdef COMPILER2</span><br><span class="line">  if (is_server_compilation_mode_vm()) {</span><br><span class="line">    int lines =  MAX2(AllocatePrefetchLines, AllocateInstancePrefetchLines) + 2;</span><br><span class="line">    _reserve_for_allocation_prefetch = (AllocatePrefetchDistance + AllocatePrefetchStepSize * lines) /</span><br><span class="line">                                       (int)HeapWordSize;</span><br><span class="line">  }</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">  // &#x521D;&#x59CB;&#x5316; main &#x7EBF;&#x7A0B;&#x7684; TLAB</span><br><span class="line">  guarantee(Thread::current()-&gt;is_Java_thread(), &quot;tlab initialization thread not Java thread&quot;);</span><br><span class="line">  Thread::current()-&gt;tlab().initialize();</span><br><span class="line">  log_develop_trace(gc, tlab)(&quot;TLAB min: &quot; SIZE_FORMAT &quot; initial: &quot; SIZE_FORMAT &quot; max: &quot; SIZE_FORMAT,</span><br><span class="line">                               min_size(), Thread::current()-&gt;tlab().initial_desired_size(), max_size());</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x7EF4;&#x62A4;&#x81EA;&#x5DF1;&#x7684; TLAB&#xFF0C;&#x540C;&#x65F6;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x7684; TLAB &#x5927;&#x5C0F;&#x4E0D;&#x4E00;&#x3002;TLAB &#x7684;&#x5927;&#x5C0F;&#x4E3B;&#x8981;&#x7531; Eden &#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x7EBF;&#x7A0B;&#x6570;&#x91CF;&#xFF0C;&#x8FD8;&#x6709;&#x7EBF;&#x7A0B;&#x7684;&#x5BF9;&#x8C61;&#x5206;&#x914D;&#x901F;&#x7387;&#x51B3;&#x5B9A;&#x3002; &#x5728; Java &#x7EBF;&#x7A0B;&#x5F00;&#x59CB;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x4F1A;&#x5148;&#x5206;&#x914D; TLAB&#xFF1A; <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/runtime/thread.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">javascript&#x590D;&#x5236;&#x4EE3;&#x7801;void JavaThread::run() {</span><br><span class="line">  // initialize thread-local alloc buffer related fields</span><br><span class="line">  this-&gt;initialize_tlab();</span><br><span class="line">  //&#x5269;&#x4F59;&#x4EE3;&#x7801;&#x5FFD;&#x7565;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5206;&#x914D; TLAB &#x5176;&#x5B9E;&#x5C31;&#x662F;&#x8C03;&#x7528; ThreadLocalAllocBuffer &#x7684; initialize &#x65B9;&#x6CD5;&#x3002; <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/runtime/thread.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void initialize_tlab() {</span><br><span class="line">    //&#x5982;&#x679C;&#x6CA1;&#x6709;&#x901A;&#x8FC7; -XX:-UseTLAB &#x7981;&#x7528; TLAB&#xFF0C;&#x5219;&#x521D;&#x59CB;&#x5316;TLAB</span><br><span class="line">    if (UseTLAB) {</span><br><span class="line">      tlab().initialize();</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// Thread-Local Allocation Buffer (TLAB) support</span><br><span class="line">ThreadLocalAllocBuffer&amp; tlab()                 {</span><br><span class="line">  return _tlab; </span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">ThreadLocalAllocBuffer _tlab;</span><br></pre></td></tr></table></figure>
+
+<p>ThreadLocalAllocBuffer &#x7684; initialize &#x65B9;&#x6CD5;&#x521D;&#x59CB;&#x5316; TLAB &#x7684;&#x4E0A;&#x9762;&#x63D0;&#x5230;&#x7684;&#x6211;&#x4EEC;&#x8981;&#x5173;&#x5FC3;&#x7684;&#x5404;&#x79CD; field&#xFF1A;<a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void ThreadLocalAllocBuffer::initialize() {</span><br><span class="line">  //&#x8BBE;&#x7F6E;&#x521D;&#x59CB;&#x6307;&#x9488;&#xFF0C;&#x7531;&#x4E8E;&#x8FD8;&#x6CA1;&#x6709;&#x4ECE; Eden &#x5206;&#x914D;&#x5185;&#x5B58;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x90FD;&#x8BBE;&#x7F6E;&#x4E3A; NULL</span><br><span class="line">  initialize(NULL,                    // start</span><br><span class="line">             NULL,                    // top</span><br><span class="line">             NULL);                   // end</span><br><span class="line">  //&#x8BA1;&#x7B97;&#x521D;&#x59CB;&#x671F;&#x671B;&#x5927;&#x5C0F;&#xFF0C;&#x5E76;&#x8BBE;&#x7F6E;</span><br><span class="line">  set_desired_size(initial_desired_size());</span><br><span class="line">  //&#x6240;&#x6709; TLAB &#x603B;&#x5927;&#x5C0F;&#xFF0C;&#x4E0D;&#x540C;&#x7684; GC &#x5B9E;&#x73B0;&#x6709;&#x4E0D;&#x540C;&#x7684; TLAB &#x5BB9;&#x91CF;&#xFF0C; &#x4E00;&#x822C;&#x662F; Eden &#x533A;&#x5927;&#x5C0F;</span><br><span class="line">  //&#x4F8B;&#x5982; G1 GC&#xFF0C;&#x5C31;&#x662F;&#x7B49;&#x4E8E; (_policy-&gt;young_list_target_length() - _survivor.length()) * HeapRegion::GrainBytes&#xFF0C;&#x53EF;&#x4EE5;&#x7406;&#x89E3;&#x4E3A;&#x5E74;&#x8F7B;&#x4EE3;&#x51CF;&#x53BB;Survivor&#x533A;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;Eden&#x533A;</span><br><span class="line">  size_t capacity = Universe::heap()-&gt;tlab_capacity(thread()) / HeapWordSize;</span><br><span class="line">  //&#x8BA1;&#x7B97;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x7684; TLAB &#x671F;&#x671B;&#x5360;&#x7528;&#x6240;&#x6709; TLAB &#x603B;&#x4F53;&#x5927;&#x5C0F;&#x6BD4;&#x4F8B;</span><br><span class="line">  //TLAB &#x671F;&#x671B;&#x5360;&#x7528;&#x5927;&#x5C0F;&#x4E5F;&#x5C31;&#x662F;&#x8FD9;&#x4E2A; TLAB &#x5927;&#x5C0F;&#x4E58;&#x4EE5;&#x671F;&#x671B; refill &#x7684;&#x6B21;&#x6570;</span><br><span class="line">  float alloc_frac = desired_size() * target_refills() / (float) capacity;</span><br><span class="line">  //&#x8BB0;&#x5F55;&#x4E0B;&#x6765;&#xFF0C;&#x7528;&#x4E8E;&#x8BA1;&#x7B97; EMA</span><br><span class="line">  _allocation_fraction.sample(alloc_frac);</span><br><span class="line">  //&#x8BA1;&#x7B97;&#x521D;&#x59CB; refill &#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#xFF0C;&#x5E76;&#x8BBE;&#x7F6E;</span><br><span class="line">  //&#x5982;&#x524D;&#x9762;&#x539F;&#x7406;&#x90E8;&#x5206;&#x6240;&#x8FF0;&#xFF0C;&#x521D;&#x59CB;&#x5927;&#x5C0F;&#x5C31;&#x662F; TLAB &#x7684;&#x5927;&#x5C0F;&#xFF08;_desired_size&#xFF09; / TLABRefillWasteFraction</span><br><span class="line">  set_refill_waste_limit(initial_refill_waste_limit());</span><br><span class="line">  //&#x91CD;&#x7F6E;&#x7EDF;&#x8BA1;</span><br><span class="line">  reset_statistics();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-2-1-&#x521D;&#x59CB;&#x671F;&#x671B;&#x5927;&#x5C0F;&#x662F;&#x5982;&#x4F55;&#x8BA1;&#x7B97;&#x7684;&#x5462;&#xFF1F;"><a href="#9-2-1-&#x521D;&#x59CB;&#x671F;&#x671B;&#x5927;&#x5C0F;&#x662F;&#x5982;&#x4F55;&#x8BA1;&#x7B97;&#x7684;&#x5462;&#xFF1F;" class="headerlink" title="9.2.1. &#x521D;&#x59CB;&#x671F;&#x671B;&#x5927;&#x5C0F;&#x662F;&#x5982;&#x4F55;&#x8BA1;&#x7B97;&#x7684;&#x5462;&#xFF1F;"></a>9.2.1. &#x521D;&#x59CB;&#x671F;&#x671B;&#x5927;&#x5C0F;&#x662F;&#x5982;&#x4F55;&#x8BA1;&#x7B97;&#x7684;&#x5462;&#xFF1F;</h3><p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x8BA1;&#x7B97;&#x521D;&#x59CB;&#x5927;&#x5C0F;</span><br><span class="line">size_t ThreadLocalAllocBuffer::initial_desired_size() {</span><br><span class="line">  size_t init_sz = 0;</span><br><span class="line">  //&#x5982;&#x679C;&#x901A;&#x8FC7; -XX:TLABSize &#x8BBE;&#x7F6E;&#x4E86; TLAB &#x5927;&#x5C0F;&#xFF0C;&#x5219;&#x7528;&#x8FD9;&#x4E2A;&#x503C;&#x4F5C;&#x4E3A;&#x521D;&#x59CB;&#x671F;&#x671B;&#x5927;&#x5C0F;</span><br><span class="line">  //&#x8868;&#x793A;&#x5806;&#x5185;&#x5B58;&#x5360;&#x7528;&#x5927;&#x5C0F;&#x90FD;&#x9700;&#x8981;&#x7528;&#x5360;&#x7528;&#x51E0;&#x4E2A; HeapWord &#x8868;&#x793A;&#xFF0C;&#x6240;&#x4EE5;&#x7528;TLABSize / HeapWordSize</span><br><span class="line">  if (TLABSize &gt; 0) {</span><br><span class="line">    init_sz = TLABSize / HeapWordSize;</span><br><span class="line">  } else {</span><br><span class="line">    //&#x83B7;&#x53D6;&#x5F53;&#x524D;epoch&#x5185;&#x7EBF;&#x7A0B;&#x6570;&#x91CF;&#x671F;&#x671B;&#xFF0C;&#x8FD9;&#x4E2A;&#x5982;&#x4E4B;&#x524D;&#x6240;&#x8FF0;&#x901A;&#x8FC7; EMA &#x9884;&#x6D4B;</span><br><span class="line">    unsigned int nof_threads = ThreadLocalAllocStats::allocating_threads_avg();</span><br><span class="line">    //&#x4E0D;&#x540C;&#x7684; GC &#x5B9E;&#x73B0;&#x6709;&#x4E0D;&#x540C;&#x7684; TLAB &#x5BB9;&#x91CF;&#xFF0C;Universe::heap()-&gt;tlab_capacity(thread()) &#x4E00;&#x822C;&#x662F; Eden &#x533A;&#x5927;&#x5C0F;</span><br><span class="line">    //&#x4F8B;&#x5982; G1 GC&#xFF0C;&#x5C31;&#x662F;&#x7B49;&#x4E8E; (_policy-&gt;young_list_target_length() - _survivor.length()) * HeapRegion::GrainBytes&#xFF0C;&#x53EF;&#x4EE5;&#x7406;&#x89E3;&#x4E3A;&#x5E74;&#x8F7B;&#x4EE3;&#x51CF;&#x53BB;Survivor&#x533A;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;Eden&#x533A;</span><br><span class="line">    //&#x6574;&#x4F53;&#x5927;&#x5C0F;&#x7B49;&#x4E8E; Eden&#x533A;&#x5927;&#x5C0F;/(&#x5F53;&#x524D; epcoh &#x5185;&#x4F1A;&#x5206;&#x914D;&#x5BF9;&#x8C61;&#x671F;&#x671B;&#x7EBF;&#x7A0B;&#x4E2A;&#x6570; * &#x6BCF;&#x4E2A; epoch &#x5185;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B; refill &#x6B21;&#x6570;&#x914D;&#x7F6E;)</span><br><span class="line">    //target_refills&#x5DF2;&#x7ECF;&#x5728; JVM &#x521D;&#x59CB;&#x5316;&#x6240;&#x6709; TLAB &#x5168;&#x5C40;&#x914D;&#x7F6E;&#x7684;&#x65F6;&#x5019;&#x521D;&#x59CB;&#x5316;&#x597D;&#x4E86;</span><br><span class="line">    init_sz  = (Universe::heap()-&gt;tlab_capacity(thread()) / HeapWordSize) /</span><br><span class="line">                      (nof_threads * target_refills());</span><br><span class="line">    //&#x8003;&#x8651;&#x5BF9;&#x8C61;&#x5BF9;&#x9F50;&#xFF0C;&#x5F97;&#x51FA;&#x6700;&#x540E;&#x7684;&#x5927;&#x5C0F;</span><br><span class="line">    init_sz = align_object_size(init_sz);</span><br><span class="line">  }</span><br><span class="line">  //&#x4FDD;&#x6301;&#x5927;&#x5C0F;&#x5728;  min_size() &#x8FD8;&#x6709; max_size() &#x4E4B;&#x95F4;</span><br><span class="line">  //min_size&#x4E3B;&#x8981;&#x7531; MinTLABSize &#x51B3;&#x5B9A;</span><br><span class="line">  init_sz = MIN2(MAX2(init_sz, min_size()), max_size());</span><br><span class="line">  return init_sz;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">//&#x6700;&#x5C0F;&#x5927;&#x5C0F;&#x7531; MinTLABSize &#x51B3;&#x5B9A;&#xFF0C;&#x9700;&#x8981;&#x8868;&#x793A;&#x4E3A; HeapWordSize&#xFF0C;&#x5E76;&#x4E14;&#x8003;&#x8651;&#x5BF9;&#x8C61;&#x5BF9;&#x9F50;&#xFF0C;&#x6700;&#x540E;&#x7684; alignment_reserve &#x662F; dummy object &#x586B;&#x5145;&#x7684;&#x5BF9;&#x8C61;&#x5934;&#x5927;&#x5C0F;&#xFF08;&#x8FD9;&#x91CC;&#x5148;&#x4E0D;&#x8003;&#x8651; JVM &#x7684; CPU &#x7F13;&#x5B58; prematch&#xFF0C;&#x6211;&#x4EEC;&#x4F1A;&#x5728;&#x5176;&#x4ED6;&#x7AE0;&#x8282;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#xFF09;&#x3002;</span><br><span class="line">static size_t min_size()                       { </span><br><span class="line">    return align_object_size(MinTLABSize / HeapWordSize) + alignment_reserve(); </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-2-2-TLAB-&#x6700;&#x5927;&#x5927;&#x5C0F;&#x662F;&#x600E;&#x6837;&#x51B3;&#x5B9A;&#x7684;&#x5462;&#xFF1F;"><a href="#9-2-2-TLAB-&#x6700;&#x5927;&#x5927;&#x5C0F;&#x662F;&#x600E;&#x6837;&#x51B3;&#x5B9A;&#x7684;&#x5462;&#xFF1F;" class="headerlink" title="9.2.2. TLAB &#x6700;&#x5927;&#x5927;&#x5C0F;&#x662F;&#x600E;&#x6837;&#x51B3;&#x5B9A;&#x7684;&#x5462;&#xFF1F;"></a>9.2.2. TLAB &#x6700;&#x5927;&#x5927;&#x5C0F;&#x662F;&#x600E;&#x6837;&#x51B3;&#x5B9A;&#x7684;&#x5462;&#xFF1F;</h3><p>&#x4E0D;&#x540C;&#x7684; GC &#x65B9;&#x5F0F;&#xFF0C;&#x6709;&#x4E0D;&#x540C;&#x7684;&#x65B9;&#x5F0F;&#xFF1A;</p>
+<p><strong>G1 GC &#x4E2D;&#x4E3A;&#x5927;&#x5BF9;&#x8C61;&#xFF08;humongous object&#xFF09;&#x5927;&#x5C0F;</strong>&#xFF0C;&#x4E5F;&#x5C31;&#x662F; G1 region &#x5927;&#x5C0F;&#x7684;&#x4E00;&#x534A;&#xFF1A;<a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/g1/g1CollectedHeap.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;// For G1 TLABs should not contain humongous objects, so the maximum TLAB size</span><br><span class="line">// must be equal to the humongous object limit.</span><br><span class="line">size_t G1CollectedHeap::max_tlab_size() const {</span><br><span class="line">  return align_down(_humongous_object_threshold_in_words, MinObjAlignment);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>ZGC &#x4E2D;&#x4E3A;&#x9875;&#x5927;&#x5C0F;&#x7684; 8 &#x5206;&#x4E4B;&#x4E00;</strong>&#xFF0C;&#x7C7B;&#x4F3C;&#x7684;&#x5728;&#x5927;&#x90E8;&#x5206;&#x60C5;&#x51B5;&#x4E0B; S<strong>henandoah GC &#x4E5F;&#x662F;&#x6BCF;&#x4E2A; Region &#x5927;&#x5C0F;&#x7684; 8 &#x5206;&#x4E4B;&#x4E00;</strong>&#x3002;&#x4ED6;&#x4EEC;&#x90FD;&#x662F;&#x671F;&#x671B;&#x81F3;&#x5C11;&#x6709; 8 &#x5206;&#x4E4B; 7 &#x7684;&#x533A;&#x57DF;&#x662F;&#x4E0D;&#x7528;&#x9000;&#x56DE;&#x7684;&#x51CF;&#x5C11;&#x9009;&#x62E9; Cset &#x7684;&#x65F6;&#x5019;&#x7684;&#x626B;&#x63CF;&#x590D;&#x6742;&#x5EA6;: <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shenandoah/shenandoahHeap.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;MaxTLABSizeWords = MIN2(ShenandoahElasticTLAB ? RegionSizeWords : (RegionSizeWords / 8), HumongousThresholdWords);</span><br></pre></td></tr></table></figure>
+
+<p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/z/zHeap.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;const size_t      ZObjectSizeLimitSmall         = ZPageSizeSmall / 8;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;&#x4E8E;<strong>&#x5176;&#x4ED6;&#x7684; GC&#xFF0C;&#x5219;&#x662F; int &#x6570;&#x7EC4;&#x7684;&#x6700;&#x5927;&#x5927;&#x5C0F;</strong>&#xFF0C;&#x8FD9;&#x4E2A;&#x548C;&#x4E3A;&#x4E86;&#x586B;&#x5145; dummy object &#x8868;&#x793A; TLAB &#x7684;&#x7A7A;&#x533A;&#x57DF;&#x6709;&#x5173;&#x3002;&#x8FD9;&#x4E2A;&#x539F;&#x56E0;&#x4E4B;&#x524D;&#x5DF2;&#x7ECF;&#x8BF4;&#x660E;&#x4E86;&#x3002;</p>
+<h2 id="9-3-TLAB-&#x5206;&#x914D;&#x5185;&#x5B58;"><a href="#9-3-TLAB-&#x5206;&#x914D;&#x5185;&#x5B58;" class="headerlink" title="9.3. TLAB &#x5206;&#x914D;&#x5185;&#x5B58;"></a>9.3. TLAB &#x5206;&#x914D;&#x5185;&#x5B58;</h2><p>&#x5F53; new &#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x8C03;&#x7528;<code>instanceOop InstanceKlass::allocate_instance(TRAPS)</code> <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/oops/instanceKlass.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;instanceOop InstanceKlass::allocate_instance(TRAPS) {</span><br><span class="line">  bool has_finalizer_flag = has_finalizer(); // Query before possible GC</span><br><span class="line">  int size = size_helper();  // Query before forming handle.</span><br><span class="line"></span><br><span class="line">  instanceOop i;</span><br><span class="line"></span><br><span class="line">  i = (instanceOop)Universe::heap()-&gt;obj_allocate(this, size, CHECK_NULL);</span><br><span class="line">  if (has_finalizer_flag &amp;&amp; !RegisterFinalizersAtInit) {</span><br><span class="line">    i = register_finalizer(i, CHECK_NULL);</span><br><span class="line">  }</span><br><span class="line">  return i;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5176;&#x6838;&#x5FC3;&#x5C31;&#x662F;<code>heap()-&gt;obj_allocate(this, size, CHECK_NULL)</code>&#x4ECE;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#x5185;&#x5B58;&#xFF1A; <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/collectedHeap.inline.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;inline oop CollectedHeap::obj_allocate(Klass* klass, int size, TRAPS) {</span><br><span class="line">  ObjAllocator allocator(klass, size, THREAD);</span><br><span class="line">  return allocator.allocate();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F7F;&#x7528;&#x5168;&#x5C40;&#x7684; <code>ObjAllocator</code> &#x5B9E;&#x73B0;&#x8FDB;&#x884C;&#x5BF9;&#x8C61;&#x5185;&#x5B58;&#x5206;&#x914D;&#xFF1A; <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/memAllocator.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;oop MemAllocator::allocate() const {</span><br><span class="line">  oop obj = NULL;</span><br><span class="line">  {</span><br><span class="line">    Allocation allocation(*this, &amp;obj);</span><br><span class="line">    //&#x5206;&#x914D;&#x5806;&#x5185;&#x5B58;&#xFF0C;&#x7EE7;&#x7EED;&#x770B;&#x4E0B;&#x9762;&#x4E00;&#x4E2A;&#x65B9;&#x6CD5;</span><br><span class="line">    HeapWord* mem = mem_allocate(allocation);</span><br><span class="line">    if (mem != NULL) {</span><br><span class="line">      obj = initialize(mem);</span><br><span class="line">    } else {</span><br><span class="line">      // The unhandled oop detector will poison local variable obj,</span><br><span class="line">      // so reset it to NULL if mem is NULL.</span><br><span class="line">      obj = NULL;</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line">  return obj;</span><br><span class="line">}</span><br><span class="line">HeapWord* MemAllocator::mem_allocate(Allocation&amp; allocation) const {</span><br><span class="line">  //&#x5982;&#x679C;&#x4F7F;&#x7528;&#x4E86; TLAB&#xFF0C;&#x5219;&#x4ECE; TLAB &#x5206;&#x914D;&#xFF0C;&#x5206;&#x914D;&#x4EE3;&#x7801;&#x7EE7;&#x7EED;&#x770B;&#x4E0B;&#x9762;&#x4E00;&#x4E2A;&#x65B9;&#x6CD5;</span><br><span class="line">  if (UseTLAB) {</span><br><span class="line">    HeapWord* result = allocate_inside_tlab(allocation);</span><br><span class="line">    if (result != NULL) {</span><br><span class="line">      return result;</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line">  //&#x5426;&#x5219;&#x76F4;&#x63A5;&#x4ECE; tlab &#x5916;&#x5206;&#x914D;</span><br><span class="line">  return allocate_outside_tlab(allocation);</span><br><span class="line">}</span><br><span class="line">HeapWord* MemAllocator::allocate_inside_tlab(Allocation&amp; allocation) const {</span><br><span class="line">  assert(UseTLAB, &quot;should use UseTLAB&quot;);</span><br><span class="line"></span><br><span class="line">  //&#x4ECE;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x7684; TLAB &#x5206;&#x914D;&#x5185;&#x5B58;&#xFF0C;TLAB &#x5FEB;&#x5206;&#x914D;</span><br><span class="line">  HeapWord* mem = _thread-&gt;tlab().allocate(_word_size);</span><br><span class="line">  //&#x5982;&#x679C;&#x6CA1;&#x6709;&#x5206;&#x914D;&#x5931;&#x8D25;&#x5219;&#x8FD4;&#x56DE;</span><br><span class="line">  if (mem != NULL) {</span><br><span class="line">    return mem;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  //&#x5982;&#x679C;&#x5206;&#x914D;&#x5931;&#x8D25;&#x5219;&#x8D70; TLAB &#x6162;&#x5206;&#x914D;&#xFF0C;&#x9700;&#x8981; refill &#x6216;&#x8005;&#x76F4;&#x63A5;&#x4ECE; Eden &#x5206;&#x914D;</span><br><span class="line">  return allocate_inside_tlab_slow(allocation);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-1-TLAB-&#x5FEB;&#x5206;&#x914D;"><a href="#9-3-1-TLAB-&#x5FEB;&#x5206;&#x914D;" class="headerlink" title="9.3.1. TLAB &#x5FEB;&#x5206;&#x914D;"></a>9.3.1. TLAB &#x5FEB;&#x5206;&#x914D;</h3><p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.inline.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;inline HeapWord* ThreadLocalAllocBuffer::allocate(size_t size) {</span><br><span class="line">  //&#x9A8C;&#x8BC1;&#x5404;&#x4E2A;&#x5185;&#x5B58;&#x6307;&#x9488;&#x6709;&#x6548;&#xFF0C;&#x4E5F;&#x5C31;&#x662F; _top &#x5728; _start &#x548C; _end &#x8303;&#x56F4;&#x5185;</span><br><span class="line">  invariants();</span><br><span class="line">  HeapWord* obj = top();</span><br><span class="line">  //&#x5982;&#x679C;&#x7A7A;&#x95F4;&#x8DB3;&#x591F;&#xFF0C;&#x5219;&#x5206;&#x914D;&#x5185;&#x5B58;</span><br><span class="line">  if (pointer_delta(end(), obj) &gt;= size) {</span><br><span class="line">    set_top(obj + size);</span><br><span class="line">    invariants();</span><br><span class="line">    return obj;</span><br><span class="line">  }</span><br><span class="line">  return NULL;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-2-TLAB-&#x6162;&#x5206;&#x914D;"><a href="#9-3-2-TLAB-&#x6162;&#x5206;&#x914D;" class="headerlink" title="9.3.2. TLAB &#x6162;&#x5206;&#x914D;"></a>9.3.2. TLAB &#x6162;&#x5206;&#x914D;</h3><p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/memAllocator.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;HeapWord* MemAllocator::allocate_inside_tlab_slow(Allocation&amp; allocation) const {</span><br><span class="line">  HeapWord* mem = NULL;</span><br><span class="line">  ThreadLocalAllocBuffer&amp; tlab = _thread-&gt;tlab();</span><br><span class="line"></span><br><span class="line">  // &#x5982;&#x679C; TLAB &#x5269;&#x4F59;&#x7A7A;&#x95F4;&#x5927;&#x4E8E; &#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#xFF0C;&#x5219;&#x8BB0;&#x5F55;&#x5E76;&#x8BA9;&#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#x9012;&#x589E;</span><br><span class="line">  if (tlab.free() &gt; tlab.refill_waste_limit()) {</span><br><span class="line">    tlab.record_slow_allocation(_word_size);</span><br><span class="line">    return NULL;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  //&#x91CD;&#x65B0;&#x8BA1;&#x7B97; TLAB &#x5927;&#x5C0F;</span><br><span class="line">  size_t new_tlab_size = tlab.compute_size(_word_size);</span><br><span class="line">  //TLAB &#x653E;&#x56DE; Eden &#x533A;</span><br><span class="line">  tlab.retire_before_allocation();</span><br><span class="line">  </span><br><span class="line">  if (new_tlab_size == 0) {</span><br><span class="line">    return NULL;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  // &#x8BA1;&#x7B97;&#x6700;&#x5C0F;&#x5927;&#x5C0F;</span><br><span class="line">  size_t min_tlab_size = ThreadLocalAllocBuffer::compute_min_size(_word_size);</span><br><span class="line">  //&#x5206;&#x914D;&#x65B0;&#x7684; TLAB &#x7A7A;&#x95F4;&#xFF0C;&#x5E76;&#x5728;&#x91CC;&#x9762;&#x5206;&#x914D;&#x5BF9;&#x8C61;</span><br><span class="line">  mem = Universe::heap()-&gt;allocate_new_tlab(min_tlab_size, new_tlab_size, &amp;allocation._allocated_tlab_size);</span><br><span class="line">  if (mem == NULL) {</span><br><span class="line">    assert(allocation._allocated_tlab_size == 0,</span><br><span class="line">           &quot;Allocation failed, but actual size was updated. min: &quot; SIZE_FORMAT</span><br><span class="line">           &quot;, desired: &quot; SIZE_FORMAT &quot;, actual: &quot; SIZE_FORMAT,</span><br><span class="line">           min_tlab_size, new_tlab_size, allocation._allocated_tlab_size);</span><br><span class="line">    return NULL;</span><br><span class="line">  }</span><br><span class="line">  assert(allocation._allocated_tlab_size != 0, &quot;Allocation succeeded but actual size not updated. mem at: &quot;</span><br><span class="line">         PTR_FORMAT &quot; min: &quot; SIZE_FORMAT &quot;, desired: &quot; SIZE_FORMAT,</span><br><span class="line">         p2i(mem), min_tlab_size, new_tlab_size);</span><br><span class="line">  //&#x5982;&#x679C;&#x542F;&#x7528;&#x4E86; ZeroTLAB &#x8FD9;&#x4E2A; JVM &#x53C2;&#x6570;&#xFF0C;&#x5219;&#x5C06;&#x5BF9;&#x8C61;&#x6240;&#x6709;&#x5B57;&#x6BB5;&#x7F6E;&#x96F6;&#x503C;</span><br><span class="line">  if (ZeroTLAB) {</span><br><span class="line">    // ..and clear it.</span><br><span class="line">    Copy::zero_to_words(mem, allocation._allocated_tlab_size);</span><br><span class="line">  } else {</span><br><span class="line">    // ...and zap just allocated object.</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  //&#x8BBE;&#x7F6E;&#x65B0;&#x7684; TLAB &#x7A7A;&#x95F4;&#x4E3A;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x7684; TLAB</span><br><span class="line">  tlab.fill(mem, mem + _word_size, allocation._allocated_tlab_size);</span><br><span class="line">  //&#x8FD4;&#x56DE;&#x5206;&#x914D;&#x7684;&#x5BF9;&#x8C61;&#x5185;&#x5B58;&#x5730;&#x5740;</span><br><span class="line">  return mem;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="9-3-2-1-TLAB&#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;"><a href="#9-3-2-1-TLAB&#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;" class="headerlink" title="9.3.2.1 TLAB&#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;"></a>9.3.2.1 TLAB&#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;</h4><p>TLAB&#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4; <code>_refill_waste_limit</code> &#x521D;&#x59CB;&#x503C;&#x4E3A; TLAB &#x5927;&#x5C0F;&#x9664;&#x4EE5; TLABRefillWasteFraction&#xFF1A;<a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;size_t initial_refill_waste_limit()            { return desired_size() / TLABRefillWasteFraction; }</span><br></pre></td></tr></table></figure>
+
+<p>&#x6BCF;&#x6B21;&#x6162;&#x5206;&#x914D;&#xFF0C;&#x8C03;&#x7528;<code>record_slow_allocation(size_t obj_size)</code>&#x8BB0;&#x5F55;&#x6162;&#x5206;&#x914D;&#x7684;&#x540C;&#x65F6;&#xFF0C;&#x589E;&#x52A0; TLAB &#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#x7684;&#x5927;&#x5C0F;&#xFF1A;</p>
+<p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void ThreadLocalAllocBuffer::record_slow_allocation(size_t obj_size) {</span><br><span class="line">  //&#x6BCF;&#x6B21;&#x6162;&#x5206;&#x914D;&#xFF0C;_refill_waste_limit &#x589E;&#x52A0; refill_waste_limit_increment&#xFF0C;&#x4E5F;&#x5C31;&#x662F; TLABWasteIncrement</span><br><span class="line">  set_refill_waste_limit(refill_waste_limit() + refill_waste_limit_increment());</span><br><span class="line">  _slow_allocations++;</span><br><span class="line">  log_develop_trace(gc, tlab)(&quot;TLAB: %s thread: &quot; INTPTR_FORMAT &quot; [id: %2d]&quot;</span><br><span class="line">                              &quot; obj: &quot; SIZE_FORMAT</span><br><span class="line">                              &quot; free: &quot; SIZE_FORMAT</span><br><span class="line">                              &quot; waste: &quot; SIZE_FORMAT,</span><br><span class="line">                              &quot;slow&quot;, p2i(thread()), thread()-&gt;osthread()-&gt;thread_id(),</span><br><span class="line">                              obj_size, free(), refill_waste_limit());</span><br><span class="line">}</span><br><span class="line">//refill_waste_limit_increment &#x5C31;&#x662F; JVM &#x53C2;&#x6570; TLABWasteIncrement</span><br><span class="line">static size_t refill_waste_limit_increment()   { return TLABWasteIncrement; }</span><br></pre></td></tr></table></figure>
+
+<h4 id="9-3-2-2-&#x91CD;&#x65B0;&#x8BA1;&#x7B97;-TLAB-&#x5927;&#x5C0F;"><a href="#9-3-2-2-&#x91CD;&#x65B0;&#x8BA1;&#x7B97;-TLAB-&#x5927;&#x5C0F;" class="headerlink" title="9.3.2.2. &#x91CD;&#x65B0;&#x8BA1;&#x7B97; TLAB &#x5927;&#x5C0F;"></a>9.3.2.2. &#x91CD;&#x65B0;&#x8BA1;&#x7B97; TLAB &#x5927;&#x5C0F;</h4><p>&#x91CD;&#x65B0;&#x8BA1;&#x7B97;&#x4F1A;&#x53D6; &#x5F53;&#x524D;&#x5806;&#x5269;&#x4F59;&#x7ED9; TLAB &#x53EF;&#x5206;&#x914D;&#x7684;&#x7A7A;&#x95F4; &#x548C; <strong>TLAB &#x671F;&#x671B;&#x5927;&#x5C0F; + &#x5F53;&#x524D;&#x9700;&#x8981;&#x5206;&#x914D;&#x7684;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;</strong> &#x4E2D;&#x7684;&#x5C0F;&#x7684;&#x90A3;&#x4E2A;&#xFF1A;</p>
+<p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.inline.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;inline size_t ThreadLocalAllocBuffer::compute_size(size_t obj_size) {</span><br><span class="line">  //&#x83B7;&#x53D6;&#x5F53;&#x524D;&#x5806;&#x5269;&#x4F59;&#x7ED9; TLAB &#x53EF;&#x5206;&#x914D;&#x7684;&#x7A7A;&#x95F4;</span><br><span class="line">  const size_t available_size = Universe::heap()-&gt;unsafe_max_tlab_alloc(thread()) / HeapWordSize;</span><br><span class="line">  //&#x53D6; TLAB &#x53EF;&#x5206;&#x914D;&#x7684;&#x7A7A;&#x95F4; &#x548C; TLAB &#x671F;&#x671B;&#x5927;&#x5C0F; + &#x5F53;&#x524D;&#x9700;&#x8981;&#x5206;&#x914D;&#x7684;&#x7A7A;&#x95F4;&#x5927;&#x5C0F; &#x4EE5;&#x53CA; TLAB &#x6700;&#x5927;&#x5927;&#x5C0F;&#x4E2D;&#x7684;&#x5C0F;&#x7684;&#x90A3;&#x4E2A;</span><br><span class="line">  size_t new_tlab_size = MIN3(available_size, desired_size() + align_object_size(obj_size), max_size());</span><br><span class="line"></span><br><span class="line">  // &#x786E;&#x4FDD;&#x5927;&#x5C0F;&#x5927;&#x4E8E; dummy obj &#x5BF9;&#x8C61;&#x5934;</span><br><span class="line">  if (new_tlab_size &lt; compute_min_size(obj_size)) {</span><br><span class="line">    log_trace(gc, tlab)(&quot;ThreadLocalAllocBuffer::compute_size(&quot; SIZE_FORMAT &quot;) returns failure&quot;,</span><br><span class="line">                        obj_size);</span><br><span class="line">    return 0;</span><br><span class="line">  }</span><br><span class="line">  log_trace(gc, tlab)(&quot;ThreadLocalAllocBuffer::compute_size(&quot; SIZE_FORMAT &quot;) returns &quot; SIZE_FORMAT,</span><br><span class="line">                      obj_size, new_tlab_size);</span><br><span class="line">  return new_tlab_size;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="9-3-2-3-&#x5F53;&#x524D;-TLAB-&#x653E;&#x56DE;&#x5806;"><a href="#9-3-2-3-&#x5F53;&#x524D;-TLAB-&#x653E;&#x56DE;&#x5806;" class="headerlink" title="9.3.2.3. &#x5F53;&#x524D; TLAB &#x653E;&#x56DE;&#x5806;"></a>9.3.2.3. &#x5F53;&#x524D; TLAB &#x653E;&#x56DE;&#x5806;</h4><p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x5728;TLAB&#x6162;&#x5206;&#x914D;&#x88AB;&#x8C03;&#x7528;&#xFF0C;&#x5F53;&#x524D; TLAB &#x653E;&#x56DE;&#x5806;</span><br><span class="line">void ThreadLocalAllocBuffer::retire_before_allocation() {</span><br><span class="line">  //&#x5C06;&#x5F53;&#x524D; TLAB &#x5269;&#x4F59;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#x52A0;&#x5165;&#x6162;&#x5206;&#x914D;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;</span><br><span class="line">  _slow_refill_waste += (unsigned int)remaining();</span><br><span class="line">  //&#x6267;&#x884C; TLAB &#x9000;&#x8FD8;&#x7ED9;&#x5806;&#xFF0C;&#x8FD9;&#x4E2A;&#x5728;&#x540E;&#x9762; GC &#x7684;&#x65F6;&#x5019;&#x8FD8;&#x4F1A;&#x88AB;&#x8C03;&#x7528;&#x7528;&#x4E8E;&#x5C06;&#x6240;&#x6709;&#x7684;&#x7EBF;&#x7A0B;&#x7684; TLAB &#x9000;&#x56DE;&#x5806;</span><br><span class="line">  retire();</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">//&#x5BF9;&#x4E8E; TLAB &#x6162;&#x5206;&#x914D;&#xFF0C;stats &#x4E3A;&#x7A7A;</span><br><span class="line">//&#x5BF9;&#x4E8E; GC &#x7684;&#x65F6;&#x5019;&#x8C03;&#x7528;&#xFF0C;stats &#x7528;&#x4E8E;&#x8BB0;&#x5F55;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x7684;&#x6570;&#x636E;</span><br><span class="line">void ThreadLocalAllocBuffer::retire(ThreadLocalAllocStats* stats) {</span><br><span class="line">  </span><br><span class="line">  if (stats != NULL) {</span><br><span class="line">    accumulate_and_reset_statistics(stats);</span><br><span class="line">  }</span><br><span class="line">  //&#x5982;&#x679C;&#x5F53;&#x524D; TLAB &#x6709;&#x6548;</span><br><span class="line">  if (end() != NULL) {</span><br><span class="line">    invariants();</span><br><span class="line">    //&#x5C06;&#x7528;&#x4E86;&#x7684;&#x7A7A;&#x95F4;&#x8BB0;&#x5F55;&#x5982;&#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x5BF9;&#x8C61;&#x5927;&#x5C0F;&#x8BB0;&#x5F55;</span><br><span class="line">    thread()-&gt;incr_allocated_bytes(used_bytes());</span><br><span class="line">    //&#x586B;&#x5145;dummy object</span><br><span class="line">    insert_filler();</span><br><span class="line">    //&#x6E05;&#x7A7A;&#x5F53;&#x524D; TLAB &#x6307;&#x9488;</span><br><span class="line">    initialize(NULL, NULL, NULL);</span><br><span class="line">  }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-4-GC-&#x76F8;&#x5173;-TLAB-&#x64CD;&#x4F5C;"><a href="#9-4-GC-&#x76F8;&#x5173;-TLAB-&#x64CD;&#x4F5C;" class="headerlink" title="9.4. GC &#x76F8;&#x5173; TLAB &#x64CD;&#x4F5C;"></a>9.4. GC &#x76F8;&#x5173; TLAB &#x64CD;&#x4F5C;</h2><h3 id="9-4-1-GC-&#x524D;"><a href="#9-4-1-GC-&#x524D;" class="headerlink" title="9.4.1. GC &#x524D;"></a>9.4.1. GC &#x524D;</h3><p>&#x4E0D;&#x540C;&#x7684; GC &#x53EF;&#x80FD;&#x5B9E;&#x73B0;&#x4E0D;&#x4E00;&#x6837;&#xFF0C;&#x4F46;&#x662F; TLAB &#x64CD;&#x4F5C;&#x7684;&#x65F6;&#x673A;&#x662F;&#x57FA;&#x672C;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5; G1 GC &#x4E3A;&#x4F8B;&#xFF0C;&#x5728;&#x771F;&#x6B63; GC &#x524D;&#xFF1A;</p>
+<p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/g1/g1CollectedHeap.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void G1CollectedHeap::gc_prologue(bool full) {</span><br><span class="line">  //&#x7701;&#x7565;&#x5176;&#x4ED6;&#x4EE3;&#x7801;</span><br><span class="line"></span><br><span class="line">  // Fill TLAB&apos;s and such</span><br><span class="line">  {</span><br><span class="line">    Ticks start = Ticks::now();</span><br><span class="line">    //&#x786E;&#x4FDD;&#x5806;&#x5185;&#x5B58;&#x662F;&#x53EF;&#x4EE5;&#x89E3;&#x6790;&#x7684;</span><br><span class="line">    ensure_parsability(true);</span><br><span class="line">    Tickspan dt = Ticks::now() - start;</span><br><span class="line">    phase_times()-&gt;record_prepare_tlab_time_ms(dt.seconds() * MILLIUNITS);</span><br><span class="line">  }</span><br><span class="line">  //&#x7701;&#x7565;&#x5176;&#x4ED6;&#x4EE3;&#x7801;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E3A;&#x4F55;&#x8981;&#x786E;&#x4FDD;&#x5806;&#x5185;&#x5B58;&#x662F;&#x53EF;&#x4EE5;&#x89E3;&#x6790;&#x7684;&#x5462;&#xFF1F;&#x8FD9;&#x6837;&#x6709;&#x5229;&#x4E8E;&#x66F4;&#x5FEB;&#x901F;&#x7684;&#x626B;&#x63CF;&#x5806;&#x4E0A;&#x5BF9;&#x8C61;&#x3002;&#x786E;&#x4FDD;&#x5185;&#x5B58;&#x53EF;&#x4EE5;&#x89E3;&#x6790;&#x91CC;&#x9762;&#x505A;&#x4E86;&#x4EC0;&#x4E48;&#x5462;&#xFF1F;&#x5176;&#x5B9E;&#x4E3B;&#x8981;&#x5C31;&#x662F;&#x9000;&#x8FD8;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x7684; TLAB &#x4EE5;&#x53CA;&#x586B;&#x5145; dummy object&#x3002;</p>
+<p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/g1/g1CollectedHeap.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void CollectedHeap::ensure_parsability(bool retire_tlabs) {</span><br><span class="line">  //&#x771F;&#x6B63;&#x7684; GC &#x80AF;&#x5B9A;&#x53D1;&#x751F;&#x5728;&#x5B89;&#x5168;&#x70B9;&#x4E0A;&#xFF0C;&#x8FD9;&#x4E2A;&#x5728;&#x540E;&#x9762;&#x5B89;&#x5168;&#x70B9;&#x7AE0;&#x8282;&#x4F1A;&#x8BE6;&#x7EC6;&#x8BF4;&#x660E;</span><br><span class="line">  assert(SafepointSynchronize::is_at_safepoint() || !is_init_completed(),</span><br><span class="line">         &quot;Should only be called at a safepoint or at start-up&quot;);</span><br><span class="line"></span><br><span class="line">  ThreadLocalAllocStats stats;</span><br><span class="line">  for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next();) {</span><br><span class="line">    BarrierSet::barrier_set()-&gt;make_parsable(thread);</span><br><span class="line">    //&#x5982;&#x679C;&#x5168;&#x5C40;&#x542F;&#x7528;&#x4E86; TLAB</span><br><span class="line">    if (UseTLAB) {</span><br><span class="line">      //&#x5982;&#x679C;&#x6307;&#x5B9A;&#x8981;&#x56DE;&#x6536;&#xFF0C;&#x5219;&#x56DE;&#x6536; TLAB</span><br><span class="line">      if (retire_tlabs) {</span><br><span class="line">        //&#x56DE;&#x6536; TLAB&#xFF0C;&#x8C03;&#x7528;  9.3.2.3. &#x5F53;&#x524D; TLAB &#x653E;&#x56DE;&#x5806; &#x63D0;&#x5230;&#x7684; retire &#x65B9;&#x6CD5;</span><br><span class="line">        thread-&gt;tlab().retire(&amp;stats);</span><br><span class="line">      } else {</span><br><span class="line">        //&#x5F53;&#x524D;&#x5982;&#x679C;&#x4E0D;&#x56DE;&#x6536;&#xFF0C;&#x5219;&#x5C06; TLAB &#x586B;&#x5145; Dummy Object &#x5229;&#x4E8E;&#x89E3;&#x6790;</span><br><span class="line">        thread-&gt;tlab().make_parsable();</span><br><span class="line">      }</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  stats.publish();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-4-2-GC-&#x540E;"><a href="#9-4-2-GC-&#x540E;" class="headerlink" title="9.4.2. GC &#x540E;"></a>9.4.2. GC &#x540E;</h3><p>&#x4E0D;&#x540C;&#x7684; GC &#x53EF;&#x80FD;&#x5B9E;&#x73B0;&#x4E0D;&#x4E00;&#x6837;&#xFF0C;&#x4F46;&#x662F; TLAB &#x64CD;&#x4F5C;&#x7684;&#x65F6;&#x673A;&#x662F;&#x57FA;&#x672C;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5; G1 GC &#x4E3A;&#x4F8B;&#xFF0C;&#x5728; GC &#x540E;&#xFF1A;</p>
+<p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/g1/g1CollectedHeap.cpp</code></a> <code>_desired_size</code>&#x662F;&#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x53D8;&#x5F97;&#x5462;&#xFF1F;&#x600E;&#x4E48;&#x53D8;&#x5F97;&#x5462;&#xFF1F;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;void G1CollectedHeap::gc_epilogue(bool full) {</span><br><span class="line">    //&#x7701;&#x7565;&#x5176;&#x4ED6;&#x4EE3;&#x7801;</span><br><span class="line">    resize_all_tlabs();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/collectedHeap.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void CollectedHeap::resize_all_tlabs() {</span><br><span class="line">  //&#x9700;&#x8981;&#x5728;&#x5B89;&#x5168;&#x70B9;&#xFF0C;GC &#x4F1A;&#x5904;&#x4E8E;&#x5B89;&#x5168;&#x70B9;&#x7684;</span><br><span class="line">  assert(SafepointSynchronize::is_at_safepoint() || !is_init_completed(),</span><br><span class="line">         &quot;Should only resize tlabs at safepoint&quot;);</span><br><span class="line">  //&#x5982;&#x679C; UseTLAB &#x548C; ResizeTLAB &#x90FD;&#x662F;&#x6253;&#x5F00;&#x7684;&#xFF08;&#x9ED8;&#x8BA4;&#x5C31;&#x662F;&#x6253;&#x5F00;&#x7684;&#xFF09;</span><br><span class="line">  if (UseTLAB &amp;&amp; ResizeTLAB) {</span><br><span class="line">    for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {</span><br><span class="line">      //&#x91CD;&#x65B0;&#x8BA1;&#x7B97;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B; TLAB &#x671F;&#x671B;&#x5927;&#x5C0F;</span><br><span class="line">      thread-&gt;tlab().resize();</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x91CD;&#x65B0;&#x8BA1;&#x7B97;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B; TLAB &#x671F;&#x671B;&#x5927;&#x5C0F;&#xFF1A; <a href="/external_links/e561795e9cbd7a1f31f4f8472b2a3c10.html" target="blank" rel="noopener"><code>src/hotspot/share/gc/shared/threadLocalAllocBuffer.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;void ThreadLocalAllocBuffer::resize() {</span><br><span class="line">  assert(ResizeTLAB, &quot;Should not call this otherwise&quot;);</span><br><span class="line">  //&#x6839;&#x636E; _allocation_fraction &#x8FD9;&#x4E2A; EMA &#x91C7;&#x96C6;&#x5F97;&#x51FA;&#x5E73;&#x5747;&#x6570;&#x4E58;&#x4EE5;Eden&#x533A;&#x5927;&#x5C0F;&#xFF0C;&#x5F97;&#x51FA; TLAB &#x5F53;&#x524D;&#x9884;&#x6D4B;&#x5360;&#x7528;&#x5185;&#x5B58;&#x6BD4;&#x4F8B;</span><br><span class="line">  size_t alloc = (size_t)(_allocation_fraction.average() *</span><br><span class="line">                          (Universe::heap()-&gt;tlab_capacity(thread()) / HeapWordSize));</span><br><span class="line">  //&#x9664;&#x4EE5;&#x76EE;&#x6807; refill &#x6B21;&#x6570;&#x5C31;&#x662F;&#x65B0;&#x7684; TLAB &#x5927;&#x5C0F;&#xFF0C;&#x548C;&#x521D;&#x59CB;&#x5316;&#x65F6;&#x5019;&#x7684;&#x8BA1;&#x7B97;&#x65B9;&#x6CD5;&#x5DEE;&#x4E0D;&#x591A;</span><br><span class="line">  size_t new_size = alloc / _target_refills;</span><br><span class="line">  //&#x4FDD;&#x8BC1;&#x5728; min_size &#x8FD8;&#x6709; max_size &#x4E4B;&#x95F4;</span><br><span class="line">  new_size = clamp(new_size, min_size(), max_size());</span><br><span class="line"></span><br><span class="line">  size_t aligned_new_size = align_object_size(new_size);</span><br><span class="line"></span><br><span class="line">  log_trace(gc, tlab)(&quot;TLAB new size: thread: &quot; INTPTR_FORMAT &quot; [id: %2d]&quot;</span><br><span class="line">                      &quot; refills %d  alloc: %8.6f desired_size: &quot; SIZE_FORMAT &quot; -&gt; &quot; SIZE_FORMAT,</span><br><span class="line">                      p2i(thread()), thread()-&gt;osthread()-&gt;thread_id(),</span><br><span class="line">                      _target_refills, _allocation_fraction.average(), desired_size(), aligned_new_size);</span><br><span class="line">  //&#x8BBE;&#x7F6E;&#x65B0;&#x7684; TLAB &#x5927;&#x5C0F;</span><br><span class="line">  set_desired_size(aligned_new_size);</span><br><span class="line">  //&#x91CD;&#x7F6E; TLAB &#x6700;&#x5927;&#x6D6A;&#x8D39;&#x7A7A;&#x95F4;</span><br><span class="line">  set_refill_waste_limit(initial_refill_waste_limit());</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/c5549c853892e85cc22ad7b7159b5c5a.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6925218101147484167.html" rel="next" title="全网最硬核 JVM TLAB 分析 4 TLAB 基本流程">
+                <i class="fa fa-chevron-left"></i> 全网最硬核 JVM TLAB 分析 4 TLAB 基本流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6925218189395787783.html" rel="prev" title="全网最硬核 JVM TLAB 分析 6 TLAB 相关热门">
+                全网最硬核 JVM TLAB 分析 6 TLAB 相关热门 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">102</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#OpenJDK-HotSpot-TLAB-相关源代码分析"><span class="nav-number">1.</span> <span class="nav-text">OpenJDK HotSpot TLAB 相关源代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-TLAB-类构成"><span class="nav-number">1.1.</span> <span class="nav-text">9.1. TLAB 类构成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-2-TLAB-初始化"><span class="nav-number">1.2.</span> <span class="nav-text">9.2. TLAB 初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-2-1-初始期望大小是如何计算的呢？"><span class="nav-number">1.2.1.</span> <span class="nav-text">9.2.1. 初始期望大小是如何计算的呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-2-2-TLAB-最大大小是怎样决定的呢？"><span class="nav-number">1.2.2.</span> <span class="nav-text">9.2.2. TLAB 最大大小是怎样决定的呢？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-3-TLAB-分配内存"><span class="nav-number">1.3.</span> <span class="nav-text">9.3. TLAB 分配内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-3-1-TLAB-快分配"><span class="nav-number">1.3.1.</span> <span class="nav-text">9.3.1. TLAB 快分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-3-2-TLAB-慢分配"><span class="nav-number">1.3.2.</span> <span class="nav-text">9.3.2. TLAB 慢分配</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#9-3-2-1-TLAB最大浪费空间"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">9.3.2.1 TLAB最大浪费空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-3-2-2-重新计算-TLAB-大小"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">9.3.2.2. 重新计算 TLAB 大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-3-2-3-当前-TLAB-放回堆"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">9.3.2.3. 当前 TLAB 放回堆</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-4-GC-相关-TLAB-操作"><span class="nav-number">1.4.</span> <span class="nav-text">9.4. GC 相关 TLAB 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-1-GC-前"><span class="nav-number">1.4.1.</span> <span class="nav-text">9.4.1. GC 前</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-2-GC-后"><span class="nav-number">1.4.2.</span> <span class="nav-text">9.4.2. GC 后</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

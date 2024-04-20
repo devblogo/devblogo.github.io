@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,面试,Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4E2A;&amp;#x4EBA;&amp;#x521B;&amp;#x4F5C;&amp;#x516C;&amp;#x7EA6;&amp;#xFF1A;&amp;#x672C;&amp;#x4EBA;&amp;#x58F0;&amp;#x660E;&amp;#x521B;&amp;#x4F5C;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0;&amp;#x7686;&amp;#x4E3A;&amp;#x81EA;&amp;#x5DF1;&amp;#x539F;&amp;#x521B;&amp;#xFF0C">
+<meta name="keywords" content="后端,面试,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="全网最硬核 JVM 内存解析 - 8元空间的核心概念与设计">
+<meta property="og:url" content="https://dev.newban.cn/7225879724545835045.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4E2A;&amp;#x4EBA;&amp;#x521B;&amp;#x4F5C;&amp;#x516C;&amp;#x7EA6;&amp;#xFF1A;&amp;#x672C;&amp;#x4EBA;&amp;#x58F0;&amp;#x660E;&amp;#x521B;&amp;#x4F5C;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0;&amp;#x7686;&amp;#x4E3A;&amp;#x81EA;&amp;#x5DF1;&amp;#x539F;&amp;#x521B;&amp;#xFF0C">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/151ce8c407b46e34612bbcbef289d0a1ca6f195d946814954c68ba516eab1d30">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/062f83eb86d962fb908f435ca48d3a34595778c2f445941e180c9385baf7bc8e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/dc8ab1ddac796c20c127661de96e74f57bf6cabdc20efaf3b4a8faff5c5299ba">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/8776d471ce962b3b5879895ad3078b439717d0d403b619ec224f9dfba59d2adc">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/b9a6d012fc7fd7e6aa9d6235379b2e19f23ffa83a77f502ece7b63665dc0a79a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/de6b45fd0d443d8581e24ece4f3b1752335e54cb173834d78b9ba7a01a4b370b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/fccacae028632575808712fffdba9a45b29ac786c532fa08dcb8a814b22a9b83">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/268fc9d67381a92d6506b611687c07b5eee9719a126ed0e2cb49196ec9fce75d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/c82e125f887ccac66038e7d82524ed75d39738b96e67c886a6a6fce4868d1bc9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/9b28ac2b49b82318b63c6a3013d89685b7379d5967748e89040d0b6e0e478c76">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/f1cd14b404e35fd35c7eb8ce092a83fe478247cde475db777332a2f0907a0bad">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/e0f903ed607b2e4706cc2d489caf00c8c5734176993338f066eb9fac84a13b9d">
+<meta property="og:updated_time" content="2024-04-20T10:25:28.844Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="全网最硬核 JVM 内存解析 - 8元空间的核心概念与设计">
+<meta name="twitter:description" content="&amp;#x4E2A;&amp;#x4EBA;&amp;#x521B;&amp;#x4F5C;&amp;#x516C;&amp;#x7EA6;&amp;#xFF1A;&amp;#x672C;&amp;#x4EBA;&amp;#x58F0;&amp;#x660E;&amp;#x521B;&amp;#x4F5C;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0;&amp;#x7686;&amp;#x4E3A;&amp;#x81EA;&amp;#x5DF1;&amp;#x539F;&amp;#x521B;&amp;#xFF0C">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/151ce8c407b46e34612bbcbef289d0a1ca6f195d946814954c68ba516eab1d30">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7225879724545835045.html">
+
+
+
+
+
+  <title>全网最硬核 JVM 内存解析 - 8元空间的核心概念与设计 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">全网最硬核 JVM 内存解析 - 8元空间的核心概念与设计</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-04-25T15:39:48+08:00">
+                2023-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x4E2A;&#x4EBA;&#x521B;&#x4F5C;&#x516C;&#x7EA6;&#xFF1A;&#x672C;&#x4EBA;&#x58F0;&#x660E;&#x521B;&#x4F5C;&#x7684;&#x6240;&#x6709;&#x6587;&#x7AE0;&#x7686;&#x4E3A;&#x81EA;&#x5DF1;&#x539F;&#x521B;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x53C2;&#x8003;&#x4EFB;&#x4F55;&#x6587;&#x7AE0;&#x7684;&#x5730;&#x65B9;&#xFF0C;&#x4F1A;&#x6807;&#x6CE8;&#x51FA;&#x6765;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x758F;&#x6F0F;&#xFF0C;&#x6B22;&#x8FCE;&#x5927;&#x5BB6;&#x6279;&#x5224;&#x3002;&#x5982;&#x679C;&#x5927;&#x5BB6;&#x53D1;&#x73B0;&#x7F51;&#x4E0A;&#x6709;&#x6284;&#x88AD;&#x672C;&#x6587;&#x7AE0;&#x7684;&#xFF0C;&#x6B22;&#x8FCE;&#x4E3E;&#x62A5;&#xFF0C;&#x5E76;&#x4E14;&#x79EF;&#x6781;&#x5411;&#x8FD9;&#x4E2A; <a href="/external_links/a7475ce7cc4a9ea6f81215803b043243.html" target="blank" rel="noopener">github &#x4ED3;&#x5E93;</a> &#x63D0;&#x4EA4; issue&#xFF0C;&#x8C22;&#x8C22;&#x652F;&#x6301;~<br>&#x53E6;&#x5916;&#xFF0C;&#x672C;&#x6587;&#x4E3A;&#x4E86;&#x907F;&#x514D;&#x6284;&#x88AD;&#xFF0C;&#x4F1A;&#x5728;&#x4E0D;&#x5F71;&#x54CD;&#x9605;&#x8BFB;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5728;&#x6587;&#x7AE0;&#x7684;&#x968F;&#x673A;&#x4F4D;&#x7F6E;&#x653E;&#x5165;&#x5BF9;&#x4E8E;&#x6284;&#x88AD;&#x548C;&#x6D17;&#x7A3F;&#x7684;&#x4EBA;&#x7684;&#x201C;&#x4EB2;&#x5207;&#x201D;&#x7684;&#x95EE;&#x5019;&#x3002;&#x5982;&#x679C;&#x662F;&#x6B63;&#x5E38;&#x8BFB;&#x8005;&#x770B;&#x5230;&#xFF0C;&#x7B14;&#x8005;&#x5728;&#x8FD9;&#x91CC;&#x8BF4;&#x58F0;&#x5BF9;&#x4E0D;&#x8D77;&#xFF0C;&#x3002;&#x5982;&#x679C;&#x88AB;&#x6284;&#x88AD;&#x72D7;&#x6216;&#x8005;&#x6D17;&#x7A3F;&#x72D7;&#x770B;&#x5230;&#x4E86;&#xFF0C;&#x5E0C;&#x671B;&#x4F60;&#x80FD;&#x591F;&#x597D;&#x597D;&#x53CD;&#x601D;&#xFF0C;&#x4E0D;&#x8981;&#x518D;&#x6284;&#x88AD;&#x4E86;&#xFF0C;&#x8C22;&#x8C22;&#x3002;<br>&#x4ECA;&#x5929;&#x53C8;&#x662F;&#x5E72;&#x8D27;&#x6EE1;&#x6EE1;&#x7684;&#x4E00;&#x5929;&#xFF0C;&#x8FD9;&#x662F;&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x89E3;&#x6790;&#x7CFB;&#x5217;&#x7B2C;&#x56DB;&#x7BC7;&#xFF0C;&#x5F80;&#x671F;&#x7CBE;&#x5F69;&#xFF1A;</p>
+<ul>
+<li><a href="https://dev.newban.cn/6925217498723778568">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; TLAB &#x89E3;&#x6790;</a></li>
+<li><a href="https://dev.newban.cn/7051386828913377316">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; Java &#x968F;&#x673A;&#x6570;&#x89E3;&#x6790;</a></li>
+<li><a href="https://dev.newban.cn/7080869319407566879">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; Java &#x65B0;&#x5185;&#x5B58;&#x6A21;&#x578B;&#x89E3;&#x6790;</a></li>
+</ul>
+</blockquote>
+<blockquote>
+<p>&#x672C;&#x7BC7;&#x662F;&#x5173;&#x4E8E; JVM &#x5185;&#x5B58;&#x7684;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;&#x7F51;&#x4E0A;&#x6709;&#x5F88;&#x591A;&#x5173;&#x4E8E; JVM &#x5185;&#x5B58;&#x7ED3;&#x6784;&#x7684;&#x5206;&#x6790;&#x4EE5;&#x53CA;&#x56FE;&#x7247;&#xFF0C;&#x4F46;&#x662F;&#x7531;&#x4E8E;&#x4E0D;&#x662F;&#x4E00;&#x624B;&#x7684;&#x8D44;&#x6599;&#x4EA6;&#x6216;&#x662F;&#x4EBA;&#x4E91;&#x4EA6;&#x4E91;&#x5BFC;&#x81F4;&#x6709;&#x5F88;&#x9519;&#x8BEF;&#xFF0C;&#x9020;&#x6210;&#x4E86;&#x5F88;&#x591A;&#x8BEF;&#x89E3;&#xFF1B;&#x5E76;&#x4E14;&#xFF0C;&#x8FD9;&#x91CC;&#x53EF;&#x80FD;&#x6700;&#x5BB9;&#x6613;&#x6DF7;&#x6DC6;&#x7684;&#x662F;&#x4E00;&#x8FB9;&#x662F; JVM Specification &#x7684;&#x5B9A;&#x4E49;&#xFF0C;&#x4E00;&#x8FB9;&#x662F; Hotspot JVM &#x7684;&#x5B9E;&#x9645;&#x5B9E;&#x73B0;&#xFF0C;&#x6709;&#x65F6;&#x5019;&#x4EBA;&#x4EEC;&#x4E00;&#x4E9B;&#x90E8;&#x5206;&#x8BF4;&#x7684;&#x662F; JVM Specification&#xFF0C;&#x4E00;&#x90E8;&#x5206;&#x8BF4;&#x7684;&#x662F; Hotspot &#x5B9E;&#x73B0;&#xFF0C;&#x7ED9;&#x4EBA;&#x4E00;&#x79CD;&#x5272;&#x88C2;&#x611F;&#x4E0E;&#x8BEF;&#x89E3;&#x3002;&#x672C;&#x7BC7;&#x4E3B;&#x8981;&#x4ECE; Hotspot &#x5B9E;&#x73B0;&#x51FA;&#x53D1;&#xFF0C;&#x4EE5; Linux x86 &#x73AF;&#x5883;&#x4E3A;&#x4E3B;&#xFF0C;&#x7D27;&#x5BC6;&#x8D34;&#x5408; JVM &#x6E90;&#x7801;&#x5E76;&#x4E14;&#x8F85;&#x4EE5;&#x5404;&#x79CD; JVM &#x5DE5;&#x5177;&#x9A8C;&#x8BC1;&#x5E2E;&#x52A9;&#x5927;&#x5BB6;&#x7406;&#x89E3; JVM &#x5185;&#x5B58;&#x7684;&#x7ED3;&#x6784;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x672C;&#x7BC7;&#x4EC5;&#x9650;&#x4E8E;&#x5BF9;&#x4E8E;&#x8FD9;&#x4E9B;&#x5185;&#x5B58;&#x7684;&#x7528;&#x9014;&#xFF0C;&#x4F7F;&#x7528;&#x9650;&#x5236;&#xFF0C;&#x76F8;&#x5173;&#x53C2;&#x6570;&#x7684;&#x5206;&#x6790;&#xFF0C;&#x6709;&#x4E9B;&#x5730;&#x65B9;&#x53EF;&#x80FD;&#x6BD4;&#x8F83;&#x6DF1;&#x5165;&#xFF0C;&#x6709;&#x4E9B;&#x5730;&#x65B9;&#x53EF;&#x80FD;&#x9700;&#x8981;&#x7ED3;&#x5408;&#x672C;&#x8EAB;&#x7528;&#x8FD9;&#x5757;&#x5185;&#x5B58;&#x6D89;&#x53CA;&#x7684; JVM &#x6A21;&#x5757;&#x53BB;&#x8BF4;&#xFF0C;&#x4F1A;&#x653E;&#x5728;&#x53E6;&#x4E00;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x8BE6;&#x7EC6;&#x63CF;&#x8FF0;&#x3002;&#x6700;&#x540E;&#xFF0C;&#x6D17;&#x7A3F;&#x6284;&#x88AD;&#x72D7;&#x4E0D;&#x5F97; house</p>
+</blockquote>
+<p>&#x672C;&#x7BC7;&#x5168;&#x7BC7;&#x76EE;&#x5F55;&#xFF08;&#x4EE5;&#x53CA;&#x6D89;&#x53CA;&#x7684; JVM &#x53C2;&#x6570;&#xFF09;&#xFF1A;</p>
+<ol>
+<li>&#x4ECE; Native Memory Tracking &#x8BF4;&#x8D77;&#xFF08;<a href="https://dev.newban.cn/7225871227743043644">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 1.&#x4ECE; Native Memory Tracking &#x8BF4;&#x8D77;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>Native Memory Tracking &#x7684;&#x5F00;&#x542F;</li>
+<li>Native Memory Tracking &#x7684;&#x4F7F;&#x7528;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>NativeMemoryTracking</code>&#xFF09;</li>
+<li>Native Memory Tracking &#x7684; summary &#x4FE1;&#x606F;&#x6BCF;&#x90E8;&#x5206;&#x542B;&#x4E49;</li>
+<li>Native Memory Tracking &#x7684; summary &#x4FE1;&#x606F;&#x7684;&#x6301;&#x7EED;&#x76D1;&#x63A7;</li>
+<li>&#x4E3A;&#x4F55; Native Memory Tracking &#x4E2D;&#x7533;&#x8BF7;&#x7684;&#x5185;&#x5B58;&#x5206;&#x4E3A; reserved &#x548C; committed</li>
+</ol>
+</li>
+<li>JVM &#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;&#xFF08;<a href="https://dev.newban.cn/7225875600644407357">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 2.JVM &#x5185;&#x5B58;&#x7533;&#x8BF7;&#x4E0E;&#x4F7F;&#x7528;&#x6D41;&#x7A0B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>Linux &#x4E0B;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x6A21;&#x578B;&#x7B80;&#x8FF0;</li>
+<li>JVM commit &#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;<ol>
+<li>JVM commit &#x7684;&#x5185;&#x5B58;&#x4E0E;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x5185;&#x5B58;&#x7684;&#x5DEE;&#x5F02;</li>
+</ol>
+</li>
+<li>&#x5927;&#x9875;&#x5206;&#x914D; UseLargePages&#xFF08;<a href="https://dev.newban.cn/7225875600644489277">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 3.&#x5927;&#x9875;&#x5206;&#x914D; UseLargePages</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>Linux &#x5927;&#x9875;&#x5206;&#x914D;&#x65B9;&#x5F0F; - Huge Translation Lookaside Buffer Page (hugetlbfs)</li>
+<li>Linux &#x5927;&#x9875;&#x5206;&#x914D;&#x65B9;&#x5F0F; - Transparent Huge Pages (THP)</li>
+<li>JVM &#x5927;&#x9875;&#x5206;&#x914D;&#x76F8;&#x5173;&#x53C2;&#x6570;&#x4E0E;&#x673A;&#x5236;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>UseLargePages</code>,<code>UseHugeTLBFS</code>,<code>UseSHM</code>,<code>UseTransparentHugePages</code>,<code>LargePageSizeInBytes</code>&#xFF09;</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>Java &#x5806;&#x5185;&#x5B58;&#x76F8;&#x5173;&#x8BBE;&#x8BA1;&#xFF08;<a href="https://dev.newban.cn/7225874698906615864">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 4.Java &#x5806;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x7684;&#x786E;&#x8BA4;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x901A;&#x7528;&#x521D;&#x59CB;&#x5316;&#x4E0E;&#x6269;&#x5C55;&#x6D41;&#x7A0B;</li>
+<li>&#x76F4;&#x63A5;&#x6307;&#x5B9A;&#x4E09;&#x4E2A;&#x6307;&#x6807;&#x7684;&#x65B9;&#x5F0F;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>MaxHeapSize</code>,<code>MinHeapSize</code>,<code>InitialHeapSize</code>,<code>Xmx</code>,<code>Xms</code>&#xFF09;</li>
+<li>&#x4E0D;&#x624B;&#x52A8;&#x6307;&#x5B9A;&#x4E09;&#x4E2A;&#x6307;&#x6807;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x8FD9;&#x4E09;&#x4E2A;&#x6307;&#x6807;(MinHeapSize,MaxHeapSize,InitialHeapSize)&#x662F;&#x5982;&#x4F55;&#x8BA1;&#x7B97;&#x7684;</li>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x76F8;&#x5173;&#x673A;&#x5236;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>UseCompressedOops</code>&#xFF09;&#xFF08;<a href="https://dev.newban.cn/7225874698906714168">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 5.&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x76F8;&#x5173;&#x673A;&#x5236;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x5B58;&#x5728;&#x7684;&#x610F;&#x4E49;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>ObjectAlignmentInBytes</code>&#xFF09;</li>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x4E0E;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#x7684;&#x5173;&#x7CFB;&#x6F14;&#x8FDB;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>UseCompressedOops</code>,<code>UseCompressedClassPointers</code>&#xFF09;</li>
+<li>&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x7684;&#x4E0D;&#x540C;&#x6A21;&#x5F0F;&#x4E0E;&#x5BFB;&#x5740;&#x4F18;&#x5316;&#x673A;&#x5236;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>ObjectAlignmentInBytes</code>,<code>HeapBaseMinAddress</code>&#xFF09;</li>
+</ol>
+</li>
+<li>&#x4E3A;&#x4F55;&#x9884;&#x7559;&#x7B2C; 0 &#x9875;&#xFF0C;&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488; null &#x5224;&#x65AD;&#x64E6;&#x9664;&#x7684;&#x5B9E;&#x73B0;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>HeapBaseMinAddress</code>&#xFF09;</li>
+<li>&#x7ED3;&#x5408;&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x4E0E;&#x524D;&#x9762;&#x63D0;&#x5230;&#x7684;&#x5806;&#x5185;&#x5B58;&#x9650;&#x5236;&#x7684;&#x521D;&#x59CB;&#x5316;&#x7684;&#x5173;&#x7CFB;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>HeapBaseMinAddress</code>,<code>ObjectAlignmentInBytes</code>,<code>MinHeapSize</code>,<code>MaxHeapSize</code>,<code>InitialHeapSize</code>&#xFF09;</li>
+<li>&#x4F7F;&#x7528; jol + jhsdb + JVM &#x65E5;&#x5FD7;&#x67E5;&#x770B;&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x4E0E; Java &#x5806;&#x9A8C;&#x8BC1;&#x6211;&#x4EEC;&#x524D;&#x9762;&#x7684;&#x7ED3;&#x8BBA;<ol>
+<li>&#x9A8C;&#x8BC1; <code>32-bit</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+<li>&#x9A8C;&#x8BC1; <code>Zero based</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+<li>&#x9A8C;&#x8BC1; <code>Non-zero disjoint</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+<li>&#x9A8C;&#x8BC1; <code>Non-zero based</code> &#x538B;&#x7F29;&#x6307;&#x9488;&#x6A21;&#x5F0F;</li>
+</ol>
+</li>
+<li>&#x5806;&#x5927;&#x5C0F;&#x7684;&#x52A8;&#x6001;&#x4F38;&#x7F29;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>MinHeapFreeRatio</code>,<code>MaxHeapFreeRatio</code>,<code>MinHeapDeltaBytes</code>&#xFF09;&#xFF08;<a href="https://dev.newban.cn/7225879698952470588">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 6.&#x5176;&#x4ED6; Java &#x5806;&#x5185;&#x5B58;&#x76F8;&#x5173;&#x7684;&#x7279;&#x6B8A;&#x673A;&#x5236;</a>&#x5F00;&#x59CB;&#xFF09;</li>
+<li>&#x9002;&#x7528;&#x4E8E;&#x957F;&#x671F;&#x8FD0;&#x884C;&#x5E76;&#x4E14;&#x5C3D;&#x91CF;&#x5C06;&#x6240;&#x6709;&#x53EF;&#x7528;&#x5185;&#x5B58;&#x88AB;&#x5806;&#x4F7F;&#x7528;&#x7684; JVM &#x53C2;&#x6570; AggressiveHeap</li>
+<li>JVM &#x53C2;&#x6570; AlwaysPreTouch &#x7684;&#x4F5C;&#x7528;</li>
+<li>JVM &#x53C2;&#x6570; UseContainerSupport - JVM &#x5982;&#x4F55;&#x611F;&#x77E5;&#x5230;&#x5BB9;&#x5668;&#x5185;&#x5B58;&#x9650;&#x5236;</li>
+<li>JVM &#x53C2;&#x6570; SoftMaxHeapSize - &#x7528;&#x4E8E;&#x5E73;&#x6ED1;&#x8FC1;&#x79FB;&#x66F4;&#x8017;&#x5185;&#x5B58;&#x7684; GC &#x4F7F;&#x7528;</li>
+</ol>
+</li>
+<li>JVM &#x5143;&#x7A7A;&#x95F4;&#x8BBE;&#x8BA1;&#xFF08;<a href="https://dev.newban.cn/7225879698952486972">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 7.&#x5143;&#x7A7A;&#x95F4;&#x5B58;&#x50A8;&#x7684;&#x5143;&#x6570;&#x636E;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x4EC0;&#x4E48;&#x662F;&#x5143;&#x6570;&#x636E;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981;&#x5143;&#x6570;&#x636E;</li>
+<li>&#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x7528;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x5143;&#x7A7A;&#x95F4;&#x4FDD;&#x5B58;&#x4EC0;&#x4E48;</li>
+<li>2.1. &#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x7528;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x4EE5;&#x53CA;&#x91CA;&#x653E;&#x65F6;&#x673A;</li>
+<li>2.2. &#x5143;&#x7A7A;&#x95F4;&#x4FDD;&#x5B58;&#x4EC0;&#x4E48;</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;&#xFF08;<a href="https://dev.newban.cn/7225879724545835045">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 8.&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6574;&#x4F53;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x76F8;&#x5173;&#x53C2;&#x6570;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>MetaspaceSize</code>,<code>MaxMetaspaceSize</code>,<code>MinMetaspaceExpansion</code>,<code>MaxMetaspaceExpansion</code>,<code>MaxMetaspaceFreeRatio</code>,<code>MinMetaspaceFreeRatio</code>,<code>UseCompressedClassPointers</code>,<code>CompressedClassSpaceSize</code>,<code>CompressedClassSpaceBaseAddress</code>,<code>MetaspaceReclaimPolicy</code>&#xFF09;</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x4E0A;&#x4E0B;&#x6587; <code>MetaspaceContext</code></li>
+<li>&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5217;&#x8868; <code>VirtualSpaceList</code></li>
+<li>&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9; <code>VirtualSpaceNode</code> &#x4E0E; <code>CompressedClassSpaceSize</code></li>
+<li><code>MetaChunk</code><ol>
+<li><code>ChunkHeaderPool</code> &#x6C60;&#x5316; <code>MetaChunk</code> &#x5BF9;&#x8C61;</li>
+<li><code>ChunkManager</code> &#x7BA1;&#x7406;&#x7A7A;&#x95F2;&#x7684; <code>MetaChunk</code></li>
+</ol>
+</li>
+<li>&#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x5165;&#x53E3; <code>SystemDictionary</code> &#x4E0E;&#x4FDD;&#x7559;&#x6240;&#x6709; <code>ClassLoaderData</code> &#x7684; <code>ClassLoaderDataGraph</code></li>
+<li>&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684; <code>ClassLoaderData</code> &#x4EE5;&#x53CA; <code>ClassLoaderMetaspace</code></li>
+<li>&#x7BA1;&#x7406;&#x6B63;&#x5728;&#x4F7F;&#x7528;&#x7684; <code>MetaChunk</code> &#x7684; <code>MetaspaceArena</code></li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5206;&#x914D;&#x6D41;&#x7A0B;&#xFF08;<a href="https://dev.newban.cn/7225879724545900581">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 9.&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5206;&#x914D;&#x6D41;&#x7A0B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x5230; <code>MetaSpaceArena</code> &#x7684;&#x6D41;&#x7A0B;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x6574;&#x4F53;&#x6D41;&#x7A0B;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - <code>FreeBlocks</code> &#x56DE;&#x6536;&#x8001;&#x7684; <code>current chunk</code> &#x4E0E;&#x7528;&#x4E8E;&#x540E;&#x7EED;&#x5206;&#x914D;&#x7684;&#x6D41;&#x7A0B;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x5C1D;&#x8BD5;&#x4ECE; <code>FreeBlocks</code> &#x5206;&#x914D;</li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x5C1D;&#x8BD5;&#x6269;&#x5BB9; <code>current chunk</code></li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x4ECE; <code>ChunkManager</code> &#x5206;&#x914D;&#x65B0;&#x7684; <code>MetaChunk</code></li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x4ECE; <code>ChunkManager</code> &#x5206;&#x914D;&#x65B0;&#x7684; <code>MetaChunk</code> - &#x4ECE; <code>VirtualSpaceList</code> &#x7533;&#x8BF7;&#x65B0;&#x7684; <code>RootMetaChunk</code></li>
+<li>&#x4ECE; <code>MetaChunkArena</code> &#x666E;&#x901A;&#x5206;&#x914D; - &#x4ECE; <code>ChunkManager</code> &#x5206;&#x914D;&#x65B0;&#x7684; <code>MetaChunk</code> - &#x5C06; <code>RootMetaChunk</code> &#x5207;&#x5272;&#x6210;&#x4E3A;&#x9700;&#x8981;&#x7684; <code>MetaChunk</code></li>
+<li><code>MetaChunk</code> &#x56DE;&#x6536; - &#x4E0D;&#x540C;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C; <code>MetaChunk</code> &#x5982;&#x4F55;&#x653E;&#x5165; <code>FreeChunkListVector</code></li>
+</ol>
+</li>
+<li><code>ClassLoaderData</code> &#x56DE;&#x6536;</li>
+</ol>
+</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x4E0E;&#x56DE;&#x6536;&#x6D41;&#x7A0B;&#x4E3E;&#x4F8B;&#xFF08;<a href="https://dev.newban.cn/7225879698952634428">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 10.&#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x4E0E;&#x56DE;&#x6536;&#x6D41;&#x7A0B;&#x4E3E;&#x4F8B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>&#x9996;&#x5148;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 1023 &#x5B57;&#x8282;&#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x8FD8;&#x9700;&#x8981;&#x5206;&#x914D; 1023 &#x5B57;&#x8282;&#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 264 KB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 2 MB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x9700;&#x8981;&#x5206;&#x914D; 128KB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x65B0;&#x6765;&#x4E00;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 2&#xFF0C;&#x9700;&#x8981;&#x5206;&#x914D; 1023 Bytes &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 1 &#x88AB; GC &#x56DE;&#x6536;&#x6389;</li>
+<li>&#x7136;&#x540E;&#x7C7B;&#x52A0;&#x8F7D;&#x5668; 2 &#x9700;&#x8981;&#x5206;&#x914D; 1 MB &#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5C5E;&#x4E8E;&#x7C7B;&#x7A7A;&#x95F4;</li>
+</ol>
+</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#x9650;&#x5236;&#x4E0E;&#x52A8;&#x6001;&#x4F38;&#x7F29;&#xFF08;<a href="https://dev.newban.cn/7225879724546015269">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 11.&#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x4E0E;&#x56DE;&#x6536;&#x6D41;&#x7A0B;&#x4E3E;&#x4F8B;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li><code>CommitLimiter</code> &#x7684;&#x9650;&#x5236;&#x5143;&#x7A7A;&#x95F4;&#x53EF;&#x4EE5; commit &#x7684;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x4EE5;&#x53CA;&#x9650;&#x5236;&#x5143;&#x7A7A;&#x95F4;&#x5360;&#x7528;&#x8FBE;&#x5230;&#x591A;&#x5C11;&#x5C31;&#x5F00;&#x59CB;&#x5C1D;&#x8BD5; GC</li>
+<li>&#x6BCF;&#x6B21; GC &#x4E4B;&#x540E;&#xFF0C;&#x4E5F;&#x4F1A;&#x5C1D;&#x8BD5;&#x91CD;&#x65B0;&#x8BA1;&#x7B97; <code>_capacity_until_GC</code></li>
+</ol>
+</li>
+<li><code>jcmd VM.metaspace</code> &#x5143;&#x7A7A;&#x95F4;&#x8BF4;&#x660E;&#x3001;&#x5143;&#x7A7A;&#x95F4;&#x76F8;&#x5173; JVM &#x65E5;&#x5FD7;&#x4EE5;&#x53CA;&#x5143;&#x7A7A;&#x95F4; JFR &#x4E8B;&#x4EF6;&#x8BE6;&#x89E3;&#xFF08;<a href="https://dev.newban.cn/7225879731177013303">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 12.&#x5143;&#x7A7A;&#x95F4;&#x5404;&#x79CD;&#x76D1;&#x63A7;&#x624B;&#x6BB5;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li><code>jcmd &lt;pid&gt; VM.metaspace</code> &#x5143;&#x7A7A;&#x95F4;&#x8BF4;&#x660E;</li>
+<li>&#x5143;&#x7A7A;&#x95F4;&#x76F8;&#x5173; JVM &#x65E5;&#x5FD7;</li>
+<li>&#x5143;&#x7A7A;&#x95F4; JFR &#x4E8B;&#x4EF6;&#x8BE6;&#x89E3;<ol>
+<li><code>jdk.MetaspaceSummary</code> &#x5143;&#x7A7A;&#x95F4;&#x5B9A;&#x65F6;&#x7EDF;&#x8BA1;&#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceAllocationFailure</code> &#x5143;&#x7A7A;&#x95F4;&#x5206;&#x914D;&#x5931;&#x8D25;&#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceOOM</code> &#x5143;&#x7A7A;&#x95F4; OOM &#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceGCThreshold</code> &#x5143;&#x7A7A;&#x95F4; GC &#x9608;&#x503C;&#x53D8;&#x5316;&#x4E8B;&#x4EF6;</li>
+<li><code>jdk.MetaspaceChunkFreeListSummary</code> &#x5143;&#x7A7A;&#x95F4; Chunk FreeList &#x7EDF;&#x8BA1;&#x4E8B;&#x4EF6;</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>JVM &#x7EBF;&#x7A0B;&#x5185;&#x5B58;&#x8BBE;&#x8BA1;&#xFF08;&#x91CD;&#x70B9;&#x7814;&#x7A76; Java &#x7EBF;&#x7A0B;&#xFF09;&#xFF08;<a href="https://dev.newban.cn/7225879724546113573">&#x5168;&#x7F51;&#x6700;&#x786C;&#x6838; JVM &#x5185;&#x5B58;&#x89E3;&#x6790; - 13.JVM &#x7EBF;&#x7A0B;&#x5185;&#x5B58;&#x8BBE;&#x8BA1;</a>&#x5F00;&#x59CB;&#xFF09;<ol>
+<li>JVM &#x4E2D;&#x6709;&#x54EA;&#x51E0;&#x79CD;&#x7EBF;&#x7A0B;&#xFF0C;&#x5BF9;&#x5E94;&#x7EBF;&#x7A0B;&#x6808;&#x76F8;&#x5173;&#x7684;&#x53C2;&#x6570;&#x662F;&#x4EC0;&#x4E48;&#xFF08;&#x6D89;&#x53CA; JVM &#x53C2;&#x6570;&#xFF1A;<code>ThreadStackSize</code>,<code>VMThreadStackSize</code>,<code>CompilerThreadStackSize</code>,<code>StackYellowPages</code>,<code>StackRedPages</code>,<code>StackShadowPages</code>,<code>StackReservedPages</code>,<code>RestrictReservedStack</code>&#xFF09;</li>
+<li>Java &#x7EBF;&#x7A0B;&#x6808;&#x5185;&#x5B58;&#x7684;&#x7ED3;&#x6784;</li>
+<li>Java &#x7EBF;&#x7A0B;&#x5982;&#x4F55;&#x629B;&#x51FA;&#x7684; StackOverflowError<ol>
+<li>&#x89E3;&#x91CA;&#x6267;&#x884C;&#x4E0E;&#x7F16;&#x8BD1;&#x6267;&#x884C;&#x65F6;&#x5019;&#x7684;&#x5224;&#x65AD;&#xFF08;x86&#x4E3A;&#x4F8B;&#xFF09;</li>
+<li>&#x4E00;&#x4E2A; Java &#x7EBF;&#x7A0B; Xss &#x6700;&#x5C0F;&#x80FD;&#x6307;&#x5B9A;&#x591A;&#x5927;</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<ol start="4">
+<li><h1 id="JVM-&#x5143;&#x7A7A;&#x95F4;&#x8BBE;&#x8BA1;"><a href="#JVM-&#x5143;&#x7A7A;&#x95F4;&#x8BBE;&#x8BA1;" class="headerlink" title="JVM &#x5143;&#x7A7A;&#x95F4;&#x8BBE;&#x8BA1;"></a>JVM &#x5143;&#x7A7A;&#x95F4;&#x8BBE;&#x8BA1;</h1></li>
+</ol>
+<h2 id="4-3-&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;"><a href="#4-3-&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;" class="headerlink" title="4.3. &#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;"></a>4.3. &#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x4E0E;&#x8BBE;&#x8BA1;</h2><h3 id="4-3-1-&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6574;&#x4F53;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x76F8;&#x5173;&#x53C2;&#x6570;"><a href="#4-3-1-&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6574;&#x4F53;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x76F8;&#x5173;&#x53C2;&#x6570;" class="headerlink" title="4.3.1. &#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6574;&#x4F53;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x76F8;&#x5173;&#x53C2;&#x6570;"></a>4.3.1. &#x5143;&#x7A7A;&#x95F4;&#x7684;&#x6574;&#x4F53;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x76F8;&#x5173;&#x53C2;&#x6570;</h3><p>&#x5143;&#x7A7A;&#x95F4;&#x914D;&#x7F6E;&#x76F8;&#x5173;&#x7684;&#x53C2;&#x6570;&#xFF1A;</p>
+<ul>
+<li><code>MetaspaceSize</code>&#xFF1A;&#x521D;&#x59CB;&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#xFF0C;&#x4E5F;&#x662F;&#x6700;&#x5C0F;&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#x3002;&#x540E;&#x9762;&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#x4F38;&#x7F29;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E0D;&#x4F1A;&#x5C0F;&#x4E8E;&#x8FD9;&#x4E2A;&#x5927;&#x5C0F;&#x3002;&#x9ED8;&#x8BA4;&#x662F; 21M&#x3002;&#x6284;&#x88AD;&#x527D;&#x7A83;&#x4FB5;&#x6743;<br>&#x6EDA;</li>
+<li><code>MaxMetaspaceSize</code>&#xFF1A;&#x6700;&#x5927;&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F;&#x65E0;&#x7B26;&#x53F7; int &#x6700;&#x5927;&#x503C;&#x3002;</li>
+<li><code>MinMetaspaceExpansion</code>&#xFF1A;&#x6BCF;&#x6B21;&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#x4F38;&#x7F29;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x81F3;&#x5C11;&#x6539;&#x53D8;&#x7684;&#x5927;&#x5C0F;&#x3002;&#x9ED8;&#x8BA4;&#x662F; 256K&#x3002;&#x540E;&#x6587;&#x8BB2;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x9650;&#x5236;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;</li>
+<li><code>MaxMetaspaceExpansion</code>&#xFF1A;&#x6BCF;&#x6B21;&#x5143;&#x7A7A;&#x95F4;&#x5927;&#x5C0F;&#x4F38;&#x7F29;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6700;&#x591A;&#x6539;&#x53D8;&#x7684;&#x5927;&#x5C0F;&#x3002;&#x9ED8;&#x8BA4;&#x662F; 4M&#x3002;&#x540E;&#x6587;&#x8BB2;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x9650;&#x5236;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;</li>
+<li><code>MaxMetaspaceFreeRatio</code>&#xFF1A;&#x6700;&#x5927;&#x5143;&#x7A7A;&#x95F4;&#x7A7A;&#x95F2;&#x6BD4;&#x4F8B;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F; 70&#xFF0C;&#x5373; 70%&#x3002;&#x540E;&#x6587;&#x8BB2;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x9650;&#x5236;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;</li>
+<li><code>MinMetaspaceFreeRatio</code>&#xFF1A;&#x6700;&#x5C0F;&#x5143;&#x7A7A;&#x95F4;&#x7A7A;&#x95F2;&#x6BD4;&#x4F8B;&#xFF0C;&#x9ED8;&#x8BA4;&#x662F; 40&#xFF0C;&#x5373; 40%&#x3002;&#x540E;&#x6587;&#x8BB2;&#x5230;&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x9650;&#x5236;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;</li>
+<li><code>UseCompressedClassPointers</code>&#xFF1A;&#x524D;&#x6587;&#x63D0;&#x5230;&#x8FC7;&#xFF0C;&#x662F;&#x5426;&#x5F00;&#x542F;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#x3002;&#x9ED8;&#x8BA4;&#x662F;&#x5F00;&#x542F;&#x7684;&#x3002;&#x8001;&#x7248;&#x672C;&#x4E2D;&#xFF0C; <code>UseCompressedClassPointers</code> &#x53D6;&#x51B3;&#x4E8E; <code>UseCompressedOops</code>&#xFF0C;&#x5373;&#x538B;&#x7F29;&#x5BF9;&#x8C61;&#x6307;&#x9488;&#x5982;&#x679C;&#x6CA1;&#x5F00;&#x542F;&#xFF0C;&#x90A3;&#x4E48;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#x4E5F;&#x65E0;&#x6CD5;&#x5F00;&#x542F;&#x3002;&#x4F46;&#x662F;<strong>&#x4ECE; Java 15 Build 23 &#x5F00;&#x59CB;&#xFF0C; <code>UseCompressedClassPointers</code> &#x5DF2;&#x7ECF;&#x4E0D;&#x518D;&#x4F9D;&#x8D56; <code>UseCompressedOops</code> &#x4E86;</strong>&#xFF0C;&#x4E24;&#x8005;&#x5728;&#x5927;&#x90E8;&#x5206;&#x60C5;&#x51B5;&#x4E0B;&#x5DF2;&#x7ECF;&#x72EC;&#x7ACB;&#x5F00;&#x6765;&#x3002;&#x9664;&#x975E;&#x5728; x86 &#x7684; CPU &#x4E0A;&#x9762;&#x542F;&#x7528; JVM Compiler Interface&#xFF08;&#x4F8B;&#x5982;&#x4F7F;&#x7528; GraalVM&#xFF09;&#x3002;&#x53C2;&#x8003; JDK ISSUE&#xFF1A;<a href="/external_links/4c7b90a1ec6895b47a51998d04eedb7f.html" target="blank" rel="noopener">bugs.openjdk.java.net/browse/JDK-&#x2026;</a></li>
+<li><code>CompressedClassSpaceSize</code>&#xFF1A;&#x5982;&#x679C;&#x542F;&#x7528;&#x4E86;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#xFF0C;&#x5219;&#x5143;&#x7A7A;&#x95F4;&#x4F1A;&#x5206;&#x4E3A;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x548C;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x5426;&#x5219;&#x53EA;&#x6709;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x3002;&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x9650;&#x5236;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x8303;&#x56F4;&#x662F; 1M ~ 3G&#x3002;&#x9ED8;&#x8BA4;&#x5927;&#x5C0F;&#x662F; 1G&#xFF0C;&#x5982;&#x679C;&#x6307;&#x5B9A;&#x4E86; <code>MaxMetaspaceSize</code>&#xFF0C;&#x90A3;&#x4E48;&#x4E3A; 1G &#x4E0E; <code>MaxMetaspaceSize * 0.8</code> &#x4E2D;&#x6BD4;&#x8F83;&#x5C0F;&#x7684;&#x90A3;&#x4E2A;&#x503C;&#xFF0C;</li>
+<li><code>CompressedClassSpaceBaseAddress</code>&#xFF1A;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x8D77;&#x59CB;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5730;&#x5740;&#xFF0C;&#x8FD9;&#x4E2A;&#x4E00;&#x822C;&#x4E0D;&#x6307;&#x5B9A;&#x3002;&#x4F5C;&#x7528;&#x548C;&#x524D;&#x6587;&#x5206;&#x6790;&#x5806;&#x5185;&#x5B58;&#x7684;&#x5806;&#x8D77;&#x59CB;&#x4F4D;&#x7F6E;&#x7684;&#x4F5C;&#x7528;&#x5DEE;&#x4E0D;&#x591A;&#x3002;</li>
+<li><code>MetaspaceReclaimPolicy</code>&#xFF1A;&#x53EF;&#x4EE5;&#x4E3A;&#xFF1A;<code>balanced</code>, <code>aggressive</code>, &#x4EE5;&#x53CA; <code>none</code>&#xFF0C;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x4E00;&#x70B9;&#x7684;&#x662F; <code>none</code> &#x8981;&#x88AB;&#x79FB;&#x9664;&#x4E86;&#xFF08;<a href="/external_links/3e484594a43df71029a3f5f22e575539.html" target="blank" rel="noopener">bugs.openjdk.org/browse/JDK-&#x2026;</a>&#xFF09;&#x3002;&#x9ED8;&#x8BA4;&#x662F; <code>balanced</code>&#x3002;&#x5177;&#x4F53;&#x4E3B;&#x8981;&#x662F;&#x5F71;&#x54CD;&#x5143;&#x7A7A;&#x95F4;&#x5E95;&#x5C42;&#x76F8;&#x5173;&#x7684;&#x914D;&#x7F6E;&#xFF0C;&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;</li>
+</ul>
+<p>&#x5143;&#x7A7A;&#x95F4;&#x5E95;&#x5C42;&#x76F8;&#x5173;&#x7684;&#x914D;&#x7F6E;&#x5305;&#x62EC;&#xFF1A;</p>
+<ul>
+<li><strong>commit &#x7C92;&#x5EA6; - commit_granule</strong>&#xFF1A;&#x901A;&#x8FC7;&#x7B2C;&#x4E8C;&#x7AE0;&#x7684;&#x5206;&#x6790;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#xFF0C;JVM &#x7684;&#x7A7A;&#x95F4;&#x4E00;&#x822C;&#x662F;&#x5148; reserve&#xFF0C; &#x4E4B;&#x540E; commit &#x4E4B;&#x524D; reserve &#x7684;&#x7A7A;&#x95F4;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x7136;&#x540E;&#x624D;&#x80FD;&#x4F7F;&#x7528;&#x7684;&#x3002;&#x8FD9;&#x4E2A; commit &#x7C92;&#x5EA6;&#x4EE3;&#x8868;&#x5143;&#x7A7A;&#x95F4;&#x4E2D; commit &#x5185;&#x5B58;&#x7684;&#x6700;&#x5C0F;&#x7C92;&#x5EA6;&#xFF0C;&#x5143;&#x7A7A;&#x95F4;&#x5728;&#x6269;&#x5BB9;&#x7F29;&#x5BB9;&#x7684;&#x65F6;&#x5019;&#x6700;&#x5C0F;&#x7684;&#x5927;&#x5C0F;&#x5355;&#x4F4D;&#x662F; commit &#x7C92;&#x5EA6;&#x3002;</li>
+<li><strong>&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5185;&#x5B58;&#x5927;&#x5C0F; - virtual_space_node_default_word_size</strong>&#xFF1A;&#x8FD9;&#x662F;&#x540E;&#x6587;&#x6211;&#x4EEC;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x7684; <code>VirtualSpaceNode</code> &#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x3002;&#x5927;&#x5C0F;&#x5728; 64 &#x4F4D;&#x73AF;&#x5883;&#x4E0B;&#x662F; 64 MB&#x3002;</li>
+<li><strong>&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5185;&#x5B58;&#x5BF9;&#x9F50; - virtual_space_node_reserve_alignment_words</strong>&#xFF1A;&#x8FD9;&#x662F;&#x540E;&#x6587;&#x6211;&#x4EEC;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x7684; <code>VirtualSpaceNode</code> &#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x9700;&#x8981;&#x5BF9;&#x9F50;&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x5373;&#x6574;&#x4F53;&#x5927;&#x5C0F;&#x9700;&#x8981;&#x5927;&#x4E8E;&#x8FD9;&#x4E2A;&#x5BF9;&#x9F50;&#x5927;&#x5C0F;&#x5E76;&#x4E14;&#x662F;&#x8FD9;&#x4E2A;&#x5BF9;&#x9F50;&#x5927;&#x5C0F;&#x6574;&#x6570;&#x500D;&#x3002;&#x8FD9;&#x4E2A;&#x5927;&#x5C0F;&#x5C31;&#x662F; <code>MetaChunk</code> &#x7684;&#x6700;&#x5927;&#x5927;&#x5C0F;&#xFF0C;&#x5373; 4MB&#x3002;</li>
+<li><strong>&#x5F53;&#x524D; MetaChunk &#x4E0D;&#x8DB3;&#x4EE5;&#x5206;&#x914D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x662F;&#x5426;&#x5C1D;&#x8BD5;&#x6269;&#x5BB9;&#x5F53;&#x524D; MetaChunk - enlarge_chunks_in_place</strong>&#xFF1A;&#x8FD9;&#x4E2A;&#x53C2;&#x6570;&#x5728;&#x6B63;&#x5F0F; JVM &#x4E2D;&#x662F; true&#xFF0C;&#x5E76;&#x4E14;&#x4E0D;&#x80FD;&#x4FEE;&#x6539;&#x3002;&#x540E;&#x6587;&#x6211;&#x4EEC;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x4EC0;&#x4E48;&#x662F; <code>MetaChunk</code>&#x3002;&#x8FD9;&#x91CC;&#x7B80;&#x5355;&#x7406;&#x89E3;&#x5C31;&#x662F;&#xFF0C;&#x5143;&#x7A7A;&#x95F4;&#x6574;&#x4F53;&#x4F7F;&#x7528;&#x4E86;&#x548C; Linux &#x4F19;&#x4F34;&#x5206;&#x914D;&#x7B97;&#x6CD5;&#x7C7B;&#x4F3C;&#x7684;&#x8BBE;&#x8BA1;&#x4E0E;&#x62BD;&#x8C61;&#xFF0C;&#x5176;&#x4E2D;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7684;&#x5355;&#x5143;&#x5C31;&#x662F; Chunk&#xFF0C;&#x5143;&#x7A7A;&#x95F4;&#x4E2D;&#x5BF9;&#x5E94;&#x7684;&#x5C31;&#x662F; MetaChunk&#x3002;</li>
+<li><strong>&#x5206;&#x914D;&#x65B0;&#x7684; MetaChunk &#x7684;&#x65F6;&#x5019;&#xFF0C;&#x662F;&#x5426;&#x4E00;&#x4E0B;&#x5B50; commit MetaChunk &#x6240;&#x6709;&#x7684;&#x5185;&#x5B58; - new_chunks_are_fully_committed</strong>&#xFF1A;&#x540E;&#x6587;&#x6211;&#x4EEC;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x4EC0;&#x4E48;&#x662F; <code>MetaChunk</code>&#x3002;</li>
+<li><strong>&#x5728; MetaChunk &#x6574;&#x4E2A;&#x7A7A;&#x95F4;&#x90FD;&#x6CA1;&#x6709;&#x4F7F;&#x7528;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x662F;&#x5426;&#x5C06; MetaChunk &#x7684;&#x5185;&#x5B58;&#x5168;&#x90E8;&#x91CA;&#x653E;&#x56DE;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF; - uncommit_free_chunks</strong>&#xFF1A;&#x540E;&#x6587;&#x6211;&#x4EEC;&#x4F1A;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x4EC0;&#x4E48;&#x662F; <code>MetaChunk</code>&#x3002;</li>
+</ul>
+<p>&#x4ECE; Java 16 &#x5F00;&#x59CB;&#xFF0C;&#x5F15;&#x5165;&#x4E86;&#x5F39;&#x6027;&#x5143;&#x7A7A;&#x95F4;&#x3002;&#x8001;&#x7684;&#x5143;&#x7A7A;&#x95F4;&#x7531;&#x4E8E;&#x8BBE;&#x8BA1;&#x4E0A;&#x5206;&#x914D;&#x7C92;&#x5EA6;&#x6BD4;&#x8F83;&#x5927;&#xFF0C;&#x5E76;&#x4E14;&#x6CA1;&#x6709;&#x5F88;&#x597D;&#x5730;&#x91CA;&#x653E;&#x7A7A;&#x95F4;&#x7684;&#x7B56;&#x7565;&#x8BBE;&#x8BA1;&#xFF0C;&#x6240;&#x4EE5;&#x5360;&#x7528;&#x53EF;&#x80FD;&#x6BD4;&#x8F83;&#x5927;&#x3002;Java 16 &#x5F00;&#x59CB;&#xFF0C;JEP 387: Elastic Metaspace &#x5F15;&#x5165;&#x4E86;<strong>&#x5F39;&#x6027;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x8BBE;&#x8BA1;&#xFF0C;&#x4E5F;&#x662F;&#x6211;&#x4EEC;&#x8FD9;&#x91CC;&#x8981;&#x8BA8;&#x8BBA;&#x7684;&#x8BBE;&#x8BA1;</strong>&#x3002;&#x8FD9;&#x4E2A;&#x5F39;&#x6027;&#x5143;&#x7A7A;&#x95F4;&#x4E5F;&#x5F15;&#x5165;&#x4E86;&#x4E00;&#x4E2A;&#x91CD;&#x8981;&#x7684;&#x53C2;&#x6570; <code>-XX:MetaspaceReclaimPolicy</code>&#x3002;</p>
+<p><code>MetaspaceReclaimPolicy</code>&#xFF1A;&#x53EF;&#x4EE5;&#x4E3A;&#xFF1A;<code>balanced</code>, <code>aggressive</code>, &#x4EE5;&#x53CA; <code>none</code>&#xFF0C;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x4E00;&#x70B9;&#x7684;&#x662F; <code>none</code> &#x8981;&#x88AB;&#x79FB;&#x9664;&#x4E86;&#xFF08;<a href="/external_links/3e484594a43df71029a3f5f22e575539.html" target="blank" rel="noopener">bugs.openjdk.org/browse/JDK-&#x2026;</a>&#xFF09;&#xFF0C;&#x8FD9;&#x4E09;&#x4E2A;&#x914D;&#x7F6E;&#x5177;&#x4F53;&#x5F71;&#x54CD;&#x662F;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/151ce8c407b46e34612bbcbef289d0a1ca6f195d946814954c68ba516eab1d30" alt="image"></p>
+<h3 id="4-3-2-&#x5143;&#x7A7A;&#x95F4;&#x4E0A;&#x4E0B;&#x6587;-MetaspaceContext"><a href="#4-3-2-&#x5143;&#x7A7A;&#x95F4;&#x4E0A;&#x4E0B;&#x6587;-MetaspaceContext" class="headerlink" title="4.3.2. &#x5143;&#x7A7A;&#x95F4;&#x4E0A;&#x4E0B;&#x6587; MetaspaceContext"></a>4.3.2. &#x5143;&#x7A7A;&#x95F4;&#x4E0A;&#x4E0B;&#x6587; <code>MetaspaceContext</code></h3><p><code>MetaspaceContext</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Metaspace</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x62BD;&#x8C61;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/memory/metaspace/metaspaceContext.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;class MetaspaceContext : public CHeapObj&lt;mtMetaspace&gt;</span><br></pre></td></tr></table></figure>
+
+<p>JVM &#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x4F1A;&#x5728;&#x5168;&#x5C40;&#x5EFA;&#x7ACB;<strong>&#x4E24;&#x4E2A;&#x5143;&#x7A7A;&#x95F4;&#x4E0A;&#x4E0B;&#x6587;</strong>&#xFF08;<code>MetaspaceContext</code>&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#xFF08;&#x6211;&#x4EEC;&#x540E;&#x9762;&#x79F0;&#x4E3A;<strong>&#x7C7B;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code></strong>&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x7528;&#x4E8E;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#xFF08;&#x6211;&#x4EEC;&#x540E;&#x9762;&#x79F0;&#x4E3A;<strong>&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code></strong>&#xFF09;&#x3002;&#x5F53;&#x7136;&#xFF0C;&#x5728;&#x6CA1;&#x6709;&#x542F;&#x7528;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x53EA;&#x4F1A;&#x521D;&#x59CB;&#x5316;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code>&#xFF0C;&#x4E0D;&#x4F1A;&#x521D;&#x59CB;&#x5316;&#x7C7B;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code>&#xFF0C;&#x4E4B;&#x540E;&#x4F7F;&#x7528;&#x5206;&#x914D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E5F;&#x53EA;&#x4F1A;&#x7528;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code> &#x8FDB;&#x884C;&#x5206;&#x914D;&#x3002;&#x4F46;&#x662F;&#x6211;&#x4EEC;&#x5728;&#x540E;&#x9762;&#x8BA8;&#x8BBA;&#x7684;&#x65F6;&#x5019;&#xFF0C;<strong>&#x53EA;&#x4F1A;&#x8BA8;&#x8BBA;&#x5F00;&#x542F;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x56E0;&#x4E3A;&#x8FD9;&#x662F;&#x9ED8;&#x8BA4;&#x5E76;&#x4E14;&#x5E38;&#x7528;&#x7684;&#x60C5;&#x51B5;</strong>&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/062f83eb86d962fb908f435ca48d3a34595778c2f445941e180c9385baf7bc8e" alt="image"></p>
+<p>&#x6BCF;&#x4E2A; <code>MetaspaceContext</code> &#x90FD;&#x4F1A;&#x5BF9;&#x5E94;<strong>&#x4E00;&#x4E2A;&#x72EC;&#x7ACB;&#x7684; <code>VirtualSpaceList</code></strong>&#xFF0C;&#x4EE5;&#x53CA;<strong>&#x4E00;&#x4E2A;&#x72EC;&#x7ACB;&#x7684; <code>ChunkManager</code></strong>&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/dc8ab1ddac796c20c127661de96e74f57bf6cabdc20efaf3b4a8faff5c5299ba" alt="image"></p>
+<p>&#x8FD9;&#x4E2A; <code>VirtualSpaceList</code> &#x4E2D;&#x7684;&#x6BCF;&#x4E00;&#x4E2A;&#x5143;&#x7D20;&#x90FD;&#x662F;&#x4E00;&#x4E2A; <code>VirtualSpaceNode</code>&#x3002;&#x987E;&#x540D;&#x601D;&#x4E49;&#xFF0C;<code>VirtualSpaceNode</code> &#x662F;&#x4ECE;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7533;&#x8BF7;&#x5185;&#x5B58;&#xFF0C;&#x4E0E;&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5212;&#x5206;&#x7684;&#x62BD;&#x8C61;&#x9694;&#x79BB;&#x7684;&#x4E2D;&#x95F4;&#x5C42;&#x62BD;&#x8C61;&#x3002;<code>VirtualSpaceList</code> &#x8D1F;&#x8D23;&#x4E0E;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x4EA4;&#x4E92;&#xFF0C;&#x7533;&#x8BF7;&#x6216;&#x8005;&#x91CA;&#x653E;&#x5185;&#x5B58;&#x3002;&#x5143;&#x7A7A;&#x95F4;&#x4E0E; <code>VirtualSpaceList</code> &#x4EA4;&#x4E92;&#xFF0C;&#x4F7F;&#x7528;&#x5185;&#x5B58;&#x3002;</p>
+<p><code>ChunkManager</code> &#x987E;&#x540D;&#x601D;&#x4E49;&#xFF0C;&#x662F;&#x7BA1;&#x7406;&#x6240;&#x6709; Chunk &#x7684;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x5668;&#x3002;Chunk &#x8FD9;&#x4E2A;&#x6982;&#x5FF5;&#x7ECF;&#x5E38;&#x51FA;&#x73B0;&#x5728;&#x5404;&#x79CD;&#x4F19;&#x4F34;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x7B97;&#x6CD5;&#x6846;&#x67B6;&#xFF08;Buddy Allocator&#xFF09;&#x4E2D;&#xFF0C;&#x4E00;&#x822C;&#x6307;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x5206;&#x914D;&#x7684;&#x6700;&#x5C0F;&#x5355;&#x5143;&#xFF0C;&#x8FD9;&#x91CC;&#x7684; Chunk &#x62BD;&#x8C61;&#x5BF9;&#x5E94;&#x7684;&#x5C31;&#x662F; <code>MetaChunk</code>&#x3002;<code>ChunkManager</code> &#x4ECE; <code>VirtualSpaceList</code> &#x4E0A;&#x9762;&#x83B7;&#x53D6;&#x4E00;&#x5757;&#x8FDE;&#x7EED;&#x6BD4;&#x8F83;&#x5927;&#x7684;&#x5185;&#x5B58;&#x7684; <code>MetaChunk</code>&#xFF08;&#x5176;&#x5B9E;&#x662F; <code>RootMetaChunk</code>&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A; <code>RootMetaChunk</code> &#x6309;&#x7167;&#x5206;&#x914D;&#x9700;&#x6C42;&#xFF0C;&#x8FDE;&#x7EED;&#x5BF9;&#x534A;&#x5206;&#x5272;&#x6210;&#x9700;&#x8981;&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x8FD4;&#x56DE;&#x8FD9;&#x4E2A;&#x5408;&#x9002;&#x5927;&#x5C0F;&#x7684; <code>MetaChunk</code>&#xFF0C;&#x5269;&#x4E0B;&#x7684;&#x5206;&#x5272;&#x51FA;&#x6765;&#x7684; <code>MetaChunk</code> &#x8FDB;&#x5165; <code>FreeChunkListVector</code> &#x7528;&#x4E8E;&#x4E0B;&#x6B21;&#x5206;&#x914D; <code>MetaChunk</code> &#x7684;&#x65F6;&#x5019;&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#x5408;&#x9002;&#x7684;&#xFF0C;&#x5C31;&#x4E0D;&#x518D;&#x4ECE; <code>VirtualSpaceList</code> &#x83B7;&#x53D6;&#x4E86;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x63A5;&#x4E0B;&#x6765;&#x4ED4;&#x7EC6;&#x5206;&#x6790; <code>VirtualSpaceList</code> &#x4E0E; <code>ChunkManager</code></p>
+<h3 id="4-3-3-&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5217;&#x8868;-VirtualSpaceList"><a href="#4-3-3-&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5217;&#x8868;-VirtualSpaceList" class="headerlink" title="4.3.3. &#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5217;&#x8868; VirtualSpaceList"></a>4.3.3. &#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;&#x5217;&#x8868; <code>VirtualSpaceList</code></h3><p><code>VirtualSpaceList</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Class</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x52A0;&#x8F7D;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;<strong>&#x5176;&#x5B9E;&#x672C;&#x4EBA;&#x611F;&#x89C9;&#x8FD9;&#x4E48;&#x8BBE;&#x8BA1;&#x4E0D;&#x592A;&#x5408;&#x7406;&#xFF0C;&#x5E94;&#x8BE5;&#x548C; <code>MetaspaceContext</code> &#x5C5E;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x7C7B;&#x522B;&#x624D;&#x6BD4;&#x8F83;&#x5408;&#x7406;</strong>&#x3002;&#x771F;&#x6B63;&#x5206;&#x914D;&#x52A0;&#x8F7D;&#x7684;&#x7C7B;&#x7684;&#x5360;&#x7528;&#x7A7A;&#x95F4;&#x7684;&#x662F;&#x4ECE; <code>VirtualSpaceNode</code> &#x4E0A;&#x9762;&#x6807;&#x8BB0;&#x7684;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7684;&#xFF0C;&#x8FD9;&#x662F;&#x4E0B;&#x4E00;&#x5C0F;&#x8282;&#x8981;&#x5206;&#x6790;&#x7684;&#x5185;&#x5BB9;&#x3002;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/memory/metaspace/virtualSpaceList.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;class VirtualSpaceList : public CHeapObj&lt;mtClass&gt;</span><br></pre></td></tr></table></figure>
+
+<p>&#x9996;&#x5148;&#x63D0;&#x4E00;&#x70B9;&#xFF0C;&#x7C7B;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code> &#x4E0E;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code> &#x7565;&#x6709;&#x4E0D;&#x540C;&#xFF1A;&#x7C7B;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code> &#x7684; <code>VirtualSpaceList</code> &#x662F;&#x4E0D;&#x53EF;&#x4EE5;&#x6269;&#x5C55;&#x7533;&#x8BF7;&#x65B0;&#x7684;&#x5185;&#x5B58;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code> &#x7684; <code>VirtualSpaceList</code> &#x662F;&#x53EF;&#x4EE5;&#x7684;&#x3002;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#xFF1A;&#x7C7B;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code> &#x7684; <code>VirtualSpaceList</code> &#x5176;&#x5B9E;&#x53EA;&#x6709;&#x4E00;&#x4E2A; <code>VirtualSpaceNode</code>&#xFF0C;&#x4F46;&#x662F;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4; <code>MetaspaceContext</code> &#x7684; <code>VirtualSpaceList</code> &#x662F;&#x4E00;&#x4E2A;&#x5305;&#x542B;&#x591A;&#x4E2A; <code>VirtualSpaceNode</code> &#x7684;&#x5217;&#x8868;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/8776d471ce962b3b5879895ad3078b439717d0d403b619ec224f9dfba59d2adc" alt="image"></p>
+<h3 id="4-3-4-&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;-VirtualSpaceNode-&#x4E0E;-CompressedClassSpaceSize"><a href="#4-3-4-&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9;-VirtualSpaceNode-&#x4E0E;-CompressedClassSpaceSize" class="headerlink" title="4.3.4. &#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9; VirtualSpaceNode &#x4E0E; CompressedClassSpaceSize"></a>4.3.4. &#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x8282;&#x70B9; <code>VirtualSpaceNode</code> &#x4E0E; <code>CompressedClassSpaceSize</code></h3><p><code>VirtualSpaceNode</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Class</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x52A0;&#x8F7D;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;<strong>&#x5176;&#x5B9E;&#x672C;&#x4EBA;&#x611F;&#x89C9;&#x8FD9;&#x4E48;&#x8BBE;&#x8BA1;&#x4E0D;&#x592A;&#x5408;&#x7406;&#xFF0C;&#x5E94;&#x8BE5;&#x548C; <code>MetaspaceContext</code> &#x5C5E;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x7C7B;&#x522B;&#x624D;&#x6BD4;&#x8F83;&#x5408;&#x7406;</strong>&#x3002;&#x771F;&#x6B63;&#x5206;&#x914D;&#x52A0;&#x8F7D;&#x7684;&#x7C7B;&#x7684;&#x5360;&#x7528;&#x7A7A;&#x95F4;&#x7684;&#x662F;&#x4ECE; <code>VirtualSpaceNode</code> &#x4E0A;&#x9762;&#x6807;&#x8BB0;&#x7684;&#x5185;&#x5B58;&#x5730;&#x5740;&#x5206;&#x914D;&#x7684;&#xFF0C;<code>VirtualSpaceNode</code> &#x672C;&#x8EAB;&#x7684;&#x7A7A;&#x95F4;&#x5360;&#x7528;&#x53EA;&#x662F;&#x8D77;&#x5230;&#x63CF;&#x8FF0;&#x8BB0;&#x5F55;&#x4F5C;&#x7528;&#xFF0C;&#x5E94;&#x8BE5;&#x4E5F;&#x5C5E;&#x4E8E;&#x5143;&#x7A7A;&#x95F4;&#x63CF;&#x8FF0;&#x7684;&#x90A3;&#x4E00;&#x7C7B;&#x3002;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/memory/metaspace/virtualSpaceNode.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;class VirtualSpaceNode : public CHeapObj&lt;mtClass&gt;</span><br></pre></td></tr></table></figure>
+
+<p><code>VirtualSpaceNode</code> &#x662F;&#x4E00;&#x5757;&#x8FDE;&#x7EED;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x7684;&#x62BD;&#x8C61;&#x3002;<strong>&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>VirtualSpaceList</code> &#x53EA;&#x5305;&#x542B;&#x4E00;&#x4E2A; <code>VirtualSpaceNode</code>&#xFF0C;&#x5927;&#x5C0F;&#x662F;&#x524D;&#x6587;&#x63D0;&#x5230;&#x7684;</strong> <code>CompressedClassSpaceSize</code>&#x3002;</p>
+<p><strong>&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x5E76;&#x4E0D;&#x50CF;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x6216;&#x8005;&#x5806;&#x5185;&#x5B58;&#x90A3;&#x6837;</strong>&#xFF0C;&#x4E00;&#x4E0B;&#x5B50; reserve &#x6700;&#x5927;&#x5806;&#x5185;&#x5B58;&#x9650;&#x5236;&#x7684;&#x5185;&#x5B58;&#xFF0C;<strong>&#x800C;&#x662F;&#x6BCF;&#x6B21; reserve <code>VirtualSpaceNode</code> &#x5927;&#x5C0F;</strong>&#x3002;<code>VirtualSpaceNode</code> &#x5927;&#x5C0F;&#x5728; 64 &#x4F4D;&#x73AF;&#x5883;&#x4E0B;&#x662F; 64 MB&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/memory/metaspace/metaspaceSettings.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;static const size_t _virtual_space_node_default_word_size =</span><br><span class="line">      chunklevel::MAX_CHUNK_WORD_SIZE * NOT_LP64(2) LP64_ONLY(16); // 8MB (32-bit) / 64MB (64-bit)</span><br></pre></td></tr></table></figure>
+
+<p><code>VirtualSpaceNode</code> &#x901A;&#x8FC7;&#x4E24;&#x4E2A;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x6765;&#x7BA1;&#x7406;&#x5B83;&#x7EF4;&#x62A4;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#xFF1A;</p>
+<ul>
+<li><code>CommitMask</code>&#xFF1A;&#x5B9E;&#x9645;&#x662F;&#x4E00;&#x4E2A;&#x4F4D;&#x56FE;&#xFF0C;&#x7528;&#x4E8E;&#x7EF4;&#x62A4;&#x54EA;&#x4E9B;&#x5185;&#x5B58;&#x88AB; commit &#x4E86;&#xFF0C;&#x54EA;&#x4E9B;&#x6CA1;&#x6709;&#xFF0C;&#x4F4D;&#x56FE;&#x7684;&#x6807;&#x8BB0;&#x7684;&#x5355;&#x4F4D;&#x5C31;&#x662F;&#x524D;&#x6587;&#x63D0;&#x5230;&#x7684; commit_granule&#xFF08;commit &#x7C92;&#x5EA6;&#xFF09;&#x3002;</li>
+<li><code>RootChunkAreaLUT</code>&#xFF1A;&#x7528;&#x4E8E;&#x7EF4;&#x62A4;&#x6BCF;&#x4E2A; <code>RootMetaChunk</code> &#x7684;&#x5185;&#x5B58;&#x5206;&#x5E03;&#x3002;&#x81F3;&#x4E8E;&#x4EC0;&#x4E48;&#x662F; <code>RootMetaChunk</code> &#x5728;&#x540E;&#x7EED;&#x6211;&#x4EEC;&#x8BB2; <code>MetaChunk</code> &#x7684;&#x65F6;&#x5019;&#x4F1A;&#x8BE6;&#x7EC6;&#x8BB2;&#x89E3;&#x3002;</li>
+</ul>
+<p>&#x4E00;&#x4E2A; <code>VirtualSpaceNode</code> &#x7684;&#x4E3B;&#x8981;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;<br><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/b9a6d012fc7fd7e6aa9d6235379b2e19f23ffa83a77f502ece7b63665dc0a79a" alt="image"></p>
+<h3 id="4-3-5-MetaChunk"><a href="#4-3-5-MetaChunk" class="headerlink" title="4.3.5. MetaChunk"></a>4.3.5. <code>MetaChunk</code></h3><p><code>MetaChunk</code> &#x662F;&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7684;&#x6838;&#x5FC3;&#x62BD;&#x8C61;&#xFF0C;&#x5176;&#x672C;&#x8D28;&#x5C31;&#x662F;<strong>&#x63CF;&#x8FF0;</strong>&#x4E00;&#x5757;&#x8FDE;&#x7EED;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x3002;<code>MetaChunk</code> &#x672C;&#x8EAB;&#x53EA;&#x662F;&#x4E00;&#x4E2A;&#x63CF;&#x8FF0;&#x5BF9;&#x8C61;&#xFF0C;&#x5B83;&#x4E5F;&#x662F;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Metaspace</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x62BD;&#x8C61;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;&#x8FD9;&#x4E2A;&#x63CF;&#x8FF0;&#x5BF9;&#x8C61;&#x662F;&#x6C60;&#x5316;&#x7684;&#xFF0C;&#x53C2;&#x8003;&#x540E;&#x9762;&#x4F1A;&#x5206;&#x6790;&#x7684; <code>ChunkHeaderPool</code>&#x3002;&#x4E0D;&#x8981;&#x5077;&#x53D6;&#x4ED6;&#x4EBA;&#x7684;&#x52B3;&#x52A8;&#x6210;&#x679C;&#xFF01;</p>
+<p>&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x4EFB;&#x610F;&#x5206;&#x914D;&#xFF0C;&#x90FD;&#x662F;&#x5728;&#x67D0;&#x4E2A; <code>MetaChunk</code> &#x4E0A;&#x8FDB;&#x884C;&#x7684;(&#x4E0D;&#x8981;&#x5077;&#x53D6;&#x4ED6;&#x4EBA;&#x7684;&#x52B3;&#x52A8;&#x6210;&#x679C;&#xFF01;)&#x3002;<code>MetaChunk</code> &#x6709;&#x7EA7;&#x522B;&#x7684;&#x6982;&#x5FF5;&#xFF0C;&#x5373; <code>ChunkLevel</code>&#xFF0C;&#x6BCF;&#x4E2A; <code>MetaChunk</code> &#x90FD;&#x6709;&#x81EA;&#x5DF1;&#x7684; <code>ChunkLevel</code>&#xFF0C;&#x8FD9;&#x4E2A; <code>ChunkLevel</code> &#x4E3B;&#x8981;&#x4EE3;&#x8868;&#x4E86; <code>MetaChunk</code> &#x63CF;&#x8FF0;&#x7684;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x6BCF;&#x4E00;&#x4E2A; level &#x90FD;&#x662F;&#x4E0B;&#x4E00;&#x4E2A; level &#x5927;&#x5C0F;&#x7684; 2 &#x500D;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/de6b45fd0d443d8581e24ece4f3b1752335e54cb173834d78b9ba7a01a4b370b" alt="image"></p>
+<p>&#x4ECE; <code>VirtualSpaceNode</code> &#x4E0A;&#x76F4;&#x63A5;&#x5212;&#x5206;&#x7684; <code>MetaChunk</code> &#x662F; <code>RootMetaChunk</code>&#xFF0C;&#x5B83;&#x7684; <code>ChunkLevel</code> &#x4E3A;&#x6700;&#x9AD8;&#x7EA7;&#x522B;&#x7684; 0&#xFF0C;&#x5927;&#x5C0F;&#x662F; 4MB&#xFF0C;&#x5E76;&#x4E14;&#x5176;&#x4E2D;&#x7684;&#x5185;&#x5B58;&#x53EA;&#x662F; reserve &#x8FD8;&#x6CA1;&#x6709; commit &#x7684;&#x3002;</p>
+<p><code>MetaChunk</code>&#x6709;&#x4E09;&#x4E2A;&#x72B6;&#x6001;&#xFF1A;</p>
+<ul>
+<li><code>Dead</code>&#xFF1A;&#x5373; <code>MetaChunk</code> &#x53EA;&#x662F;&#x5BF9;&#x8C61;&#x88AB;&#x521B;&#x5EFA;&#x51FA;&#x6765;&#xFF0C;&#x4F46;&#x662F;&#x6CA1;&#x6709;&#x5173;&#x8054;&#x63CF;&#x8FF0;&#x5B9E;&#x9645;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x3002;&#x540E;&#x9762;&#x6211;&#x4EEC;&#x4F1A;&#x77E5;&#x9053;&#xFF0C;<code>MetaChunk</code> &#x662F;&#x6C60;&#x5316;&#x53EF;&#x56DE;&#x6536;&#x5728;&#x5229;&#x7528;&#x7684;&#xFF0C;<code>MetaChunk</code> &#x7684;&#x6C60;&#x5C31;&#x662F; <code>ChunkHeaderPool</code>&#x3002;&#x4F4D;&#x4E8E; <code>ChunkHeaderPool</code> &#x90FD;&#x8FD8;&#x6CA1;&#x6709;&#x5173;&#x8054;&#x63CF;&#x8FF0;&#x5B9E;&#x9645;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#xFF0C;&#x72B6;&#x6001;&#x4E3A; <code>Dead</code>&#x3002;</li>
+<li><code>Free</code>&#xFF1A;&#x5373; <code>MetaChunk</code> &#x5173;&#x8054;&#x63CF;&#x8FF0;&#x4E86;&#x5B9E;&#x9645;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#xFF0C;&#x4F46;&#x662F;&#x6CA1;&#x6709;&#x88AB;&#x5B9E;&#x9645;&#x4F7F;&#x7528;&#x3002;&#x6B64;&#x65F6;&#xFF0C;&#x8FD9;&#x4E2A; <code>MetaChunk</code> &#x4F4D;&#x4E8E; <code>ChunkManager</code> &#x7BA1;&#x7406;&#x3002;</li>
+<li><code>InUse</code>&#xFF1A;&#x5373; <code>MetaChunk</code> &#x5173;&#x8054;&#x63CF;&#x8FF0;&#x4E86;&#x5B9E;&#x9645;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#xFF0C;&#x4E5F;&#x88AB;&#x5B9E;&#x9645;&#x4F7F;&#x7528;&#x4E86;&#xFF0C;&#x6B64;&#x65F6;&#xFF0C;<code>MetaChunkArena</code> &#x7BA1;&#x7406;&#x8FD9;&#x4E2A; <code>MetaChunk</code> &#x4E0A;&#x9762;&#x7684;&#x5185;&#x5B58;&#x5206;&#x914D;&#x3002;</li>
+</ul>
+<h4 id="4-3-5-1-ChunkHeaderPool-&#x6C60;&#x5316;-MetaChunk-&#x5BF9;&#x8C61;"><a href="#4-3-5-1-ChunkHeaderPool-&#x6C60;&#x5316;-MetaChunk-&#x5BF9;&#x8C61;" class="headerlink" title="4.3.5.1. ChunkHeaderPool &#x6C60;&#x5316; MetaChunk &#x5BF9;&#x8C61;"></a>4.3.5.1. <code>ChunkHeaderPool</code> &#x6C60;&#x5316; <code>MetaChunk</code> &#x5BF9;&#x8C61;</h4><p><code>MetaChunk</code> &#x5B9E;&#x9645;&#x4E0A;&#x53EA;&#x662F;&#x4E00;&#x5757;&#x8FDE;&#x7EED;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x7684;&#x63CF;&#x8FF0;&#x7C7B;(&#x4E0D;&#x8981;&#x5077;&#x53D6;&#x4ED6;&#x4EBA;&#x7684;&#x52B3;&#x52A8;&#x6210;&#x679C;&#xFF01;)&#xFF0C;&#x5373;&#x5143;&#x6570;&#x636E;&#x7C7B;&#x3002;&#x7531;&#x4E8E;&#x7C7B;&#x52A0;&#x8F7D;&#x9700;&#x8981;&#x7684;&#x5927;&#x5C0F;&#x4E0D;&#x4E00;&#xFF0C;&#x5E76;&#x4E14;&#x8FD8;&#x7ECF;&#x5E38;&#x4F1A;&#x53D1;&#x751F;&#x5408;&#x5E76;&#xFF0C;&#x5207;&#x5206;&#x7B49;&#x7B49;&#xFF0C;<code>MetaChunk</code> &#x53EF;&#x80FD;&#x6709;&#x5F88;&#x591A;&#x5F88;&#x591A;&#xFF0C;&#x5143;&#x7A7A;&#x95F4;&#x4E3A;&#x4E86;&#x8282;&#x7701;&#x8FD9;&#x4E2A;&#x5143;&#x6570;&#x636E;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#xFF0C;&#x5C06;&#x5176;&#x6C60;&#x5316;&#xFF0C;&#x56DE;&#x6536;&#x518D;&#x5229;&#x7528;&#x3002;&#x8FD9;&#x4E2A;&#x6C60;&#x5C31;&#x662F; <code>ChunkHeaderPool</code>&#x3002;&#x4F8B;&#x5982;&#xFF0C;&#x4ECE; <code>VirtualSpaceNode</code> &#x4E0A;&#x76F4;&#x63A5;&#x5212;&#x5206; <code>RootMetaChunk</code> &#x7684;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#xFF0C;&#x4F1A;&#x4ECE; <code>ChunkHeaderPool</code> &#x7533;&#x8BF7;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x7528;&#x4E8E;&#x63CF;&#x8FF0;&#x3002;&#x5F53;&#x4E24;&#x4E2A; <code>MetaChunk</code> &#x7684;&#x7A7A;&#x95F4;&#x9700;&#x8981;&#x5408;&#x5E76;&#x6210;&#x4E00;&#x4E2A;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5176;&#x4E2D;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x5176;&#x5B9E;&#x5C31;&#x6CA1;&#x6709;&#x7528;&#x4E86;&#xFF0C;&#x4F1A;&#x653E;&#x56DE; <code>ChunkHeaderPool</code>&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x76F4;&#x63A5; free &#x6389;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x3002;</p>
+<p><code>ChunkHeaderPool</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Metaspace</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x62BD;&#x8C61;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/memory/metaspace/chunkHeaderPool.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;class ChunkHeaderPool : public CHeapObj&lt;mtMetaspace&gt;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5176;&#x5B9E;&#x4ECE;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x63A8;&#x6D4B;&#x51FA;&#xFF0C;<code>MetaChunk</code> &#x672C;&#x8EAB;&#x4E5F;&#x662F;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x4E5F;&#x662F;&#x5C5E;&#x4E8E; <code>Metaspace</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#x3002;</p>
+<p><code>ChunkHeaderPool</code> &#x7684;&#x7ED3;&#x6784;&#x662F;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/fccacae028632575808712fffdba9a45b29ac786c532fa08dcb8a814b22a9b83" alt="image"></p>
+<p>&#x5176;&#x5B9E; <code>ChunkHeaderPool</code> &#x7684;&#x673A;&#x5236;&#x5F88;&#x7B80;&#x5355;&#xFF1A;</p>
+<ul>
+<li>&#x7533;&#x8BF7; <code>MetaChunk</code> &#x7528;&#x4E8E;&#x63CF;&#x8FF0;&#x5185;&#x5B58;&#xFF1A;<ul>
+<li>&#x9996;&#x5148;&#x67E5;&#x770B; <code>_freelist</code>&#xFF0C;&#x662F;&#x5426;&#x6709;&#x4E4B;&#x524D;&#x653E;&#x56DE;&#x7684; <code>MetaChunk</code> &#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#xFF0C;&#x5982;&#x679C;&#x6709;&#xFF0C;&#x5C31;&#x8FD4;&#x56DE;&#x90A3;&#x4E2A; <code>MetaChunk</code>&#xFF0C;&#x5E76;&#x4ECE; <code>_freelist</code> &#x79FB;&#x9664;&#x8FD9;&#x4E2A; <code>MetaChunk</code></li>
+<li>&#x5982;&#x679C;&#x6CA1;&#x6709;&#xFF0C;&#x8BFB;&#x53D6; <code>_current_slab</code> &#x6307;&#x5411;&#x7684; <code>Slab</code>&#xFF0C;<code>Slab</code> &#x6838;&#x5FC3;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x9884;&#x5206;&#x914D;&#x597D;&#x7684; <code>MetaChunk</code> &#x6570;&#x7EC4;&#xFF08;&#x5927;&#x5C0F;&#x662F; 128&#xFF09;&#xFF0C;<code>_top</code> &#x6307;&#x7684;&#x662F;&#x5F53;&#x524D;&#x4F7F;&#x7528;&#x5230;&#x6570;&#x7EC4;&#x7684;&#x54EA;&#x4E00;&#x4E2A;&#x3002;</li>
+<li>&#x5982;&#x679C; <code>_top</code> &#x6CA1;&#x6709;&#x5230; 128&#xFF0C;&#x8FD4;&#x56DE; <code>_top</code> &#x4EE3;&#x8868;&#x7684; <code>MetaChunk</code>&#xFF0C;&#x5E76;&#x5C06; <code>_top</code> &#x52A0; 1&#x3002;</li>
+<li>&#x5982;&#x679C; <code>_top</code> &#x5230; 128&#xFF0C;&#x521B;&#x5EFA;&#x65B0;&#x7684; <code>Slab</code>&#xFF0C;<code>_current_slab</code> &#x6307;&#x5411;&#x8FD9;&#x4E2A;&#x65B0;&#x7684; <code>Slab</code></li>
+</ul>
+</li>
+<li>&#x56DE;&#x6536; <code>MetaChunk</code>&#xFF1A;&#x653E;&#x5165; <code>_freelist</code></li>
+</ul>
+<h4 id="4-3-5-2-ChunkManager-&#x7BA1;&#x7406;&#x7A7A;&#x95F2;&#x7684;-MetaChunk"><a href="#4-3-5-2-ChunkManager-&#x7BA1;&#x7406;&#x7A7A;&#x95F2;&#x7684;-MetaChunk" class="headerlink" title="4.3.5.2. ChunkManager &#x7BA1;&#x7406;&#x7A7A;&#x95F2;&#x7684; MetaChunk"></a>4.3.5.2. <code>ChunkManager</code> &#x7BA1;&#x7406;&#x7A7A;&#x95F2;&#x7684; <code>MetaChunk</code></h4><p><code>ChunkManager</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Metaspace</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x62BD;&#x8C61;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;&#x4E0D;&#x8981;&#x5077;&#x53D6;&#x4ED6;&#x4EBA;&#x7684;&#x52B3;&#x52A8;&#x6210;&#x679C;&#xFF01;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;class ChunkManager : public CHeapObj&lt;mtMetaspace&gt;</span><br></pre></td></tr></table></figure>
+
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/memory/metaspace/chunkManager.hpp</code></a></p>
+<p><code>ChunkManager</code> &#x7BA1;&#x7406;&#x5DF2;&#x7ECF;&#x5173;&#x8054;&#x5185;&#x5B58;&#x4F46;&#x662F;&#x8FD8;&#x6CA1;&#x4F7F;&#x7528;&#xFF08;&#x72B6;&#x6001;&#x662F; <code>Free</code>&#xFF09;&#x7684; <code>MetaChunk</code>&#x3002;&#x5728;&#x7B2C;&#x4E00;&#x6B21;&#x4ECE; <code>VirtualSpaceNode</code> &#x4E0A;&#x9762;&#x5206;&#x914D; <code>RootMetaChunk</code> &#x7684;&#x5185;&#x5B58;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x6839;&#x636E;&#x7533;&#x8BF7;&#x7684;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#xFF0C;&#x51B3;&#x5B9A;&#x8981;&#x5C06; <code>RootMetaChunk</code> &#x62C6;&#x5206;&#x5230;&#x67D0;&#x4E2A; <code>ChunkLevel</code> &#x5927;&#x5C0F;&#x4E4B;&#x540E;&#x7528;&#x4E8E;&#x5F53;&#x524D;&#x5206;&#x914D;&#xFF0C;&#x62C6;&#x5206;&#x51FA;&#x6765;&#x7684;&#x5176;&#x4ED6;&#x7684; <code>MetaChunk</code> &#x8FD8;&#x6CA1;&#x6709;&#x4F7F;&#x7528;&#xFF0C;&#x5148;&#x653E;&#x5165;&#x4E00;&#x4E2A;&#x7C7B;&#x4F3C;&#x4E8E;&#x4E4B;&#x524D; <code>ChunkHeaderPool</code> &#x91CC;&#x9762;&#x7684; <code>_free_list</code> &#x7684;&#x7ED3;&#x6784;&#xFF0C;&#x7528;&#x4E8E;&#x4E0B;&#x6B21;&#x7533;&#x8BF7; <code>MetaChunk</code> &#x7528;&#x4E8E;&#x5206;&#x914D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5148;&#x4ECE;&#x8FD9;&#x4E2A;&#x91CC;&#x9762;&#x627E;&#xFF0C;&#x627E;&#x4E0D;&#x5230;&#x4E4B;&#x540E;&#x518D;&#x4ECE; <code>VirtualSpaceNode</code> &#x4E0A;&#x9762;&#x5C1D;&#x8BD5;&#x5206;&#x914D;&#x65B0;&#x7684; <code>RootMetaChunk</code>&#x3002;&#x4E0D;&#x8981;&#x60EF;&#x7740;cao&#x88AD;&#x7684;&#x4EBA;&#xFF01;</p>
+<p><code>ChunkManager</code> &#x7684;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x662F;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/268fc9d67381a92d6506b611687c07b5eee9719a126ed0e2cb49196ec9fce75d" alt="image"></p>
+<p><code>ChunkManager</code> &#x4E3B;&#x8981;&#x7EF4;&#x62A4;&#x4E00;&#x4E2A; <code>FreeChunkListVector</code>&#xFF0C;<code>FreeChunkListVector</code> &#x91CC;&#x9762;&#x662F;&#x4E00;&#x4E2A; <code>FreeChunkList</code> &#x6570;&#x7EC4;&#xFF08;&#x8FD8;&#x6709;xigao dog &#x7684;&#x7801;&#xFF09;&#x3002;<code>FreeChunkList</code> &#x662F;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x94FE;&#x8868;&#xFF0C;&#x94FE;&#x8868;&#x4E2D;&#x90FD;&#x662F; <code>Free</code> &#x7684; <code>MetaChunk</code>&#xFF0C;&#x540C;&#x6837; <code>ChunkLevel</code> &#x7684; <code>MetaChunk</code> &#x4F4D;&#x4E8E;&#x540C;&#x4E00;&#x4E2A; <code>FreeChunkList</code> &#x4E2D;&#x3002;<code>FreeChunkList</code> &#x6570;&#x7EC4;&#x4EE5; <code>ChunkLevel</code> &#x4E3A;&#x4E0B;&#x6807;&#xFF0C;&#x8FD9;&#x6837;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x53EF;&#x4EE5;&#x5FEB;&#x901F;&#x627E;&#x5230;&#x4E00;&#x4E2A;&#x6240;&#x9700; <code>ChunkLevel</code> &#x7684; <code>MetaChunk</code>&#x3002;<code>FreeChunkList</code>&#x8FD9;&#x4E2A;&#x94FE;&#x8868;&#x5176;&#x5B9E;&#x662F;&#x4E00;&#x4E2A;&#x53CC;&#x5411;&#x94FE;&#x8868;&#xFF0C;&#x5305;&#x542B;&#x5934;&#x5C3E;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x5982;&#x679C;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x7BA1;&#x7406;&#x7684;&#x5185;&#x5B58;&#x88AB; commit &#x4E86;&#xFF0C;&#x5C31;&#x4F1A;&#x653E;&#x5728;&#x94FE;&#x8868;&#x5934;&#x90E8;&#xFF0C;&#x6CA1;&#x6709; commit &#x7684;&#x653E;&#x5728;&#x94FE;&#x8868;&#x5C3E;&#x90E8;&#x3002;</p>
+<p><code>MetaChunk</code> &#x5177;&#x4F53;&#x7684;&#x5206;&#x914D;&#xFF0C;&#x5207;&#x5206;&#xFF0C;&#x5408;&#x5E76;&#x6D41;&#x7A0B;&#xFF0C;&#x6211;&#x4EEC;&#x4F1A;&#x5728;&#x4ECB;&#x7ECD;&#x5B8C; <code>MetaspaceArena</code> &#x4E4B;&#x540E;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x3002;&#x4F46;&#x662F;&#xFF0C;<code>MetaspaceArena</code> &#x548C; <code>ChunkManager</code> &#x4E0D;&#x4E00;&#x6837;&#xFF0C;<code>ChunkManager</code> &#x662F;&#x5168;&#x5C40;&#x4E24;&#x4E2A;&#xFF0C;&#x4E00;&#x4E2A;&#x5C5E;&#x4E8E;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x4E00;&#x4E2A;&#x5C5E;&#x4E8E;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#xFF0C;&#x5018;&#x82E5;&#x6CA1;&#x6709;&#x5F00;&#x542F;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4; <code>ChunkManager</code>&#xFF0C;&#x800C; <code>MetaspaceArena</code> &#x6211;&#x4EEC;&#x540E;&#x9762;&#x4F1A;&#x770B;&#x5230;&#x662F;&#x6BCF;&#x4E2A; <code>ClassLoader</code> &#x72EC;&#x7ACB;&#x79C1;&#x6709;&#x7684;&#x3002;&#x6240;&#x4EE5;&#xFF0C;&#x5728;&#x8BB2; <code>MetaspaceArena</code> &#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x4EEC;&#x5148;&#x8981;&#x4ECE;&#x53E6;&#x4E00;&#x4E2A;&#x89D2;&#x5EA6;&#x5373; <code>ClassLoader</code> &#x52A0;&#x8F7D;&#x7C7B;&#x7684;&#x89D2;&#x5EA6;&#x51FA;&#x53D1;&#xFF0C;&#x5411;&#x4E0B;&#x4E00;&#x5C42;&#x4E00;&#x5C42;&#x5256;&#x6790;&#x5230; <code>MetaspaceArena</code>&#x3002;</p>
+<h3 id="4-3-6-&#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x5165;&#x53E3;-SystemDictionary-&#x4E0E;&#x4FDD;&#x7559;&#x6240;&#x6709;-ClassLoaderData-&#x7684;-ClassLoaderDataGraph"><a href="#4-3-6-&#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x5165;&#x53E3;-SystemDictionary-&#x4E0E;&#x4FDD;&#x7559;&#x6240;&#x6709;-ClassLoaderData-&#x7684;-ClassLoaderDataGraph" class="headerlink" title="4.3.6. &#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x5165;&#x53E3; SystemDictionary &#x4E0E;&#x4FDD;&#x7559;&#x6240;&#x6709; ClassLoaderData &#x7684; ClassLoaderDataGraph"></a>4.3.6. &#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x5165;&#x53E3; <code>SystemDictionary</code> &#x4E0E;&#x4FDD;&#x7559;&#x6240;&#x6709; <code>ClassLoaderData</code> &#x7684; <code>ClassLoaderDataGraph</code></h3><p>&#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x5165;&#x53E3;&#x5728;&#x5168;&#x5C40;&#x552F;&#x4E00;&#x7684; <code>SystemDictionary</code> &#x4E2D;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x53EA;&#x662F;&#x4E3A;&#x4E86;&#x770B;&#x4E00;&#x4E0B;&#x7C7B;&#x52A0;&#x8F7D;&#x9700;&#x8981;&#x54EA;&#x4E9B;&#x53C2;&#x6570;&#xFF0C;&#x6765;&#x641E;&#x6E05;&#x695A;&#x5BF9;&#x5E94;&#x5173;&#x7CFB;&#xFF0C;&#x4E0D;&#x7528;&#x5173;&#x5FC3;&#x7EC6;&#x8282;&#xFF0C;&#x5165;&#x53E3;&#x4EE3;&#x7801;&#x662F;&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/classfile/systemDictionary.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;InstanceKlass* SystemDictionary::resolve_from_stream(ClassFileStream* st,</span><br><span class="line">                                                     Symbol* class_name,</span><br><span class="line">                                                     Handle class_loader,</span><br><span class="line">                                                     const ClassLoadInfo&amp; cl_info,</span><br><span class="line">                                                     TRAPS) {</span><br><span class="line">  //&#x9690;&#x85CF;&#x7C7B;&#x4E0E;&#x666E;&#x901A;&#x7C7B;&#x7684;&#x52A0;&#x8F7D;&#x65B9;&#x5F0F;&#x4E0D;&#x540C;&#xFF0C;&#x9690;&#x85CF;&#x7C7B;&#x662F; JEP 371: Hidden Classes &#x5F15;&#x5165;&#x7684;&#xFF0C;Java 15 &#x4E2D;&#x53D1;&#x5E03;&#x7684;&#x65B0;&#x7279;&#x6027;</span><br><span class="line">  if (cl_info.is_hidden()) {</span><br><span class="line">    return resolve_hidden_class_from_stream(st, class_name, class_loader, cl_info, CHECK_NULL);</span><br><span class="line">  } else {</span><br><span class="line">    return resolve_class_from_stream(st, class_name, class_loader, cl_info, CHECK_NULL);</span><br><span class="line">  }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x52A0;&#x8F7D;&#x7C7B;&#x9700;&#x8981;&#x4EE5;&#x4E0B;&#x53C2;&#x6570;&#xFF1A;</p>
+<ul>
+<li><code>ClassFileStream* st</code>&#xFF1A;&#x7C7B;&#x6587;&#x4EF6;&#x6D41;</li>
+<li><code>Symbol* class_name</code>&#xFF1A;&#x52A0;&#x8F7D;&#x7684;&#x7C7B;&#x7684;&#x540D;&#x79F0;</li>
+<li><code>Handle class_loader</code>&#xFF1A;&#x662F;&#x54EA;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;</li>
+<li><code>const ClassLoadInfo&amp; cl_info</code>&#xFF1A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x4FE1;&#x606F;</li>
+</ul>
+<p>&#x5728;&#x52A0;&#x8F7D;&#x7C7B;&#x7684;&#x65F6;&#x5019;&#xFF0C;<code>SystemDictionary</code> &#x4F1A;&#x83B7;&#x53D6;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x7684; <code>ClassLoaderData</code>&#xFF0C;<code>ClassLoaderData</code> &#x662F;&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684;&#x3002;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/classfile/systemDictionary.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x901A;&#x8FC7;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684; `ClassLoaderData`</span><br><span class="line">ClassLoaderData* SystemDictionary::register_loader(Handle class_loader, bool create_mirror_cld) {</span><br><span class="line">  if (create_mirror_cld) {</span><br><span class="line">    return ClassLoaderDataGraph::add(class_loader, true);</span><br><span class="line">  } else {</span><br><span class="line">    // &#x5982;&#x679C;&#x662F; null&#xFF0C;&#x4EE3;&#x8868;&#x662F; BootstrapClassLoader&#xFF0C;&#x4F7F;&#x7528;&#x5168;&#x5C40;&#x7684; BootstrapClassLoader &#x5BF9;&#x5E94;&#x7684; ClassLoaderData</span><br><span class="line">    return (class_loader() == NULL) ? ClassLoaderData::the_null_class_loader_data() :</span><br><span class="line">    //&#x5426;&#x5219;&#xFF0C;&#x4ECE; ClassLoaderDataGraph &#x5BFB;&#x627E;&#x6216;&#x8005;&#x521B;&#x5EFA; class_loader &#x5BF9;&#x5E94;&#x7684; ClassLoaderData</span><br><span class="line">                                      ClassLoaderDataGraph::find_or_create(class_loader);</span><br><span class="line">  }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><code>ClassLoaderDataGraph</code> &#x4FDD;&#x5B58;&#x7740;&#x6240;&#x6709;&#x7684; <code>ClassLoaderData</code>&#xFF0C;&#x8FD9;&#x4E2A;&#x4E3B;&#x8981;&#x7528;&#x6765;&#x904D;&#x5386;&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF0C;&#x4EE5;&#x53CA;&#x83B7;&#x53D6;&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x52A0;&#x8F7D;&#x7684;&#x7C7B;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x8FD8;&#x6709;&#x904D;&#x5386;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x52A0;&#x8F7D;&#x7684;&#x7C7B;&#xFF0C;&#x4F8B;&#x5982; <code>jcmd</code> &#x547D;&#x4EE4;&#x4E2D;&#x7684; <code>VM.classloaders</code> &#x4EE5;&#x53CA; <code>VM.classloader_stats</code> &#x5C31;&#x662F;&#x8FD9;&#x4E48;&#x5B9E;&#x73B0;&#x7684;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x4E0D;&#x7EA0;&#x7ED3;&#x4E8E; <code>ClassLoaderDataGraph</code> &#x7684;&#x7EC6;&#x8282;&#x4E86;&#xFF0C;&#x8FD9;&#x4E0D;&#x662F;&#x54B1;&#x4EEC;&#x7684;&#x91CD;&#x70B9;&#x3002;</p>
+<h3 id="4-3-7-&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684;-ClassLoaderData-&#x4EE5;&#x53CA;-ClassLoaderMetaspace"><a href="#4-3-7-&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684;-ClassLoaderData-&#x4EE5;&#x53CA;-ClassLoaderMetaspace" class="headerlink" title="4.3.7. &#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684; ClassLoaderData &#x4EE5;&#x53CA; ClassLoaderMetaspace"></a>4.3.7. &#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684; <code>ClassLoaderData</code> &#x4EE5;&#x53CA; <code>ClassLoaderMetaspace</code></h3><p><code>ClassLoaderData</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Class</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x52A0;&#x8F7D;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;&#x8FD9;&#x5C31;&#x5F88;&#x5408;&#x7406;&#x4E86;&#xFF0C;&#x4E0D;&#x52A0;&#x8F7D;&#x7C7B;&#x5C31;&#x4E0D;&#x4F1A;&#x6709; <code>ClassLoaderData</code>&#x3002;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/classfile/classLoaderData.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;    class ClassLoaderData : public CHeapObj&lt;mtClass&gt;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x524D;&#x6240;&#x8FF0;&#xFF0C;<code>ClassLoaderData</code> &#x662F;&#x6BCF;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x79C1;&#x6709;&#x7684;&#x3002;<code>ClassLoaderData</code> &#x5305;&#x542B;&#x7684;&#x5143;&#x7D20;&#x4F17;&#x591A;&#xFF0C;&#x6211;&#x4EEC;&#x8FD9;&#x91CC;&#x53EA;&#x5173;&#x5FC3;&#x5B83;&#x5176;&#x4E2D;&#x4E0E;&#x5143;&#x7A7A;&#x95F4;&#x5185;&#x5B58;&#x5206;&#x914D;&#x76F8;&#x5173;&#x7684;&#xFF0C;&#x5373; <code>ClassLoaderMetaspace</code>&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/classfile/classLoaderData.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;    ClassLoaderMetaspace * volatile _metaspace;</span><br></pre></td></tr></table></figure>
+
+<p><code>ClassLoaderMetaspace</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Class</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x52A0;&#x8F7D;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B11/src/hotspot/share/memory/classLoaderMetaspace.hpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;    class ClassLoaderMetaspace : public CHeapObj&lt;mtClass&gt;</span><br></pre></td></tr></table></figure>
+
+<p><code>ClassLoaderMetaspace</code> &#x6709;&#x4E0D;&#x540C;&#x7684;&#x7C7B;&#x578B;&#xFF08;<code>MetaspaceType</code>&#xFF09;&#xFF1A;</p>
+<ul>
+<li><code>MetaspaceType::StandardMetaspaceType</code>&#xFF1A;&#x5E73;&#x53F0;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Platform ClassLoader&#xFF0C;Java 9 &#x4E4B;&#x524D;&#x53EB;&#x505A; ext ClassLoader&#xFF09;&#x4EE5;&#x53CA;&#x5E94;&#x7528;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Application ClassLoader&#xFF09;&#x7684; <code>ClassLoaderMetaspace</code></li>
+<li><code>MetaspaceType::BootMetaspaceType</code>&#xFF1A;&#x5373;&#x6839;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Boostrap ClassLoader&#xFF09;&#x7684; <code>ClassLoaderMetaspace</code></li>
+<li><code>MetaspaceType::ClassMirrorHolderMetaspaceType</code>&#xFF1A;&#x52A0;&#x8F7D;&#x533F;&#x540D;&#x7C7B;&#x7684;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x7684; <code>ClassLoaderMetaspace</code></li>
+<li><code>MetaspaceType::ReflectionMetaspaceType</code>&#xFF1A;&#x53CD;&#x5C04;&#x8C03;&#x7528;&#x7684;&#x524D;&#x51E0;&#x6B21;&#x901A;&#x8FC7; jni native &#x8C03;&#x7528;&#xFF0C;&#x8D85;&#x8FC7;&#x4E00;&#x5B9A;&#x6B21;&#x6570;&#x4F1A;&#x4F18;&#x5316;&#x6210;&#x751F;&#x6210;&#x5B57;&#x8282;&#x7801;&#x7C7B;&#x8C03;&#x7528;&#x3002;&#x52A0;&#x8F7D;&#x8FD9;&#x4E9B;&#x5B57;&#x8282;&#x7801;&#x7C7B;&#x7684;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x662F; <code>jdk.internal.reflect.DelegatingClassLoader</code>&#xFF0C;&#x8FD9;&#x4E2A;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x7684; <code>ClassLoaderMetaspace</code> &#x7C7B;&#x578B;&#x5C31;&#x662F; <code>ReflectionMetaspaceType</code>&#x3002;</li>
+</ul>
+<p><code>ClassLoaderMetaspace</code> &#x548C; <code>MetaspaceContext</code> &#x7C7B;&#x4F3C;&#xFF0C;&#x5982;&#x679C;&#x538B;&#x7F29;&#x7C7B;&#x6307;&#x9488;&#x5F00;&#x542F;&#xFF0C;&#x90A3;&#x4E48; <code>ClassLoaderMetaspace</code> &#x5305;&#x542B;&#x4E00;&#x4E2A;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x548C;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code>&#xFF0C;&#x5426;&#x5219;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code>&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/c82e125f887ccac66038e7d82524ed75d39738b96e67c886a6a6fce4868d1bc9" alt="image"></p>
+<h3 id="4-3-8-&#x7BA1;&#x7406;&#x6B63;&#x5728;&#x4F7F;&#x7528;&#x7684;-MetaChunk-&#x7684;-MetaspaceArena"><a href="#4-3-8-&#x7BA1;&#x7406;&#x6B63;&#x5728;&#x4F7F;&#x7528;&#x7684;-MetaChunk-&#x7684;-MetaspaceArena" class="headerlink" title="4.3.8. &#x7BA1;&#x7406;&#x6B63;&#x5728;&#x4F7F;&#x7528;&#x7684; MetaChunk &#x7684; MetaspaceArena"></a>4.3.8. &#x7BA1;&#x7406;&#x6B63;&#x5728;&#x4F7F;&#x7528;&#x7684; <code>MetaChunk</code> &#x7684; <code>MetaspaceArena</code></h3><p><code>MetaspaceArena</code> &#x672C;&#x8EAB;&#x76F4;&#x63A5;&#x539F;&#x751F;&#x5806;&#x4E0A;&#x9762;&#x5206;&#x914D;&#xFF0C;Native Memory Tracking &#x4E2D;&#x5C5E;&#x4E8E; <code>Class</code> &#x90A3;&#x4E00;&#x7C7B;&#x522B;&#xFF0C;&#x5373;&#x5143;&#x7A7A;&#x95F4;&#x7684;&#x52A0;&#x8F7D;&#x7C7B;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x3002;&#x8FD9;&#x4E5F;&#x662F;&#x80AF;&#x5B9A;&#x7684;&#xFF0C;&#x56E0;&#x4E3A;&#x8DDF;&#x7740;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x5B58;&#x5728;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;class MetaspaceArena : public CHeapObj&lt;mtClass&gt;</span><br></pre></td></tr></table></figure>
+
+<p><code>MetaspaceArena</code> &#x7ED3;&#x6784;&#x5982;&#x4E0B;&#x6240;&#x793A;&#xFF1A;<br><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/9b28ac2b49b82318b63c6a3013d89685b7379d5967748e89040d0b6e0e478c76" alt="image"></p>
+<p><code>MetaspaceArena</code> &#x5305;&#x542B;&#xFF1A;</p>
+<ul>
+<li>&#x4E00;&#x4E2A; <code>MetachunkList</code>&#xFF1A;&#x7BA1;&#x7406;&#x5728;&#x8BE5; <code>MetaspaceArena</code> &#x5206;&#x914D;&#x7684; <code>MetaChunk</code> &#x7684;&#x5217;&#x8868;&#xFF0C;&#x5217;&#x8868;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x662F;&#x5F53;&#x524D;&#x5206;&#x914D;&#x5185;&#x5B58;&#x7684; <code>MetaChunk</code>&#x3002;</li>
+<li>&#x5F53;&#x524D; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;&#x5728;&#x5F53;&#x524D;&#x5206;&#x914D;&#x5185;&#x5B58;&#x7684; <code>MetaChunk</code> &#x4E0D;&#x591F;&#x5206;&#x914D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x7533;&#x8BF7;&#x65B0;&#x7684; <code>MetaChunk</code> &#x7684;&#x5927;&#x5C0F;&#x3002;</li>
+<li><code>Freeblocks</code>&#xFF1A; &#x5728;&#x5F53;&#x524D;&#x5206;&#x914D;&#x5185;&#x5B58;&#x7684; <code>MetaChunk</code> &#x4E0D;&#x591F;&#x5206;&#x914D;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x9700;&#x8981;&#x5206;&#x914D;&#x65B0;&#x7684; <code>MetaChunk</code>&#x3002;&#x5F53;&#x524D;&#x7684; <code>MetaChunk</code> &#x5269;&#x4F59;&#x7A7A;&#x95F4;&#x653E;&#x5165; <code>Freeblocks</code>&#x3002;</li>
+</ul>
+<p><code>Freeblocks</code> &#x5305;&#x542B;&#x4E00;&#x4E2A; <code>BinList32</code> &#x548C;&#x4E00;&#x4E2A; <code>BlockTree</code>&#x3002;&#x5927;&#x5C0F;&#x5927;&#x4E8E; 33 &#x5B57;&#x8282;&#x7684;&#x8FDB;&#x5165; <code>BlockTree</code>&#xFF0C;&#x5426;&#x5219;&#x8FDB;&#x5165; <code>BinList32</code>&#x3002;</p>
+<p><code>BinList32</code> &#x7C7B;&#x4F3C;&#x4E8E; <code>FreeChunkListVector</code>&#xFF0C;&#x662F;&#x4E00;&#x4E2A;&#x94FE;&#x8868;&#x7684;&#x6570;&#x7EC4;&#xFF0C;&#x540C;&#x6837;&#x5927;&#x5C0F;&#x7684;&#x5185;&#x5B58;&#x5728;&#x540C;&#x4E00;&#x6570;&#x7EC4;&#x4E0B;&#x6807;&#x7684;&#x94FE;&#x8868;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/f1cd14b404e35fd35c7eb8ce092a83fe478247cde475db777332a2f0907a0bad" alt="image"></p>
+<p><code>BlockTree</code> &#x662F;&#x4E00;&#x4E2A;&#x5728; <strong>Binary Search Tree</strong>&#xFF08;BST&#xFF09;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#xFF0C;&#x540C;&#x6837;&#x5185;&#x5B58;&#x7684;&#x8282;&#x70B9;&#x5728;&#x4E8C;&#x53C9;&#x6811;&#x8282;&#x70B9;&#x7684;&#x540E;&#x9762;&#x5F62;&#x6210;&#x94FE;&#x8868;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p1/raw/master/img/e0f903ed607b2e4706cc2d489caf00c8c5734176993338f066eb9fac84a13b9d" alt="image"></p>
+<p>&#x4E0D;&#x540C;&#x7684;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x7C7B;&#x578B;&#x7684;&#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x4E0E;&#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code> &#x4E0D;&#x540C;&#xFF1A;</p>
+<p>1.&#x6839;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Boostrap ClassLoader&#xFF09;&#x7684; <code>ClassLoaderMetaspace</code> &#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code>&#x6BCF;&#x6B21;&#x589E;&#x957F;&#x90FD;&#x662F;&#x7533;&#x8BF7;&#x5927;&#x5C0F;&#x4E3A; <code>256K</code> &#x7684; <code>MetaChunk</code></p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_boot_class[] = {</span><br><span class="line">        chunklevel::CHUNK_LEVEL_256K</span><br><span class="line">        // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<p>2.&#x6839;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Boostrap ClassLoader&#xFF09;&#x7684; <code>ClassLoaderMetaspace</code> &#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code> &#x7684;&#x7B2C;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x5927;&#x5C0F;&#x4E3A; <code>4M</code>&#xFF0C;&#x4E4B;&#x540E;&#x6BCF;&#x4E2A;&#x65B0; <code>MetaChunk</code> &#x90FD;&#x662F; <code>1M</code>&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_boot_non_class[] = {</span><br><span class="line">        chunklevel::CHUNK_LEVEL_4M,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_1M</span><br><span class="line">        // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<p>3.&#x5E73;&#x53F0;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Platform ClassLoader&#xFF0C;Java 9 &#x4E4B;&#x524D;&#x53EB;&#x505A; ext ClassLoader&#xFF09;&#x4EE5;&#x53CA;&#x5E94;&#x7528;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Application ClassLoader&#xFF09;&#x7684; <code>ClassLoaderMetaspace</code> &#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code> &#x7684;&#x7B2C;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x5927;&#x5C0F;&#x4E3A; <code>2K</code>&#xFF0C;&#x7B2C;&#x4E8C;&#x4E2A;&#x4E5F;&#x662F; <code>2K</code>&#xFF0C;&#x7B2C;&#x4E09;&#x4E2A; <code>4K</code>&#xFF0C;&#x7B2C;&#x56DB;&#x4E2A;&#x4E3A; <code>8K</code>&#xFF0C;&#x4E4B;&#x540E;&#x6BCF;&#x4E2A;&#x65B0; <code>MetaChunk</code> &#x90FD;&#x662F; <code>16K</code>&#xFF08;&#x4E0D;&#x8981;&#x60EF;&#x7740;cao&#x88AD;&#x7684;&#x4EBA;&#xFF01;&#xFF09;&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_standard_class[] = {</span><br><span class="line">        chunklevel::CHUNK_LEVEL_2K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_2K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_4K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_8K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_16K</span><br><span class="line">        // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<p>4.&#x5E73;&#x53F0;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Platform ClassLoader&#xFF0C;Java 9 &#x4E4B;&#x524D;&#x53EB;&#x505A; ext ClassLoader&#xFF09;&#x4EE5;&#x53CA;&#x5E94;&#x7528;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#xFF08;Application ClassLoader&#xFF09;&#x7684; <code>ClassLoaderMetaspace</code> &#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code> &#x7684;&#x7B2C;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x5927;&#x5C0F;&#x4E3A; <code>4K</code>&#xFF0C;&#x7B2C;&#x4E8C;&#x4E2A;&#x4E5F;&#x662F; <code>4K</code>&#xFF0C;&#x7B2C;&#x4E09;&#x4E2A; <code>4K</code>&#xFF0C;&#x7B2C;&#x56DB;&#x4E2A;&#x4E3A; <code>8K</code>&#xFF0C;&#x4E4B;&#x540E;&#x6BCF;&#x4E2A;&#x65B0; <code>MetaChunk</code> &#x90FD;&#x662F; <code>16K</code>&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_standard_non_class[] = {</span><br><span class="line">        chunklevel::CHUNK_LEVEL_4K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_4K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_4K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_8K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_16K</span><br><span class="line">        // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<p>5.&#x52A0;&#x8F7D;&#x533F;&#x540D;&#x7C7B;&#x7684;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x7684; <code>ClassLoaderMetaspace</code> &#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code> &#x6BCF;&#x6B21;&#x589E;&#x957F;&#x90FD;&#x662F;&#x7533;&#x8BF7;&#x5927;&#x5C0F;&#x4E3A; <code>1K</code> &#x7684; <code>MetaChunk</code>&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_anon_class[] = {</span><br><span class="line">        chunklevel::CHUNK_LEVEL_1K,</span><br><span class="line">        // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<p>6.&#x52A0;&#x8F7D;&#x533F;&#x540D;&#x7C7B;&#x7684;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x7684; <code>ClassLoaderMetaspace</code> &#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code> &#x6BCF;&#x6B21;&#x589E;&#x957F;&#x90FD;&#x662F;&#x7533;&#x8BF7;&#x5927;&#x5C0F;&#x4E3A; <code>1K</code> &#x7684; <code>MetaChunk</code>&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cpp&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_anon_non_class[] = {</span><br><span class="line">       chunklevel::CHUNK_LEVEL_1K,</span><br><span class="line">       // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<p>7.<code>DelegatingClassLoader</code> &#x7684; <code>ClassLoaderMetaspace</code> &#x7C7B;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code> &#x6BCF;&#x6B21;&#x589E;&#x957F;&#x90FD;&#x662F;&#x7533;&#x8BF7;&#x5927;&#x5C0F;&#x4E3A; <code>1K</code> &#x7684; <code>MetaChunk</code>&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_refl_class[] = {</span><br><span class="line">        chunklevel::CHUNK_LEVEL_1K,</span><br><span class="line">        // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<p>8.<code>DelegatingClassLoader</code> &#x7684; <code>ClassLoaderMetaspace</code> &#x6570;&#x636E;&#x5143;&#x7A7A;&#x95F4;&#x7684; <code>MetaspaceArena</code> &#x7684; <code>ArenaGrowthPolicy</code>&#xFF1A;<code>MetachunkList</code> &#x7684;&#x7B2C;&#x4E00;&#x4E2A; <code>MetaChunk</code> &#x5927;&#x5C0F;&#x4E3A; <code>2K</code>&#xFF0C;&#x4E4B;&#x540E;&#x6BCF;&#x4E2A;&#x65B0; <code>MetaChunk</code> &#x90FD;&#x662F; <code>1K</code>&#xFF1A;</p>
+<p><a href="/external_links/b01aba2b0f439453416021e7ad923df8.html" target="blank" rel="noopener"><code>https://github.com/openjdk/jdk/blob/jdk-21%2B12/src/hotspot/share/memory/metaspace/metaspaceArenaGrowthPolicy.cpp</code></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;    static const chunklevel_t g_sequ_refl_non_class[] = {</span><br><span class="line">        chunklevel::CHUNK_LEVEL_2K,</span><br><span class="line">        chunklevel::CHUNK_LEVEL_1K</span><br><span class="line">        // .. repeat last</span><br><span class="line">    };</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>&#x5FAE;&#x4FE1;&#x641C;&#x7D22;&#x201C;&#x5E72;&#x8D27;&#x6EE1;&#x6EE1;&#x5F20;&#x54C8;&#x5E0C;&#x201D;&#x5173;&#x6CE8;&#x516C;&#x4F17;&#x53F7;&#xFF0C;&#x52A0;&#x4F5C;&#x8005;&#x5FAE;&#x4FE1;&#xFF0C;&#x6BCF;&#x65E5;&#x4E00;&#x5237;&#xFF0C;&#x8F7B;&#x677E;&#x63D0;&#x5347;&#x6280;&#x672F;&#xFF0C;&#x65A9;&#x83B7;&#x5404;&#x79CD;offer</strong><br>&#x6211;&#x4F1A;&#x7ECF;&#x5E38;&#x53D1;&#x4E00;&#x4E9B;&#x5F88;&#x597D;&#x7684;&#x5404;&#x79CD;&#x6846;&#x67B6;&#x7684;&#x5B98;&#x65B9;&#x793E;&#x533A;&#x7684;&#x65B0;&#x95FB;&#x89C6;&#x9891;&#x8D44;&#x6599;&#x5E76;&#x52A0;&#x4E0A;&#x4E2A;&#x4EBA;&#x7FFB;&#x8BD1;&#x5B57;&#x5E55;&#x5230;&#x5982;&#x4E0B;&#x5730;&#x5740;&#xFF08;&#x4E5F;&#x5305;&#x62EC;&#x4E0A;&#x9762;&#x7684;&#x516C;&#x4F17;&#x53F7;&#xFF09;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;&#xFF1A;</p>
+<ul>
+<li>&#x77E5;&#x4E4E;&#xFF1A;<a href="/external_links/371449001e02a5502b7dec21cae420e8.html" target="blank" rel="noopener">www.zhihu.com/people/zhxh&#x2026;</a></li>
+<li>B &#x7AD9;&#xFF1A;<a href="/external_links/4cb1b1096c7f68ac89bbd30f61437b90.html" target="blank" rel="noopener">space.bilibili.com/31359187</a></li>
+</ul>
+</blockquote>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/af3225c821991275b1667979b5b4c4cd.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-面试-Java/" rel="tag"># 后端,面试,Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7225879698952486972.html" rel="next" title="全网最硬核 JVM 内存解析 - 7元空间存储的元数据 4">
+                <i class="fa fa-chevron-left"></i> 全网最硬核 JVM 内存解析 - 7元空间存储的元数据 4
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7225879724545900581.html" rel="prev" title="全网最硬核 JVM 内存解析 - 9元空间内存分配流程 4">
+                全网最硬核 JVM 内存解析 - 9元空间内存分配流程 4 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">102</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM-元空间设计"><span class="nav-number">1.</span> <span class="nav-text">JVM 元空间设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-元空间的核心概念与设计"><span class="nav-number">1.1.</span> <span class="nav-text">4.3. 元空间的核心概念与设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-1-元空间的整体配置以及相关参数"><span class="nav-number">1.1.1.</span> <span class="nav-text">4.3.1. 元空间的整体配置以及相关参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-2-元空间上下文-MetaspaceContext"><span class="nav-number">1.1.2.</span> <span class="nav-text">4.3.2. 元空间上下文 MetaspaceContext</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-3-虚拟内存空间节点列表-VirtualSpaceList"><span class="nav-number">1.1.3.</span> <span class="nav-text">4.3.3. 虚拟内存空间节点列表 VirtualSpaceList</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-4-虚拟内存空间节点-VirtualSpaceNode-与-CompressedClassSpaceSize"><span class="nav-number">1.1.4.</span> <span class="nav-text">4.3.4. 虚拟内存空间节点 VirtualSpaceNode 与 CompressedClassSpaceSize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-5-MetaChunk"><span class="nav-number">1.1.5.</span> <span class="nav-text">4.3.5. MetaChunk</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-5-1-ChunkHeaderPool-池化-MetaChunk-对象"><span class="nav-number">1.1.5.1.</span> <span class="nav-text">4.3.5.1. ChunkHeaderPool 池化 MetaChunk 对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-5-2-ChunkManager-管理空闲的-MetaChunk"><span class="nav-number">1.1.5.2.</span> <span class="nav-text">4.3.5.2. ChunkManager 管理空闲的 MetaChunk</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-6-类加载的入口-SystemDictionary-与保留所有-ClassLoaderData-的-ClassLoaderDataGraph"><span class="nav-number">1.1.6.</span> <span class="nav-text">4.3.6. 类加载的入口 SystemDictionary 与保留所有 ClassLoaderData 的 ClassLoaderDataGraph</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-7-每个类加载器私有的-ClassLoaderData-以及-ClassLoaderMetaspace"><span class="nav-number">1.1.7.</span> <span class="nav-text">4.3.7. 每个类加载器私有的 ClassLoaderData 以及 ClassLoaderMetaspace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-8-管理正在使用的-MetaChunk-的-MetaspaceArena"><span class="nav-number">1.1.8.</span> <span class="nav-text">4.3.8. 管理正在使用的 MetaChunk 的 MetaspaceArena</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
