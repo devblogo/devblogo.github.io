@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x9996;&amp;#x5148;&amp;#x5206;&amp;#x4EAB;&amp;#x4E4B;&amp;#x524D;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0; , &amp;#x6B22;&amp;#x8FCE;&amp;#x70B9;&amp;#x8D5E;&amp;#x6536;&amp;#x85CF;&amp;#x8F6C;&amp;#x53D1;&amp;#x4E09;&amp;#x8FDE;&amp;#x4E0B;&amp;#x6B21;&amp;#x4E00;&amp;#x5">
+<meta name="keywords" content="后端,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="盘点Seata   undo-log 处理">
+<meta property="og:url" content="https://dev.newban.cn/6986248944749641758.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x9996;&amp;#x5148;&amp;#x5206;&amp;#x4EAB;&amp;#x4E4B;&amp;#x524D;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0; , &amp;#x6B22;&amp;#x8FCE;&amp;#x70B9;&amp;#x8D5E;&amp;#x6536;&amp;#x85CF;&amp;#x8F6C;&amp;#x53D1;&amp;#x4E09;&amp;#x8FDE;&amp;#x4E0B;&amp;#x6B21;&amp;#x4E00;&amp;#x5">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/ae47099ef998e2d9edad7f9e3997d3d85d6106fdb1d4649a0954c76f4501ac95">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/276a9b2b3276e0ef43edff218af952ddae7dfb4417cc794b55f66797f25ad374">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/9b05c6b8117ee8e03b6eb8cb6b9596f692a5142d16f44fc87702501c7078aa1c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/7570b7b20ce1f67140b025268452b5cb9ce2049a5a697af0b1852b1725bebb07">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/6a294d4477afc20530a729b73300aa31ac964320deb4f68d06b5023be9f182c4">
+<meta property="og:updated_time" content="2024-04-22T09:08:06.634Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="盘点Seata   undo-log 处理">
+<meta name="twitter:description" content="&amp;#x9996;&amp;#x5148;&amp;#x5206;&amp;#x4EAB;&amp;#x4E4B;&amp;#x524D;&amp;#x7684;&amp;#x6240;&amp;#x6709;&amp;#x6587;&amp;#x7AE0; , &amp;#x6B22;&amp;#x8FCE;&amp;#x70B9;&amp;#x8D5E;&amp;#x6536;&amp;#x85CF;&amp;#x8F6C;&amp;#x53D1;&amp;#x4E09;&amp;#x8FDE;&amp;#x4E0B;&amp;#x6B21;&amp;#x4E00;&amp;#x5">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/ae47099ef998e2d9edad7f9e3997d3d85d6106fdb1d4649a0954c76f4501ac95">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6986248944749641758.html">
+
+
+
+
+
+  <title>盘点Seata   undo-log 处理 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">盘点Seata   undo-log 处理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-18T20:56:45+08:00">
+                2021-07-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p><strong>&#x9996;&#x5148;&#x5206;&#x4EAB;&#x4E4B;&#x524D;&#x7684;&#x6240;&#x6709;&#x6587;&#x7AE0; , &#x6B22;&#x8FCE;&#x70B9;&#x8D5E;&#x6536;&#x85CF;&#x8F6C;&#x53D1;&#x4E09;&#x8FDE;&#x4E0B;&#x6B21;&#x4E00;&#x5B9A; &gt;&gt;&gt;&gt;</strong> &#x1F61C;&#x1F61C;&#x1F61C;   </p>
+<p><strong>&#x6587;&#x7AE0;&#x5408;&#x96C6; :</strong> &#x1F381; <a href="https://dev.newban.cn/6941642435189538824">juejin.cn/post/694164&#x2026;</a>   </p>
+<p><strong>Github :</strong> &#x1F449; <a href="/external_links/f4c0695dd8cd8371c2f2fc9edde11029.html" target="blank" rel="noopener">github.com/black-ant</a>  </p>
+<p><strong>CASE &#x5907;&#x4EFD; :</strong> &#x1F449; <a href="/external_links/907cd6419accaedf9bfa60f559823d4b.html" target="blank" rel="noopener">gitee.com/antblack/ca&#x2026;</a></p>
+</blockquote>
+<h2 id="&#x4E00;-&#x524D;&#x8A00;"><a href="#&#x4E00;-&#x524D;&#x8A00;" class="headerlink" title="&#x4E00; .&#x524D;&#x8A00;"></a>&#x4E00; .&#x524D;&#x8A00;</h2><p>&#x524D;&#x9762;&#x8BF4;&#x4E86; Seata Client &#x7684;&#x8BF7;&#x6C42;&#x6D41;&#x7A0B; , &#x8FD9;&#x4E00;&#x7BC7;&#x6765;&#x770B;&#x4E00;&#x4E0B; Client &#x7AEF;&#x5BF9; undo-log &#x7684;&#x64CD;&#x4F5C;.</p>
+<p>undo-log &#x662F; AT &#x6A21;&#x5F0F;&#x4E2D;&#x7684;&#x6838;&#x5FC3;&#x90E8;&#x5206; , <strong>&#x4ED6;&#x662F;&#x5728; RM &#x90E8;&#x5206;&#x5B8C;&#x6210;&#x7684; , &#x5728;&#x6BCF;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x5E93;&#x5355;&#x5143;&#x5904;&#x7406;&#x65F6;&#x5747;&#x4F1A;&#x751F;&#x6210;&#x4E00;&#x6761; undoLog &#x6570;&#x636E;.</strong></p>
+<h2 id="&#x4E8C;-undo-log-&#x8868;"><a href="#&#x4E8C;-undo-log-&#x8868;" class="headerlink" title="&#x4E8C; . undo-log &#x8868;"></a>&#x4E8C; . undo-log &#x8868;</h2><p><strong>&#x5148;&#x6765;&#x770B;&#x4E00;&#x4E0B; undo-log &#x7684;&#x8868;&#x7ED3;&#x6784;</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;CREATE TABLE `undo_log` (</span><br><span class="line">  `id` bigint(20) NOT NULL AUTO_INCREMENT,</span><br><span class="line">  `branch_id` bigint(20) NOT NULL,</span><br><span class="line">  `xid` varchar(100) NOT NULL,</span><br><span class="line">  `context` varchar(128) NOT NULL,</span><br><span class="line">  `rollback_info` longblob NOT NULL,</span><br><span class="line">  `log_status` int(11) NOT NULL,</span><br><span class="line">  `log_created` datetime NOT NULL,</span><br><span class="line">  `log_modified` datetime NOT NULL,</span><br><span class="line">  `ext` varchar(100) DEFAULT NULL,</span><br><span class="line">  PRIMARY KEY (`id`),</span><br><span class="line">  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)</span><br><span class="line">) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;</span><br><span class="line"></span><br><span class="line">// &#x770B;&#x4E00;&#x4E0B;&#x5176;&#x4E2D;&#x53EF;&#x4EE5;&#x4E86;&#x89E3;&#x7684;&#x53C2;&#x6570; :</span><br><span class="line">- branch_id : &#x5206;&#x652F; ID </span><br><span class="line">- context : &#x955C;&#x50CF;&#x6570;&#x636E;</span><br><span class="line">- rollback_info : </span><br><span class="line">- log_status :</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>SQL &#x8BED;&#x53E5;</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SQL&#x590D;&#x5236;&#x4EE3;&#x7801;INSERT INTO `seata`.`undo_log`(</span><br><span class="line">    `id`, `branch_id`, `xid`, </span><br><span class="line">    `context`, `rollback_info`, </span><br><span class="line">    `log_status`, `log_created`, `log_modified`, </span><br><span class="line">    `ext`</span><br><span class="line">) VALUES (</span><br><span class="line">    1, 5116237355214458898, &apos;192.168.181.2:8091:5116237355214458897&apos;, </span><br><span class="line">    &apos;serializer=jackson&apos;, 0x7B7D, </span><br><span class="line">    1, &apos;2021-06-25 23:26:06&apos;, &apos;2021-06-25 23:26:06&apos;, </span><br><span class="line">    NULL</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>&#x5355;&#x7EAF;&#x7684;&#x770B; SQL &#x8BED;&#x53E5;&#x8FD8;&#x4E0D;&#x662F;&#x5F88;&#x6E05;&#x695A; , &#x518D;&#x8BE6;&#x7EC6;&#x7684;&#x770B;&#x770B; , <strong>&#x8FD9;&#x91CC;&#x9996;&#x5148;&#x900F;&#x9732;&#x6700;&#x7EC8;&#x7684;&#x5904;&#x7406;&#x903B;&#x8F91; , debug &#x7684;&#x65F6;&#x5019;&#x53EF;&#x4EE5;&#x901A;&#x8FC7; DEBUG &#x8BE5;&#x65B9;&#x6CD5;&#x8FDB;&#x884C;&#x56DE;&#x9000;</strong> :</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x770B;&#x4E00;&#x4E0B;&#x5F53;&#x524D;&#x63D2;&#x5165;&#x7684; undoLog &#x8BE6;&#x60C5;</span><br><span class="line">private void insertUndoLog(String xid, long branchId, String rollbackCtx,</span><br><span class="line">                               byte[] undoLogContent, State state, Connection conn) throws SQLException {</span><br><span class="line">    try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {</span><br><span class="line">        pst.setLong(1, 4386660905323926071);</span><br><span class="line">        pst.setString(2, &quot;192.168.181.2:8091:4386660905323926065&quot;);</span><br><span class="line">        pst.setString(3, &quot;serializer=jackson&quot;);</span><br><span class="line">        pst.setBlob(4, BlobUtils.bytes2Blob(undoLogContent));</span><br><span class="line">        pst.setInt(5, State.Normal(0));</span><br><span class="line">        pst.executeUpdate();</span><br><span class="line">    } catch (Exception e) {</span><br><span class="line">        if (!(e instanceof SQLException)) {</span><br><span class="line">                e = new SQLException(e);</span><br><span class="line">        }</span><br><span class="line">        throw (SQLException) e;</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// undoLogContent &#x53C2;&#x6570;</span><br><span class="line">{</span><br><span class="line">    &quot;@class&quot;: &quot;io.seata.rm.datasource.undo.BranchUndoLog&quot;,</span><br><span class="line">    &quot;xid&quot;: &quot;192.168.181.2:8091:4386660905323926065&quot;,</span><br><span class="line">    &quot;branchId&quot;: 4386660905323926071,</span><br><span class="line">    &quot;sqlUndoLogs&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">        &quot;@class&quot;: &quot;io.seata.rm.datasource.undo.SQLUndoLog&quot;,</span><br><span class="line">        &quot;sqlType&quot;: &quot;INSERT&quot;,</span><br><span class="line">        &quot;tableName&quot;: &quot;t_order&quot;,</span><br><span class="line">        &quot;beforeImage&quot;: {</span><br><span class="line">            &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.TableRecords$EmptyTableRecords&quot;,</span><br><span class="line">            &quot;tableName&quot;: &quot;t_order&quot;,</span><br><span class="line">            &quot;rows&quot;: [&quot;java.util.ArrayList&quot;, []]</span><br><span class="line">        },</span><br><span class="line">        &quot;afterImage&quot;: {</span><br><span class="line">            &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.TableRecords&quot;,</span><br><span class="line">            &quot;tableName&quot;: &quot;t_order&quot;,</span><br><span class="line">            &quot;rows&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">                &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Row&quot;,</span><br><span class="line">                &quot;fields&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">                    &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                    &quot;name&quot;: &quot;id&quot;,</span><br><span class="line">                    &quot;keyType&quot;: &quot;PRIMARY_KEY&quot;,</span><br><span class="line">                    &quot;type&quot;: 4,</span><br><span class="line">                    &quot;value&quot;: 31</span><br><span class="line">                }, {</span><br><span class="line">                    &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                    &quot;name&quot;: &quot;order_no&quot;,</span><br><span class="line">                    &quot;keyType&quot;: &quot;NULL&quot;,</span><br><span class="line">                    &quot;type&quot;: 12,</span><br><span class="line">                    &quot;value&quot;: &quot;63098e74e93b49bba77f1957e8fdab39&quot;</span><br><span class="line">                }, {</span><br><span class="line">                    &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                    &quot;name&quot;: &quot;user_id&quot;,</span><br><span class="line">                    &quot;keyType&quot;: &quot;NULL&quot;,</span><br><span class="line">                    &quot;type&quot;: 12,</span><br><span class="line">                    &quot;value&quot;: &quot;1&quot;</span><br><span class="line">                }, {</span><br><span class="line">                    &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                    &quot;name&quot;: &quot;commodity_code&quot;,</span><br><span class="line">                    &quot;keyType&quot;: &quot;NULL&quot;,</span><br><span class="line">                    &quot;type&quot;: 12,</span><br><span class="line">                    &quot;value&quot;: &quot;C201901140001&quot;</span><br><span class="line">                }, {</span><br><span class="line">                    &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                    &quot;name&quot;: &quot;count&quot;,</span><br><span class="line">                    &quot;keyType&quot;: &quot;NULL&quot;,</span><br><span class="line">                    &quot;type&quot;: 4,</span><br><span class="line">                    &quot;value&quot;: 50</span><br><span class="line">                }, {</span><br><span class="line">                    &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                    &quot;name&quot;: &quot;amount&quot;,</span><br><span class="line">                    &quot;keyType&quot;: &quot;NULL&quot;,</span><br><span class="line">                    &quot;type&quot;: 8,</span><br><span class="line">                    &quot;value&quot;: 100.0</span><br><span class="line">                }]]</span><br><span class="line">            }]]</span><br><span class="line">        }</span><br><span class="line">    }]]</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>undoLogContent &#x662F;&#x4E00;&#x4E2A;BlobUtils.bytes2Blob &#x8F6C;&#x6362;&#x7684; Byte &#x6570;&#x7EC4; , &#x5176;&#x4E2D;&#x901A;&#x8FC7; xid &#x548C; BranchId &#x5B58;&#x50A8;&#x4E86;<strong>&#x5168;&#x5C40;&#x4E8B;&#x52A1; ID (xid)</strong> &#x4EE5;&#x53CA; <strong>&#x5206;&#x652F;&#x4E8B;&#x52A1; ID(BranchId)</strong> ,&#x540C;&#x65F6;&#x5728; sqlUndoLogs &#x5C5E;&#x6027;&#x4E2D;&#x8BB0;&#x5F55;&#x4E86;<strong>&#x8868;&#x540D; (tableName)</strong> &#x548C; <strong>&#x64CD;&#x4F5C;&#x7C7B;&#x578B; (sqlType)</strong>   </p>
+<p>&#x6B64;&#x5904;&#x901A;&#x8FC7; <strong>beforeImage</strong> &#x548C;<strong>afterImage</strong> &#x5BF9;&#x524D;&#x540E;&#x7684;&#x6570;&#x636E; (PS : &#x6B64;&#x5904;&#x4E0D;&#x662F;&#x5907;&#x4EFD;&#x4E86;&#x6574;&#x4E2A;&#x8BB0;&#x5F55; ,&#x800C;&#x662F;&#x5907;&#x4EFD;&#x4E86;&#x90E8;&#x5206;&#x53C2;&#x6570;)</p>
+<hr>
+<h2 id="&#x4E09;-Client-undo-log-&#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;"><a href="#&#x4E09;-Client-undo-log-&#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;" class="headerlink" title="&#x4E09; . Client undo-log &#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;"></a>&#x4E09; . Client undo-log &#x7684;&#x5904;&#x7406;&#x6D41;&#x7A0B;</h2><p>Client &#x63D0;&#x4F9B;&#x4E86;&#x4E09;&#x79CD;&#x4FDD;&#x5B58; undo-log &#x7684;&#x5B9E;&#x73B0; , &#x53EF;&#x4EE5;&#x770B;&#x5230; , &#x90FD;&#x662F;&#x6301;&#x4E45;&#x5316;&#x5230;&#x5E93;&#x4E2D;&#x7684; , &#x53EA;&#x662F;&#x533A;&#x5206;&#x4E86;&#x5177;&#x4F53;&#x7684;&#x5E93;&#x7C7B;&#x578B;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/ae47099ef998e2d9edad7f9e3997d3d85d6106fdb1d4649a0954c76f4501ac95" alt="seata-system-UndoLogManager.png"></p>
+<h3 id="3-1-AbstractUndoLogManager-&#x89E3;&#x6790;"><a href="#3-1-AbstractUndoLogManager-&#x89E3;&#x6790;" class="headerlink" title="3.1 AbstractUndoLogManager &#x89E3;&#x6790;"></a>3.1 AbstractUndoLogManager &#x89E3;&#x6790;</h3><p>AbstractUndoLogManager &#x5B9E;&#x73B0;&#x4E86; UndoLogManager , &#x5B83;&#x662F;&#x4E00;&#x4E2A;&#x4E3B;&#x8981;&#x7684;&#x7BA1;&#x7406;&#x5DE5;&#x5177; , &#x5B9E;&#x73B0;&#x4E86;&#x5BF9; undo-log &#x7684;&#x7BA1;&#x7406; , &#x8BE5;&#x7C7B;&#x4E3B;&#x8981;&#x5B9E;&#x73B0;&#x4E86;&#x5982;&#x4E0B;&#x65B9;&#x6CD5;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public interface UndoLogManager {</span><br><span class="line"></span><br><span class="line">    void flushUndoLogs(ConnectionProxy cp) throws SQLException;</span><br><span class="line"></span><br><span class="line">    void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException;</span><br><span class="line"></span><br><span class="line">    void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException;</span><br><span class="line"></span><br><span class="line">    void batchDeleteUndoLog(Set&lt;String&gt; xids, Set&lt;Long&gt; branchIds, Connection conn) throws SQLException;</span><br><span class="line"></span><br><span class="line">    int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x6574;&#x4E2A;&#x6848;&#x4F8B;&#x4E2D;&#x6709;&#x4E09;&#x4E2A; RM ( Order , Account , Storage) , &#x4E0B;&#x9762;&#x6765;&#x770B;&#x4E00;&#x4E0B;&#x4E09;&#x4E2A; RM &#x662F;&#x600E;&#x4E48;&#x5904;&#x7406;&#x7684;</strong></p>
+<h3 id="3-2-undo-log-&#x53D1;&#x8D77;&#x7684;&#x6D41;&#x7A0B;-Order"><a href="#3-2-undo-log-&#x53D1;&#x8D77;&#x7684;&#x6D41;&#x7A0B;-Order" class="headerlink" title="3.2 undo-log &#x53D1;&#x8D77;&#x7684;&#x6D41;&#x7A0B; (Order)"></a>3.2 undo-log &#x53D1;&#x8D77;&#x7684;&#x6D41;&#x7A0B; (Order)</h3><ol>
+<li>ConnectionProxy # doCommit : <strong>&#x53D1;&#x8D77;&#x6574;&#x4F53;&#x7684; commit &#x6D41;&#x7A0B;</strong></li>
+<li>ConnectionProxy # processGlobalTransactionCommit : <strong>&#x5168;&#x5C40;&#x4E8B;&#x52A1;&#x63D0;&#x4EA4;&#x64CD;&#x4F5C;</strong></li>
+<li>UndoLogManagerFactory # getUndoLogManager : <strong>&#x83B7;&#x53D6; undoLog &#x7BA1;&#x7406;&#x5668;</strong></li>
+<li>AbstractUndoLogManager # flushUndoLogs</li>
+<li>MySQLUndoLogManager # insertUndoLogWithNormal</li>
+<li>MySQLUndoLogManager # insertUndoLog : <strong>&#x63D2;&#x5165; undoLog</strong></li>
+</ol>
+<h4 id="3-2-1-undo-log-&#x7684;&#x4E3B;&#x5904;&#x7406;&#x6D41;&#x7A0B;"><a href="#3-2-1-undo-log-&#x7684;&#x4E3B;&#x5904;&#x7406;&#x6D41;&#x7A0B;" class="headerlink" title="3.2.1 undo-log &#x7684;&#x4E3B;&#x5904;&#x7406;&#x6D41;&#x7A0B;"></a>3.2.1 undo-log &#x7684;&#x4E3B;&#x5904;&#x7406;&#x6D41;&#x7A0B;</h4><p>flushUndoLogs&#x662F;&#x6838;&#x5FC3;&#x6D41;&#x7A0B; , &#x5728;&#x8BE5;&#x73AF;&#x8282;&#x4E2D;&#x5BF9; BranchUndoLog &#x8FDB;&#x884C;&#x4E86;&#x67E5;&#x8BE2;&#x521B;&#x5EFA;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public void flushUndoLogs(ConnectionProxy cp) throws SQLException {</span><br><span class="line">    ConnectionContext connectionContext = cp.getContext();</span><br><span class="line">    if (!connectionContext.hasUndoLog()) {</span><br><span class="line">        return;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    String xid = connectionContext.getXid();</span><br><span class="line">    long branchId = connectionContext.getBranchId();</span><br><span class="line">    </span><br><span class="line">    // &#x6784;&#x5EFA;undo-log &#x5BF9;&#x8C61; -&gt; 3.2.2 &#x955C;&#x50CF;&#x7684;&#x67E5;&#x8BE2;&#x548C;&#x83B7;&#x53D6;</span><br><span class="line">    BranchUndoLog branchUndoLog = new BranchUndoLog();</span><br><span class="line">    branchUndoLog.setXid(xid);</span><br><span class="line">    branchUndoLog.setBranchId(branchId);</span><br><span class="line">    branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());</span><br><span class="line"></span><br><span class="line">    UndoLogParser parser = UndoLogParserFactory.getInstance();</span><br><span class="line">    byte[] undoLogContent = parser.encode(branchUndoLog);</span><br><span class="line">    </span><br><span class="line">    // &#x63D2;&#x5165;&#x6570;&#x636E; -&gt; 3.2.3 &#x6700;&#x7EC8;&#x6570;&#x636E;&#x7684;&#x63D2;&#x5165;</span><br><span class="line">    insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName()), undoLogContent,</span><br><span class="line">        cp.getTargetConnection());</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x8FD9;&#x91CC; branchUndoLog &#x4E2D;&#x5B58;&#x653E;&#x4E86;&#x524D;&#x540E;&#x7684;&#x6570;&#x636E; image , &#x53EF;&#x4EE5;&#x6765;&#x770B;&#x4E00;&#x4E0B;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/276a9b2b3276e0ef43edff218af952ddae7dfb4417cc794b55f66797f25ad374" alt="seata-undo-log-data.png"></p>
+<h4 id="3-2-2-&#x955C;&#x50CF;&#x7684;&#x67E5;&#x8BE2;&#x548C;&#x83B7;&#x53D6;"><a href="#3-2-2-&#x955C;&#x50CF;&#x7684;&#x67E5;&#x8BE2;&#x548C;&#x83B7;&#x53D6;" class="headerlink" title="3.2.2 &#x955C;&#x50CF;&#x7684;&#x67E5;&#x8BE2;&#x548C;&#x83B7;&#x53D6;"></a>3.2.2 &#x955C;&#x50CF;&#x7684;&#x67E5;&#x8BE2;&#x548C;&#x83B7;&#x53D6;</h4><p><strong>&#x955C;&#x50CF;&#x662F;&#x5C06;&#x53D8;&#x52A8;&#x524D; (beforeImage) &#x548C;&#x53D8;&#x52A8;&#x540E;(AfterImage)&#x7684;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x4E86;&#x5904;&#x7406; , &#x6765;&#x770B;&#x4E00;&#x4E0B;&#x955C;&#x50CF;&#x662F;&#x5728;&#x54EA;&#x4E2A;&#x73AF;&#x8282;&#x67E5;&#x8BE2;&#x51FA;&#x6765;&#x7684;</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;// Image &#x7684;&#x8D77;&#x70B9;&#x662F; Context &#x4E2D;&#x83B7;&#x53D6;&#x7684;</span><br><span class="line">public class ConnectionProxy extends AbstractConnectionProxy {</span><br><span class="line"></span><br><span class="line">    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxy.class);</span><br><span class="line"></span><br><span class="line">    private ConnectionContext context = new ConnectionContext();</span><br><span class="line">    </span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x5148;&#x6765;&#x770B;&#x4E00;&#x4E0B; ConnectionContext &#x7684;&#x7ED3;&#x6784; :</span><br><span class="line">public class ConnectionContext {</span><br><span class="line">    private String xid;</span><br><span class="line">    private Long branchId;</span><br><span class="line">    private boolean isGlobalLockRequire;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Table and primary key should not be duplicated.</span><br><span class="line">     */</span><br><span class="line">    private Set&lt;String&gt; lockKeysBuffer = new HashSet&lt;&gt;();</span><br><span class="line">    private List&lt;SQLUndoLog&gt; sqlUndoItemsBuffer = new ArrayList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// &#x67E5;&#x8BE2;&#x7684;&#x6D41;&#x7A0B; : </span><br><span class="line">C- ExecuteTemplate # execute</span><br><span class="line">C- AbstractDMLBaseExecutor # executeAutoCommitFalse    </span><br><span class="line">C- BaseTransactionalExecutor # prepareUndoLog</span><br><span class="line">C- ConnectionContext # appendUndoItem</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Step Start : &#x4E3B;&#x903B;&#x8F91; , &#x5176;&#x4E2D;&#x67E5;&#x8BE2;&#x4E86;&#x524D;&#x540E; Image</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x5728;&#x8FD9;&#x4E2A;&#x6D41;&#x7A0B;&#x4E2D; ,&#x5B8C;&#x6210;&#x4E86;&#x5927;&#x90E8;&#x5206;&#x7684;&#x6570;&#x636E;&#x64CD;&#x4F5C;</span><br><span class="line">protected T executeAutoCommitFalse(Object[] args) throws Exception {</span><br><span class="line">    if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) &amp;&amp; isMultiPk()) {</span><br><span class="line">        throw new NotSupportYetException(&quot;multi pk only support mysql!&quot;);</span><br><span class="line">    }</span><br><span class="line">    // &#x67E5;&#x8BE2;&#x524D;&#x7F6E;&#x955C;&#x50CF;</span><br><span class="line">    TableRecords beforeImage = beforeImage();</span><br><span class="line">    // &#x6267;&#x884C; SQL &#x65B9;&#x6CD5;</span><br><span class="line">    T result = statementCallback.execute(statementProxy.getTargetStatement(), args);</span><br><span class="line">    // &#x67E5;&#x8BE2;&#x540E;&#x7F6E;&#x955C;&#x50CF;</span><br><span class="line">    TableRecords afterImage = afterImage(beforeImage);</span><br><span class="line">    // &#x4FDD;&#x5B58; Undo-log</span><br><span class="line">    prepareUndoLog(beforeImage, afterImage);</span><br><span class="line">    return result;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x8865;&#x5145; : TableRecords &#x5BF9;&#x8C61;</span><br><span class="line">public class TableRecords implements java.io.Serializable {</span><br><span class="line">    // &#x652F;&#x6301;&#x5E8F;&#x5217;&#x5316;&#x7684;&#x80FD;&#x529B;</span><br><span class="line">    private static final long serialVersionUID = 4441667803166771721L;</span><br><span class="line"></span><br><span class="line">    private transient TableMeta tableMeta;</span><br><span class="line">    private String tableName;</span><br><span class="line">    private List&lt;Row&gt; rows = new ArrayList&lt;Row&gt;();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Step 1 : &#x83B7;&#x53D6; beforeImage</p>
+</blockquote>
+<p><strong>AbstractDMLBaseExecutor &#x4F1A;&#x6839;&#x636E;&#x5904;&#x7406;&#x7684;&#x4E0D;&#x540C;&#x6709;&#x591A;&#x4E2A;&#x5B9E;&#x73B0;&#x7C7B;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/9b05c6b8117ee8e03b6eb8cb6b9596f692a5142d16f44fc87702501c7078aa1c" alt="seata-AbstractDMLBaseExecutor.png"></p>
+<p><strong>&#x8FD9;&#x91CC;&#x4EC5;&#x4EE5;Update&#x4E3A;&#x4F8B; , insert &#x65F6;&#x4E0D;&#x4F1A;&#x67E5;&#x8BE2; , &#x5C31;&#x4E0D;&#x8FC7;&#x591A;&#x7684;&#x6DF1;&#x5165;&#x4E86;:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;// C-BaseInsertExecutor : Insert &#x60C5;&#x51B5;&#x65F6;&#x7684;&#x5904;&#x7406;&#x65B9;&#x5F0F;</span><br><span class="line">protected TableRecords beforeImage() throws SQLException {</span><br><span class="line">    return TableRecords.empty(getTableMeta());</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// C-UpdateExecutor : Update &#x60C5;&#x51B5;&#x65F6; Image &#x7684;&#x67E5;&#x8BE2;&#x65B9;&#x5F0F;</span><br><span class="line">protected TableRecords beforeImage() throws SQLException {</span><br><span class="line">    ArrayList&lt;List&lt;Object&gt;&gt; paramAppenderList = new ArrayList&lt;&gt;();</span><br><span class="line">    TableMeta tmeta = getTableMeta();</span><br><span class="line">    String selectSQL = buildBeforeImageSQL(tmeta, paramAppenderList);</span><br><span class="line">    return buildTableRecords(tmeta, selectSQL, paramAppenderList);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// Step 1-1 : </span><br><span class="line">private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList&lt;List&lt;Object&gt;&gt; paramAppenderList) {</span><br><span class="line">    SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;</span><br><span class="line">    List&lt;String&gt; updateColumns = recognizer.getUpdateColumns();</span><br><span class="line">    assertContainsPKColumnName(updateColumns);</span><br><span class="line">    StringBuilder prefix = new StringBuilder(&quot;SELECT &quot;);</span><br><span class="line">    StringBuilder suffix = new StringBuilder(&quot; FROM &quot;).append(getFromTableInSQL());</span><br><span class="line">    String whereCondition = buildWhereCondition(recognizer, paramAppenderList);</span><br><span class="line">    if (StringUtils.isNotBlank(whereCondition)) {</span><br><span class="line">        suffix.append(WHERE).append(whereCondition);</span><br><span class="line">    }</span><br><span class="line">    String orderBy = recognizer.getOrderBy();</span><br><span class="line">    if (StringUtils.isNotBlank(orderBy)) {</span><br><span class="line">        suffix.append(orderBy);</span><br><span class="line">    }</span><br><span class="line">    ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;</span><br><span class="line">    String limit = recognizer.getLimit(parametersHolder, paramAppenderList);</span><br><span class="line">    if (StringUtils.isNotBlank(limit)) {</span><br><span class="line">        suffix.append(limit);</span><br><span class="line">    }</span><br><span class="line">    suffix.append(&quot; FOR UPDATE&quot;);</span><br><span class="line">    StringJoiner selectSQLJoin = new StringJoiner(&quot;, &quot;, prefix.toString(), suffix.toString());</span><br><span class="line">    // &#x662F;&#x5426;&#x53EA;&#x66F4;&#x65B0;&#x5217;</span><br><span class="line">    if (ONLY_CARE_UPDATE_COLUMNS) {</span><br><span class="line">        if (!containsPK(updateColumns)) {</span><br><span class="line">            selectSQLJoin.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));</span><br><span class="line">        }</span><br><span class="line">        // &#x67E5;&#x8BE2;&#x66F4;&#x65B0;&#x7684;&#x5217;</span><br><span class="line">        for (String columnName : updateColumns) {</span><br><span class="line">            selectSQLJoin.add(columnName);</span><br><span class="line">        }</span><br><span class="line">    } else {</span><br><span class="line">        for (String columnName : tableMeta.getAllColumns().keySet()) {</span><br><span class="line">            selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    // SELECT id, count FROM t_storage WHERE commodity_code = ? FOR UPDATE</span><br><span class="line">    return selectSQLJoin.toString();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>TableMeta &#x8868;&#x5143;&#x6570;&#x636E; :</strong><br><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/7570b7b20ce1f67140b025268452b5cb9ce2049a5a697af0b1852b1725bebb07" alt="image.png"></p>
+<hr>
+<blockquote>
+<p>Step 2 : &#x67E5;&#x8BE2; afterImage</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {</span><br><span class="line">        TableMeta tmeta = getTableMeta();</span><br><span class="line">        if (beforeImage == null || beforeImage.size() == 0) {</span><br><span class="line">            return TableRecords.empty(getTableMeta());</span><br><span class="line">        }</span><br><span class="line">        String selectSQL = buildAfterImageSQL(tmeta, beforeImage);</span><br><span class="line">        ResultSet rs = null;</span><br><span class="line">        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {</span><br><span class="line">            SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);</span><br><span class="line">            rs = pst.executeQuery();</span><br><span class="line">            return TableRecords.buildRecords(tmeta, rs);</span><br><span class="line">        } finally {</span><br><span class="line">            IOUtil.close(rs);</span><br><span class="line">        }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x6DF1;&#x5165;&#x4E86;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Step 3 : &#x6DFB;&#x52A0; undo-log , &#x6784;&#x5EFA; Context ()</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;C- BaseTransactionalExecutor</span><br><span class="line">protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {</span><br><span class="line">    // image &#x6539;&#x53D8;&#x65F6;&#x624D;&#x4F1A;&#x521B;&#x5EFA; undo-log</span><br><span class="line">    if (beforeImage.getRows().isEmpty() &amp;&amp; afterImage.getRows().isEmpty()) {</span><br><span class="line">        return;</span><br><span class="line">    }</span><br><span class="line">    // &#x83B7;&#x53D6;&#x4EE3;&#x7406;&#x8FDE;&#x63A5;&#x5668;</span><br><span class="line">    ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();</span><br><span class="line">    // &#x63D2;&#x5165;&#x5B9E;&#x4F53; -&gt; &#x8BE6;&#x89C1;&#x4E0B;&#x56FE;</span><br><span class="line">    TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;</span><br><span class="line">    String lockKeys = buildLockKey(lockKeyRecords);</span><br><span class="line">    connectionProxy.appendLockKey(lockKeys);</span><br><span class="line"></span><br><span class="line">    SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);</span><br><span class="line">    connectionProxy.appendUndoLog(sqlUndoLog);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/6a294d4477afc20530a729b73300aa31ac964320deb4f68d06b5023be9f182c4" alt="image.png"></p>
+<p><strong>&#x8FD9;&#x91CC;&#x67E5;&#x8BE2;&#x5230; Image &#x540E; , &#x4E0B;&#x9762;&#x518D;&#x6765;&#x770B;&#x4E00;&#x4E0B; image &#x7684;&#x63D2;&#x5165;&#x6D41;&#x7A0B;</strong></p>
+<h4 id="3-2-3-&#x6700;&#x7EC8;&#x6570;&#x636E;&#x7684;&#x63D2;&#x5165;"><a href="#3-2-3-&#x6700;&#x7EC8;&#x6570;&#x636E;&#x7684;&#x63D2;&#x5165;" class="headerlink" title="3.2.3 &#x6700;&#x7EC8;&#x6570;&#x636E;&#x7684;&#x63D2;&#x5165;"></a>3.2.3 &#x6700;&#x7EC8;&#x6570;&#x636E;&#x7684;&#x63D2;&#x5165;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {</span><br><span class="line">	insertUndoLog(xid, branchId, buildContext(parser.getName()),</span><br><span class="line">		parser.getDefaultContent(), State.GlobalFinished, conn);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x6570;&#x636E;&#x7684;&#x63D2;&#x5165;&#x903B;&#x8F91;&#x5728;&#x7AE0;&#x8282;2&#x4E2D;</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x8865;&#x5145;-update-&#x4E0B;&#x7684;&#x955C;&#x50CF;-undo-log-Storage"><a href="#&#x8865;&#x5145;-update-&#x4E0B;&#x7684;&#x955C;&#x50CF;-undo-log-Storage" class="headerlink" title="&#x8865;&#x5145; :update &#x4E0B;&#x7684;&#x955C;&#x50CF; undo-log (Storage)"></a>&#x8865;&#x5145; :update &#x4E0B;&#x7684;&#x955C;&#x50CF; undo-log (Storage)</h3><p>&#x5176;&#x4E3B;&#x6D41;&#x7A0B;&#x662F;&#x548C; Order &#x4E00;&#x81F4;&#x7684; , &#x4E3B;&#x8981;&#x6765;&#x770B;&#x4E00;&#x4E0B;&#x63D2;&#x5165;&#x65F6;&#x7684; undo-log &#x6570;&#x636E; , &#x53EF;&#x4EE5;&#x770B;&#x5230; , &#x8FD9;&#x91CC;&#x4E0D;&#x662F;&#x751F;&#x6210;&#x4E86;&#x4E00;&#x4E2A; SQL , &#x800C;&#x662F;&#x5BF9;&#x5B57;&#x6BB5;&#x548C;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x4E86;&#x955C;&#x50CF;&#x5904;&#x7406;</p>
+<p><strong>&#x800C;&#x4E14;&#x8FD9;&#x91CC;&#x7684;&#x955C;&#x50CF;&#x5904;&#x7406;&#x7684;&#x662F;&#x53D8;&#x52A8;&#x7684;&#x8282;&#x70B9;</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;{</span><br><span class="line">    &quot;@class&quot;: &quot;io.seata.rm.datasource.undo.BranchUndoLog&quot;,</span><br><span class="line">	&quot;xid&quot;: &quot;192.168.181.2:8091:4386660905323926147&quot;,</span><br><span class="line">	&quot;branchId&quot;: 4386660905323926150,</span><br><span class="line">	&quot;sqlUndoLogs&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">        &quot;@class&quot;: &quot;io.seata.rm.datasource.undo.SQLUndoLog&quot;,</span><br><span class="line">        &quot;sqlType&quot;: &quot;UPDATE&quot;,</span><br><span class="line">        &quot;tableName&quot;: &quot;t_storage&quot;,</span><br><span class="line">        &quot;beforeImage&quot;: {</span><br><span class="line">        	&quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.TableRecords&quot;,</span><br><span class="line">        	&quot;tableName&quot;: &quot;t_storage&quot;,</span><br><span class="line">        	&quot;rows&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">                &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Row&quot;,</span><br><span class="line">                &quot;fields&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">                	&quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                	&quot;name&quot;: &quot;id&quot;,</span><br><span class="line">                	&quot;keyType&quot;: &quot;PRIMARY_KEY&quot;,</span><br><span class="line">                	&quot;type&quot;: 4,</span><br><span class="line">                	&quot;value&quot;: 1</span><br><span class="line">                }, {</span><br><span class="line">                	&quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                	&quot;name&quot;: &quot;count&quot;,</span><br><span class="line">                	&quot;keyType&quot;: &quot;NULL&quot;,</span><br><span class="line">                	&quot;type&quot;: 4,</span><br><span class="line">                	&quot;value&quot;: -800</span><br><span class="line">                }]]</span><br><span class="line">            }]]</span><br><span class="line">        },</span><br><span class="line">        &quot;afterImage&quot;: {</span><br><span class="line">        	&quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.TableRecords&quot;,</span><br><span class="line">        	&quot;tableName&quot;: &quot;t_storage&quot;,</span><br><span class="line">        	&quot;rows&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">                &quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Row&quot;,</span><br><span class="line">                &quot;fields&quot;: [&quot;java.util.ArrayList&quot;, [{</span><br><span class="line">                	&quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                	&quot;name&quot;: &quot;id&quot;,</span><br><span class="line">                	&quot;keyType&quot;: &quot;PRIMARY_KEY&quot;,</span><br><span class="line">                	&quot;type&quot;: 4,</span><br><span class="line">                	&quot;value&quot;: 1</span><br><span class="line">                }, {</span><br><span class="line">                	&quot;@class&quot;: &quot;io.seata.rm.datasource.sql.struct.Field&quot;,</span><br><span class="line">                	&quot;name&quot;: &quot;count&quot;,</span><br><span class="line">                	&quot;keyType&quot;: &quot;NULL&quot;,</span><br><span class="line">                	&quot;type&quot;: 4,</span><br><span class="line">                	&quot;value&quot;: -850</span><br><span class="line">                }]]</span><br><span class="line">            }]]</span><br><span class="line">        }</span><br><span class="line">    }]]</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>Account</strong> &#x4E0E;&#x6B64;&#x540C;&#x7406; , &#x8FD9;&#x91CC;&#x6682;&#x65F6;&#x4E0D;&#x8BF4;&#x4E86;</p>
+<h2 id="&#x56DB;-Client-undo-log-&#x56DE;&#x9000;&#x6D41;&#x7A0B;"><a href="#&#x56DB;-Client-undo-log-&#x56DE;&#x9000;&#x6D41;&#x7A0B;" class="headerlink" title="&#x56DB; . Client undo-log &#x56DE;&#x9000;&#x6D41;&#x7A0B;"></a>&#x56DB; . Client undo-log &#x56DE;&#x9000;&#x6D41;&#x7A0B;</h2><p><strong>&#x4E0A;&#x9762;&#x770B;&#x5B8C;&#x4E86; undo-log &#x7684;&#x521B;&#x5EFA;&#x6D41;&#x7A0B; , &#x4E0B;&#x9762;&#x6765;&#x770B;&#x4E00;&#x4E0B;&#x56DE;&#x9000;&#x65F6;&#x5BF9; undo-log &#x7684;&#x5904;&#x7406;</strong></p>
+<p>&#x8FD9;&#x91CC;&#x6709;&#x4E2A;&#x5F88;&#x91CD;&#x8981;&#x7684;&#x77E5;&#x8BC6;&#x70B9; , undo-log &#x7684;&#x521B;&#x5EFA;&#x662F;&#x5728;&#x6BCF;&#x4E2A; RM &#x4E2D;&#x521B;&#x5EFA;&#x7684; , &#x4F46;&#x662F;&#x56DE;&#x6EDA;&#x5728;</p>
+<h3 id="4-1-undo-log-&#x56DE;&#x9000;&#x6D41;&#x7A0B;"><a href="#4-1-undo-log-&#x56DE;&#x9000;&#x6D41;&#x7A0B;" class="headerlink" title="4.1 undo-log &#x56DE;&#x9000;&#x6D41;&#x7A0B;"></a>4.1 undo-log &#x56DE;&#x9000;&#x6D41;&#x7A0B;</h3><p><strong>Rollback &#x4E3B;&#x6D41;&#x7A0B; :</strong></p>
+<ol>
+<li>RmBranchRollbackProcessor # process : <strong>&#x63A5;&#x6536;&#x5230;&#x56DE;&#x9000;&#x5904;&#x7406;&#x8BF7;&#x6C42;</strong></li>
+<li>RmBranchRollbackProcessor # handleBranchRollback</li>
+<li>AbstractRMHandler # onRequest</li>
+<li>AbstractRMHandler # handle</li>
+<li>AbstractExceptionHandler # exceptionHandleTemplate</li>
+<li>AbstractRMHandler # handle</li>
+<li>AbstractRMHandler # doBranchRollback : &#x5206;&#x652F;&#x56DE;&#x9000;</li>
+<li>DataSourceManager # branchRollback</li>
+<li>AbstractUndoLogManager # undo : <strong>&#x6267;&#x884C; undo &#x903B;&#x8F91;</strong></li>
+<li>AbstractUndoLogManager # deleteUndoLog : <strong>&#x5220;&#x9664;&#x5206;&#x652F;</strong></li>
+</ol>
+<p>&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x770B;&#x5230; , &#x6700;&#x6838;&#x5FC3;&#x7684;&#x903B;&#x8F91;&#x5C31;&#x662F; undo , &#x8FD9;&#x4E2A;&#x903B;&#x8F91;&#x7684;&#x4EE3;&#x7801;&#x6BD4;&#x8F83;&#x957F; , &#x6211;&#x8FD9;&#x91CC;&#x5206;&#x4E3A;&#x56DE;&#x8C03;&#x548C;&#x5220;&#x9664; undo-log 2&#x4E2A;&#x903B;&#x8F91;&#x6765;&#x770B; :</p>
+<h3 id="4-2-&#x56DE;&#x8C03;&#x4E3B;&#x903B;&#x8F91;"><a href="#4-2-&#x56DE;&#x8C03;&#x4E3B;&#x903B;&#x8F91;" class="headerlink" title="4.2 &#x56DE;&#x8C03;&#x4E3B;&#x903B;&#x8F91;"></a>4.2 &#x56DE;&#x8C03;&#x4E3B;&#x903B;&#x8F91;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;C- AbstractUndoLogManager</span><br><span class="line">public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {</span><br><span class="line">    Connection conn = null;</span><br><span class="line">    ResultSet rs = null;</span><br><span class="line">    PreparedStatement selectPST = null;</span><br><span class="line">    boolean originalAutoCommit = true;</span><br><span class="line"></span><br><span class="line">    for (; ; ) {</span><br><span class="line">        conn = dataSourceProxy.getPlainConnection();</span><br><span class="line"></span><br><span class="line">        // The entire undo process should run in a local transaction.</span><br><span class="line">        if (originalAutoCommit = conn.getAutoCommit()) {</span><br><span class="line">            conn.setAutoCommit(false);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        // &#x901A;&#x8FC7; branchId &#x548C; xid &#x67E5;&#x8BE2; undo-log </span><br><span class="line">        selectPST = conn.prepareStatement(SELECT_UNDO_LOG_SQL);</span><br><span class="line">        selectPST.setLong(1, branchId);</span><br><span class="line">        selectPST.setString(2, xid);</span><br><span class="line">        rs = selectPST.executeQuery();</span><br><span class="line"></span><br><span class="line">        boolean exists = false;</span><br><span class="line">        // &#x5BF9;&#x67E5;&#x8BE2;&#x51FA;&#x7684; undo-log &#x8FDB;&#x884C;&#x5FAA;&#x73AF;&#x5904;&#x7406;</span><br><span class="line">        while (rs.next()) {</span><br><span class="line">            exists = true;</span><br><span class="line"></span><br><span class="line">            // &#x670D;&#x52A1;&#x5668;&#x53EF;&#x80FD;&#x4F1A;&#x91CD;&#x590D;&#x53D1;&#x9001;&#x56DE;&#x6EDA;&#x8BF7;&#x6C42;&#xFF0C;&#x5C06;&#x540C;&#x4E00;&#x4E2A;&#x5206;&#x652F;&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;&#x5230;&#x591A;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF0C;&#x4ECE;&#x800C;&#x786E;&#x4FDD;&#x53EA;&#x5904;&#x7406;&#x6B63;&#x5E38;&#x72B6;&#x6001;&#x4E0B;&#x7684;undo_log</span><br><span class="line">            int state = rs.getInt(ClientTableColumnsName.UNDO_LOG_LOG_STATUS);</span><br><span class="line">            if (!canUndo(state)) {</span><br><span class="line">                return;</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            String contextString = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);</span><br><span class="line">            Map&lt;String, String&gt; context = parseContext(contextString);</span><br><span class="line">            byte[] rollbackInfo = getRollbackInfo(rs);</span><br><span class="line"></span><br><span class="line">            String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);</span><br><span class="line">            UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance()</span><br><span class="line">                    : UndoLogParserFactory.getInstance(serializer);</span><br><span class="line">            // &#x53CD;&#x5E8F;&#x5217;&#x5316;&#x4E3A; BranchUndoLog</span><br><span class="line">            BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);</span><br><span class="line"></span><br><span class="line">            try {</span><br><span class="line">                // put serializer name to local</span><br><span class="line">                setCurrentSerializer(parser.getName());</span><br><span class="line">                List&lt;SQLUndoLog&gt; sqlUndoLogs = branchUndoLog.getSqlUndoLogs();</span><br><span class="line">                if (sqlUndoLogs.size() &gt; 1) {</span><br><span class="line">                    // &#x987A;&#x5E8F;&#x53CD;&#x8F6C;</span><br><span class="line">                    Collections.reverse(sqlUndoLogs);</span><br><span class="line">                }</span><br><span class="line">                </span><br><span class="line">                // &#x6267;&#x884C; undo-log &#x8FDB;&#x884C;&#x56DE;&#x9000;&#x5904;&#x7406;</span><br><span class="line">                for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {</span><br><span class="line">                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(</span><br><span class="line">                            conn, sqlUndoLog.getTableName(), dataSourceProxy.getResourceId());</span><br><span class="line">                    sqlUndoLog.setTableMeta(tableMeta);</span><br><span class="line">                    AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(</span><br><span class="line">                            dataSourceProxy.getDbType(), sqlUndoLog);</span><br><span class="line">                    undoExecutor.executeOn(conn);</span><br><span class="line">                }</span><br><span class="line">            } finally {</span><br><span class="line">                // remove serializer name</span><br><span class="line">                removeCurrentSerializer();</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        </span><br><span class="line">        // ........ &#x7701;&#x7565;&#x56DE;&#x9000;&#x903B;&#x8F91;</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>AbstractUndoExecutor &#x5BF9; executeOn &#x8FDB;&#x884C;&#x56DE;&#x9000;&#x5904;&#x7406;</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public void executeOn(Connection conn) throws SQLException {</span><br><span class="line">    if (IS_UNDO_DATA_VALIDATION_ENABLE &amp;&amp; !dataValidationAndGoOn(conn)) {</span><br><span class="line">        return;</span><br><span class="line">    }</span><br><span class="line">    try {</span><br><span class="line">        // UPDATE t_storage SET count = ? WHERE id = ?  </span><br><span class="line">        String undoSQL = buildUndoSQL();</span><br><span class="line">        PreparedStatement undoPST = conn.prepareStatement(undoSQL);</span><br><span class="line">        TableRecords undoRows = getUndoRows();</span><br><span class="line">        // &#x83B7;&#x53D6;&#x53D7;&#x5F71;&#x54CD;&#x7684;&#x5217;</span><br><span class="line">        for (Row undoRow : undoRows.getRows()) {</span><br><span class="line">            ArrayList&lt;Field&gt; undoValues = new ArrayList&lt;&gt;();</span><br><span class="line">            List&lt;Field&gt; pkValueList = getOrderedPkList(undoRows, undoRow, getDbType(conn));</span><br><span class="line">            for (Field field : undoRow.getFields()) {</span><br><span class="line">                if (field.getKeyType() != KeyType.PRIMARY_KEY) {</span><br><span class="line">                    undoValues.add(field);</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            // &#x89E3;&#x6790;&#x9700;&#x8981;&#x56DE;&#x9000;&#x7684;&#x5B57;&#x6BB5;&#x503C; (&#x5373;&#x539F;&#x6709;&#x503C;)</span><br><span class="line">            undoPrepare(undoPST, undoValues, pkValueList);</span><br><span class="line">            // &#x6267;&#x884C; undo-log &#x5904;&#x7406; , &#x56DE;&#x9000;&#x503C;</span><br><span class="line">            undoPST.executeUpdate();</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">    } catch (Exception ex) {</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x4E94;-Client-undo-log-&#x5220;&#x9664;&#x6D41;&#x7A0B;"><a href="#&#x4E94;-Client-undo-log-&#x5220;&#x9664;&#x6D41;&#x7A0B;" class="headerlink" title="&#x4E94; . Client undo-log &#x5220;&#x9664;&#x6D41;&#x7A0B;"></a>&#x4E94; . Client undo-log &#x5220;&#x9664;&#x6D41;&#x7A0B;</h2><p>&#x56DE;&#x9000;&#x5B8C;&#x6210;&#x540E; , &#x518D;&#x6765;&#x770B;&#x4E00;&#x4E0B; undo-log &#x7684;&#x5220;&#x9664;&#x5904;&#x7406; , &#x5220;&#x9664;&#x903B;&#x8F91;&#x662F;&#x5728; rollback &#x903B;&#x8F91;&#x4E4B;&#x540E;&#x5904;&#x7406;&#x7684;</p>
+<h3 id="5-1-undo-log-&#x4E3B;&#x903B;&#x8F91;"><a href="#5-1-undo-log-&#x4E3B;&#x903B;&#x8F91;" class="headerlink" title="5.1 undo-log &#x4E3B;&#x903B;&#x8F91;"></a>5.1 undo-log &#x4E3B;&#x903B;&#x8F91;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {</span><br><span class="line">    Connection conn = null;</span><br><span class="line">    ResultSet rs = null;</span><br><span class="line">    PreparedStatement selectPST = null;</span><br><span class="line">    boolean originalAutoCommit = true;</span><br><span class="line"></span><br><span class="line">    for (; ; ) {</span><br><span class="line">        try {</span><br><span class="line">            // .... &#x7701;&#x7565; rollback &#x903B;&#x8F91;</span><br><span class="line"> </span><br><span class="line">            // &#x5982;&#x679C;undo_log&#x5B58;&#x5728;&#xFF0C;&#x8FD9;&#x610F;&#x5473;&#x7740;&#x5206;&#x652F;&#x4E8B;&#x52A1;&#x5DF2;&#x7ECF;&#x5B8C;&#x6210;&#x4E86;&#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x56DE;&#x6EDA;&#x5E76;&#x6E05;&#x7406;undo_log</span><br><span class="line">            // &#x5426;&#x5219;&#xFF0C;&#x5B83;&#x8868;&#x660E;&#x5206;&#x652F;&#x4E8B;&#x52A1;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x5F02;&#x5E38;&#xFF0C;&#x5BFC;&#x81F4;undo_log&#x6CA1;&#x6709;&#x5199;&#x5165;&#x6570;&#x636E;&#x5E93;&#x3002;</span><br><span class="line"></span><br><span class="line">            // &#x4F8B;&#x5982;&#xFF0C;&#x4E1A;&#x52A1;&#x5904;&#x7406;&#x8D85;&#x65F6;&#x65F6;&#xFF0C;&#x5168;&#x5C40;&#x4E8B;&#x52A1;&#x88AB;&#x542F;&#x52A8;&#x5668;&#x56DE;&#x6EDA;&#x3002;</span><br><span class="line">            // &#x4E3A;&#x4E86;&#x786E;&#x4FDD;&#x6570;&#x636E;&#x7684;&#x4E00;&#x81F4;&#x6027;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x63D2;&#x5165;&#x4E00;&#x4E2A;&#x5E26;&#x6709;GlobalFinished&#x72B6;&#x6001;&#x7684;undo_log&#xFF0C;&#x4EE5;&#x9632;&#x6B62;&#x5176;&#x4ED6;&#x7A0B;&#x5E8F;&#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#x7684;&#x672C;&#x5730;&#x4E8B;&#x52A1;&#x88AB;&#x6B63;&#x786E;&#x63D0;&#x4EA4;&#x3002;</span><br><span class="line"></span><br><span class="line">            if (exists) {</span><br><span class="line">                deleteUndoLog(xid, branchId, conn);</span><br><span class="line">                conn.commit();</span><br><span class="line">            } else {</span><br><span class="line">                insertUndoLogWithGlobalFinished(xid, branchId, UndoLogParserFactory.getInstance(), conn);</span><br><span class="line">                conn.commit();</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            return;</span><br><span class="line">        } catch (SQLIntegrityConstraintViolationException e) {</span><br><span class="line">            // Possible undo_log has been inserted into the database by other processes, retrying rollback undo_log</span><br><span class="line">        } catch (Throwable e) {</span><br><span class="line">            if (conn != null) {</span><br><span class="line">                try {</span><br><span class="line">                    conn.rollback();</span><br><span class="line">                } catch (SQLException rollbackEx) {</span><br><span class="line">                    LOGGER.warn(&quot;Failed to close JDBC resource while undo ... &quot;, rollbackEx);</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            throw new BranchTransactionException(BranchRollbackFailed_Retriable, String</span><br><span class="line">                .format(&quot;Branch session rollback failed and try again later xid = %s branchId = %s %s&quot;, xid,</span><br><span class="line">                    branchId, e.getMessage()), e);</span><br><span class="line"></span><br><span class="line">        } finally {</span><br><span class="line">            //...</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-2-&#x5220;&#x9664;-undo-log"><a href="#5-2-&#x5220;&#x9664;-undo-log" class="headerlink" title="5.2 &#x5220;&#x9664; undo-log"></a>5.2 &#x5220;&#x9664; undo-log</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {</span><br><span class="line">        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL)) {</span><br><span class="line">            deletePST.setLong(1, branchId);</span><br><span class="line">            deletePST.setString(2, xid);</span><br><span class="line">            deletePST.executeUpdate();</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            if (!(e instanceof SQLException)) {</span><br><span class="line">                e = new SQLException(e);</span><br><span class="line">            }</span><br><span class="line">            throw (SQLException) e;</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x8FD9;&#x4E00;&#x7BC7;&#x53EA;&#x662F;&#x5F52;&#x7EB3;&#x4E86;&#x4E00;&#x4E0B; undo-log &#x7684;&#x903B;&#x8F91; ,<strong>&#x4E3B;&#x8981;&#x901A;&#x8FC7; BeforeImage &#x548C; AfterImage &#x4FDD;&#x5B58;&#x524D;&#x540E;&#x903B;&#x8F91;</strong> , &#x7528;&#x4E8E;&#x56DE;&#x9000;&#x5904;&#x7406;</p>
+<p>&#x4F46;&#x662F;&#x8FD9;&#x8FD8;&#x8FDC;&#x8FDC;&#x6CA1;&#x5B8C; , <strong>&#x540E;&#x9762;&#x8FD8;&#x6709; lock &#x673A;&#x5236;&#x548C; &#x8FDC;&#x7A0B;&#x8C03;&#x7528; &#x673A;&#x5236;&#x6765;&#x5B8C;&#x5584;&#x6574;&#x4E2A;&#x6D41;&#x7A0B; , &#x540C;&#x65F6;&#x9700;&#x8981;&#x68B3;&#x7406;&#x51FA; TCC &#x7684;&#x903B;&#x8F91;</strong></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/288719ee58d337347a1a03dedc81f583.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-Java/" rel="tag"># 后端,Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6985012282359021582.html" rel="next" title="盘点 Seata   Server 端事务的 Session">
+                <i class="fa fa-chevron-left"></i> 盘点 Seata   Server 端事务的 Session
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6987714408235417608.html" rel="prev" title="盘点 Seata   Server 端接收请求">
+                盘点 Seata   Server 端接收请求 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">501</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">201</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-前言"><span class="nav-number">1.</span> <span class="nav-text">一 .前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-undo-log-表"><span class="nav-number">2.</span> <span class="nav-text">二 . undo-log 表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-Client-undo-log-的处理流程"><span class="nav-number">3.</span> <span class="nav-text">三 . Client undo-log 的处理流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-AbstractUndoLogManager-解析"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 AbstractUndoLogManager 解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-undo-log-发起的流程-Order"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 undo-log 发起的流程 (Order)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-1-undo-log-的主处理流程"><span class="nav-number">3.2.1.</span> <span class="nav-text">3.2.1 undo-log 的主处理流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-2-镜像的查询和获取"><span class="nav-number">3.2.2.</span> <span class="nav-text">3.2.2 镜像的查询和获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-3-最终数据的插入"><span class="nav-number">3.2.3.</span> <span class="nav-text">3.2.3 最终数据的插入</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#补充-update-下的镜像-undo-log-Storage"><span class="nav-number">3.3.</span> <span class="nav-text">补充 :update 下的镜像 undo-log (Storage)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-Client-undo-log-回退流程"><span class="nav-number">4.</span> <span class="nav-text">四 . Client undo-log 回退流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-undo-log-回退流程"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 undo-log 回退流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-回调主逻辑"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 回调主逻辑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五-Client-undo-log-删除流程"><span class="nav-number">5.</span> <span class="nav-text">五 . Client undo-log 删除流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-undo-log-主逻辑"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 undo-log 主逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-删除-undo-log"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 删除 undo-log</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

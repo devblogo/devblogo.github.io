@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,面试,性能优化,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x6211;&amp;#x4EEC;&amp;#x77E5;&amp;#x9053;&amp;#xFF0C;&amp;#x5145;&amp;#x5206;&amp;#x4E14;&amp;#x5408;&amp;#x7406;&amp;#x5730;&amp;#x4F7F;&amp;#x7528; CPU &amp;#x8D44;&amp;#x6E90;&amp;#x662F;&amp;#x63D0;&amp;#x5347;&amp;#x901F;&amp;#x5EA6;&amp;#x7684;&amp;#x672C;&amp;#x8D28;&amp;#x56E0;&amp;#x">
+<meta name="keywords" content="Android,面试,性能优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="速度优化：GC抑制 GC 执行的流程 抑制 GC 执行的方案">
+<meta property="og:url" content="https://dev.newban.cn/7280345543145127977.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x6211;&amp;#x4EEC;&amp;#x77E5;&amp;#x9053;&amp;#xFF0C;&amp;#x5145;&amp;#x5206;&amp;#x4E14;&amp;#x5408;&amp;#x7406;&amp;#x5730;&amp;#x4F7F;&amp;#x7528; CPU &amp;#x8D44;&amp;#x6E90;&amp;#x662F;&amp;#x63D0;&amp;#x5347;&amp;#x901F;&amp;#x5EA6;&amp;#x7684;&amp;#x672C;&amp;#x8D28;&amp;#x56E0;&amp;#x">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/c6c1d2689f720fc85f3963b261723abff960d3115892e058420302fe71c9dae0">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/5958afb686022301c872fccba35899a958dffcc080271ecc8e05cf65ab748ca3">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/8a995b74ec6dfca2f4c91f29156c425567173182a0298a64cd7a13cb24867ad8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/f9a7b488e0f7493bde8b228dbf5c775b686dd15e915f6acc9e18bc6163316239">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/20806979c1d3fbfaee6a7d809333a5f698f37d24dcaa1ee8da5271e67ee416f2">
+<meta property="og:updated_time" content="2024-04-22T09:19:08.033Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="速度优化：GC抑制 GC 执行的流程 抑制 GC 执行的方案">
+<meta name="twitter:description" content="&amp;#x6211;&amp;#x4EEC;&amp;#x77E5;&amp;#x9053;&amp;#xFF0C;&amp;#x5145;&amp;#x5206;&amp;#x4E14;&amp;#x5408;&amp;#x7406;&amp;#x5730;&amp;#x4F7F;&amp;#x7528; CPU &amp;#x8D44;&amp;#x6E90;&amp;#x662F;&amp;#x63D0;&amp;#x5347;&amp;#x901F;&amp;#x5EA6;&amp;#x7684;&amp;#x672C;&amp;#x8D28;&amp;#x56E0;&amp;#x">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/c6c1d2689f720fc85f3963b261723abff960d3115892e058420302fe71c9dae0">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7280345543145127977.html">
+
+
+
+
+
+  <title>速度优化：GC抑制 GC 执行的流程 抑制 GC 执行的方案 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">速度优化：GC抑制 GC 执行的流程 抑制 GC 执行的方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-09-19T14:56:43+08:00">
+                2023-09-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x6211;&#x4EEC;&#x77E5;&#x9053;&#xFF0C;&#x5145;&#x5206;&#x4E14;&#x5408;&#x7406;&#x5730;&#x4F7F;&#x7528; CPU &#x8D44;&#x6E90;&#x662F;&#x63D0;&#x5347;&#x901F;&#x5EA6;&#x7684;&#x672C;&#x8D28;&#x56E0;&#x7D20;&#x4E4B;&#x4E00;&#x3002;&#x63D0;&#x5347; CPU &#x5229;&#x7528;&#x7387;&#xFF0C;&#x9664;&#x4E86;&#x524D;&#x9762;&#x63D0;&#x5230;&#x7684;&#x4F18;&#x5316;&#x65B9;&#x6848;&#x5916;&#xFF0C;&#x8FD8;&#x6709;&#x5F88;&#x591A;&#x5176;&#x4ED6;&#x7684;&#x65B9;&#x6848;&#xFF0C;&#x6BD4;&#x5982;&#x6211;&#x4EEC;&#x8FD8;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5206;&#x6790; CPU &#x7684;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x5BFB;&#x627E;&#x4F18;&#x5316;&#x70B9;&#x3002;</p>
+<p>Android &#x5B98;&#x65B9;&#x63D0;&#x4F9B;&#x4E86;&#x5B8C;&#x5584;&#x7684;&#x5206;&#x6790; CPU &#x4F7F;&#x7528;&#x7684;&#x5DE5;&#x5177;&#xFF0C;&#x5982;&#x6293; Trace &#x6216;&#x8005; AndroidStudio &#x4E2D;&#x81EA;&#x5E26;&#x7684; Profile &#x5DE5;&#x5177;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x719F;&#x6089;&#x4F7F;&#x7528;&#x7684;&#x53EF;&#x4EE5;&#x53C2;&#x8003;<a href="/external_links/0298254457ba4f637d073dfd7025d2c5.html" target="blank" rel="noopener">&#x5B98;&#x65B9;&#x6587;&#x6863;</a>&#xFF0C;&#x8BB2;&#x89E3;&#x975E;&#x5E38;&#x8BE6;&#x7EC6;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x8FC7;&#x591A;&#x4ECB;&#x7ECD;&#x4E86;&#x3002;</p>
+<p><strong>&#x5728;&#x901A;&#x8FC7; Profile &#x5206;&#x6790; CPU &#x4F7F;&#x7528;&#x65F6;&#xFF0C;</strong> <strong>&#x6211;&#x4EEC;</strong> <strong>&#x7ECF;&#x5E38;&#x4F1A;&#x53D1;&#x73B0; HeapTaskDaemon</strong> <strong>&#x7EBF;&#x7A0B;</strong> <strong>&#x5360;&#x7528;&#x4E86;&#x8F83;&#x9AD8; CPU &#x65F6;&#x95F4;&#xFF0C;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x5B9E;&#x9645;&#x662F;&#x865A;&#x62DF;&#x673A;&#x7528;&#x6765;&#x6267;&#x884C;</strong> <strong>GC</strong> <strong>&#x64CD;&#x4F5C;&#x7684;&#x3002;</strong> &#x4E0B;&#x56FE;&#x662F; Demo &#x4E2D;&#x7684; CPU &#x4F7F;&#x7528;&#x5206;&#x6790;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x6709;&#x5927;&#x5757;&#x5904;&#x4E8E; Running &#x72B6;&#x6001;&#x7684;&#x65F6;&#x95F4;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/c6c1d2689f720fc85f3963b261723abff960d3115892e058420302fe71c9dae0" alt></p>
+<p>&#x4ECE; Android 5 &#x5F00;&#x59CB;&#xFF0C;Dalvik &#x865A;&#x62DF;&#x673A;&#x88AB;&#x66FF;&#x6362;&#x6210;&#x4E86; ART &#x865A;&#x62DF;&#x673A;&#xFF0C;ART &#x865A;&#x62DF;&#x673A;&#x5728;&#x8FDB;&#x884C; GC &#x7684;&#x65F6;&#x5019;&#xFF0C;&#x867D;&#x7136;&#x4E0D;&#x518D;&#x6267;&#x884C; Stop The World &#x903B;&#x8F91;&#x6765;&#x505C;&#x6B62;&#x4E00;&#x5207;&#x5176;&#x4ED6;&#x4EFB;&#x52A1;&#xFF0C;&#x4F46;&#x5E76;&#x4E0D;&#x610F;&#x5473;&#x7740; GC &#x64CD;&#x4F5C;&#x4FBF;&#x4E0D;&#x4F1A;&#x518D;&#x5BFC;&#x81F4;&#x5361;&#x987F;&#x3002;ART&#x865A;&#x62DF;&#x673A;&#x4E0A;&#xFF0C; GC &#x64CD;&#x4F5C;&#x4F9D;&#x7136;&#x4F1A;&#x5BFC;&#x81F4;&#x5361;&#x987F;&#xFF0C;&#x4E3B;&#x8981;&#x539F;&#x56E0;&#x662F;&#x8BE5;&#x64CD;&#x4F5C;&#x4F1A;&#x62A2;&#x5360;&#x5F88;&#x591A; CPU &#x8D44;&#x6E90;&#xFF0C;&#x4ECE;&#x800C;&#x5BFC;&#x81F4;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x65E0;&#x6CD5;&#x83B7;&#x5F97;&#x8DB3;&#x591F;&#x7684; CPU &#x65F6;&#x95F4;&#x7247;&#x800C;&#x5361;&#x987F;&#x6216;&#x8005;&#x53D8;&#x6162;&#x3002;HeapTaskDaemon &#x7EBF;&#x7A0B;&#x9664;&#x4E86;&#x62A2;&#x5360; CPU &#x65F6;&#x95F4;&#x7247;&#xFF0C;&#x8FD8;&#x4F1A;&#x56E0;&#x4E3A;&#x6709;&#x8F83;&#x591A;&#x5185;&#x5B58;&#x64CD;&#x4F5C;&#x800C;&#x6301;&#x6709;&#x5185;&#x5B58;&#x76F8;&#x5173;&#x7684;&#x9501;&#xFF0C;&#x5176;&#x4ED6;&#x4EFB;&#x52A1;&#x65E0;&#x6CD5;&#x5F97;&#x5230;&#x9501;&#x81EA;&#x7136;&#x5C31;&#x53D8;&#x6162;&#x4E86;&#x3002;</p>
+<p>&#x6240;&#x4EE5;&#x5F53;&#x6211;&#x4EEC;&#x6267;&#x884C;&#x6838;&#x5FC3;&#x573A;&#x666F;&#xFF0C;&#x6BD4;&#x5982;&#x542F;&#x52A8;&#xFF0C;&#x6253;&#x5F00;&#x9875;&#x9762;&#x6216;&#x8005;&#x6ED1;&#x52A8; List &#x65F6;&#xFF0C;&#x5982;&#x679C;&#x80FD;&#x6291;&#x5236; GC &#x7684;&#x6267;&#x884C;&#xFF0C;&#x5C31;&#x80FD;&#x8BA9;&#x6838;&#x5FC3;&#x4EFB;&#x52A1;&#x83B7;&#x5F97;&#x66F4;&#x591A;&#x7684; CPU &#x65F6;&#x95F4;&#xFF0C;&#x8868;&#x73B0;&#x51FA;&#x66F4;&#x597D;&#x7684;&#x6027;&#x80FD;&#x3002;</p>
+<p>&#x8FD9;&#x4E00;&#x7AE0;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x6765;&#x5B66;&#x4E60;<strong>&#x5982;&#x4F55;&#x5BF9; GC &#x8FDB;&#x884C;&#x6291;&#x5236;</strong>&#x3002;&#x56E0;&#x4E3A;&#x6D89;&#x53CA;&#x6BD4;&#x8F83;&#x591A;&#x590D;&#x6742;&#x7684;&#x77E5;&#x8BC6;&#x70B9;&#xFF0C;&#x5185;&#x5BB9;&#x4E0A;&#x4F1A;&#x6709;&#x4E00;&#x5B9A;&#x7684;&#x96BE;&#x5EA6;&#xFF0C;&#x5E0C;&#x671B;&#x901A;&#x8FC7;&#x4ECA;&#x5929;&#x7684;&#x5B66;&#x4E60;&#x6211;&#x4EEC;&#x80FD;&#x4E00;&#x8D77;&#x5F04;&#x61C2;&#x5B83;&#x4EEC;&#xFF0C;&#x8E0F;&#x4E0A;&#x8FDB;&#x9636;&#x4E4B;&#x8DEF;&#x3002;</p>
+<h1 id="GC-&#x6267;&#x884C;&#x7684;&#x6D41;&#x7A0B;"><a href="#GC-&#x6267;&#x884C;&#x7684;&#x6D41;&#x7A0B;" class="headerlink" title="GC &#x6267;&#x884C;&#x7684;&#x6D41;&#x7A0B;"></a>GC &#x6267;&#x884C;&#x7684;&#x6D41;&#x7A0B;</h1><p>&#x60F3;&#x8981;&#x6291;&#x5236; GC &#x6267;&#x884C;&#xFF0C;&#x6211;&#x4EEC;&#x9996;&#x5148;&#x8981;&#x719F;&#x6089; GC &#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#xFF0C;&#x7136;&#x540E;&#x4ECE;&#x6D41;&#x7A0B;&#x4E2D;&#x5BFB;&#x627E;&#x7A81;&#x7834;&#x70B9;&#xFF0C;&#x5728;&#x524D;&#x9762;&#x5B66;&#x4E60;&#x901A;&#x8FC7;&#x201C;&#x9ED1;&#x79D1;&#x6280;&#x201D;&#x624B;&#x6BB5;&#x4F18;&#x5316;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x662F;&#x8FD9;&#x6837;&#x7684;&#x601D;&#x8DEF;&#x3002;&#x65E2;&#x7136; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x62A2;&#x5360;&#x4E86;&#x8F83;&#x591A;&#x7684; CPU&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x76F4;&#x63A5;&#x4ECE; HeapTaskDaemon &#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x6765;&#x5206;&#x6790;&#xFF0C;&#x770B;&#x770B;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x5230;&#x5E95;&#x662F;&#x505A;&#x4EC0;&#x4E48;&#x7684;&#x3002;</p>
+<h2 id="HeapTaskDaemon-&#x7EBF;&#x7A0B;&#x7684;&#x8D77;&#x6E90;"><a href="#HeapTaskDaemon-&#x7EBF;&#x7A0B;&#x7684;&#x8D77;&#x6E90;" class="headerlink" title="HeapTaskDaemon &#x7EBF;&#x7A0B;&#x7684;&#x8D77;&#x6E90;"></a>HeapTaskDaemon &#x7EBF;&#x7A0B;&#x7684;&#x8D77;&#x6E90;</h2><p>&#x901A;&#x8FC7;&#x5168;&#x5C40;&#x641C;&#x7D22; HeapTaskDaemon &#x5173;&#x952E;&#x5B57;&#xFF0C;&#x53D1;&#x73B0;&#x5B83;&#x662F;&#x5728; Java &#x5C42;&#x521B;&#x5EFA;&#x7684;&#x7EBF;&#x7A0B;&#xFF0C;&#x5E76;&#x4F4D;&#x4E8E; <a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">Daemons.java</a> &#x5BF9;&#x8C61;&#x4E2D;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/5958afb686022301c872fccba35899a958dffcc080271ecc8e05cf65ab748ca3" alt></p>
+<p>&#x5206;&#x6790;&#x6E90;&#x7801;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#xFF0C;HeapTaskDaemon &#x7EE7;&#x627F;&#x81EA; Daemon &#x5BF9;&#x8C61;&#x3002;Daemon &#x5BF9;&#x8C61;&#x5B9E;&#x9645;&#x662F;&#x4E00;&#x4E2A; Runnale&#xFF0C;&#x5E76;&#x4E14;&#x5185;&#x90E8;&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#xFF0C;&#x7528;&#x4E8E;&#x6267;&#x884C;&#x5F53;&#x524D;&#x8FD9;&#x4E2A; Daemon Runnable&#xFF0C;&#x8FD9;&#x4E2A;&#x5185;&#x90E8;&#x7EBF;&#x7A0B;&#x7684;&#x7EBF;&#x7A0B;&#x540D;&#x5C31;&#x53EB; HeapTaskDaemon&#x3002;&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x77E5;&#x9053;&#x4E86;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x7684;&#x8D77;&#x6E90;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">Java&#x590D;&#x5236;&#x4EE3;&#x7801;private static class HeapTaskDaemon extends Daemon {</span><br><span class="line">    private static final HeapTaskDaemon INSTANCE = new HeapTaskDaemon();</span><br><span class="line"></span><br><span class="line">    HeapTaskDaemon() {</span><br><span class="line">        super(&quot;HeapTaskDaemon&quot;);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">   public void runInternal() {</span><br><span class="line">        &#x2026;&#x2026;</span><br><span class="line">        VMRuntime.getRuntime().runHeapTasks();</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line">    </span><br><span class="line">private static abstract class Daemon implements Runnable {</span><br><span class="line">    @UnsupportedAppUsage</span><br><span class="line">    private Thread thread;</span><br><span class="line">    private String name;</span><br><span class="line">    private boolean postZygoteFork;</span><br><span class="line"></span><br><span class="line">    protected Daemon(String name) {</span><br><span class="line">        this.name = name;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @UnsupportedAppUsage</span><br><span class="line">    public synchronized void start() {</span><br><span class="line">        startInternal();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public synchronized void startPostZygoteFork() {</span><br><span class="line">        postZygoteFork = true;</span><br><span class="line">        startInternal();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // zygote &#x8FDB;&#x7A0B;&#x542F;&#x52A8;&#x5C31;&#x4F1A;&#x542F;&#x52A8;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;</span><br><span class="line">    public void startInternal() {</span><br><span class="line">        if (thread != null) {</span><br><span class="line">            throw new IllegalStateException(&quot;already running&quot;);</span><br><span class="line">        }</span><br><span class="line">        thread = new Thread(ThreadGroup.systemThreadGroup, this, name);</span><br><span class="line">        thread.setDaemon(true);</span><br><span class="line">        thread.setSystemDaemon(true);</span><br><span class="line">        thread.start();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public final void run() {</span><br><span class="line">        &#x2026;&#x2026;</span><br><span class="line">        try {</span><br><span class="line">            runInternal();</span><br><span class="line">        } catch (Throwable ex) {</span><br><span class="line">           &#x2026;&#x2026;</span><br><span class="line">            throw ex;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public abstract void runInternal();</span><br><span class="line"></span><br><span class="line">    &#x2026;&#x2026;</span><br><span class="line">    </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x77E5;&#x9053;&#x4E86; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x7684;&#x8D77;&#x6E90;&#xFF0C;&#x6211;&#x4EEC;&#x63A5;&#x7740;&#x770B;&#x770B;&#x5B83;&#x662F;&#x5E72;&#x4EC0;&#x4E48;&#x7684;&#x3002;</p>
+<h2 id="HeapTaskDaemon-&#x7EBF;&#x7A0B;&#x7684;&#x4F5C;&#x7528;"><a href="#HeapTaskDaemon-&#x7EBF;&#x7A0B;&#x7684;&#x4F5C;&#x7528;" class="headerlink" title="HeapTaskDaemon &#x7EBF;&#x7A0B;&#x7684;&#x4F5C;&#x7528;"></a>HeapTaskDaemon &#x7EBF;&#x7A0B;&#x7684;&#x4F5C;&#x7528;</h2><p>HeapTaskDaemon &#x662F;&#x4E00;&#x4E2A;&#x5B88;&#x62A4;&#x7EBF;&#x7A0B;&#xFF0C;&#x968F;&#x7740; Zygote &#x8FDB;&#x7A0B;&#x542F;&#x52A8;&#x4FBF;&#x4F1A;&#x542F;&#x52A8;&#xFF0C;&#x8BE5;&#x7EBF;&#x7A0B;&#x7684; run &#x65B9;&#x6CD5;&#x4E5F;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x5C31;&#x662F;&#x6267;&#x884C; runInternal &#x8FD9;&#x4E2A;&#x62BD;&#x8C61;&#x51FD;&#x6570;&#xFF0C;&#x8BE5;&#x62BD;&#x8C61;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;&#x65B9;&#x6CD5;&#x4E2D;&#x4F1A;&#x6267;&#x884C; VMRuntime.getRuntime().runHeapTasks() &#x65B9;&#x6CD5;&#xFF0C;runHeapTasks() &#x51FD;&#x6570;&#x4F1A;&#x6267;&#x884C; RunAllTasks &#x8FD9;&#x4E2A; Native &#x51FD;&#x6570;&#xFF0C;&#x5B83;&#x4F4D;&#x4E8E; <a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">task_processor.cc</a> &#x8FD9;&#x4E2A;&#x7C7B;&#x4E2D;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;static void VMRuntime_runHeapTasks(JNIEnv* env, jobject) {</span><br><span class="line">  Runtime::Current()-&gt;GetHeap()-&gt;GetTaskProcessor()-&gt;RunAllTasks(ThreadForEnv(env));</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x6E90;&#x7801;&#x4E00;&#x8DEF;&#x8DDF;&#x8E2A;&#x4E0B;&#x6765;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x7684; run &#x65B9;&#x6CD5;&#x4E2D;&#x771F;&#x6B63;&#x505A;&#x7684;&#x4E8B;&#x60C5;&#xFF0C;&#x5B9E;&#x9645;&#x53EA;&#x662F;&#x5728;&#x65E0;&#x9650;&#x5FAA;&#x73AF;&#x7684;&#x8C03;&#x7528; GetTask &#x51FD;&#x6570;&#x83B7;&#x53D6; HeapTask &#x5E76;&#x6267;&#x884C;&#x3002;GetTask &#x4E2D;&#x4F1A;&#x4E0D;&#x65AD;&#x4ECE; tasks &#x96C6;&#x5408;&#x4E2D;&#x53D6;&#x51FA; HeapTask &#x6765;&#x6267;&#x884C;&#xFF0C;&#x5E76;&#x4E14;&#x5BF9;&#x4E8E;&#x9700;&#x8981;&#x5EF6;&#x65F6;&#x7684; HeapTask &#xFF0C;&#x4F1A;&#x963B;&#x585E;&#x5230;&#x76EE;&#x6807;&#x65F6;&#x95F4;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;void TaskProcessor::RunAllTasks(Thread* self) {</span><br><span class="line">  while (true) {</span><br><span class="line">    HeapTask* task = GetTask(self);</span><br><span class="line">    if (task != nullptr) {</span><br><span class="line">      task-&gt;Run(self);</span><br><span class="line">      task-&gt;Finalize();</span><br><span class="line">    } else if (!IsRunning()) {</span><br><span class="line">      break;</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">std::multiset&lt;HeapTask*, CompareByTargetRunTime&gt; tasks_ ;</span><br><span class="line"></span><br><span class="line">HeapTask* TaskProcessor::GetTask(Thread* self) {</span><br><span class="line">  &#x2026;&#x2026;</span><br><span class="line">  while (true) {</span><br><span class="line">    if (tasks_.empty()) {</span><br><span class="line">      //&#x5982;&#x679C; tasks &#x96C6;&#x5408;&#x4E3A;&#x7A7A;&#xFF0C;&#x5219;&#x4F11;&#x7720;&#x7EBF;&#x7A0B;</span><br><span class="line">      cond_.Wait(self);  </span><br><span class="line">    } else {</span><br><span class="line">      // &#x5982;&#x679C; task&#x662F;&#x96C6;&#x5408;&#x4E0D;&#x4F1A;&#x7A7A;&#xFF0C;&#x5219;&#x53D6;&#x51FA;&#x7B2C;&#x4E00;&#x4E2A; HeapTask</span><br><span class="line">      const uint64_t current_time = NanoTime();</span><br><span class="line">      HeapTask* task = *tasks_.begin();</span><br><span class="line">      </span><br><span class="line">      uint64_t target_time = task-&gt;GetTargetRunTime();</span><br><span class="line">      if (!is_running_ || target_time &lt;= current_time) {</span><br><span class="line">        tasks_.erase(tasks_.begin());</span><br><span class="line">        return task;</span><br><span class="line">      }</span><br><span class="line">      // &#x5BF9;&#x4E8E;&#x5EF6;&#x65F6;&#x6267;&#x884C;&#x7684; HeapTask&#xFF0C;&#x8FD9;&#x91CC;&#x4F1A;&#x8FDB;&#x884C;&#x7B49;&#x5F85;&#xFF0C;&#x76F4;&#x5230;&#x76EE;&#x6807;&#x65F6;&#x95F4;  </span><br><span class="line">      const uint64_t delta_time = target_time - current_time;</span><br><span class="line">      const uint64_t ms_delta = NsToMs(delta_time);</span><br><span class="line">      const uint64_t ns_delta = delta_time - MsToNs(ms_delta);</span><br><span class="line">      cond_.TimedWait(self, static_cast&lt;int64_t&gt;(ms_delta), static_cast&lt;int32_t&gt;(ns_delta));</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line">  UNREACHABLE();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x6291;&#x5236; GC &#x7684;&#x601D;&#x8DEF;&#x5176;&#x5B9E;&#x5DF2;&#x7ECF;&#x51FA;&#x6765;&#xFF0C;&#x6211;&#x4EEC;&#x6709; 2 &#x79CD;&#x505A;&#x6CD5;&#xFF1A;</p>
+<ol>
+<li><strong>&#x6DFB;&#x52A0;&#x4E00;&#x4E2A;&#x81EA;&#x5DF1;&#x7684; HeapTask &#x5230; tasks &#x96C6;&#x5408;&#x4E2D;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x6211;&#x4EEC;&#x81EA;&#x5DF1;&#x7684; HeapTask &#x4E2D;&#x8FDB;&#x884C;&#x4F11;&#x7720;&#xFF0C;&#x6B64;&#x65F6;&#x4FBF;&#x4F1A;&#x963B;&#x585E; HeapTaskDaemon</strong> <strong>&#x7EBF;&#x7A0B;</strong> <strong>&#xFF0C;&#x8FBE;&#x5230;&#x6291;&#x5236;&#x8BE5;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x7684;&#x76EE;&#x7684;</strong> <strong>&#xFF1B;</strong></li>
+</ol>
+<ol start="2">
+<li><strong>&#x83B7;&#x53D6;&#x5230;&#x7CFB;&#x7EDF;&#x7684; HeapTask&#xFF0C;&#x5E76;&#x8BA9;&#x8FD9;&#x4E2A; HeapTask &#x4F11;&#x7720;&#xFF0C;&#x540C;&#x6837;&#x80FD;&#x8FBE;&#x5230;&#x6291;&#x5236; HeapTaskDaemon</strong> <strong>&#x7EBF;&#x7A0B;</strong> <strong>&#x6267;&#x884C;&#x7684;&#x76EE;&#x7684;&#x3002;</strong></li>
+</ol>
+<h2 id="HeapTask-&#x5206;&#x6790;"><a href="#HeapTask-&#x5206;&#x6790;" class="headerlink" title="HeapTask &#x5206;&#x6790;"></a>HeapTask &#x5206;&#x6790;</h2><p>&#x8FD9;&#x4E24;&#x79CD;&#x65B9;&#x6848;&#x90FD;&#x9700;&#x8981; HeapTask &#x8FDB;&#x884C;&#x64CD;&#x4F5C;&#xFF0C;&#x4E3A;&#x4E86;&#x8BA9;&#x65B9;&#x6848;&#x987A;&#x5229;&#x5B9E;&#x65BD;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x7EE7;&#x7EED;&#x5206;&#x6790; HeapTask &#x662F;&#x5E72;&#x4EC0;&#x4E48;&#x7684;&#x3002;</p>
+<p>&#x901A;&#x8FC7;&#x6E90;&#x7801;&#x5206;&#x6790;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#xFF0C;<a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">HeapTask</a> &#x5B9E;&#x9645;&#x4E0A;&#x4F9D;&#x6B21;&#x7EE7;&#x627F;&#x81EA; SelfDeletingTask &#x3001;Task &#x548C; Closure &#x8FD9;&#x4E09;&#x4E2A;&#x7C7B;&#xFF0C;Task &#x7C7B;&#x5B9A;&#x4E49;&#x4E86; Finalize &#x8FD9;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#xFF0C;Closure &#x7C7B;&#x5B9A;&#x4E49;&#x4E86; Run &#x8FD9;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x3002;<strong>&#x4EC0;&#x4E48;&#x662F;&#x865A;&#x51FD;&#x6570;&#x5462;&#xFF1F;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5148;&#x628A;&#x5B83;&#x7406;&#x89E3;&#x6210; Java &#x7684;&#x62BD;&#x8C61;&#x51FD;&#x6570;&#xFF0C;virtual &#x5173;&#x952E;&#x5B57;&#x5C31;&#x7C7B;&#x4F3C;&#x4E8E; Java &#x7684; abstract &#x5173;&#x952E;&#x5B57;</strong> &#x65E2;&#x7136;&#x662F;&#x62BD;&#x8C61;&#x51FD;&#x6570;&#xFF0C;&#x5C31;&#x9700;&#x8981;&#x5B50;&#x7C7B;&#x6765;&#x5B9E;&#x73B0;&#xFF0C;SelfDeletingTask &#x5B9E;&#x73B0;&#x4E86; Finalize &#x8FD9;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x7528;&#x4E8E;&#x5BF9;&#x8C61;&#x6790;&#x6784;&#x4F7F;&#x7528;&#x3002;Run &#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x5219;&#x4F1A;&#x4EA4;&#x7ED9; HeapTask &#x7684;&#x5B50;&#x7C7B;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;class HeapTask : public SelfDeletingTask {</span><br><span class="line"> public:</span><br><span class="line">  explicit HeapTask(uint64_t target_run_time) : target_run_time_(target_run_time) {</span><br><span class="line">  }</span><br><span class="line">  uint64_t GetTargetRunTime() const {</span><br><span class="line">    return target_run_time_;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line"> private:</span><br><span class="line">  void SetTargetRunTime(uint64_t new_target_run_time) { //&#x5EF6;&#x65F6;&#x65F6;&#x95F4;&#x8BBE;&#x7F6E;&#x63A5;&#x53E3;</span><br><span class="line">    target_run_time_ = new_target_run_time;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  uint64_t target_run_time_;</span><br><span class="line">  friend class TaskProcessor;</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">class SelfDeletingTask : public Task {</span><br><span class="line"> public:</span><br><span class="line">  virtual ~SelfDeletingTask() { }</span><br><span class="line">  virtual void Finalize() {</span><br><span class="line">    delete this;</span><br><span class="line">  }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">class Task : public Closure {</span><br><span class="line"> public:</span><br><span class="line">  // &#x5B9A;&#x4E49; Finalize &#x865A;&#x51FD;&#x6570;</span><br><span class="line">  virtual void Finalize() { }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">class Closure {</span><br><span class="line"> public:</span><br><span class="line">  virtual ~Closure() { }</span><br><span class="line">  // &#x5B9A;&#x4E49; Run &#x865A;&#x51FD;&#x6570;</span><br><span class="line">  virtual void Run(Thread* self) = 0;</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD8;&#x662F;&#x901A;&#x8FC7;&#x5168;&#x5C40;&#x641C;&#x7D22;&#xFF0C;&#x53D1;&#x73B0; Android &#x7CFB;&#x7EDF;&#x4E2D;&#x7EE7;&#x627F;&#x81EA; HeapTask &#x7684;&#x5B50;&#x7C7B;&#x6709;&#x4E0B;&#x9762;&#x8FD9;&#x4E9B;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/8a995b74ec6dfca2f4c91f29156c425567173182a0298a64cd7a13cb24867ad8" alt></p>
+<p>&#x4E0B;&#x9762;&#x5927;&#x81F4;&#x4ECB;&#x7ECD;&#x4E00;&#x4E0B;&#x6BCF;&#x4E00;&#x4E2A; HeapTask &#x7684;&#x4F5C;&#x7528;&#x3002;</p>
+<ul>
+<li>ConcurrentGCTask&#xFF1A;&#x5F53; Java &#x5185;&#x5B58;&#x5230;&#x8FBE;&#x9608;&#x503C;&#x65F6;&#xFF0C;&#x4FBF;&#x4F1A;&#x6267;&#x884C;&#x8FD9;&#x4E2A; Task&#xFF0C;&#x7528;&#x4E8E;&#x6267;&#x884C;&#x5E76;&#x53D1; GC&#x3002;</li>
+</ul>
+<ul>
+<li>CollectorTransitionTask&#xFF1A;&#x524D;&#x540E;&#x53F0;&#x5207;&#x6362;&#x65F6;&#xFF0C;&#x4FBF;&#x4F1A;&#x6267;&#x884C;&#x8FD9;&#x4E2A; Task&#xFF0C;&#x7528;&#x4E8E;&#x5207;&#x6362; GC &#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x6BD4;&#x5982;&#x5230;&#x540E;&#x53F0;&#x65F6;&#xFF0C;&#x4FBF;&#x4F1A;&#x5207;&#x6362;&#x6210;&#x62F7;&#x8D1D;&#x56DE;&#x6536;&#x8FD9;&#x79CD; GC &#x673A;&#x5236;&#x3002;</li>
+</ul>
+<ul>
+<li>HeapTrimTask&#xFF1A;GC &#x5B8C;&#x6210;&#x4E4B;&#x540E;&#xFF0C;&#x5982;&#x679C;&#x9700;&#x8981;&#x5C06;&#x5806;&#x4E2D;&#x7A7A;&#x95F2;&#x7684;&#x5185;&#x5B58;&#x5F52;&#x8FD8;&#x7ED9;&#x5185;&#x6838;&#xFF0C;&#x5219;&#x4F1A;&#x6267;&#x884C;&#x8FD9;&#x4E2A; Task &#x6765;&#x5904;&#x7406;&#x3002;</li>
+</ul>
+<ul>
+<li>TriggerPostForkCCGcTask&#xFF1A;Android8 &#x5F00;&#x59CB;&#xFF0C;&#x7CFB;&#x7EDF;&#x4E3A;&#x4E86;&#x5728;&#x542F;&#x52A8;&#x65F6;&#x907F;&#x514D; GC &#x64CD;&#x4F5C;&#xFF0C;&#x4F1A;&#x6267;&#x884C;&#x8FD9;&#x4E2A; Task&#xFF0C;&#x5C06; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x963B;&#x585E; 2 &#x79D2;&#x3002;</li>
+</ul>
+<ul>
+<li>ReduceTargetFootprintTask&#xFF1A;&#x548C; TriggerPostForkCCGcTask &#x914D;&#x5408;&#x4F7F;&#x7528;&#x3002;</li>
+</ul>
+<ul>
+<li>ClearedReferenceTask&#xFF1A;&#x5728;&#x5BF9;&#x8C61;&#x56DE;&#x6536;&#x65F6;&#xFF0C;&#x4F1A;&#x6267;&#x884C;&#x8BE5; Task&#xFF0C;Task &#x4E2D;&#x8C03;&#x7528; Java &#x5C42;&#x7684;ReferenceQueue.add &#x65B9;&#x6CD5;&#xFF0C; &#x5C06;&#x88AB;&#x56DE;&#x6536;&#x5BF9;&#x8C61;&#x5F15;&#x7528;&#x6DFB;&#x52A0;&#x5230; ReferenceQueue &#x961F;&#x5217;&#x4E2D;&#x3002;LeakCanary &#x4FBF;&#x662F;&#x7528; ReferenceQueue &#x961F;&#x5217;&#x6765;&#x5224;&#x65AD;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x3002;</li>
+</ul>
+<ul>
+<li>NotifyStartupCompletedTask&#xFF1A;&#x542F;&#x52A8;&#x5B8C;&#x6210;&#x540E;&#x6267;&#x884C;&#x7684;&#x4E00;&#x4E2A; Task&#xFF0C;&#x7528;&#x4E8E;&#x6821;&#x9A8C;&#x4F7F;&#x7528;&#x3002;</li>
+</ul>
+<p>&#x56E0;&#x4E3A; Task &#x6BD4;&#x8F83;&#x591A;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x4E0D;&#x6BCF;&#x4E00;&#x4E2A;&#x90FD;&#x53BB;&#x5206;&#x6790;&#x5B83;&#x7684;&#x5B9E;&#x73B0;&#x4E86;&#xFF0C;&#x8FD9;&#x91CC;&#x4EC5;&#x4EE5; ConcurrentGCTask &#x8FD9;&#x4E00;&#x4E2A; Task &#x4E3A;&#x4F8B;&#x5B50;&#x8BB2;&#x89E3;&#x5B83;&#x7684;&#x539F;&#x7406;&#x548C;&#x673A;&#x5236;&#x3002;</p>
+<h2 id="ConcurrentGCTask-&#x5206;&#x6790;"><a href="#ConcurrentGCTask-&#x5206;&#x6790;" class="headerlink" title="ConcurrentGCTask &#x5206;&#x6790;"></a>ConcurrentGCTask &#x5206;&#x6790;</h2><p>&#x5728;<a href="/external_links/b80ddb1f0d0f9717b3482be8fe1eadb2.html" target="blank" rel="noopener">&#x300A;Java &#x5806;&#x5185;&#x5B58;&#x4F18;&#x5316;&#x300B;</a>&#x4E2D;&#x8BB2;&#x5230;&#x8FC7;&#xFF0C;&#x5F53;&#x6211;&#x4EEC;&#x521B;&#x5EFA;&#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x6700;&#x7EC8;&#x865A;&#x62DF;&#x673A;&#x4F1A;&#x8C03;&#x7528; <a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">AllocObjectWithAllocator</a> &#x65B9;&#x6CD5;&#xFF0C;&#x5230; Java &#x5806;&#x4E2D;&#x4E3A;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7533;&#x8BF7;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x3002;&#x7533;&#x8BF7;&#x7A7A;&#x95F4;&#x7684;&#x64CD;&#x4F5C;&#x5C31;&#x4E0D;&#x91CD;&#x590D;&#x8BB2;&#x4E86;&#xFF0C;&#x6211;&#x4EEC;&#x4E3B;&#x8981;&#x770B;&#x89E6;&#x53D1; ConcurrentGCTask &#x7684;&#x6D41;&#x7A0B;&#x3002;</p>
+<p>&#x901A;&#x8FC7;&#x6E90;&#x7801;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5982;&#x679C;&#x5224;&#x65AD;&#x662F;&#x5E76;&#x53D1; GC&#xFF0C;&#x6216;&#x8005;&#x5806;&#x5185;&#x5B58;&#x8FBE;&#x5230; concurrent_start_bytes_ &#xFF08;&#x8FD9;&#x4E2A;&#x503C;&#x662F;&#x4E00;&#x4E2A;&#x52A8;&#x6001;&#x503C;&#xFF0C;&#x7CFB;&#x7EDF;&#x4F1A;&#x6839;&#x636E;&#x5F53;&#x524D;&#x6761;&#x4EF6;&#xFF0C;&#x52A8;&#x6001;&#x8C03;&#x6574;&#x8FD9;&#x4E2A;&#x503C;&#x7684;&#x5927;&#x5C0F;&#xFF09;&#x9608;&#x503C;&#x65F6;&#xFF0C;&#x5C31;&#x4F1A;&#x8C03;&#x7528; RequestConcurrentGCAndSaveObject &#x65B9;&#x6CD5;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;inline mirror::Object* Heap::AllocObjectWithAllocator(Thread* self,</span><br><span class="line">                                                      ObjPtr&lt;mirror::Class&gt; klass,</span><br><span class="line">                                                      size_t byte_count,</span><br><span class="line">                                                      AllocatorType allocator,</span><br><span class="line">                                                      const PreFenceVisitor&amp; pre_fence_visitor) {</span><br><span class="line">  &#x2026;&#x2026;</span><br><span class="line">  bool need_gc = false;</span><br><span class="line">  uint32_t starting_gc_num;  // o.w. GC number at which we observed need for GC.</span><br><span class="line">  {</span><br><span class="line">    &#x2026;&#x2026;</span><br><span class="line">    if (bytes_tl_bulk_allocated &gt; 0) {</span><br><span class="line">      &#x2026;&#x2026;</span><br><span class="line">      // &#x5982;&#x679C;&#x662F;&#x5E76;&#x53D1; GC &#xFF0C;&#x6216;&#x8005;&#x8FBE;&#x5230;&#x4E86;&#x9608;&#x503C;&#xFF0C;&#x5219;need_gc&#x4E3A;true</span><br><span class="line">      if (IsGcConcurrent() &amp;&amp; UNLIKELY(ShouldConcurrentGCForJava(new_num_bytes_allocated))) {</span><br><span class="line">        need_gc = true;</span><br><span class="line">      }</span><br><span class="line">      &#x2026;&#x2026;</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line">  &#x2026;&#x2026;</span><br><span class="line">  if (need_gc) {</span><br><span class="line">    // Do this only once thread suspension is allowed again, and we&apos;re done with kInstrumented.</span><br><span class="line">    RequestConcurrentGCAndSaveObject(self, /*force_full=*/ false, starting_gc_num, &amp;obj);</span><br><span class="line">  }</span><br><span class="line">  &#x2026;&#x2026;</span><br><span class="line">  return obj.Ptr();</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">inline bool Heap::ShouldConcurrentGCForJava(size_t new_num_bytes_allocated) {</span><br><span class="line">  return new_num_bytes_allocated &gt;= concurrent_start_bytes_;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>RequestConcurrentGCAndSaveObject &#x65B9;&#x6CD5;&#x4E2D;&#x5B9E;&#x9645;&#x4E0A;&#x5C31;&#x662F;&#x521B;&#x5EFA; ConcurrentGCTask&#xFF0C;&#x5E76;&#x8C03;&#x7528; task_processor_ &#x5BF9;&#x8C61;&#x7684; AddTask &#x65B9;&#x6CD5;&#xFF0C;&#x5C06;&#x8BE5; Task &#x6DFB;&#x52A0;&#x5230; tasks &#x96C6;&#x5408;&#x91CC;&#x53BB;&#x3002;ConcurrentGCTask &#x91CC;&#x9762;&#x5177;&#x4F53;&#x505A;&#x7684;&#x4E8B;&#x60C5;&#xFF0C;&#x5C31;&#x662F;&#x6267;&#x884C;&#x5E76;&#x53D1; GC &#x4E86;&#xFF0C;&#x8FD9;&#x5C5E;&#x4E8E;&#x865A;&#x62DF;&#x673A;&#x6A21;&#x5757;&#x7684;&#x77E5;&#x8BC6;&#xFF0C;&#x5C31;&#x4E0D;&#x5C55;&#x5F00;&#x8BB2;&#x4E86;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;void Heap::RequestConcurrentGCAndSaveObject(Thread* self,</span><br><span class="line">                                            bool force_full,</span><br><span class="line">                                            uint32_t observed_gc_num,</span><br><span class="line">                                            ObjPtr&lt;mirror::Object&gt;* obj) {</span><br><span class="line">  RequestConcurrentGC(self, kGcCauseBackground, force_full, observed_gc_num);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">bool Heap::RequestConcurrentGC(Thread* self,</span><br><span class="line">                               GcCause cause,</span><br><span class="line">                               bool force_full,</span><br><span class="line">                               uint32_t observed_gc_num) {</span><br><span class="line">  uint32_t max_gc_requested = max_gc_requested_.load(std::memory_order_relaxed);</span><br><span class="line">  if (!GCNumberLt(observed_gc_num, max_gc_requested)) {</span><br><span class="line">    if (CanAddHeapTask(self)) {</span><br><span class="line">      if (max_gc_requested_.CompareAndSetStrongRelaxed(max_gc_requested, observed_gc_num + 1)) {</span><br><span class="line">        task_processor_-&gt;AddTask(self, new ConcurrentGCTask(NanoTime(),  // Start straight away.</span><br><span class="line">                                                            cause,</span><br><span class="line">                                                            force_full,</span><br><span class="line">                                                            observed_gc_num + 1));</span><br><span class="line">      }</span><br><span class="line">      &#x2026;&#x2026;</span><br><span class="line">      return true;</span><br><span class="line">    }</span><br><span class="line">    return false;</span><br><span class="line">  }</span><br><span class="line">  return true;  </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x679C;&#x4F60;&#x5BF9; GC &#x673A;&#x5236;&#x6BD4;&#x8F83;&#x6709;&#x5174;&#x8DA3;&#xFF0C;&#x53EF;&#x4EE5;&#x5C06;&#x5176;&#x4ED6;&#x7684; HeapTask &#x90FD;&#x5206;&#x6790;&#x4E00;&#x4E0B;&#xFF0C;&#x8FD9;&#x6837;&#x80FD;&#x52A0;&#x6DF1;&#x4F60;&#x5BF9; ART GC &#x673A;&#x5236;&#x7684;&#x4E86;&#x89E3;&#x3002;&#x4E86;&#x89E3;&#x4E86; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x4EE5;&#x53CA;&#x76F8;&#x5173;&#x7684;&#x6D41;&#x7A0B;&#xFF0C;&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x8FDB;&#x5165;&#x5B9E;&#x6218;&#xFF0C;&#x770B;&#x770B;&#x5982;&#x4F55;&#x6291;&#x5236; GC &#x7684;&#x6267;&#x884C;&#x3002;</p>
+<h1 id="&#x6291;&#x5236;-GC-&#x6267;&#x884C;&#x7684;&#x65B9;&#x6848;"><a href="#&#x6291;&#x5236;-GC-&#x6267;&#x884C;&#x7684;&#x65B9;&#x6848;" class="headerlink" title="&#x6291;&#x5236; GC &#x6267;&#x884C;&#x7684;&#x65B9;&#x6848;"></a>&#x6291;&#x5236; GC &#x6267;&#x884C;&#x7684;&#x65B9;&#x6848;</h1><p>&#x5728;&#x4E0A;&#x9762;&#x7684;&#x5206;&#x6790;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x5DF2;&#x7ECF;&#x63D0;&#x5230;&#x4E86; 2 &#x79CD;&#x65B9;&#x6848;&#xFF1A;</p>
+<ol>
+<li><strong>&#x6DFB;&#x52A0;&#x4E00;&#x4E2A;&#x81EA;&#x5DF1;&#x7684; HeapTask &#x5230; tasks &#x96C6;&#x5408;&#x4E2D;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x6211;&#x4EEC;&#x81EA;&#x5DF1;&#x7684; HeapTask &#x4E2D;&#x8FDB;&#x884C;&#x4F11;&#x7720;&#xFF0C;&#x6B64;&#x65F6;&#x4FBF;&#x4F1A;&#x963B;&#x585E; HeapTaskDaemon &#x7EBF;&#x7A0B;&#xFF0C;&#x8FBE;&#x5230;&#x6291;&#x5236;&#x8BE5;&#x7EBF;&#x7A0B;&#x7684;&#x76EE;&#x7684;&#xFF1B;</strong></li>
+</ol>
+<ol start="2">
+<li><strong>&#x83B7;&#x53D6;&#x5230;&#x7CFB;&#x7EDF;&#x7684; HeapTask&#xFF0C;&#x5E76;&#x8BA9;&#x8FD9;&#x4E2A; HeapTask &#x4F11;&#x7720;&#xFF0C;&#x540C;&#x6837;&#x80FD;&#x8FBE;&#x5230;&#x6291;&#x5236; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x7684;&#x76EE;&#x7684;&#x3002;</strong></li>
+</ol>
+<p>&#x4ECE; Android8 &#x5F00;&#x59CB;&#xFF0C;&#x5E94;&#x7528;&#x542F;&#x52A8;&#x65F6;&#x4F7F;&#x7528;&#x7B2C; 1 &#x79CD;&#x65B9;&#x6848;&#xFF0C;&#x5C06; GC &#x5EF6;&#x540E; 2 &#x79D2;&#x624D;&#x6267;&#x884C;&#x3002;&#x5BF9;&#x4E8E;&#x7CFB;&#x7EDF;&#x6765;&#x8BF4;&#xFF0C;&#x8FD9;&#x79CD;&#x65B9;&#x6848;&#x975E;&#x5E38;&#x7B80;&#x5355;&#xFF0C;&#x56E0;&#x4E3A;<strong>&#x7CFB;&#x7EDF;&#x80FD;&#x76F4;&#x63A5;&#x62FF;&#x5230; TaskProcessor &#x5BF9;&#x8C61;&#xFF0C;&#x5F80;&#x91CC;&#x9762;&#x6DFB;&#x52A0;&#x81EA;&#x5B9A;&#x4E49; task &#x5C31;&#x884C;&#x3002;</strong> &#x4F46;&#x662F;&#x5BF9;&#x4E8E;&#x5E94;&#x7528;&#x6765;&#x8BF4;&#xFF0C;&#x8FD9;&#x79CD;&#x65B9;&#x6848;&#x76F8;&#x5BF9;&#x590D;&#x6742;&#xFF0C;&#x590D;&#x6742;&#x7684;&#x539F;&#x56E0;&#x5728;&#x540E;&#x9762;&#x4F1A;&#x8BB2;&#x5230;&#xFF0C;&#x6240;&#x4EE5;&#x672C;&#x7AE0;&#x4E2D;&#x4ECB;&#x7ECD;&#x7684;&#x662F;&#x7B2C;&#x4E8C;&#x79CD;&#x65B9;&#x6848;&#xFF0C;&#x4E0B;&#x9762;&#x4EE5;&#x7CFB;&#x7EDF;&#x7684; ConcurrentGCTask &#x4E3A;&#x4F8B;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x770B;&#x5982;&#x4F55;&#x8BA9;&#x8FD9;&#x4E2A; Task &#x4F11;&#x7720; &#x3002;</p>
+<p>&#x5F53;&#x6211;&#x4EEC;&#x60F3;&#x8981;&#x8C03;&#x7528;&#x67D0;&#x4E2A;&#x65B9;&#x6CD5;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x5728;&#x4EE3;&#x7801;&#x4E2D;&#x6301;&#x6709;&#x65B9;&#x6CD5;&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x7136;&#x540E;&#x624D;&#x80FD;&#x8FDB;&#x884C;&#x65B9;&#x6CD5;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x5F53;&#x4EE3;&#x7801;&#x88AB;&#x7F16;&#x8BD1;&#x65F6;&#xFF0C;&#x7F16;&#x8BD1;&#x5668;&#x4F1A;&#x5C06;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7F16;&#x8BD1;&#x6210;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x4E00;&#x4E2A;&#x5730;&#x5740;&#x3002;&#x4F46;&#x662F;&#x5F53;&#x6211;&#x4EEC;&#x5728;&#x4EE3;&#x7801;&#x4E2D;&#x62FF;&#x4E0D;&#x5230;&#x76EE;&#x6807;&#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x5C31;&#x6CA1;&#x6CD5;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x4E86;&#xFF0C;&#x5373;&#x4F7F;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x4F1A;&#x88AB;&#x52A0;&#x8F7D;&#x5230;&#x8FDB;&#x7A0B;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x4E2D;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x6211;&#x4EEC;&#x60F3;&#x8981;&#x5728;&#x81EA;&#x5DF1;&#x7684; native &#x65B9;&#x6CD5;&#x4E2D;&#xFF0C;&#x6267;&#x884C; libart &#x8FD9;&#x4E2A; so &#x5E93;&#x4E2D; ConcurrentGCTask &#x5BF9;&#x8C61;&#x7684; Run &#x65B9;&#x6CD5; &#xFF0C;&#x5E38;&#x89C4;&#x624B;&#x6BB5;&#x529E;&#x4E0D;&#x5230;&#xFF0C;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x62FF;&#x4E0D;&#x5230; ConcurrentGCTask &#x5BF9;&#x8C61;&#xFF0C;&#x66F4;&#x522B;&#x8BF4;&#x6267;&#x884C;&#x5BF9;&#x8C61;&#x91CC;&#x9762;&#x7684;&#x65B9;&#x6CD5;&#x4E86; &#x3002;</p>
+<p>&#x6B64;&#x65F6;&#xFF0C;&#x53EA;&#x80FD;&#x4F7F;&#x7528;&#x975E;&#x5E38;&#x89C4;&#x624B;&#x6BB5;&#x4E86;&#x3002;<strong>libart.so &#x8FD9;&#x4E2A;&#x5E93;&#x5B9E;&#x9645;&#x4E0A;&#x662F;&#x5DF2;&#x7ECF;&#x52A0;&#x8F7D;&#x8FDB;&#x6211;&#x4EEC;&#x5E94;&#x7528;&#x7684;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x4E2D;&#x4E86;&#xFF0C;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x4E5F;&#x88AB;&#x5B58;&#x653E;&#x5728;&#x5E94;&#x7528;&#x7528;&#x6237;&#x7A7A;&#x95F4;&#x7684;&#x67D0;&#x4E00;&#x5757;&#x5185;&#x5B58;&#x5730;&#x5740;&#x4E0A;&#x3002;&#x8FD9;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;&#x53EA;&#x9700;&#x8981;&#x627E;&#x5230;&#x8FD9;&#x4E2A; Run &#x65B9;&#x6CD5;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x64CD;&#x4F5C;&#x5B83;&#x4E86;</strong>&#x3002;&#x90A3;&#x600E;&#x4E48;&#x624D;&#x80FD;&#x627E;&#x5230; Run &#x65B9;&#x6CD5;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x5730;&#x5740;&#x5462;&#xFF1F;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x7528;&#x5230;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x7684;&#x7B26;&#x53F7;&#xFF0C;&#x5E76;&#x901A;&#x8FC7;&#x7B26;&#x53F7;&#x5728; libart &#x8FD9;&#x4E2A; so &#x5E93;&#x7684;&#x5185;&#x5B58;&#x8303;&#x56F4;&#x4E2D;&#x53BB;&#x5BFB;&#x627E;&#x5176;&#x5BF9;&#x5E94;&#x7684;&#x7B26;&#x53F7;&#x8868;&#xFF0C;&#x8FD9;&#x6837;&#x6211;&#x4EEC;&#x5C31;&#x80FD;&#x83B7;&#x53D6;&#x7B26;&#x53F7;&#x5BF9;&#x5E94;&#x65B9;&#x6CD5;&#x7684;&#x5185;&#x5B58;&#x5730;&#x5740;&#x4E86;&#x3002;&#x90A3;&#x4E48;&#x4EC0;&#x4E48;&#x662F;&#x7B26;&#x53F7;&#x5462;&#xFF1F;</p>
+<h2 id="&#x7B26;&#x53F7;"><a href="#&#x7B26;&#x53F7;" class="headerlink" title="&#x7B26;&#x53F7;"></a>&#x7B26;&#x53F7;</h2><p>&#x7F16;&#x8BD1;&#x5668;&#x5728;&#x5C06; C++ &#x6E90;&#x4EE3;&#x7801;&#x7F16;&#x8BD1;&#x6210;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#x65F6;&#xFF0C;&#x4F1A;&#x5C06;&#x51FD;&#x6570;&#x548C;&#x53D8;&#x91CF;&#x7684;&#x540D;&#x5B57;&#x8FDB;&#x884C;&#x4FEE;&#x9970;&#xFF0C;&#x751F;&#x6210;&#x7B26;&#x53F7;&#x540D;&#xFF0C;&#x6240;&#x4EE5;<strong>&#x7B26;&#x53F7;&#x662F;&#x76F8;&#x5E94;&#x7684;&#x51FD;&#x6570;&#x548C;&#x53D8;&#x91CF;&#x4FEE;&#x9970;&#x540E;&#x7684;&#x540D;&#x79F0;</strong>&#x3002;&#x7F16;&#x8BD1;&#x5668;&#x4E0D;&#x540C;&#xFF0C;&#x751F;&#x6210;&#x7684;&#x7B26;&#x53F7;&#x4E5F;&#x4E0D;&#x4E00;&#x6837;&#xFF0C;&#x6BD4;&#x5982;&#x901A;&#x8FC7; GCC &#x7F16;&#x8BD1;&#x5668;&#x6765;&#x7F16;&#x8BD1;&#x4E0B;&#x9762;&#x8FD9;&#x51E0;&#x4E2A;&#x51FD;&#x6570;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x7B26;&#x53F7;&#x5219;&#x5982;&#x4E0B;&#xFF1A;</p>
+<table>
+<thead>
+<tr>
+<th>&#x51FD;&#x6570;</th>
+<th>&#x7B26;&#x53F7;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>int func(int)</td>
+<td>_Z4funci</td>
+</tr>
+<tr>
+<td>float func(float)</td>
+<td>_Z4funcf</td>
+</tr>
+<tr>
+<td>int Test::func(int)</td>
+<td>_ZN4Test4funcEi</td>
+</tr>
+</tbody></table>
+<p>&#x4EE5; int Test::func(int) &#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x4E3A;&#x4F8B;&#xFF0C;GCC &#x5728;&#x751F;&#x6210;&#x65B9;&#x6CD5;&#x7684;&#x7B26;&#x53F7;&#x65F6;&#xFF0C;&#x90FD;&#x4EE5; _Z &#x5F00;&#x5934;&#xFF0C;&#x5BF9;&#x4E8E;&#x5D4C;&#x5957;&#x7684;&#x540D;&#x5B57;&#xFF0C;&#x540E;&#x9762;&#x7D27;&#x8DDF; N&#xFF0C;&#x7136;&#x540E;&#x8DDF;&#x7740;&#x5404;&#x4E2A;&#x540D;&#x79F0;&#x7A7A;&#x95F4;&#x548C;&#x7C7B;&#x7684;&#x540D;&#x79F0;&#x957F;&#x5EA6;&#x53CA;&#x540D;&#x79F0;&#xFF0C;&#x6240;&#x4EE5;&#x662F; 4Test4func&#xFF0C;&#x518D;&#x4EE5; E &#x7ED3;&#x5C3E;&#xFF08;&#x975E;&#x5D4C;&#x5957;&#x7684;&#x65B9;&#x6CD5;&#x540D;&#x4E0D;&#x9700;&#x8981; E &#xFF09;&#xFF0C;&#x6700;&#x540E;&#x8DDF;&#x7740;&#x5165;&#x53C2;&#x7C7B;&#x578B;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x7684;&#x7B26;&#x53F7;&#x8FDE;&#x8D77;&#x6765;&#x5C31;&#x662F; _ZN4Test4funcEi&#x3002;&#x6211;&#x4EEC;&#x4E0D;&#x9700;&#x8981;&#x53BB;&#x719F;&#x6089;&#x8FD9;&#x4E9B;&#x89C4;&#x5219;&#xFF0C;&#x5927;&#x81F4;&#x4E86;&#x89E3;&#x5C31;&#x884C;&#x3002;</p>
+<p>&#x5728;<a href="/external_links/09b14b27d2bde8201e3428d96eab1580.html" target="blank" rel="noopener">&#x300A;Native&#x5185;&#x5B58;&#x4F18;&#x5316;&#x300B;</a>&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x8BB2;&#x5230;&#x4E86;&#x901A;&#x8FC7; dladdr &#x51FD;&#x6570;&#x83B7;&#x53D6;&#x5230;&#x7684; dli_sname &#x548C; dli_saddr &#x5B57;&#x6BB5;&#xFF0C;&#x5C31;&#x662F;&#x65B9;&#x6CD5;&#x7684;&#x7B26;&#x53F7;&#x548C;&#x8FD9;&#x4E2A;&#x7B26;&#x53F7;&#x5BF9;&#x5E94;&#x7684;&#x65B9;&#x6CD5;&#x5730;&#x5740;&#x3002;&#x4E0B;&#x56FE;&#x4E2D;&#x7684; (Z16CaptureBacktracePPVM)(0x7032a1145c) &#x3001;(Z16printNativeStackV)(0X7032a11640) &#x7B49;&#x6570;&#x636E;&#x5C31;&#x662F;&#x65B9;&#x6CD5;&#x5BF9;&#x5E94;&#x7684;&#x7B26;&#x53F7;&#xFF0C;&#x4EE5;&#x53CA;&#x7B26;&#x53F7;&#x5BF9;&#x5E94;&#x65B9;&#x6CD5;&#x7684;&#x5730;&#x5740;&#x3002;&#x5982;&#x679C;&#x5BF9;&#x5185;&#x5BB9;&#x8BB0;&#x4E0D;&#x6E05;&#x4E86;&#xFF0C;&#x53EF;&#x4EE5;&#x518D;&#x56DE;&#x5934;&#x770B;&#x4E00;&#x4E0B;&#x8FD9;&#x7AE0;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/f9a7b488e0f7493bde8b228dbf5c775b686dd15e915f6acc9e18bc6163316239" alt></p>
+<p>&#x4E3A;&#x4E86;&#x5305;&#x4F53;&#x79EF;&#x548C;&#x5B89;&#x5168;&#x8003;&#x8651;&#xFF0C;&#x6211;&#x4EEC;&#x4E00;&#x822C;&#x4F1A;&#x5C06; so &#x53BB;&#x7B26;&#x53F7;&#xFF0C;&#x8FD9;&#x6837;&#x6211;&#x4EEC;&#x5728; dladdr &#x51FD;&#x6570;&#x4E2D;&#x5C31;&#x6CA1;&#x6CD5;&#x6839;&#x636E;&#x7B26;&#x53F7;&#x5B9A;&#x4F4D;&#x5230;&#x65B9;&#x6CD5;&#x540D;&#x4EE5;&#x53CA;&#x5730;&#x5740;&#x4E86;&#xFF0C;&#x4ECE;&#x4E0A;&#x56FE;&#x4E5F;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x53BB;&#x7B26;&#x53F7;&#x540E;&#x7684;&#x6570;&#x636E;&#x4E3A; (null)(0x0)&#x3002;</p>
+<p>&#x5E78;&#x8FD0;&#x7684;&#x662F;&#xFF0C;&#x5728; libart.so &#x4E2D;&#xFF0C;&#x5F88;&#x591A;&#x5BF9;&#x8C61;&#x548C;&#x65B9;&#x6CD5;&#x90FD;&#x662F;&#x6709;&#x7B26;&#x53F7;&#x7684;&#xFF0C;&#x4E4B;&#x6240;&#x4EE5;&#x4FDD;&#x7559;&#x8FD9;&#x4E9B;&#x7B26;&#x53F7;&#xFF0C;&#x53EF;&#x80FD;&#x662F;&#x9700;&#x8981;&#x7528;&#x4E8E;&#x8C03;&#x8BD5;&#x6216;&#x8005;&#x5F02;&#x5E38;&#x5B9A;&#x4F4D;&#x4F7F;&#x7528;&#x3002;&#x901A;&#x8FC7;&#x7B26;&#x53F7;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x80FD;&#x627E;&#x5230;&#x5BF9;&#x5E94;&#x7684;&#x51FD;&#x6570;&#x5730;&#x5740;&#x4E86;&#x3002;&#x8BDD;&#x8BF4;&#x56DE;&#x6765;&#xFF0C;&#x6211;&#x4EEC;&#x4E3A;&#x4EC0;&#x4E48;&#x4E0D;&#x4ECB;&#x7ECD;&#x7B2C;&#x4E00;&#x79CD;&#x65B9;&#x6848;&#x5462;&#xFF1F;&#x4E5F;&#x662F;&#x56E0;&#x4E3A; TaskProcessor &#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x6CA1;&#x6709;&#x7B26;&#x53F7;&#xFF0C;&#x6211;&#x4EEC;&#x65E0;&#x6CD5;&#x62FF;&#x5230;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x4F46;&#x5728;&#x7B2C;&#x4E8C;&#x79CD;&#x65B9;&#x6848;&#x4E2D;&#xFF0C;&#x5404;&#x79CD; HeapTask &#x7684;&#x5B50;&#x7C7B;&#x7B26;&#x53F7;&#x662F;&#x6709;&#x4FDD;&#x7559;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x5C31;&#x80FD;&#x62FF;&#x5230;&#x8FD9;&#x4E9B; Task &#x7684;&#x5BF9;&#x8C61;&#x548C;&#x51FD;&#x6570;&#x7684;&#x5185;&#x5B58;&#x5730;&#x5740;&#x3002;&#x6709;&#x4E86;&#x5730;&#x5740;&#xFF0C;&#x5C31;&#x6709;&#x4E86;&#x64CD;&#x4F5C;&#x7684;&#x53EF;&#x884C;&#x6027;&#x3002;&#x4E0B;&#x9762;&#x5C31;&#x6765;&#x770B;&#x4E00;&#x4E0B;&#x8981;&#x600E;&#x4E48;&#x505A;&#x5427;&#xFF01;</p>
+<h3 id="&#x7B26;&#x53F7;&#x67E5;&#x627E;"><a href="#&#x7B26;&#x53F7;&#x67E5;&#x627E;" class="headerlink" title="&#x7B26;&#x53F7;&#x67E5;&#x627E;"></a>&#x7B26;&#x53F7;&#x67E5;&#x627E;</h3><p>&#x4E3A;&#x4E86;&#x4FBF;&#x4E8E;&#x5206;&#x6790;&#xFF0C;&#x6211;&#x4EEC;&#x5148;&#x4ECE; root &#x624B;&#x673A;&#x4E2D;&#x62C9;&#x53D6;&#x4E00;&#x4EFD; libart.so &#x5230;&#x672C;&#x5730;&#xFF0C;&#x5728;&#x8BBE;&#x5907;&#x7684; shell &#x7A97;&#x53E3;&#x4E2D;&#x6267;&#x884C;&#x4E0B;&#x9762;&#x6307;&#x4EE4;&#x5373;&#x53EF;&#x3002;libart &#x8FD9;&#x4E2A; so &#x5E93;&#x4E00;&#x822C;&#x5B58;&#x653E;&#x5728; /system/lib/ &#x76EE;&#x5F55;&#x4E2D;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Shell&#x590D;&#x5236;&#x4EE3;&#x7801;cp /system/lib/libart.so /sdcard/libart.so</span><br></pre></td></tr></table></figure>
+
+<p>&#x7B26;&#x53F7;&#x4FE1;&#x606F;&#x90FD;&#x662F;&#x7EDF;&#x4E00;&#x653E;&#x5728;&#x7B26;&#x53F7;&#x8868;&#xFF08;.symtab&#xFF09;&#x4E2D;&#x7684;&#xFF0C;&#x548C; .bss&#xFF0C;.text &#x8FD9;&#x4E9B;&#x6BB5;&#x4E00;&#x6837;&#xFF0C;&#x7B26;&#x53F7;&#x8868; .symtab &#x4E5F;&#x5C5E;&#x4E8E; ELF &#x6587;&#x4EF6;&#x4E2D;&#x7684;&#x4E00;&#x4E2A;&#x6BB5;&#x3002;&#x6211;&#x4EEC;&#x901A;&#x8FC7; readelf &#x5DE5;&#x5177;&#x7684; -S &#x547D;&#x4EE4;&#x6765;&#x8BFB;&#x53D6; libart &#x5E93;&#x7684;&#x6BB5;&#x4FE1;&#x606F;&#x3002;&#x53EF;&#x4EE5;&#x770B;&#x5230; so &#x4E2D;&#x662F;&#x5305;&#x542B;&#x4E86; .symtab &#x8FD9;&#x4E2A;&#x6BB5;&#x7684;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">Shell&#x590D;&#x5236;&#x4EE3;&#x7801;aarch64-linux-android-readelf -S libart.so </span><br><span class="line">There are 31 section headers, starting at offset 0x5978e8:</span><br><span class="line"></span><br><span class="line">Section Headers:</span><br><span class="line">  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al</span><br><span class="line">  [ 0]                   NULL            00000000 000000 000000 00      0   0  0</span><br><span class="line">  [ 1] .note.android.ide NOTE            0000c154 000154 000018 00   A  0   0  4</span><br><span class="line">  [ 2] .note.gnu.build-i NOTE            0000c16c 00016c 000020 00   A  0   0  4</span><br><span class="line">  [ 3] .dynsym           DYNSYM          0000c18c 00018c 01a800 10   A  4   1  4</span><br><span class="line">  [ 4] .dynstr           STRTAB          0002698c 01a98c 070a56 00   A  0   0  1</span><br><span class="line">  [ 5] .gnu.hash         GNU_HASH        000973e4 08b3e4 00c570 04   A  3   0  4</span><br><span class="line">  [ 6] .gnu.version      VERSYM          000a3954 097954 003500 02   A  3   0  2</span><br><span class="line">  [ 7] .gnu.version_d    VERDEF          000a6e54 09ae54 00001c 00   A  4   1  4</span><br><span class="line">  [ 8] .gnu.version_r    VERNEED         000a6e70 09ae70 000090 00   A  4   3  4</span><br><span class="line">  [ 9] .rel.dyn          LOOS+0x1        000a6f00 09af00 002a80 01   A  0   0  4</span><br><span class="line">  [10] .rel.plt          REL             000a9980 09d980 000bf8 08  AI  3  11  4</span><br><span class="line">  [11] .plt              PROGBITS        000aa578 09e578 001208 00  AX  0   0  4</span><br><span class="line">  [12] .text             PROGBITS        000ab800 09f800 374a20 00  AX  0   0 512</span><br><span class="line">  [13] .ARM.exidx        ARM_EXIDX       00420220 414220 00c2d8 08  AL 12   0  4</span><br><span class="line">  [14] .rodata           PROGBITS        0042c500 420500 027794 00   A  0   0 16</span><br><span class="line">  [15] .ARM.extab        PROGBITS        00453c94 447c94 000858 00   A  0   0  4</span><br><span class="line">  [16] .eh_frame         PROGBITS        004544ec 4484ec 0041c4 00   A  0   0  4</span><br><span class="line">  [17] .eh_frame_hdr     PROGBITS        004586b0 44c6b0 0006fc 00   A  0   0  4</span><br><span class="line">  [18] .fini_array       FINI_ARRAY      0045a410 44d410 000004 00  WA  0   0  4</span><br><span class="line">  [19] .data.rel.ro      PROGBITS        0045a420 44d420 006ab8 00  WA  0   0 16</span><br><span class="line">  [20] .init_array       INIT_ARRAY      00460ed8 453ed8 000058 00  WA  0   0  4</span><br><span class="line">  [21] .dynamic          DYNAMIC         00460f30 453f30 000170 08  WA  4   0  4</span><br><span class="line">  [22] .got              PROGBITS        004610a0 4540a0 000f60 00  WA  0   0  4</span><br><span class="line">  [23] .data             PROGBITS        00462000 455000 001290 00  WA  0   0 16</span><br><span class="line">  [24] .bss              NOBITS          00463290 456290 001fe1 00  WA  0   0 16</span><br><span class="line">  [25] .comment          PROGBITS        00000000 456290 000065 01  MS  0   0  1</span><br><span class="line">  [26] .note.gnu.gold-ve NOTE            00000000 4562f8 00001c 00      0   0  4</span><br><span class="line">  [27] .ARM.attributes   ARM_ATTRIBUTES  00000000 456314 000044 00      0   0  1</span><br><span class="line">  [28] .shstrtab         STRTAB          00000000 456358 000143 00      0   0  1</span><br><span class="line">  [29] .symtab           SYMTAB          00000000 45649c 066a90 10     30 19498  4</span><br><span class="line">  [30] .strtab           STRTAB          00000000 4bcf2c 0da9bc 00      0   0  1</span><br><span class="line">Key to Flags:</span><br><span class="line">  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),</span><br><span class="line">  L (link order), O (extra OS processing required), G (group), T (TLS),</span><br><span class="line">  C (compressed), x (unknown), o (OS specific), E (exclude),</span><br><span class="line">  y (noread), p (processor specific)</span><br></pre></td></tr></table></figure>
+
+<p>&#x65E2;&#x7136;&#x7B26;&#x53F7;&#x8868;&#x662F; so &#x5E93;&#x4E2D;&#x7684;&#x4E00;&#x4E2A;&#x6BB5;&#xFF0C;&#x90A3;&#x4E48;&#x67E5;&#x627E;&#x8FD9;&#x4E2A;&#x7B26;&#x53F7;&#x5C31;&#x4E0D;&#x96BE;&#x4E86;&#xFF0C;&#x548C;&#x4E4B;&#x524D; plt hook &#x65B9;&#x6848;&#x4E2D;&#x67E5;&#x627E; dynamic &#x6BB5;&#x4E2D; got &#x8868;&#x7684;&#x51FD;&#x6570;&#x4E00;&#x6837;&#xFF0C;&#x4E5F;&#x662F; 2 &#x6B65;&#x3002;</p>
+<ol>
+<li><strong>&#x627E;&#x5230; so &#x5E93;&#x7684;&#x9996;&#x5730;&#x5740;&#xFF0C;&#x5E76;&#x8F6C;&#x6362;&#x6210; ELF &#x683C;&#x5F0F;&#x3002;</strong></li>
+</ol>
+<ol start="2">
+<li><strong>&#x627E;&#x5230; ELF &#x6587;&#x4EF6;&#x4E2D;&#x7684; .symtab &#x6BB5;&#xFF0C;&#x5E76;&#x904D;&#x5386;&#x8BE5;&#x6BB5;&#xFF0C;&#x627E;&#x5230;&#x6211;&#x4EEC;&#x60F3;&#x8981;&#x7684;&#x7B26;&#x53F7;&#x4FE1;&#x606F;&#xFF0C;&#x5E76;&#x53D6;&#x51FA;&#x5730;&#x5740;&#x3002;</strong></li>
+</ol>
+<p>&#x89E3;&#x6790; maps &#x6587;&#x4EF6;&#x53EF;&#x4EE5;&#x627E;&#x5230; so &#x5E93;&#x5730;&#x5740;&#x7684;&#x65B9;&#x6CD5;&#x6211;&#x4EEC;&#x5C31;&#x4E0D;&#x518D;&#x8BB2;&#x4E86;&#xFF0C;&#x8FD9;&#x91CC;&#x91CD;&#x70B9;&#x770B;&#x770B;&#x7B2C; 2 &#x4E2A;&#x6B65;&#x9AA4;&#x3002;</p>
+<ol>
+<li>&#x904D;&#x5386; ELF &#x6587;&#x4EF6;&#x4E2D;&#x7684; Section &#x6BB5;&#xFF0C;&#x5E76;&#x5BFB;&#x627E; symtab &#x6BB5;&#x3002;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;unsigned long symbolAddr;  </span><br><span class="line">unsigned int symbolSize;  </span><br><span class="line">//&#x5C06; so_addr &#x5F3A;&#x5236;&#x8F6C;&#x6362;&#x6210;Elf_Ehdr&#x683C;&#x5F0F;</span><br><span class="line">Elf_Ehdr *header = (Elf_Ehdr *) (so_addr);</span><br><span class="line">// &#x83B7;&#x53D6;&#x6BB5;&#x5934;&#x90E8;&#x8868;&#x7684;&#x5730;&#x5740;</span><br><span class="line">Elf_Shdr *seg_table = (Elf_Phdr *) (so_addr + header-&gt;e_shoff);  </span><br><span class="line"></span><br><span class="line">// &#x6BB5;&#x7684;&#x6570;&#x91CF;</span><br><span class="line">size_t seg_count = header-&gt;e_shnum; </span><br><span class="line">//&#x904D;&#x5386;&#x6BB5;&#xFF0C;&#x5BFB;&#x627E;symtab&#x6BB5;&#x5730;&#x5740;</span><br><span class="line">for (int i = 0; i &lt; seg_count ; i++) {</span><br><span class="line">    seg_table += header-&gt;e_shentsize</span><br><span class="line">    if (seg_table-&gt;sh_type == SHT_SYMTAB) {</span><br><span class="line">        //so&#x57FA;&#x5730;&#x5740;&#x52A0;symtab&#x6BB5;&#x7684;&#x504F;&#x79FB;&#x5730;&#x5740;&#xFF0C;&#x5C31;&#x662F;symtab&#x6BB5;&#x7684;&#x5B9E;&#x9645;&#x5730;&#x5740;</span><br><span class="line">        symbolAddr = seg_table-&gt;sh_offset + so_addr; </span><br><span class="line">        symbolSize = seg_table-&gt;sh_size;</span><br><span class="line">        break;</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>&#x904D;&#x5386; symtab &#x6BB5;&#xFF0C;&#x5BFB;&#x627E;&#x76EE;&#x6807;&#x7B26;&#x53F7;&#xFF0C;&#x5E76;&#x83B7;&#x53D6;&#x7B26;&#x53F7;&#x5BF9;&#x5E94;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x3002;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x786E;&#x5B9A;symtab&#x4E2D;&#x7B26;&#x53F7;&#x7684;&#x6570;&#x91CF;</span><br><span class="line">size_t symtab_num= (symbolSize / sizeof(Elf_Sym)</span><br><span class="line">//&#x5C06; sybtal &#x6BB5;&#x5730;&#x5740;&#x5F3A;&#x5236;&#x8F6C;&#x6362;&#x6210; Elf_Sym &#x7ED3;&#x6784;&#x4F53;</span><br><span class="line">Elf_Sym *symtab = (Elf_Sym *)symbolAddr;</span><br><span class="line">//&#x904D;&#x5386; sybtab &#x4E2D;&#x7684;&#x7B26;&#x53F7;&#xFF0C;&#x5E76;&#x8FDB;&#x884C;&#x5BF9;&#x6BD4;</span><br><span class="line">for (k = 0; k &lt; symtab_num; k++) {</span><br><span class="line">    //&#x5982;&#x679C;&#x548C;&#x60F3;&#x8981;&#x67E5;&#x627E;&#x7684;&#x7B26;&#x53F7;&#x540D;ratget&#x4E00;&#x81F4;&#xFF0C;&#x5219;&#x8FD4;&#x56DE;&#x7B26;&#x53F7;&#x5BF9;&#x5E94;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;</span><br><span class="line">    if (strcmp(strtab + symtab-&gt;st_name, target) == 0) {</span><br><span class="line">        void *ret = so_addr + symtab-&gt;st_value;</span><br><span class="line">        return ret;</span><br><span class="line">    }</span><br><span class="line">    //&#x79FB;&#x52A8;&#x5230;&#x4E0B;&#x4E00;&#x4E2A;&#x7B26;&#x53F7;&#x5730;&#x5740;&#x4E0A;</span><br><span class="line">    symtab++;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">//Elf_Sym &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x5982;&#x4E0B;</span><br><span class="line">typedef struct elf_sym {</span><br><span class="line">    Elf32_Word        st_name;        //&#x7B26;&#x53F7;&#x540D;</span><br><span class="line">    Elf32_Addr        st_value;       //&#x7B26;&#x53F7;&#x5BF9;&#x5E94;&#x7684;&#x503C;&#x7684;&#x504F;&#x79FB;&#x5730;&#x5740;</span><br><span class="line">    Elf32_Word        st_size;        //&#x7B26;&#x53F7;&#x7684;&#x5927;&#x5C0F;</span><br><span class="line">    &#x2026;&#x2026;</span><br><span class="line">} Elf_Sym;</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x901A;&#x8FC7;&#x7B26;&#x53F7;&#x5BFB;&#x627E;&#x5730;&#x5740;&#x7684;&#x903B;&#x8F91;&#x5E76;&#x4E0D;&#x590D;&#x6742;&#x3002;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x56DE;&#x5934;&#x518D;&#x770B;&#x770B;&#x300A;Native &#x5185;&#x5B58;&#x4F18;&#x5316;&#xFF1A;so &#x5E93;&#x7533;&#x8BF7;&#x7684;&#x5185;&#x5B58;&#x4F18;&#x5316;&#x300B;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D; plt hook &#x7684;&#x65B9;&#x6848;&#x5B9E;&#x73B0;&#xFF0C;&#x4F1A;&#x53D1;&#x73B0;<strong>&#x5BFB;&#x627E; .dynamic &#x6BB5;&#x65F6;&#x7684;&#x64CD;&#x4F5C;&#x548C;&#x8FD9;&#x91CC;&#x5BFB;&#x627E; .symtab &#x6BB5;&#x662F;&#x6709;&#x533A;&#x522B;&#x7684;&#x3002;plt hook &#x65B9;&#x6848;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;</strong> <strong>&#x904D;&#x5386;</strong> <strong>&#x7684;&#x662F; Program &#x6BB5;&#xFF0C;&#x8FD9;&#x91CC;&#x904D;&#x5386;&#x7684;&#x662F; Section &#x6BB5;&#x3002;Program &#x5B9E;&#x9645;&#x53EA;&#x662F;&#x6309;&#x7167; Section &#x7684;&#x8BFB;&#x5199;&#x6743;&#x9650;&#x548C;&#x5C5E;&#x6027;&#x7279;&#x5F81;&#xFF0C;&#x5C06; Section &#x91CD;&#x65B0;&#x7EC4;&#x7EC7;&#x4E86;&#x4E00;&#x6B21;&#xFF0C;&#x7136;&#x540E;&#x52A0;&#x8F7D;&#x8FDB;&#x5185;&#x5B58;&#x4E2D;&#xFF0C;&#x8FD9;&#x6837;&#x80FD;&#x8282;&#x7EA6;&#x66F4;&#x591A;&#x7684;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x3002;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/20806979c1d3fbfaee6a7d809333a5f698f37d24dcaa1ee8da5271e67ee416f2" alt></p>
+<p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x901A;&#x8FC7; readelf -l &#x547D;&#x4EE4;&#xFF0C;&#x67E5;&#x770B; libart.so &#x6309;&#x7167; Program &#x6BB5;&#x7684;&#x7EC4;&#x7EC7;&#x65B9;&#x5F0F;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230; Program Headers &#x53EA;&#x6709; 9 &#x4E2A;&#xFF0C;&#x800C; Section Headers &#x6709; 31 &#x4E2A;&#xFF0C;&#x8FD9; 31 &#x4E2A; Section &#x4F1A;&#x6309;&#x7167; Type &#x7684;&#x533A;&#x522B;&#xFF0C;&#x6574;&#x5408;&#x5230;&#x8FD9; 9 &#x4E2A; Program &#x4E2D;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;aarch64-linux-android-readelf -l libart.so </span><br><span class="line"></span><br><span class="line">Elf file type is DYN (Shared object file)</span><br><span class="line">Entry point 0x0</span><br><span class="line">There are 9 program headers, starting at offset 52</span><br><span class="line"></span><br><span class="line">Program Headers:</span><br><span class="line">  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align</span><br><span class="line">  PHDR           0x000034 0x0000c034 0x0000c034 0x00120 0x00120 R   0x4</span><br><span class="line">  LOAD           0x000000 0x0000c000 0x0000c000 0x44cdac 0x44cdac R E 0x1000</span><br><span class="line">  LOAD           0x44d410 0x0045a410 0x0045a410 0x08e80 0x0ae61 RW  0x1000</span><br><span class="line">  DYNAMIC        0x453f30 0x00460f30 0x00460f30 0x00170 0x00170 RW  0x4</span><br><span class="line">  NOTE           0x000154 0x0000c154 0x0000c154 0x00038 0x00038 R   0x4</span><br><span class="line">  GNU_EH_FRAME   0x44c6b0 0x004586b0 0x004586b0 0x006fc 0x006fc R   0x4</span><br><span class="line">  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0x0</span><br><span class="line">  EXIDX          0x414220 0x00420220 0x00420220 0x0c2d8 0x0c2d8 R   0x4</span><br><span class="line">  GNU_RELRO      0x44d410 0x0045a410 0x0045a410 0x07bf0 0x07bf0 RW  0x10</span><br><span class="line"></span><br><span class="line"> Section to Segment mapping:</span><br><span class="line">  Segment Sections...</span><br><span class="line">   00</span><br><span class="line">   01     .note.android.ident .note.gnu.build-id .dynsym .dynstr .gnu.hash .gnu.version .gnu.version_d .gnu.version_r .rel.dyn .rel.plt .plt .text .ARM.exidx .rodata .ARM.extab .eh_frame .eh_frame_hdr</span><br><span class="line">   02     .fini_array .data.rel.ro .init_array .dynamic .got .data .bss</span><br><span class="line">   03     .dynamic</span><br><span class="line">   04     .note.android.ident .note.gnu.build-id</span><br><span class="line">   05     .eh_frame_hdr</span><br><span class="line">   06</span><br><span class="line">   07     .ARM.exidx</span><br><span class="line">   08     .fini_array .data.rel.ro .init_array .dynamic .got</span><br><span class="line">   None   .comment .note.gnu.gold-version .ARM.attributes .shstrtab .symtab .strtab</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0D;&#x7BA1;&#x662F;&#x904D;&#x5386; Section &#x6BB5; &#xFF0C;&#x8FD8;&#x662F;&#x904D;&#x5386; Program &#x6BB5;&#xFF0C;&#x90FD;&#x80FD;&#x5B9E;&#x73B0;&#x5728; ELF &#x6587;&#x4EF6;&#x4E2D;&#x67E5;&#x627E;&#x6570;&#x636E;&#x7684;&#x76EE;&#x7684;&#x3002;&#x901A;&#x8FC7;&#x8FD9;&#x4E24;&#x79CD;&#x5728; ELF &#x6587;&#x4EF6;&#x4E2D;&#x67E5;&#x627E;&#x6570;&#x636E;&#x7684;&#x65B9;&#x6848;&#xFF0C;&#x53EF;&#x4EE5;&#x8BA9;&#x6211;&#x4EEC;&#x5BF9; ELF &#x6587;&#x4EF6;&#x6709;&#x4E00;&#x4E2A;&#x66F4;&#x5168;&#x9762;&#x7684;&#x4E86;&#x89E3;&#x3002;</p>
+<p>&#x867D;&#x7136;&#x5DF2;&#x7ECF;&#x53CD;&#x590D;&#x6F14;&#x793A;&#x8FC7;&#x4E86;&#x5982;&#x4F55;&#x67E5;&#x627E; ELF &#x6587;&#x4EF6;&#x4E2D;&#x6570;&#x636E;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x91CC;&#x8FD8;&#x662F;&#x5EFA;&#x8BAE;&#x5927;&#x5BB6;&#x7528;&#x6210;&#x719F;&#x7684;&#x5F00;&#x6E90;&#x5DE5;&#x5177;&#x6765;&#x505A;&#x8FD9;&#x4E2A;&#x4E8B;&#x60C5;&#xFF0C;&#x56E0;&#x4E3A;&#x771F;&#x6B63;&#x5728;&#x7EBF;&#x4E0A;&#x5E94;&#x7528;&#x4E2D;&#x4F7F;&#x7528;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x8003;&#x8651;&#x5230;&#x67E5;&#x627E;&#x7684;&#x6027;&#x80FD;&#xFF0C;&#x7248;&#x672C;&#x7684;&#x517C;&#x5BB9;&#x7B49;&#x5404;&#x79CD;&#x56E0;&#x7D20;&#xFF0C;&#x4E00;&#x4E0D;&#x5C0F;&#x5FC3;&#x53EF;&#x80FD;&#x5C31;&#x51FA;&#x95EE;&#x9898;&#x4E86;&#x3002;&#x6BD4;&#x5982;&#x7528; <a href="/external_links/707ac0d7c45deca5e4f3e7e934a7376c.html" target="blank" rel="noopener">ndk_dlopen</a> &#x8FD9;&#x4E2A;&#x5F00;&#x6E90;&#x5E93;&#x6765;&#x5B9E;&#x73B0; so &#x5E93;&#x548C;&#x7B26;&#x53F7;&#x7684;&#x67E5;&#x627E;&#x5C31;&#x5F88;&#x7B80;&#x5355;&#xFF0C;&#x901A;&#x8FC7;&#x4E0B;&#x9762;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x5C31;&#x80FD;&#x5FEB;&#x901F;&#x5B9E;&#x73B0;&#x529F;&#x80FD;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x6253;&#x5F00; so</span><br><span class="line">ndk_dlopen()</span><br><span class="line">//&#x6839;&#x636E;&#x7B26;&#x53F7;&#x67E5;&#x627E;&#x51FD;&#x6570;&#x5730;&#x5740;</span><br><span class="line">ndk_dlsym()</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F53;&#x7136;&#xFF0C; &#x9664;&#x4E86; ndk_dlopen &#x8FD9;&#x4E2A;&#x5F00;&#x6E90;&#x5E93;&#xFF0C;&#x4F60;&#x53EF;&#x4EE5;&#x627E;&#x4E00;&#x4E9B;&#x5176;&#x4ED6;&#x7684;&#x6210;&#x719F;&#x7684;&#x5F00;&#x6E90;&#x6846;&#x67B6;&#x6765;&#x5B8C;&#x6210;&#x4E0A;&#x9762;&#x7684;&#x903B;&#x8F91;&#xFF0C;GitHub &#x90FD;&#x6709;&#x5F88;&#x591A;&#x3002;</p>
+<h3 id="&#x83B7;&#x53D6;-ConcurrentGCTask-&#x7684;-Run-&#x51FD;&#x6570;&#x5730;&#x5740;"><a href="#&#x83B7;&#x53D6;-ConcurrentGCTask-&#x7684;-Run-&#x51FD;&#x6570;&#x5730;&#x5740;" class="headerlink" title="&#x83B7;&#x53D6; ConcurrentGCTask &#x7684; Run &#x51FD;&#x6570;&#x5730;&#x5740;"></a>&#x83B7;&#x53D6; ConcurrentGCTask &#x7684; Run &#x51FD;&#x6570;&#x5730;&#x5740;</h3><p>&#x4E86;&#x89E3;&#x4E86;&#x5982;&#x4F55;&#x901A;&#x8FC7;&#x7B26;&#x53F7;&#x67E5;&#x627E;&#x51FD;&#x6570;&#x5730;&#x5740;&#xFF0C;&#x6211;&#x4EEC;&#x518D;&#x6765;&#x770B;&#x4E00;&#x4E0B; ConcurrentGCTask &#x5BF9;&#x8C61;&#x7684; Run &#x51FD;&#x6570;&#x7684;&#x7B26;&#x53F7;&#x662F;&#x4EC0;&#x4E48;&#x3002;&#x6211;&#x4EEC;&#x901A;&#x8FC7; readelf -s libart.so &#x6307;&#x4EE4;&#x6765;&#x8BFB;&#x53D6; libart &#x4E2D;&#x6240;&#x6709;&#x7684;&#x7B26;&#x53F7;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230; libart.so &#x7684;&#x7B26;&#x53F7;&#x975E;&#x5E38;&#x591A;&#xFF0C;&#x6709; 2 &#x4E07;&#x591A;&#x4E2A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Shell&#x590D;&#x5236;&#x4EE3;&#x7801;Symbol table &apos;.symtab&apos; contains 26281 entries:</span><br><span class="line">   Num:    Value  Size Type    Bind   Vis       Ndx Name</span><br><span class="line">     0: 00000000     0 NOTYPE  LOCAL  DEFAULT   UND </span><br><span class="line">     1: 00000000     0 FILE    LOCAL  DEFAULT   ABS crtbegin_so.c</span><br><span class="line">     2: 000acf34     0 NOTYPE  LOCAL  DEFAULT    12 $a</span><br><span class="line">     3: 000acf50     0 NOTYPE  LOCAL  DEFAULT    12 $d</span><br><span class="line">     4: 0045a410     0 NOTYPE  LOCAL  DEFAULT    18 $d</span><br><span class="line">     5: 00462000     0 NOTYPE  LOCAL  DEFAULT    23 $d</span><br><span class="line">    &#x2026;&#x2026;</span><br><span class="line"> 16846: 001b0ff1    36 FUNC    LOCAL  HIDDEN     12 _ZN3art2gc4Heap16ConcurrentGCTask3RunEPNS_6ThreadE</span><br><span class="line">    &#x2026;&#x2026;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F53;&#x6211;&#x4EEC;&#x7A0D;&#x5FAE;&#x4E86;&#x89E3;&#x4E00;&#x4E0B; libart &#x4E2D;&#x7B26;&#x53F7;&#x7684;&#x751F;&#x6210;&#x89C4;&#x5219;&#xFF0C;&#x5C31;&#x80FD;&#x627E;&#x5230; ConcurrentGCTask &#x5BF9;&#x8C61;&#x7684; Run &#x51FD;&#x6570;&#x7684;&#x7B26;&#x53F7;&#xFF0C;&#x5B83;&#x4F4D;&#x4E8E; 16846 &#x884C;&#xFF0C;&#x5373; <strong>_ZN3art2gc4Heap16ConcurrentGCTask3RunEPNS_6ThreadE&#x3002;</strong></p>
+<p>&#x6709;&#x4E86; Run &#x51FD;&#x6570;&#x7684;&#x7B26;&#x53F7;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x5F88;&#x5BB9;&#x6613;&#x62FF;&#x5230;&#x5730;&#x5740;&#x4E86;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5; <a href="/external_links/707ac0d7c45deca5e4f3e7e934a7376c.html" target="blank" rel="noopener">ndk_dlopen</a> &#x5F00;&#x6E90;&#x5DE5;&#x5177;&#x505A;&#x6F14;&#x793A;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x521D;&#x59CB;&#x5316; ndk_dlopen</span><br><span class="line">ndk_init(env);</span><br><span class="line"></span><br><span class="line">//&#x4EE5;RTLD_NOW&#x6A21;&#x5F0F;&#x6253;&#x5F00;&#x52A8;&#x6001;&#x5E93;libart.so&#xFF0C;&#x62FF;&#x5230;&#x53E5;&#x67C4;&#xFF0C;RTLD_NOW&#x5373;&#x89E3;&#x6790;&#x51FA;&#x6BCF;&#x4E2A;&#x672A;&#x5B9A;&#x4E49;&#x53D8;&#x91CF;&#x7684;&#x5730;&#x5740;</span><br><span class="line">void *handle = ndk_dlopen(&quot;libart.so&quot;, RTLD_NOW);</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;&#x7B26;&#x53F7;&#x62FF;&#x5230;&#x5730;&#x5740;</span><br><span class="line">void *runAddress = ndk_dlsym(handle,&quot; _ZN3art2gc4Heap16ConcurrentGCTask3RunEPNS_6ThreadE&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>&#x7B80;&#x5355;&#x7684;&#x4E24;&#x884C;&#x4EE3;&#x7801;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x6210;&#x529F;&#x62FF;&#x5230;&#x4E86; ConcurrentGCTask &#x7684; Run &#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x53EA;&#x9700;&#x8981;&#x63D2;&#x5165;&#x6211;&#x4EEC;&#x81EA;&#x5DF1;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x4FEE;&#x6539;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x8BA9;&#x5B83;&#x4F11;&#x7720;&#x5C31;&#x80FD;&#x6210;&#x529F;&#x963B;&#x585E; HeapTaskDaemon &#x7EBF;&#x7A0B;&#x4E86;&#x3002;<strong>&#x4FEE;&#x6539;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x7528;<a href="/external_links/09b14b27d2bde8201e3428d96eab1580.html" target="blank" rel="noopener">&#x300A;Native&#x5185;&#x5B58;&#x4F18;&#x5316;&#x300B;</a>&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#x63D0;&#x5230;&#x7684; inline hook &#x65B9;&#x5F0F;</strong>&#xFF0C;&#x6211;&#x4EEC;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x6587;&#x4E2D;&#x63D0;&#x5230;&#x7684;&#x5F00;&#x6E90;&#x7684; inline hook &#x5DE5;&#x5177;&#x5373;&#x53EF;&#xFF0C;&#x4F7F;&#x7528;&#x8D77;&#x6765;&#x4E5F;&#x5F88;&#x7B80;&#x5355;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x5F53;&#x505A;&#x8BFE;&#x540E;&#x4F5C;&#x4E1A;&#x7559;&#x7ED9;&#x4F60;&#x81EA;&#x5DF1;&#x53BB;&#x5B9E;&#x73B0;&#x4E86;&#x3002;</p>
+<h1 id="&#x5C0F;&#x7ED3;"><a href="#&#x5C0F;&#x7ED3;" class="headerlink" title="&#x5C0F;&#x7ED3;"></a>&#x5C0F;&#x7ED3;</h1><p>&#x5F53;&#x6211;&#x4EEC;&#x638C;&#x63E1;&#x672C;&#x7AE0;&#x7684;&#x77E5;&#x8BC6;&#x70B9;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x4F18;&#x5316;&#x624B;&#x6BB5;&#x5C31;&#x5927;&#x5927;&#x6269;&#x5C55;&#x4E86;&#x3002;&#x9664;&#x4E86; GC &#x7EBF;&#x7A0B;&#xFF0C;&#x5728;&#x5F00;&#x5934;&#x7684;&#x56FE;&#x7247;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x770B;&#x5230; Jit thread pool &#x7EBF;&#x7A0B;&#x5360;&#x6709;&#x4E86;&#x8F83;&#x591A;&#x7684; CPU &#x65F6;&#x95F4;&#xFF0C;&#x8FD9;&#x4E2A;&#x7EBF;&#x7A0B;&#x6211;&#x4EEC;&#x540C;&#x6837;&#x53EF;&#x4EE5;&#x7528;&#x672C;&#x7AE0;&#x5B66;&#x5230;&#x7684;&#x77E5;&#x8BC6;&#x70B9;&#x6765;&#x4F18;&#x5316;&#xFF0C;&#x5E76;&#x4E14;&#x672C;&#x7AE0;&#x7684;&#x77E5;&#x8BC6;&#x70B9;&#x5728;&#x9006;&#x5411;&#x3001;&#x5B89;&#x5168;&#x3001;&#x5916;&#x6302;&#x7B49;&#x9886;&#x57DF;&#x90FD;&#x4F1A;&#x88AB;&#x7ECF;&#x5E38;&#x4F7F;&#x7528;&#xFF0C;&#x5E0C;&#x671B;&#x4F60;&#x80FD;&#x638C;&#x63E1;&#x597D;&#x3002;</p>
+<p>&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x4F60;&#x662F;&#x4E0D;&#x662F;&#x89C9;&#x5F97;&#x81EA;&#x5DF1;&#x8FC8;&#x5165;&#x4E86;&#x9AD8;&#x624B;&#x4E4B;&#x8DEF;&#x5462;&#xFF01;&#x5207;&#x8BB0;&#x4E0D;&#x8981;&#x773C;&#x9AD8;&#x624B;&#x4F4E;&#xFF0C;&#x53EA;&#x6709;&#x5F53;&#x4F60;&#x7406;&#x89E3;&#x3001;&#x5438;&#x6536;&#x672C;&#x7AE0;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x5E76;&#x80FD;&#x57FA;&#x4E8E;&#x5B83;&#x4EEC;&#x4E3E;&#x4E00;&#x53CD;&#x4E09;&#xFF0C;&#x6269;&#x5C55;&#x51FA;&#x66F4;&#x591A;&#x7684;&#x4F18;&#x5316;&#x65B9;&#x6848;&#x65F6;&#xFF0C;&#x4F60;&#x624D;&#x771F;&#x6B63;&#x8FC8;&#x8FDB;&#x4E86;&#x9AD8;&#x624B;&#x4E4B;&#x8DEF;&#xFF01;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/b21b12b4a480485cf86e1f58aab0cac9.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Android-面试-性能优化/" rel="tag"># Android,面试,性能优化</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7274430147126280207.html" rel="next" title="chromium-net - 跟随 Cronet 的脚步探索">
+                <i class="fa fa-chevron-left"></i> chromium-net - 跟随 Cronet 的脚步探索
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7280864416555860003.html" rel="prev" title="Android 启动优化案例-WebView非预期初始化排查">
+                Android 启动优化案例-WebView非预期初始化排查 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">501</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">201</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GC-执行的流程"><span class="nav-number">1.</span> <span class="nav-text">GC 执行的流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HeapTaskDaemon-线程的起源"><span class="nav-number">1.1.</span> <span class="nav-text">HeapTaskDaemon 线程的起源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HeapTaskDaemon-线程的作用"><span class="nav-number">1.2.</span> <span class="nav-text">HeapTaskDaemon 线程的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HeapTask-分析"><span class="nav-number">1.3.</span> <span class="nav-text">HeapTask 分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ConcurrentGCTask-分析"><span class="nav-number">1.4.</span> <span class="nav-text">ConcurrentGCTask 分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#抑制-GC-执行的方案"><span class="nav-number">2.</span> <span class="nav-text">抑制 GC 执行的方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#符号"><span class="nav-number">2.1.</span> <span class="nav-text">符号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#符号查找"><span class="nav-number">2.1.1.</span> <span class="nav-text">符号查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取-ConcurrentGCTask-的-Run-函数地址"><span class="nav-number">2.1.2.</span> <span class="nav-text">获取 ConcurrentGCTask 的 Run 函数地址</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

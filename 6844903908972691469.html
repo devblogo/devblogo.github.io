@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="JavaScript,源码,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x524D;&amp;#x8A00; &amp;#x4F60;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x82E5;&amp;#x5DDD;&amp;#x3002;&amp;#x8FD9;&amp;#x662F;&amp;#x5B66;&amp;#x4E60;&amp;#x6E90;&amp;#x7801;&amp;#x6574;&amp;#x4F53;&amp;#x67B6;&amp;#x6784;&amp;#x7B2C;&amp;#x4E8C;&amp;#x7BC7;&amp;#x3002;&amp;#x6574">
+<meta name="keywords" content="JavaScript,源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习 underscore 源码整体架构，打造属于自己的函数">
+<meta property="og:url" content="https://dev.newban.cn/6844903908972691469.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x524D;&amp;#x8A00; &amp;#x4F60;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x82E5;&amp;#x5DDD;&amp;#x3002;&amp;#x8FD9;&amp;#x662F;&amp;#x5B66;&amp;#x4E60;&amp;#x6E90;&amp;#x7801;&amp;#x6574;&amp;#x4F53;&amp;#x67B6;&amp;#x6784;&amp;#x7B2C;&amp;#x4E8C;&amp;#x7BC7;&amp;#x3002;&amp;#x6574">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/e0f3200edb3275ff5ab43348e00bb428bfbd075897ec30f5cdb6eaee62dc2a6f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/c7f6fb8dc933c9fc7862a4ef68c640bf91662ac857016b4b55e81ac7e5a4993b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/3b0ed798cc58e2885adb6f504415ffc15028c788e4b89e042fd9b59a7d0e3829">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/aadeca165d32560f0a5f1eb50f8961e40e01bf2c41721a1f3af6e8acf87d67e9">
+<meta property="og:updated_time" content="2024-04-22T09:23:55.294Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习 underscore 源码整体架构，打造属于自己的函数">
+<meta name="twitter:description" content="&amp;#x524D;&amp;#x8A00; &amp;#x4F60;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x82E5;&amp;#x5DDD;&amp;#x3002;&amp;#x8FD9;&amp;#x662F;&amp;#x5B66;&amp;#x4E60;&amp;#x6E90;&amp;#x7801;&amp;#x6574;&amp;#x4F53;&amp;#x67B6;&amp;#x6784;&amp;#x7B2C;&amp;#x4E8C;&amp;#x7BC7;&amp;#x3002;&amp;#x6574">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/e0f3200edb3275ff5ab43348e00bb428bfbd075897ec30f5cdb6eaee62dc2a6f">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903908972691469.html">
+
+
+
+
+
+  <title>学习 underscore 源码整体架构，打造属于自己的函数 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学习 underscore 源码整体架构，打造属于自己的函数</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-08T20:26:07+08:00">
+                2019-08-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h2><blockquote>
+<p>&#x4F60;&#x597D;&#xFF0C;&#x6211;&#x662F;<a href="/external_links/b223b476cd448b456962ecaf8028b149.html" target="blank" rel="noopener">&#x82E5;&#x5DDD;</a>&#x3002;&#x8FD9;&#x662F;<code>&#x5B66;&#x4E60;&#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;</code>&#x7B2C;&#x4E8C;&#x7BC7;&#x3002;&#x6574;&#x4F53;&#x67B6;&#x6784;&#x8FD9;&#x8BCD;&#x8BED;&#x597D;&#x50CF;&#x6709;&#x70B9;&#x5927;&#xFF0C;&#x59D1;&#x4E14;&#x5C31;&#x7B97;&#x662F;&#x6E90;&#x7801;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x5427;&#xFF0C;&#x4E3B;&#x8981;&#x5C31;&#x662F;&#x5B66;&#x4E60;&#x662F;&#x4EE3;&#x7801;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#xFF0C;&#x4E0D;&#x6DF1;&#x7A76;&#x5176;&#x4ED6;&#x4E0D;&#x662F;&#x4E3B;&#x7EBF;&#x7684;&#x5177;&#x4F53;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;&#x3002;&#x672C;&#x7BC7;&#x6587;&#x7AE0;&#x5B66;&#x4E60;&#x7684;&#x662F;&#x6253;&#x5305;&#x6574;&#x5408;&#x540E;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x4E0D;&#x662F;&#x5B9E;&#x9645;&#x4ED3;&#x5E93;&#x4E2D;&#x7684;&#x62C6;&#x5206;&#x7684;&#x4EE3;&#x7801;&#x3002;</p>
+</blockquote>
+<p><code>&#x5B66;&#x4E60;&#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;</code>&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x5982;&#x4E0B;&#xFF1A;</p>
+<blockquote>
+<p>1.<a href="https://dev.newban.cn/6844903902077272071">&#x5B66;&#x4E60; jQuery &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684; js &#x7C7B;&#x5E93;</a>  </p>
+<p>2.<a href="https://dev.newban.cn/6844903908972691469">&#x5B66;&#x4E60; underscore &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684;&#x51FD;&#x6570;&#x5F0F;&#x7F16;&#x7A0B;&#x7C7B;&#x5E93;</a>  </p>
+<p>3.<a href="https://dev.newban.cn/6844903939062628360">&#x5B66;&#x4E60; lodash &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684;&#x51FD;&#x6570;&#x5F0F;&#x7F16;&#x7A0B;&#x7C7B;&#x5E93;</a>  </p>
+<p>4.<a href="https://dev.newban.cn/6844903984457580551">&#x5B66;&#x4E60; sentry &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684;&#x524D;&#x7AEF;&#x5F02;&#x5E38;&#x76D1;&#x63A7;SDK</a>  </p>
+<p>5.<a href="https://dev.newban.cn/6844904001192853511">&#x5B66;&#x4E60; vuex &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684;&#x72B6;&#x6001;&#x7BA1;&#x7406;&#x5E93;</a>  </p>
+<p>6.<a href="https://dev.newban.cn/6844904019987529735">&#x5B66;&#x4E60; axios &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684;&#x8BF7;&#x6C42;&#x5E93;</a>  </p>
+<p>7.<a href="https://dev.newban.cn/6844904088220467213">&#x5B66;&#x4E60; koa &#x6E90;&#x7801;&#x7684;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6D45;&#x6790;koa&#x6D0B;&#x8471;&#x6A21;&#x578B;&#x539F;&#x7406;&#x548C;co&#x539F;&#x7406;</a>  </p>
+<p>8.<a href="https://dev.newban.cn/6844904191228411911">&#x5B66;&#x4E60; redux &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6DF1;&#x5165;&#x7406;&#x89E3; redux &#x53CA;&#x5176;&#x4E2D;&#x95F4;&#x4EF6;&#x539F;&#x7406;</a></p>
+</blockquote>
+<p>&#x611F;&#x5174;&#x8DA3;&#x7684;&#x8BFB;&#x8005;&#x53EF;&#x4EE5;&#x70B9;&#x51FB;&#x9605;&#x8BFB;&#x3002;</p>
+<p>&#x867D;&#x7136;&#x770B;&#x8FC7;&#x633A;&#x591A;<code>underscore.js</code>&#x5206;&#x6790;&#x7C7B;&#x7684;&#x6587;&#x7AE0;&#xFF0C;&#x4F46;&#x603B;&#x611F;&#x89C9;&#x5C11;&#x70B9;&#x4EC0;&#x4E48;&#x3002;&#x8FD9;&#x4E5F;&#x8BB8;&#x5C31;&#x662F;<strong>&#x7EB8;&#x4E0A;&#x5F97;&#x6765;&#x7EC8;&#x89C9;&#x6D45;&#xFF0C;&#x7EDD;&#x77E5;&#x6B64;&#x4E8B;&#x8981;&#x8EAC;&#x884C;</strong>&#x5427;&#x3002;&#x4E8E;&#x662F;&#x51B3;&#x5B9A;&#x81EA;&#x5DF1;&#x5199;&#x4E00;&#x7BC7;&#x5B66;&#x4E60;<code>underscore.js</code>&#x6574;&#x4F53;&#x67B6;&#x6784;&#x7684;&#x6587;&#x7AE0;&#x3002;</p>
+<p>&#x672C;&#x6587;&#x7AE0;&#x5B66;&#x4E60;&#x7684;&#x7248;&#x672C;&#x662F;<code>v1.9.1</code>&#x3002;<br><code>unpkg.com</code>&#x6E90;&#x7801;&#x5730;&#x5740;&#xFF1A;<a href="/external_links/2cf53ceab7e44b8741d4f89a2317696d.html" target="blank" rel="noopener">https://unpkg.com/underscore@1.9.1/underscore.js</a></p>
+<p>&#x867D;&#x7136;&#x5F88;&#x591A;&#x4EBA;&#x90FD;&#x6CA1;&#x7528;&#x8FC7;<code>underscore.js</code>&#xFF0C;&#x4F46;&#x770B;&#x4E0B;&#x5B98;&#x65B9;&#x6587;&#x6863;&#x90FD;&#x5E94;&#x8BE5;&#x77E5;&#x9053;&#x5982;&#x4F55;&#x4F7F;&#x7528;&#x3002;</p>
+<p>&#x4ECE;&#x4E00;&#x4E2A;&#x5B98;&#x65B9;&#x6587;&#x6863;<code>_.chain</code>&#x7B80;&#x5355;&#x4F8B;&#x5B50;&#x770B;&#x8D77;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.chain([1, 2, 3]).reverse().value();</span><br><span class="line">// =&gt; [3, 2, 1]</span><br></pre></td></tr></table></figure>
+
+<p>&#x770B;&#x4F8B;&#x5B50;&#x4E2D;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x8FD9;&#x662F;&#x652F;&#x6301;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x3002;</p>
+<p>&#x8BFB;&#x8005;&#x4E5F;&#x53EF;&#x4EE5;&#x987A;&#x7740;&#x6587;&#x7AE0;&#x601D;&#x8DEF;&#xFF0C;&#x81EA;&#x884C;&#x6253;&#x5F00;&#x4E0B;&#x8F7D;&#x6E90;&#x7801;&#x8FDB;&#x884C;&#x8C03;&#x8BD5;&#xFF0C;&#x8FD9;&#x6837;&#x5370;&#x8C61;&#x66F4;&#x52A0;&#x6DF1;&#x523B;&#x3002;</p>
+<h2 id="&#x94FE;&#x5F0F;&#x8C03;&#x7528;"><a href="#&#x94FE;&#x5F0F;&#x8C03;&#x7528;" class="headerlink" title="&#x94FE;&#x5F0F;&#x8C03;&#x7528;"></a>&#x94FE;&#x5F0F;&#x8C03;&#x7528;</h2><p><code>_.chain</code> &#x51FD;&#x6570;&#x6E90;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.chain = function(obj) {</span><br><span class="line"> var instance = _(obj);</span><br><span class="line"> instance._chain = true;</span><br><span class="line"> return instance;</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x5C31;&#x662F;&#x4F20;&#x9012;<code>obj</code>&#x8C03;&#x7528;<code>_()</code>&#x3002;&#x4F46;&#x8FD4;&#x56DE;&#x503C;&#x53D8;&#x91CF;&#x7ADF;&#x7136;&#x662F;<code>instance</code>&#x5B9E;&#x4F8B;&#x5BF9;&#x8C61;&#x3002;&#x6DFB;&#x52A0;&#x5C5E;&#x6027;<code>_chain</code>&#x8D4B;&#x503C;&#x4E3A;<code>true</code>&#xFF0C;&#x5E76;&#x8FD4;&#x56DE;<code>intance</code>&#x5BF9;&#x8C61;&#x3002;&#x4F46;&#x518D;&#x770B;&#x4F8B;&#x5B50;&#xFF0C;&#x5B9E;&#x4F8B;&#x5BF9;&#x8C61;&#x7ADF;&#x7136;&#x53EF;&#x4EE5;&#x8C03;&#x7528;<code>reverse</code>&#x65B9;&#x6CD5;&#xFF0C;&#x518D;&#x8C03;&#x7528;<code>value</code>&#x65B9;&#x6CD5;&#x3002;&#x731C;&#x6D4B;&#x652F;&#x6301;<code>OOP</code>&#xFF08;&#x9762;&#x5411;&#x5BF9;&#x8C61;&#xFF09;&#x8C03;&#x7528;&#x3002;</p>
+<p>&#x5E26;&#x7740;&#x95EE;&#x9898;&#xFF0C;&#x7B14;&#x8005;&#x770B;&#x4E86;&#x4E0B;&#x5B9A;&#x4E49; <code>_</code> &#x51FD;&#x6570;&#x5BF9;&#x8C61;&#x7684;&#x4EE3;&#x7801;&#x3002;</p>
+<h2 id="&#x51FD;&#x6570;&#x5BF9;&#x8C61;-&#x652F;&#x6301;OOP"><a href="#&#x51FD;&#x6570;&#x5BF9;&#x8C61;-&#x652F;&#x6301;OOP" class="headerlink" title="_ &#x51FD;&#x6570;&#x5BF9;&#x8C61; &#x652F;&#x6301;OOP"></a><code>_</code> &#x51FD;&#x6570;&#x5BF9;&#x8C61; &#x652F;&#x6301;<code>OOP</code></h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var _ = function(obj) {</span><br><span class="line"> if (obj instanceof _) return obj;</span><br><span class="line"> if (!(this instanceof _)) return new _(obj);</span><br><span class="line"> this._wrapped = obj;</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x679C;&#x53C2;&#x6570;<code>obj</code>&#x5DF2;&#x7ECF;&#x662F;<code>_</code>&#x7684;&#x5B9E;&#x4F8B;&#x4E86;&#xFF0C;&#x5219;&#x8FD4;&#x56DE;<code>obj</code>&#x3002;<br>&#x5982;&#x679C;<code>this</code>&#x4E0D;&#x662F;<code>_</code>&#x7684;&#x5B9E;&#x4F8B;&#xFF0C;&#x5219;&#x624B;&#x52A8; <code>new _(obj)</code>;<br>&#x518D;&#x6B21;<code>new</code>&#x8C03;&#x7528;&#x65F6;&#xFF0C;&#x628A;<code>obj</code>&#x5BF9;&#x8C61;&#x8D4B;&#x503C;&#x7ED9;<code>_wrapped</code>&#x8FD9;&#x4E2A;&#x5C5E;&#x6027;&#x3002;<br>&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x6700;&#x540E;&#x5F97;&#x5230;&#x7684;&#x5B9E;&#x4F8B;&#x5BF9;&#x8C61;&#x662F;&#x8FD9;&#x6837;&#x7684;&#x7ED3;&#x6784;<br><code>{ _wrapped: &apos;&#x53C2;&#x6570;obj&apos;, }</code><br>&#x5B83;&#x7684;&#x539F;&#x578B;<code>_(obj).__proto__</code> &#x662F; <code>_.prototype</code>;</p>
+<p>&#x5982;&#x679C;&#x5BF9;&#x8FD9;&#x5757;&#x4E0D;&#x719F;&#x6089;&#x7684;&#x8BFB;&#x8005;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x4E0B;&#x4EE5;&#x4E0B;&#x8FD9;&#x5F20;&#x56FE;(&#x4E4B;&#x524D;&#x5199;<a href="https://dev.newban.cn/6844903780035592205">&#x9762;&#x8BD5;&#x5B98;&#x95EE;&#xFF1A;<code>JS&#x7684;&#x7EE7;&#x627F;</code></a>&#x753B;&#x7684;&#x56FE;)&#x3002;<br><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/e0f3200edb3275ff5ab43348e00bb428bfbd075897ec30f5cdb6eaee62dc2a6f" alt="&#x6784;&#x9020;&#x51FD;&#x6570;&#x3001;&#x539F;&#x578B;&#x5BF9;&#x8C61;&#x548C;&#x5B9E;&#x4F8B;&#x5173;&#x7CFB;&#x56FE;"></p>
+<p>&#x7EE7;&#x7EED;&#x5206;&#x6790;&#x5B98;&#x65B9;&#x7684;<code>_.chain</code>&#x4F8B;&#x5B50;&#x3002;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#x62C6;&#x5F00;&#xFF0C;&#x5199;&#x6210;&#x4E09;&#x6B65;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var part1 = _.chain([1, 2, 3]);</span><br><span class="line">var part2 = part1.reverse();</span><br><span class="line">var part3 = part2.value();</span><br><span class="line"></span><br><span class="line">// &#x6CA1;&#x6709;&#x540E;&#x7EED;part1.reverse()&#x64CD;&#x4F5C;&#x7684;&#x60C5;&#x51B5;&#x4E0B;</span><br><span class="line">console.log(part1); // {__wrapped: [1, 2, 3], _chain: true}</span><br><span class="line"></span><br><span class="line">console.log(part2); // {__wrapped: [3, 2, 1], _chain: true}</span><br><span class="line"></span><br><span class="line">console.log(part3); // [3, 2, 1]</span><br></pre></td></tr></table></figure>
+
+<p>&#x601D;&#x8003;&#x95EE;&#x9898;&#xFF1A;<code>reverse</code>&#x672C;&#x662F;<code>Array.prototype</code>&#x4E0A;&#x7684;&#x65B9;&#x6CD5;&#x5440;&#x3002;&#x4E3A;&#x5565;&#x652F;&#x6301;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x5462;&#x3002;<br>&#x641C;&#x7D22;<code>reverse</code>&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5982;&#x4E0B;&#x8FD9;&#x6BB5;&#x4EE3;&#x7801;&#xFF1A;</p>
+<p>&#x5E76;&#x5C06;&#x4F8B;&#x5B50;&#x4EE3;&#x5165;&#x8FD9;&#x6BB5;&#x4EE3;&#x7801;&#x53EF;&#x5F97;&#xFF08;&#x600E;&#x4E48;&#x6709;&#x79CD;&#x9AD8;&#x4E2D;&#x505A;&#x6570;&#x5B66;&#x9898;&#x7684;&#x65E2;&#x89C6;&#x611F;^_^&#xFF09;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.chain([1,2,3]).reverse().value()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var ArrayProto = Array.prototype;</span><br><span class="line">// &#x904D;&#x5386; &#x6570;&#x7EC4; Array.prototype &#x7684;&#x8FD9;&#x4E9B;&#x65B9;&#x6CD5;&#xFF0C;&#x8D4B;&#x503C;&#x5230; _.prototype &#x4E0A;</span><br><span class="line">_.each([&apos;pop&apos;, &apos;push&apos;, &apos;reverse&apos;, &apos;shift&apos;, &apos;sort&apos;, &apos;splice&apos;, &apos;unshift&apos;], function(name) {</span><br><span class="line"> // &#x8FD9;&#x91CC;&#x7684;`method`&#x662F; reverse &#x51FD;&#x6570;</span><br><span class="line"> var method = ArrayProto[name];</span><br><span class="line"> _.prototype[name] = function() {</span><br><span class="line"> // &#x8FD9;&#x91CC;&#x7684;obj &#x5C31;&#x662F;&#x6570;&#x7EC4; [1, 2, 3]</span><br><span class="line"> var obj = this._wrapped;</span><br><span class="line"> // arguments  &#x662F;&#x53C2;&#x6570;&#x96C6;&#x5408;&#xFF0C;&#x6307;&#x5B9A;reverse &#x7684;this&#x6307;&#x5411;&#x4E3A;obj&#xFF0C;&#x53C2;&#x6570;&#x4E3A;arguments&#xFF0C; &#x5E76;&#x6267;&#x884C;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x51FD;&#x6570;&#x3002;&#x6267;&#x884C;&#x540E; obj &#x5219;&#x662F; [3, 2, 1]</span><br><span class="line"> method.apply(obj, arguments);</span><br><span class="line"> if ((name === &apos;shift&apos; || name === &apos;splice&apos;) &amp;&amp; obj.length === 0) delete obj[0];</span><br><span class="line"> // &#x91CD;&#x70B9;&#x5728;&#x4E8E;&#x8FD9;&#x91CC; chainResult &#x51FD;&#x6570;&#x3002;</span><br><span class="line"> return chainResult(this, obj);</span><br><span class="line"> };</span><br><span class="line">});</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// Helper function to continue chaining intermediate results.</span><br><span class="line">var chainResult = function(instance, obj) {</span><br><span class="line"> // &#x5982;&#x679C;&#x5B9E;&#x4F8B;&#x4E2D;&#x6709;_chain &#x4E3A; true &#x8FD9;&#x4E2A;&#x5C5E;&#x6027;&#xFF0C;&#x5219;&#x8FD4;&#x56DE;&#x5B9E;&#x4F8B; &#x652F;&#x6301;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x7684;&#x5B9E;&#x4F8B;&#x5BF9;&#x8C61;  { _chain: true, this._wrapped: [3, 2, 1] }&#xFF0C;&#x5426;&#x5219;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;[3, 2, 1]&#x3002;</span><br><span class="line"> return instance._chain ? _(obj).chain() : obj;</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p><code>if ((name === &apos;shift&apos; || name === &apos;splice&apos;) &amp;&amp; obj.length === 0) delete obj[0];</code><br>&#x63D0;&#x4E00;&#x4E0B;&#x4E0A;&#x9762;&#x6E90;&#x7801;&#x4E2D;&#x7684;&#x8FD9;&#x4E00;&#x53E5;&#xFF0C;&#x770B;&#x5230;&#x8FD9;&#x53E5;&#x662F;&#x767E;&#x601D;&#x4E0D;&#x5F97;&#x5176;&#x89E3;&#x3002;&#x4E8E;&#x662F;&#x8D76;&#x7D27;&#x5728;<code>github</code>&#x4E2D;&#x641C;&#x7D22;&#x8FD9;&#x53E5;&#x52A0;&#x4E0A;<code>&quot;&quot;</code>&#x53CC;&#x5F15;&#x53F7;&#x3002;&#x8868;&#x793A;&#x5168;&#x90E8;&#x641C;&#x7D22;&#x3002;</p>
+<p>&#x641C;&#x7D22;&#x5230;&#x4E24;&#x4E2A;&#x5728;&#x5B98;&#x65B9;&#x5E93;&#x4E2D;&#x7684;<code>ISSUE</code>&#xFF0C;&#x5927;&#x6982;&#x610F;&#x601D;&#x5C31;&#x662F;&#x517C;&#x5BB9;IE&#x4F4E;&#x7248;&#x672C;&#x7684;&#x5199;&#x6CD5;&#x3002;&#x6709;&#x5174;&#x8DA3;&#x7684;&#x53EF;&#x4EE5;&#x70B9;&#x51FB;&#x53BB;&#x770B;&#x770B;&#x3002;</p>
+<p><a href="/external_links/92ebb9b9e25d92903d1f516cc3e47e42.html" target="blank" rel="noopener">I don&#x2019;t understand the meaning of this sentence.</a></p>
+<p><a href="/external_links/7c30d582b1c2dae90bf0a2a4981960e3.html" target="blank" rel="noopener">why delete obj[0]</a></p>
+<h2 id="&#x57FA;&#x4E8E;&#x6D41;&#x7684;&#x7F16;&#x7A0B;"><a href="#&#x57FA;&#x4E8E;&#x6D41;&#x7684;&#x7F16;&#x7A0B;" class="headerlink" title="&#x57FA;&#x4E8E;&#x6D41;&#x7684;&#x7F16;&#x7A0B;"></a>&#x57FA;&#x4E8E;&#x6D41;&#x7684;&#x7F16;&#x7A0B;</h2><p>&#x81F3;&#x6B64;&#x5C31;&#x7B97;&#x662F;&#x5206;&#x6790;&#x5B8C;&#x4E86;&#x94FE;&#x5F0F;&#x8C03;&#x7528;<code>_.chain()</code>&#x548C;<code>_</code> &#x51FD;&#x6570;&#x5BF9;&#x8C61;&#x3002;&#x8FD9;&#x79CD;&#x628A;&#x6570;&#x636E;&#x5B58;&#x50A8;&#x5728;&#x5B9E;&#x4F8B;&#x5BF9;&#x8C61;<code>{_wrapped: &apos;&apos;, _chain: true}</code> &#x4E2D;&#xFF0C;<code>_chain</code>&#x5224;&#x65AD;&#x662F;&#x5426;&#x652F;&#x6301;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#xFF0C;&#x6765;&#x4F20;&#x9012;&#x7ED9;&#x4E0B;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x5904;&#x7406;&#x3002;&#x8FD9;&#x79CD;&#x505A;&#x6CD5;&#x53EB;&#x505A; <strong>&#x57FA;&#x4E8E;&#x6D41;&#x7684;&#x7F16;&#x7A0B;</strong>&#x3002;</p>
+<p>&#x6700;&#x540E;&#x6570;&#x636E;&#x5904;&#x7406;&#x5B8C;&#xFF0C;&#x8981;&#x8FD4;&#x56DE;&#x8FD9;&#x4E2A;&#x6570;&#x636E;&#x600E;&#x4E48;&#x529E;&#x5462;&#x3002;<code>underscore</code>&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x4E2A;<code>value</code>&#x7684;&#x65B9;&#x6CD5;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.prototype.value = function(){</span><br><span class="line"> return this._wrapped;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x987A;&#x4FBF;&#x63D0;&#x4F9B;&#x4E86;&#x51E0;&#x4E2A;&#x522B;&#x540D;&#x3002;<code>toJSON</code>&#x3001;<code>valueOf</code>&#x3002;<br>_.prototype.valueOf = _.prototype.toJSON = _.prototype.value;</p>
+<p>&#x8FD8;&#x63D0;&#x4F9B;&#x4E86; <code>toString</code>&#x7684;&#x65B9;&#x6CD5;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.prototype.toString = function() {</span><br><span class="line"> return String(this._wrapped);</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x91CC;&#x7684;<code>String()</code> &#x548C;<code>new String()</code> &#x6548;&#x679C;&#x662F;&#x4E00;&#x6837;&#x7684;&#x3002;<br>&#x53EF;&#x4EE5;&#x731C;&#x6D4B;&#x5185;&#x90E8;&#x5B9E;&#x73B0;&#x548C; <code>_</code>&#x51FD;&#x6570;&#x5BF9;&#x8C61;&#x7C7B;&#x4F3C;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var String = function(){</span><br><span class="line"> if(!(this instanceOf String)) return new String(obj);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var chainResult = function(instance, obj) {</span><br><span class="line"> return instance._chain ? _(obj).chain() : obj;</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>&#x7EC6;&#x5FC3;&#x7684;&#x8BFB;&#x8005;&#x4F1A;&#x53D1;&#x73B0;<code>chainResult</code>&#x51FD;&#x6570;&#x4E2D;&#x7684;<code>_(obj).chain()</code>&#xFF0C;&#x662F;&#x600E;&#x4E48;&#x5B9E;&#x73B0;&#x5B9E;&#x73B0;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x7684;&#x5462;&#x3002;</p>
+<p>&#x800C;<code>_(obj)</code>&#x662F;&#x8FD4;&#x56DE;&#x7684;&#x5B9E;&#x4F8B;&#x5BF9;&#x8C61;<code>{_wrapped: obj}</code>&#x5440;&#x3002;&#x600E;&#x4E48;&#x4F1A;&#x6709;<code>chain()</code>&#x65B9;&#x6CD5;&#xFF0C;&#x80AF;&#x5B9A;&#x6709;&#x5730;&#x65B9;&#x6302;&#x8F7D;&#x4E86;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x5230;<code>_.prototype</code>&#x4E0A;&#x6216;&#x8005;&#x5176;&#x4ED6;&#x64CD;&#x4F5C;&#xFF0C;&#x8FD9;&#x5C31;&#x662F;<code>_.mixin()</code>&#x3002;</p>
+<h2 id="mixin-&#x6302;&#x8F7D;&#x6240;&#x6709;&#x7684;&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x5230;-prototype&#xFF0C;-&#x4E5F;&#x53EF;&#x4EE5;&#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x65B9;&#x6CD5;"><a href="#mixin-&#x6302;&#x8F7D;&#x6240;&#x6709;&#x7684;&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x5230;-prototype&#xFF0C;-&#x4E5F;&#x53EF;&#x4EE5;&#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x65B9;&#x6CD5;" class="headerlink" title="_.mixin &#x6302;&#x8F7D;&#x6240;&#x6709;&#x7684;&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x5230; _.prototype&#xFF0C; &#x4E5F;&#x53EF;&#x4EE5;&#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x65B9;&#x6CD5;"></a><code>_.mixin</code> &#x6302;&#x8F7D;&#x6240;&#x6709;&#x7684;&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x5230; <code>_.prototype</code>&#xFF0C; &#x4E5F;&#x53EF;&#x4EE5;&#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x65B9;&#x6CD5;</h2><p><code>_.mixin</code> &#x6DF7;&#x5165;&#x3002;&#x4F46;&#x4FB5;&#x5165;&#x6027;&#x592A;&#x5F3A;&#xFF0C;&#x7ECF;&#x5E38;&#x5BB9;&#x6613;&#x51FA;&#x73B0;&#x8986;&#x76D6;&#x4E4B;&#x7C7B;&#x7684;&#x95EE;&#x9898;&#x3002;&#x8BB0;&#x5F97;&#x4E4B;&#x524D;<code>React</code>&#x6709;<code>mixin</code>&#x529F;&#x80FD;&#xFF0C;<code>Vue</code>&#x4E5F;&#x6709;<code>mixin</code>&#x529F;&#x80FD;&#x3002;&#x4F46;&#x7248;&#x672C;&#x8FED;&#x4EE3;&#x66F4;&#x65B0;&#x540E;&#x57FA;&#x672C;&#x90FD;&#x662F;&#x6162;&#x6162;&#x7684;&#x90FD;&#x4E0D;&#x63A8;&#x8350;&#x6216;&#x8005;&#x4E0D;&#x652F;&#x6301;<code>mixin</code>&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.mixin = function(obj) {</span><br><span class="line"> // &#x904D;&#x5386;&#x5BF9;&#x8C61;&#x4E0A;&#x7684;&#x6240;&#x6709;&#x65B9;&#x6CD5;</span><br><span class="line"> _.each(_.functions(obj), function(name) {</span><br><span class="line">  // &#x6BD4;&#x5982; chain, obj[&apos;chain&apos;] &#x51FD;&#x6570;&#xFF0C;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#xFF0C;&#x5219;&#x8D4B;&#x503C;&#x5230;_[name] &#x4E0A;&#xFF0C;func &#x5C31;&#x662F;&#x8BE5;&#x51FD;&#x6570;&#x3002;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x4E0D;&#x4EC5;_&#x51FD;&#x6570;&#x5BF9;&#x8C61;&#x4E0A;&#x6709;&#xFF0C;&#x800C;&#x4E14;`_.prototype`&#x4E0A;&#x4E5F;&#x6709;</span><br><span class="line"> var func = _[name] = obj[name];</span><br><span class="line"> _.prototype[name] = function() {</span><br><span class="line">  // &#x5904;&#x7406;&#x7684;&#x6570;&#x636E;&#x5BF9;&#x8C61;</span><br><span class="line">  var args = [this._wrapped];</span><br><span class="line">  // &#x5904;&#x7406;&#x7684;&#x6570;&#x636E;&#x5BF9;&#x8C61; &#x548C; arguments &#x7ED3;&#x5408;</span><br><span class="line">  push.apply(args, arguments);</span><br><span class="line">  // &#x94FE;&#x5F0F;&#x8C03;&#x7528;  chain.apply(_, args) &#x53C2;&#x6570;&#x53C8;&#x88AB;&#x52A0;&#x4E0A;&#x4E86; _chain&#x5C5E;&#x6027;&#xFF0C;&#x652F;&#x6301;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x3002;</span><br><span class="line">  // _.chain = function(obj) {</span><br><span class="line">  // var instance = _(obj);</span><br><span class="line">  // instance._chain = true;</span><br><span class="line">  // return instance;</span><br><span class="line">  };</span><br><span class="line">  return chainResult(this, func.apply(_, args));</span><br><span class="line"> };</span><br><span class="line"> });</span><br><span class="line"> // &#x6700;&#x7EC8;&#x8FD4;&#x56DE; _ &#x51FD;&#x6570;&#x5BF9;&#x8C61;&#x3002;</span><br><span class="line"> return _;</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">_.mixin(_);</span><br></pre></td></tr></table></figure>
+
+<p><code>_mixin(_)</code> &#x628A;&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x6302;&#x8F7D;&#x5230;&#x4E86;<code>_.prototype</code>&#x4E0A;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;<code>_.prototype.chain</code>&#x65B9;&#x6CD5; &#x4E5F;&#x5C31;&#x662F; <code>_.chain</code>&#x65B9;&#x6CD5;&#x3002;</p>
+<p>&#x6240;&#x4EE5;<code>_.chain(obj)</code>&#x548C;<code>_(obj).chain()</code>&#x6548;&#x679C;&#x4E00;&#x6837;&#xFF0C;&#x90FD;&#x80FD;&#x5B9E;&#x73B0;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x3002;</p>
+<p>&#x5173;&#x4E8E;&#x4E0A;&#x8FF0;&#x7684;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#xFF0C;&#x7B14;&#x8005;&#x753B;&#x4E86;&#x4E00;&#x5F20;&#x56FE;&#xFF0C;&#x6240;&#x8C13;&#x4E00;&#x56FE;&#x80DC;&#x5343;&#x8A00;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/c7f6fb8dc933c9fc7862a4ef68c640bf91662ac857016b4b55e81ac7e5a4993b" alt="underscore.js &#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x56FE;&#x89E3;"></p>
+<p>underscore.js &#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x56FE;&#x89E3;</p>
+<h3 id="mixin-&#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x65B9;&#x6CD5;"><a href="#mixin-&#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x65B9;&#x6CD5;" class="headerlink" title="_.mixin &#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x65B9;&#x6CD5;"></a>_.mixin &#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x65B9;&#x6CD5;</h3><p>&#x6302;&#x8F7D;&#x81EA;&#x5B9A;&#x4E49;&#x65B9;&#x6CD5;&#xFF1A;<br>&#x4E3E;&#x4E2A;&#x4F8B;&#x5B50;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.mixin({</span><br><span class="line"> log: function(){</span><br><span class="line">  console.log(&apos;&#x54CE;&#x5440;&#xFF0C;&#x6211;&#x88AB;&#x8C03;&#x7528;&#x4E86;&apos;);</span><br><span class="line"> }</span><br><span class="line">})</span><br><span class="line">_.log() // &#x54CE;&#x5440;&#xFF0C;&#x6211;&#x88AB;&#x8C03;&#x7528;&#x4E86;</span><br><span class="line">_().log() // &#x54CE;&#x5440;&#xFF0C;&#x6211;&#x88AB;&#x8C03;&#x7528;&#x4E86;</span><br></pre></td></tr></table></figure>
+
+<h3 id="functions-obj"><a href="#functions-obj" class="headerlink" title="_.functions(obj)"></a>_.functions(obj)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;_.functions = _.methods = function(obj) {</span><br><span class="line"> var names = [];</span><br><span class="line"> for (var key in obj) {</span><br><span class="line"> if (_.isFunction(obj[key])) names.push(key);</span><br><span class="line"> }</span><br><span class="line"> return names.sort();</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p><code>_.functions</code> &#x548C; <code>_.methods</code> &#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x904D;&#x5386;&#x5BF9;&#x8C61;&#x4E0A;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x653E;&#x5165;&#x4E00;&#x4E2A;&#x6570;&#x7EC4;&#xFF0C;&#x5E76;&#x4E14;&#x6392;&#x5E8F;&#x3002;&#x8FD4;&#x56DE;&#x6392;&#x5E8F;&#x540E;&#x7684;&#x6570;&#x7EC4;&#x3002;</p>
+<h3 id="underscore-js-&#x7A76;&#x7ADF;&#x5728;-&#x548C;-prototype&#x6302;&#x8F7D;&#x4E86;&#x591A;&#x5C11;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;"><a href="#underscore-js-&#x7A76;&#x7ADF;&#x5728;-&#x548C;-prototype&#x6302;&#x8F7D;&#x4E86;&#x591A;&#x5C11;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;" class="headerlink" title="underscore.js &#x7A76;&#x7ADF;&#x5728;_&#x548C;_.prototype&#x6302;&#x8F7D;&#x4E86;&#x591A;&#x5C11;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;"></a><code>underscore.js</code> &#x7A76;&#x7ADF;&#x5728;<code>_</code>&#x548C;<code>_.prototype</code>&#x6302;&#x8F7D;&#x4E86;&#x591A;&#x5C11;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;</h3><p>&#x518D;&#x6765;&#x770B;&#x4E0B;<code>underscore.js</code>&#x7A76;&#x7ADF;&#x6302;&#x8F7D;&#x5728;<code>_&#x51FD;&#x6570;&#x5BF9;&#x8C61;</code>&#x4E0A;&#x6709;&#x591A;&#x5C11;&#x9759;&#x6001;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;&#xFF0C;&#x548C;&#x6302;&#x8F7D;<code>_.prototype</code>&#x4E0A;&#x6709;&#x591A;&#x5C11;&#x65B9;&#x6CD5;&#x548C;&#x5C5E;&#x6027;&#x3002;</p>
+<p>&#x4F7F;&#x7528;<code>for in</code>&#x5FAA;&#x73AF;&#x4E00;&#x8BD5;&#x4FBF;&#x77E5;&#x3002;&#x770B;&#x5982;&#x4E0B;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var staticMethods = [];</span><br><span class="line">var staticProperty = [];</span><br><span class="line">for(var name in _){</span><br><span class="line"> if(typeof _[name] === &apos;function&apos;){</span><br><span class="line">  staticMethods.push(name);</span><br><span class="line"> }</span><br><span class="line"> else{</span><br><span class="line">  staticProperty.push(name);</span><br><span class="line"> }</span><br><span class="line">}</span><br><span class="line">console.log(staticProperty); // [&quot;VERSION&quot;, &quot;templateSettings&quot;] &#x4E24;&#x4E2A;</span><br><span class="line">console.log(staticMethods); // [&quot;after&quot;, &quot;all&quot;, &quot;allKeys&quot;, &quot;any&quot;, &quot;assign&quot;, ...] 138&#x4E2A;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var prototypeMethods = [];</span><br><span class="line">var prototypeProperty = [];</span><br><span class="line">for(var name in _.prototype){</span><br><span class="line"> if(typeof _.prototype[name] === &apos;function&apos;){</span><br><span class="line">  prototypeMethods.push(name);</span><br><span class="line"> }</span><br><span class="line"> else{</span><br><span class="line">  prototypeProperty.push(name);</span><br><span class="line"> }</span><br><span class="line">}</span><br><span class="line">console.log(prototypeProperty); // []</span><br><span class="line">console.log(prototypeMethods); // [&quot;after&quot;, &quot;all&quot;, &quot;allKeys&quot;, &quot;any&quot;, &quot;assign&quot;, ...] 152&#x4E2A;</span><br></pre></td></tr></table></figure>
+
+<p>&#x6839;&#x636E;&#x8FD9;&#x4E9B;&#xFF0C;&#x7B14;&#x8005;&#x53C8;&#x753B;&#x4E86;&#x4E00;&#x5F20;&#x56FE;<code>underscore.js</code> &#x539F;&#x578B;&#x5173;&#x7CFB;&#x56FE;&#xFF0C;&#x6BD5;&#x7ADF;&#x4E00;&#x56FE;&#x80DC;&#x5343;&#x8A00;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/3b0ed798cc58e2885adb6f504415ffc15028c788e4b89e042fd9b59a7d0e3829" alt="&#x539F;&#x578B;&#x5173;&#x7CFB;&#x56FE;"></p>
+<p><code>uunderscore.js</code> &#x539F;&#x578B;&#x5173;&#x7CFB;&#x56FE;</p>
+<h2 id="&#x6574;&#x4F53;&#x67B6;&#x6784;&#x6982;&#x89C8;"><a href="#&#x6574;&#x4F53;&#x67B6;&#x6784;&#x6982;&#x89C8;" class="headerlink" title="&#x6574;&#x4F53;&#x67B6;&#x6784;&#x6982;&#x89C8;"></a>&#x6574;&#x4F53;&#x67B6;&#x6784;&#x6982;&#x89C8;</h2><h3 id="&#x533F;&#x540D;&#x51FD;&#x6570;&#x81EA;&#x6267;&#x884C;"><a href="#&#x533F;&#x540D;&#x51FD;&#x6570;&#x81EA;&#x6267;&#x884C;" class="headerlink" title="&#x533F;&#x540D;&#x51FD;&#x6570;&#x81EA;&#x6267;&#x884C;"></a>&#x533F;&#x540D;&#x51FD;&#x6570;&#x81EA;&#x6267;&#x884C;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;(function(){</span><br><span class="line"></span><br><span class="line">}());</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x6837;&#x4FDD;&#x8BC1;&#x4E0D;&#x6C61;&#x67D3;&#x5916;&#x754C;&#x73AF;&#x5883;&#xFF0C;&#x540C;&#x65F6;&#x9694;&#x79BB;&#x5916;&#x754C;&#x73AF;&#x5883;&#xFF0C;&#x4E0D;&#x662F;&#x5916;&#x754C;&#x5F71;&#x54CD;&#x5185;&#x90E8;&#x73AF;&#x5883;&#x3002;</p>
+<p>&#x5916;&#x754C;&#x8BBF;&#x95EE;&#x4E0D;&#x5230;&#x91CC;&#x9762;&#x7684;&#x53D8;&#x91CF;&#x548C;&#x51FD;&#x6570;&#xFF0C;&#x91CC;&#x9762;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x5230;&#x5916;&#x754C;&#x7684;&#x53D8;&#x91CF;&#xFF0C;&#x4F46;&#x91CC;&#x9762;&#x5B9A;&#x4E49;&#x4E86;&#x81EA;&#x5DF1;&#x7684;&#x53D8;&#x91CF;&#xFF0C;&#x5219;&#x4E0D;&#x4F1A;&#x8BBF;&#x95EE;&#x5916;&#x754C;&#x7684;&#x53D8;&#x91CF;&#x3002;<br>&#x533F;&#x540D;&#x51FD;&#x6570;&#x5C06;&#x4EE3;&#x7801;&#x5305;&#x88F9;&#x5728;&#x91CC;&#x9762;&#xFF0C;&#x9632;&#x6B62;&#x4E0E;&#x5176;&#x4ED6;&#x4EE3;&#x7801;&#x51B2;&#x7A81;&#x548C;&#x6C61;&#x67D3;&#x5168;&#x5C40;&#x73AF;&#x5883;&#x3002;<br>&#x5173;&#x4E8E;&#x81EA;&#x6267;&#x884C;&#x51FD;&#x6570;&#x4E0D;&#x662F;&#x5F88;&#x4E86;&#x89E3;&#x7684;&#x8BFB;&#x8005;&#x53EF;&#x4EE5;&#x53C2;&#x770B;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x3002;<br><a href="/external_links/aeda3994b20cc05f440ffa8b253dcee7.html" target="blank" rel="noopener">[&#x8BD1;] JavaScript&#xFF1A;&#x7ACB;&#x5373;&#x6267;&#x884C;&#x51FD;&#x6570;&#x8868;&#x8FBE;&#x5F0F;&#xFF08;IIFE&#xFF09;</a></p>
+<h3 id="root-&#x5904;&#x7406;"><a href="#root-&#x5904;&#x7406;" class="headerlink" title="root &#x5904;&#x7406;"></a>root &#x5904;&#x7406;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var root = typeof self == &apos;object&apos; &amp;&amp; self.self === self &amp;&amp; self ||</span><br><span class="line"> typeof global == &apos;object&apos; &amp;&amp; global.global === global &amp;&amp; global ||</span><br><span class="line"> this ||</span><br><span class="line"> {};</span><br></pre></td></tr></table></figure>
+
+<p>&#x652F;&#x6301;<code>&#x6D4F;&#x89C8;&#x5668;&#x73AF;&#x5883;</code>&#x3001;<code>node</code>&#x3001;<code>Web Worker</code>&#x3001;<code>node vm</code>&#x3001;<code>&#x5FAE;&#x4FE1;&#x5C0F;&#x7A0B;&#x5E8F;</code>&#x3002;</p>
+<h3 id="&#x5BFC;&#x51FA;"><a href="#&#x5BFC;&#x51FA;" class="headerlink" title="&#x5BFC;&#x51FA;"></a>&#x5BFC;&#x51FA;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;if (typeof exports != &apos;undefined&apos; &amp;&amp; !exports.nodeType) {</span><br><span class="line"> if (typeof module != &apos;undefined&apos; &amp;&amp; !module.nodeType &amp;&amp; module.exports) {</span><br><span class="line"> exports = module.exports = _;</span><br><span class="line"> }</span><br><span class="line"> exports._ = _;</span><br><span class="line">} else {</span><br><span class="line"> root._ = _;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5173;&#x4E8E;<code>root&#x5904;&#x7406;</code>&#x548C;<code>&#x5BFC;&#x51FA;</code>&#x7684;&#x8FD9;&#x4E24;&#x6BB5;&#x4EE3;&#x7801;&#x7684;&#x89E3;&#x91CA;&#xFF0C;&#x63A8;&#x8350;&#x770B;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;<a href="https://dev.newban.cn/6844903511394615303">&#x51B4;&#x7FBD;&#xFF1A;underscore &#x7CFB;&#x5217;&#x4E4B;&#x5982;&#x4F55;&#x5199;&#x81EA;&#x5DF1;&#x7684; underscore</a>&#xFF0C;&#x8BB2;&#x5F97;&#x771F;&#x7684;&#x592A;&#x597D;&#x4E86;&#x3002;&#x7B14;&#x8005;&#x5728;&#x6B64;&#x5C31;&#x4E0D;&#x8D58;&#x8FF0;&#x4E86;&#x3002;<br>&#x603B;&#x4E4B;&#xFF0C;<code>underscore.js</code>&#x4F5C;&#x8005;&#x5BF9;&#x8FD9;&#x4E9B;&#x5904;&#x7406;&#x4E5F;&#x4E0D;&#x662F;&#x4E00;&#x8E74;&#x800C;&#x5C31;&#x7684;&#xFF0C;&#x4E5F;&#x662F;&#x6162;&#x6162;&#x79EF;&#x7D2F;&#xFF0C;&#x548C;&#x5176;&#x4ED6;&#x4EBA;&#x63D0;<code>ISSUE</code>&#x4E4B;&#x540E;&#x4E0D;&#x65AD;&#x6539;&#x8FDB;&#x7684;&#x3002;</p>
+<h3 id="&#x652F;&#x6301;-amd-&#x6A21;&#x5757;&#x5316;&#x89C4;&#x8303;"><a href="#&#x652F;&#x6301;-amd-&#x6A21;&#x5757;&#x5316;&#x89C4;&#x8303;" class="headerlink" title="&#x652F;&#x6301; amd &#x6A21;&#x5757;&#x5316;&#x89C4;&#x8303;"></a>&#x652F;&#x6301; <code>amd</code> &#x6A21;&#x5757;&#x5316;&#x89C4;&#x8303;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;if (typeof define == &apos;function&apos; &amp;&amp; define.amd) {</span><br><span class="line"> define(&apos;underscore&apos;, [], function() {</span><br><span class="line">  return _;</span><br><span class="line"> });</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="noConflict-&#x9632;&#x51B2;&#x7A81;&#x51FD;&#x6570;"><a href="#noConflict-&#x9632;&#x51B2;&#x7A81;&#x51FD;&#x6570;" class="headerlink" title="_.noConflict &#x9632;&#x51B2;&#x7A81;&#x51FD;&#x6570;"></a>_.noConflict &#x9632;&#x51B2;&#x7A81;&#x51FD;&#x6570;</h3><p>&#x6E90;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x6682;&#x5B58;&#x5728; root &#x4E0A;&#xFF0C; &#x6267;&#x884C;noConflict&#x65F6;&#x518D;&#x8D4B;&#x503C;&#x56DE;&#x6765;</span><br><span class="line">var previousUnderscore = root._;</span><br><span class="line">_.noConflict = function() {</span><br><span class="line"> root._ = previousUnderscore;</span><br><span class="line"> return this;</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F7F;&#x7528;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;script&gt;</span><br><span class="line">var _ = &apos;&#x6211;&#x5C31;&#x662F;&#x6211;&#xFF0C;&#x4E0D;&#x4E00;&#x6837;&#x7684;&#x70DF;&#x706B;&#xFF0C;&#x5176;&#x4ED6;&#x53EF;&#x4E0D;&#x8981;&#x8986;&#x76D6;&#x6211;&#x5440;&apos;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;script src=&quot;https://unpkg.com/underscore@1.9.1/underscore.js&quot;&gt;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">var underscore = _.noConflict();</span><br><span class="line">console.log(_); // &apos;&#x6211;&#x5C31;&#x662F;&#x6211;&#xFF0C;&#x4E0D;&#x4E00;&#x6837;&#x7684;&#x70DF;&#x706B;&#xFF0C;&#x5176;&#x4ED6;&#x53EF;&#x4E0D;&#x8981;&#x8986;&#x76D6;&#x6211;&#x5440;&apos;</span><br><span class="line">underscore.isArray([]) // true</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x5168;&#x6587;&#x6839;&#x636E;&#x5B98;&#x7F51;&#x63D0;&#x4F9B;&#x7684;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#x7684;&#x4F8B;&#x5B50;&#xFF0C; <code>_.chain([1, 2, 3]).reverse().value();</code>&#x8F83;&#x4E3A;&#x6DF1;&#x5165;&#x7684;&#x8C03;&#x8BD5;&#x548C;&#x8FFD;&#x8E2A;&#x4EE3;&#x7801;&#xFF0C;&#x5206;&#x6790;&#x94FE;&#x5F0F;&#x8C03;&#x7528;&#xFF08;<code>_.chain()</code> &#x548C; <code>_(obj).chain()</code>&#xFF09;&#x3001;<code>OOP</code>&#x3001;&#x57FA;&#x4E8E;&#x6D41;&#x5F0F;&#x7F16;&#x7A0B;&#x3001;&#x548C;<code>_.mixin(_)</code>&#x5728;<code>_.prototype</code>&#x6302;&#x8F7D;&#x65B9;&#x6CD5;&#xFF0C;&#x6700;&#x540E;&#x6574;&#x4F53;&#x67B6;&#x6784;&#x5206;&#x6790;&#x3002;&#x5B66;&#x4E60;<code>underscore.js</code>&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x5229;&#x4E8E;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684;&#x51FD;&#x6570;&#x5F0F;&#x7F16;&#x7A0B;&#x7C7B;&#x5E93;&#x3002;</p>
+<p>&#x6587;&#x7AE0;&#x5206;&#x6790;&#x7684;&#x6E90;&#x7801;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;(function() {</span><br><span class="line"> var root = typeof self == &apos;object&apos; &amp;&amp; self.self === self &amp;&amp; self ||</span><br><span class="line">  typeof global == &apos;object&apos; &amp;&amp; global.global === global &amp;&amp; global ||</span><br><span class="line">  this ||</span><br><span class="line">  {};</span><br><span class="line"> var previousUnderscore = root._;</span><br><span class="line"></span><br><span class="line"> var _ = function(obj) {</span><br><span class="line">   if (obj instanceof _) return obj;</span><br><span class="line">   if (!(this instanceof _)) return new _(obj);</span><br><span class="line">   this._wrapped = obj;</span><br><span class="line"> };</span><br><span class="line"></span><br><span class="line"> if (typeof exports != &apos;undefined&apos; &amp;&amp; !exports.nodeType) {</span><br><span class="line">   if (typeof module != &apos;undefined&apos; &amp;&amp; !module.nodeType &amp;&amp; module.exports) {</span><br><span class="line">  exports = module.exports = _;</span><br><span class="line">   }</span><br><span class="line">   exports._ = _;</span><br><span class="line"> } else {</span><br><span class="line">   root._ = _;</span><br><span class="line"> }</span><br><span class="line"> _.VERSION = &apos;1.9.1&apos;;</span><br><span class="line"></span><br><span class="line"> _.chain = function(obj) {</span><br><span class="line">   var instance = _(obj);</span><br><span class="line">   instance._chain = true;</span><br><span class="line">   return instance;</span><br><span class="line"> };</span><br><span class="line"></span><br><span class="line"> var chainResult = function(instance, obj) {</span><br><span class="line">   return instance._chain ? _(obj).chain() : obj;</span><br><span class="line"> };</span><br><span class="line"></span><br><span class="line"> _.mixin = function(obj) {</span><br><span class="line">   _.each(_.functions(obj), function(name) {</span><br><span class="line">  var func = _[name] = obj[name];</span><br><span class="line">  _.prototype[name] = function() {</span><br><span class="line">    var args = [this._wrapped];</span><br><span class="line">    push.apply(args, arguments);</span><br><span class="line">    return chainResult(this, func.apply(_, args));</span><br><span class="line">  };</span><br><span class="line">   });</span><br><span class="line">   return _;</span><br><span class="line"> };</span><br><span class="line"></span><br><span class="line"> _.mixin(_);</span><br><span class="line"></span><br><span class="line"> _.each([&apos;pop&apos;, &apos;push&apos;, &apos;reverse&apos;, &apos;shift&apos;, &apos;sort&apos;, &apos;splice&apos;, &apos;unshift&apos;], function(name) {</span><br><span class="line">   var method = ArrayProto[name];</span><br><span class="line">   _.prototype[name] = function() {</span><br><span class="line">  var obj = this._wrapped;</span><br><span class="line">  method.apply(obj, arguments);</span><br><span class="line">  if ((name === &apos;shift&apos; || name === &apos;splice&apos;) &amp;&amp; obj.length === 0) delete obj[0];</span><br><span class="line">  return chainResult(this, obj);</span><br><span class="line">   };</span><br><span class="line"> });</span><br><span class="line"></span><br><span class="line"> _.each([&apos;concat&apos;, &apos;join&apos;, &apos;slice&apos;], function(name) {</span><br><span class="line">   var method = ArrayProto[name];</span><br><span class="line">   _.prototype[name] = function() {</span><br><span class="line">  return chainResult(this, method.apply(this._wrapped, arguments));</span><br><span class="line">   };</span><br><span class="line"> });</span><br><span class="line"></span><br><span class="line"> _.prototype.value = function() {</span><br><span class="line">   return this._wrapped;</span><br><span class="line"> };</span><br><span class="line"></span><br><span class="line"> _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;</span><br><span class="line"></span><br><span class="line"> _.prototype.toString = function() {</span><br><span class="line">   return String(this._wrapped);</span><br><span class="line"> };</span><br><span class="line"></span><br><span class="line"> if (typeof define == &apos;function&apos; &amp;&amp; define.amd) {</span><br><span class="line">   define(&apos;underscore&apos;, [], function() {</span><br><span class="line">  return _;</span><br><span class="line">   });</span><br><span class="line"> }</span><br><span class="line">}());</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0B;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x662F;&#x5B66;&#x4E60;<code>lodash</code>&#x7684;&#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#x3002;<a href="https://dev.newban.cn/6844903939062628360">&#x5B66;&#x4E60; lodash &#x6E90;&#x7801;&#x6574;&#x4F53;&#x67B6;&#x6784;&#xFF0C;&#x6253;&#x9020;&#x5C5E;&#x4E8E;&#x81EA;&#x5DF1;&#x7684;&#x51FD;&#x6570;&#x5F0F;&#x7F16;&#x7A0B;&#x7C7B;&#x5E93;</a></p>
+<p>&#x8BFB;&#x8005;&#x53D1;&#x73B0;&#x6709;&#x4E0D;&#x59A5;&#x6216;&#x53EF;&#x6539;&#x5584;&#x4E4B;&#x5904;&#xFF0C;&#x6B22;&#x8FCE;&#x8BC4;&#x8BBA;&#x6307;&#x51FA;&#x3002;&#x53E6;&#x5916;&#x89C9;&#x5F97;&#x5199;&#x5F97;&#x4E0D;&#x9519;&#xFF0C;&#x53EF;&#x4EE5;&#x70B9;&#x8D5E;&#x3001;&#x8BC4;&#x8BBA;&#x3001;&#x8F6C;&#x53D1;&#xFF0C;&#x4E5F;&#x662F;&#x5BF9;&#x7B14;&#x8005;&#x7684;&#x4E00;&#x79CD;&#x652F;&#x6301;&#x3002;</p>
+<h2 id="&#x63A8;&#x8350;&#x9605;&#x8BFB;"><a href="#&#x63A8;&#x8350;&#x9605;&#x8BFB;" class="headerlink" title="&#x63A8;&#x8350;&#x9605;&#x8BFB;"></a>&#x63A8;&#x8350;&#x9605;&#x8BFB;</h2><p><a href="/external_links/8a20d27aaf61dfa3561d2e3a90d88be3.html" target="blank" rel="noopener">underscorejs.org &#x5B98;&#x7F51;</a>  </p>
+<p><a href="/external_links/9c514b12d4425a20fe4004949627e183.html" target="blank" rel="noopener">undersercore-analysis</a>  </p>
+<p><a href="https://dev.newban.cn/6844903511394615303">underscore &#x7CFB;&#x5217;&#x4E4B;&#x5982;&#x4F55;&#x5199;&#x81EA;&#x5DF1;&#x7684; underscore</a>  </p>
+<h2 id="&#x7B14;&#x8005;&#x5F80;&#x671F;&#x6587;&#x7AE0;"><a href="#&#x7B14;&#x8005;&#x5F80;&#x671F;&#x6587;&#x7AE0;" class="headerlink" title="&#x7B14;&#x8005;&#x5F80;&#x671F;&#x6587;&#x7AE0;"></a>&#x7B14;&#x8005;&#x5F80;&#x671F;&#x6587;&#x7AE0;</h2><p><a href="https://dev.newban.cn/6844903780035592205">&#x9762;&#x8BD5;&#x5B98;&#x95EE;&#xFF1A;JS&#x7684;&#x7EE7;&#x627F;</a>  </p>
+<p><a href="https://dev.newban.cn/6844903746984476686">&#x9762;&#x8BD5;&#x5B98;&#x95EE;&#xFF1A;JS&#x7684;this&#x6307;&#x5411;</a>  </p>
+<p><a href="https://dev.newban.cn/6844903728147857415">&#x9762;&#x8BD5;&#x5B98;&#x95EE;&#xFF1A;&#x80FD;&#x5426;&#x6A21;&#x62DF;&#x5B9E;&#x73B0;JS&#x7684;call&#x548C;apply&#x65B9;&#x6CD5;</a>  </p>
+<p><a href="https://dev.newban.cn/6844903718089916429">&#x9762;&#x8BD5;&#x5B98;&#x95EE;&#xFF1A;&#x80FD;&#x5426;&#x6A21;&#x62DF;&#x5B9E;&#x73B0;JS&#x7684;bind&#x65B9;&#x6CD5;</a>  </p>
+<p><a href="https://dev.newban.cn/6844903704663949325">&#x9762;&#x8BD5;&#x5B98;&#x95EE;&#xFF1A;&#x80FD;&#x5426;&#x6A21;&#x62DF;&#x5B9E;&#x73B0;JS&#x7684;new&#x64CD;&#x4F5C;&#x7B26;</a>  </p>
+<p><a href="https://dev.newban.cn/6844903666860687373">&#x524D;&#x7AEF;&#x4F7F;&#x7528;puppeteer &#x722C;&#x866B;&#x751F;&#x6210;&#x300A;React.js &#x5C0F;&#x4E66;&#x300B;PDF&#x5E76;&#x5408;&#x5E76;</a>  </p>
+<h2 id="&#x5173;&#x4E8E;"><a href="#&#x5173;&#x4E8E;" class="headerlink" title="&#x5173;&#x4E8E;"></a>&#x5173;&#x4E8E;</h2><p>&#x4F5C;&#x8005;&#xFF1A;&#x5E38;&#x4EE5;<strong>&#x82E5;&#x5DDD;</strong>&#x4E3A;&#x540D;&#x6DF7;&#x8FF9;&#x4E8E;&#x6C5F;&#x6E56;&#x3002;&#x524D;&#x7AEF;&#x8DEF;&#x4E0A; | PPT&#x7231;&#x597D;&#x8005; | &#x6240;&#x77E5;&#x751A;&#x5C11;&#xFF0C;&#x552F;&#x5584;&#x5B66;&#x3002;  </p>
+<p><a href="/external_links/f5f597eba44017436ec7b1235495cfeb.html" target="blank" rel="noopener">&#x82E5;&#x5DDD;&#x7684;&#x535A;&#x5BA2;</a>&#xFF0C;&#x7528;<code>vuepress</code>&#x91CD;&#x6784;&#x4E86;&#xFF0C;&#x9605;&#x8BFB;&#x4F53;&#x9A8C;&#x53EF;&#x80FD;&#x597D;&#x4E9B;  </p>
+<p><a href="/external_links/0eaae9aee67b3837a4608f6f57e3fe73.html" target="blank" rel="noopener">&#x6398;&#x91D1;&#x4E13;&#x680F;</a>&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;~  </p>
+<p><a href="/external_links/aa57b6e4783432f5eb4cb3122c7c281d.html" target="blank" rel="noopener"><code>segmentfault</code>&#x524D;&#x7AEF;&#x89C6;&#x91CE;&#x4E13;&#x680F;</a>&#xFF0C;&#x5F00;&#x901A;&#x4E86;<strong>&#x524D;&#x7AEF;&#x89C6;&#x91CE;</strong>&#x4E13;&#x680F;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;~  </p>
+<p><a href="/external_links/9d49889ba530cc743d4bc05726fd318e.html" target="blank" rel="noopener">&#x77E5;&#x4E4E;&#x524D;&#x7AEF;&#x89C6;&#x91CE;&#x4E13;&#x680F;</a>&#xFF0C;&#x5F00;&#x901A;&#x4E86;<strong>&#x524D;&#x7AEF;&#x89C6;&#x91CE;</strong>&#x4E13;&#x680F;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;~  </p>
+<p><a href="/external_links/91e1c19854dc9cad3830ab2dfa5bd5bc.html" target="blank" rel="noopener">&#x8BED;&#x96C0;&#x524D;&#x7AEF;&#x89C6;&#x91CE;&#x4E13;&#x680F;</a>&#xFF0C;&#x65B0;&#x589E;&#x8BED;&#x96C0;&#x4E13;&#x680F;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;~  </p>
+<p><a href="/external_links/7a72f7afa742d06ac5ceb82d817c1bed.html" target="blank" rel="noopener">github blog</a>&#xFF0C;&#x76F8;&#x5173;&#x6E90;&#x7801;&#x548C;&#x8D44;&#x6E90;&#x90FD;&#x653E;&#x5728;&#x8FD9;&#x91CC;&#xFF0C;&#x6C42;&#x4E2A;<code>star</code>^_^~</p>
+<h2 id="&#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7;-&#x82E5;&#x5DDD;&#x89C6;&#x91CE;"><a href="#&#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7;-&#x82E5;&#x5DDD;&#x89C6;&#x91CE;" class="headerlink" title="&#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7; &#x82E5;&#x5DDD;&#x89C6;&#x91CE;"></a>&#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7; &#x82E5;&#x5DDD;&#x89C6;&#x91CE;</h2><p>&#x53EF;&#x80FD;&#x6BD4;&#x8F83;&#x6709;&#x8DA3;&#x7684;&#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7;&#xFF0C;&#x957F;&#x6309;&#x626B;&#x7801;&#x5173;&#x6CE8;&#x3002;&#x4E5F;&#x53EF;&#x4EE5;&#x52A0;&#x5FAE;&#x4FE1; <code>ruochuan12</code>&#xFF0C;&#x6CE8;&#x660E;&#x6765;&#x6E90;&#xFF0C;&#x62C9;&#x60A8;&#x8FDB;&#x3010;&#x524D;&#x7AEF;&#x89C6;&#x91CE;&#x4EA4;&#x6D41;&#x7FA4;&#x3011;&#x3002;<br><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/aadeca165d32560f0a5f1eb50f8961e40e01bf2c41721a1f3af6e8acf87d67e9" alt="&#x82E5;&#x5DDD;&#x89C6;&#x91CE;"></p>
+<p>&#x672C;&#x6587;&#x4F7F;&#x7528; <a href="/external_links/f4f051239b400ed0d04b60fef623174b.html" target="blank" rel="noopener">mdnice</a> &#x6392;&#x7248;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/cc13ac8d51c14e3612383dee8f687993.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/JavaScript-源码/" rel="tag"># JavaScript,源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903902077272071.html" rel="next" title="学习 jQuery 源码整体架构，打造属于自己的 js 类库">
+                <i class="fa fa-chevron-left"></i> 学习 jQuery 源码整体架构，打造属于自己的 js 类库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903919580086280.html" rel="prev" title="探索 Android 启动优化方法">
+                探索 Android 启动优化方法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">501</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">201</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链式调用"><span class="nav-number">2.</span> <span class="nav-text">链式调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数对象-支持OOP"><span class="nav-number">3.</span> <span class="nav-text">_ 函数对象 支持OOP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于流的编程"><span class="nav-number">4.</span> <span class="nav-text">基于流的编程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mixin-挂载所有的静态方法到-prototype，-也可以挂载自定义的方法"><span class="nav-number">5.</span> <span class="nav-text">_.mixin 挂载所有的静态方法到 _.prototype， 也可以挂载自定义的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mixin-挂载自定义方法"><span class="nav-number">5.1.</span> <span class="nav-text">_.mixin 挂载自定义方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#functions-obj"><span class="nav-number">5.2.</span> <span class="nav-text">_.functions(obj)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#underscore-js-究竟在-和-prototype挂载了多少方法和属性"><span class="nav-number">5.3.</span> <span class="nav-text">underscore.js 究竟在_和_.prototype挂载了多少方法和属性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#整体架构概览"><span class="nav-number">6.</span> <span class="nav-text">整体架构概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#匿名函数自执行"><span class="nav-number">6.1.</span> <span class="nav-text">匿名函数自执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#root-处理"><span class="nav-number">6.2.</span> <span class="nav-text">root 处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#导出"><span class="nav-number">6.3.</span> <span class="nav-text">导出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#支持-amd-模块化规范"><span class="nav-number">6.4.</span> <span class="nav-text">支持 amd 模块化规范</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#noConflict-防冲突函数"><span class="nav-number">6.5.</span> <span class="nav-text">_.noConflict 防冲突函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#推荐阅读"><span class="nav-number">8.</span> <span class="nav-text">推荐阅读</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#笔者往期文章"><span class="nav-number">9.</span> <span class="nav-text">笔者往期文章</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于"><span class="nav-number">10.</span> <span class="nav-text">关于</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#微信公众号-若川视野"><span class="nav-number">11.</span> <span class="nav-text">微信公众号 若川视野</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
