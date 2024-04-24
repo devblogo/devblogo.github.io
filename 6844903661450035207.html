@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="JavaScript,前端,算法,源码,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x524D;&amp;#x8A00;lodash&amp;#x53D7;&amp;#x6B22;&amp;#x8FCE;&amp;#x7684;&amp;#x4E00;&amp;#x4E2A;&amp;#x539F;&amp;#x56E0;&amp;#xFF0C;&amp;#x662F;&amp;#x5176;&amp;#x4F18;&amp;#x5F02;&amp;#x7684;&amp;#x8BA1;&amp;#x7B97;&amp;#x6027;&amp;#x80FD;&amp;#x3002;&amp;#x800C;&amp;#x5176;&amp;#x6027;&amp;#">
+<meta name="keywords" content="JavaScript,前端,算法,源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="惰性求值——lodash源码解读">
+<meta property="og:url" content="https://dev.newban.cn/6844903661450035207.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x524D;&amp;#x8A00;lodash&amp;#x53D7;&amp;#x6B22;&amp;#x8FCE;&amp;#x7684;&amp;#x4E00;&amp;#x4E2A;&amp;#x539F;&amp;#x56E0;&amp;#xFF0C;&amp;#x662F;&amp;#x5176;&amp;#x4F18;&amp;#x5F02;&amp;#x7684;&amp;#x8BA1;&amp;#x7B97;&amp;#x6027;&amp;#x80FD;&amp;#x3002;&amp;#x800C;&amp;#x5176;&amp;#x6027;&amp;#">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/1858ebe26f4354656ac1bac3c4e25913c900263a994b9b2dc3955ad993180f31">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/7996068ee1f7d2c63da714dd1a2962b5310cd1f78bc24b9cc1c29a2357bc0084">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/46c9da5e21de716e34c849956ad953445d627e89a1bd8722672eef211fff1c9a">
+<meta property="og:updated_time" content="2024-04-23T04:34:53.188Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="惰性求值——lodash源码解读">
+<meta name="twitter:description" content="&amp;#x524D;&amp;#x8A00;lodash&amp;#x53D7;&amp;#x6B22;&amp;#x8FCE;&amp;#x7684;&amp;#x4E00;&amp;#x4E2A;&amp;#x539F;&amp;#x56E0;&amp;#xFF0C;&amp;#x662F;&amp;#x5176;&amp;#x4F18;&amp;#x5F02;&amp;#x7684;&amp;#x8BA1;&amp;#x7B97;&amp;#x6027;&amp;#x80FD;&amp;#x3002;&amp;#x800C;&amp;#x5176;&amp;#x6027;&amp;#">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/1858ebe26f4354656ac1bac3c4e25913c900263a994b9b2dc3955ad993180f31">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903661450035207.html">
+
+
+
+
+
+  <title>惰性求值——lodash源码解读 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">惰性求值——lodash源码解读</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-19T00:43:38+08:00">
+                2018-08-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h2><p>lodash&#x53D7;&#x6B22;&#x8FCE;&#x7684;&#x4E00;&#x4E2A;&#x539F;&#x56E0;&#xFF0C;&#x662F;&#x5176;&#x4F18;&#x5F02;&#x7684;&#x8BA1;&#x7B97;&#x6027;&#x80FD;&#x3002;&#x800C;&#x5176;&#x6027;&#x80FD;&#x80FD;&#x6709;&#x8FD9;&#x4E48;&#x7A81;&#x51FA;&#x7684;&#x8868;&#x73B0;&#xFF0C;&#x5F88;&#x5927;&#x90E8;&#x5206;&#x5C31;&#x6765;&#x6E90;&#x4E8E;&#x5176;&#x4F7F;&#x7528;&#x7684;&#x7B97;&#x6CD5;&#x2014;&#x2014;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x3002;<br>&#x672C;&#x6587;&#x5C06;&#x8BB2;&#x8FF0;lodash&#x6E90;&#x7801;&#x4E2D;&#xFF0C;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x539F;&#x7406;&#x548C;&#x5B9E;&#x73B0;&#x3002;</p>
+<h2 id="&#x4E00;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x539F;&#x7406;&#x5206;&#x6790;"><a href="#&#x4E00;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x539F;&#x7406;&#x5206;&#x6790;" class="headerlink" title="&#x4E00;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x539F;&#x7406;&#x5206;&#x6790;"></a>&#x4E00;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x539F;&#x7406;&#x5206;&#x6790;</h2><blockquote>
+<p>&#x60F0;&#x6027;&#x6C42;&#x503C;&#xFF08;Lazy Evaluation&#xFF09;&#xFF0C;&#x53C8;&#x8BD1;&#x4E3A;&#x60F0;&#x6027;&#x8BA1;&#x7B97;&#x3001;&#x61D2;&#x60F0;&#x6C42;&#x503C;&#xFF0C;&#x4E5F;&#x79F0;&#x4E3A;&#x4F20;&#x9700;&#x6C42;&#x8C03;&#x7528;&#xFF08;call-by-need&#xFF09;&#xFF0C;&#x662F;&#x8BA1;&#x7B97;&#x673A;&#x7F16;&#x7A0B;&#x4E2D;&#x7684;&#x4E00;&#x4E2A;&#x6982;&#x5FF5;&#xFF0C;&#x5B83;&#x7684;&#x76EE;&#x7684;&#x662F;&#x8981;<strong>&#x6700;&#x5C0F;&#x5316;&#x8BA1;&#x7B97;&#x673A;&#x8981;&#x505A;&#x7684;&#x5DE5;&#x4F5C;</strong>&#x3002;<br>&#x60F0;&#x6027;&#x6C42;&#x503C;&#x4E2D;&#x7684;&#x53C2;&#x6570;&#x76F4;&#x5230;&#x9700;&#x8981;&#x65F6;&#x624D;&#x4F1A;&#x8FDB;&#x884C;&#x8BA1;&#x7B97;&#x3002;&#x8FD9;&#x79CD;&#x7A0B;&#x5E8F;&#x5B9E;&#x9645;&#x4E0A;&#x662F;<strong>&#x4ECE;&#x672B;&#x5C3E;&#x5F00;&#x59CB;&#x53CD;&#x5411;&#x6267;&#x884C;</strong>&#x7684;&#x3002;&#x5B83;&#x4F1A;&#x5224;&#x65AD;&#x81EA;&#x5DF1;&#x9700;&#x8981;&#x8FD4;&#x56DE;&#x4EC0;&#x4E48;&#xFF0C;&#x5E76;&#x7EE7;&#x7EED;&#x5411;&#x540E;&#x6267;&#x884C;&#x6765;&#x786E;&#x5B9A;&#x8981;&#x8FD9;&#x6837;&#x505A;&#x9700;&#x8981;&#x54EA;&#x4E9B;&#x503C;&#x3002;</p>
+</blockquote>
+<p>&#x4EE5;&#x4E0B;&#x662F;<a href="/external_links/303114f79329fcb2c1192f6bb7cfef61.html" target="blank" rel="noopener">How to Speed Up Lo-Dash &#xD7;100? Introducing Lazy Evaluation.&#xFF08;&#x5982;&#x4F55;&#x63D0;&#x5347;Lo-Dash&#x767E;&#x500D;&#x7B97;&#x529B;&#xFF1F;&#x60F0;&#x6027;&#x8BA1;&#x7B97;&#x7684;&#x7B80;&#x4ECB;&#xFF09;</a>&#x6587;&#x4E2D;&#x7684;&#x793A;&#x4F8B;&#xFF0C;&#x5F62;&#x8C61;&#x5730;&#x5C55;&#x793A;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;function priceLt(x) {</span><br><span class="line">   return function(item) { return item.price &lt; x; };</span><br><span class="line">}</span><br><span class="line">var gems = [</span><br><span class="line">   { name: &apos;Sunstone&apos;, price: 4 },</span><br><span class="line">   { name: &apos;Amethyst&apos;, price: 15 },</span><br><span class="line">   { name: &apos;Prehnite&apos;, price: 20},</span><br><span class="line">   { name: &apos;Sugilite&apos;, price: 7  },</span><br><span class="line">   { name: &apos;Diopside&apos;, price: 3 },</span><br><span class="line">   { name: &apos;Feldspar&apos;, price: 13 },</span><br><span class="line">   { name: &apos;Dioptase&apos;, price: 2 },</span><br><span class="line">   { name: &apos;Sapphire&apos;, price: 20 }</span><br><span class="line">];</span><br><span class="line"> </span><br><span class="line">var chosen = _(gems).filter(priceLt(10)).take(3).value();</span><br></pre></td></tr></table></figure>
+
+<p>&#x7A0B;&#x5E8F;&#x7684;&#x76EE;&#x7684;&#xFF0C;&#x662F;&#x5BF9;&#x6570;&#x636E;&#x96C6;<code>gems</code>&#x8FDB;&#x884C;&#x7B5B;&#x9009;&#xFF0C;&#x9009;&#x51FA;3&#x4E2A;<code>price</code>&#x5C0F;&#x4E8E;10&#x7684;&#x6570;&#x636E;&#x3002;</p>
+<h3 id="1-1-&#x4E00;&#x822C;&#x7684;&#x505A;&#x6CD5;"><a href="#1-1-&#x4E00;&#x822C;&#x7684;&#x505A;&#x6CD5;" class="headerlink" title="1.1 &#x4E00;&#x822C;&#x7684;&#x505A;&#x6CD5;"></a>1.1 &#x4E00;&#x822C;&#x7684;&#x505A;&#x6CD5;</h3><p>&#x5982;&#x679C;&#x629B;&#x5F00;<code>lodash</code>&#x8FD9;&#x4E2A;&#x5DE5;&#x5177;&#x5E93;&#xFF0C;&#x8BA9;&#x4F60;&#x7528;&#x666E;&#x901A;&#x7684;&#x65B9;&#x5F0F;&#x5B9E;&#x73B0;<code>var chosen = _(gems).filter(priceLt(10)).take(3)</code>;&#x90A3;&#x4E48;&#xFF0C;&#x53EF;&#x4EE5;&#x7528;&#x4EE5;&#x4E0B;&#x65B9;&#x5F0F;&#xFF1A;  </p>
+<p><code>_(gems)</code>&#x62FF;&#x5230;&#x6570;&#x636E;&#x96C6;&#xFF0C;&#x7F13;&#x5B58;&#x8D77;&#x6765;&#x3002;  </p>
+<p>&#x518D;&#x6267;&#x884C;<code>filter</code>&#x65B9;&#x6CD5;&#xFF0C;&#x904D;&#x5386;<code>gems</code>&#x6570;&#x7EC4;&#xFF08;&#x957F;&#x5EA6;&#x4E3A;10&#xFF09;&#xFF0C;&#x53D6;&#x51FA;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x7684;&#x6570;&#x636E;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;[</span><br><span class="line">   { name: &apos;Sunstone&apos;, price: 4 },</span><br><span class="line">   { name: &apos;Sugilite&apos;, price: 7  },</span><br><span class="line">   { name: &apos;Diopside&apos;, price: 3 },</span><br><span class="line">   { name: &apos;Dioptase&apos;, price: 2 }</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>&#x7136;&#x540E;&#xFF0C;&#x6267;&#x884C;<code>take</code>&#x65B9;&#x6CD5;&#xFF0C;&#x63D0;&#x53D6;&#x524D;3&#x4E2A;&#x6570;&#x636E;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;[</span><br><span class="line">   { name: &apos;Sunstone&apos;, price: 4 },</span><br><span class="line">   { name: &apos;Sugilite&apos;, price: 7  },</span><br><span class="line">   { name: &apos;Diopside&apos;, price: 3 }</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>&#x603B;&#x5171;&#x904D;&#x5386;&#x7684;&#x6B21;&#x6570;&#x4E3A;&#xFF1A;<code>10+3</code>&#x3002;<br>&#x6267;&#x884C;&#x7684;&#x793A;&#x4F8B;&#x56FE;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/1858ebe26f4354656ac1bac3c4e25913c900263a994b9b2dc3955ad993180f31" alt="&#x666E;&#x901A;&#x8BA1;&#x7B97;"></p>
+<h3 id="1-2-&#x60F0;&#x6027;&#x6C42;&#x503C;&#x505A;&#x6CD5;"><a href="#1-2-&#x60F0;&#x6027;&#x6C42;&#x503C;&#x505A;&#x6CD5;" class="headerlink" title="1.2 &#x60F0;&#x6027;&#x6C42;&#x503C;&#x505A;&#x6CD5;"></a>1.2 &#x60F0;&#x6027;&#x6C42;&#x503C;&#x505A;&#x6CD5;</h3><p>&#x666E;&#x901A;&#x7684;&#x505A;&#x6CD5;&#x5B58;&#x5728;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#xFF1A;&#x6BCF;&#x4E2A;&#x65B9;&#x6CD5;&#x5404;&#x505A;&#x5404;&#x7684;&#x4E8B;&#xFF0C;&#x6CA1;&#x6709;&#x534F;&#x8C03;&#x8D77;&#x6765;&#x6D6A;&#x8D39;&#x4E86;&#x5F88;&#x591A;&#x8D44;&#x6E90;&#x3002;  </p>
+<p>&#x5982;&#x679C;&#x80FD;&#x5148;&#x628A;&#x8981;&#x505A;&#x7684;&#x4E8B;&#xFF0C;&#x7528;&#x5C0F;&#x672C;&#x672C;&#x8BB0;&#x4E0B;&#x6765;&#x1F60E;&#xFF0C;&#x7136;&#x540E;&#x7B49;&#x5230;&#x771F;&#x6B63;&#x8981;&#x51FA;&#x6570;&#x636E;&#x65F6;&#xFF0C;&#x518D;&#x7528;&#x6700;&#x5C11;&#x7684;&#x6B21;&#x6570;&#x8FBE;&#x5230;&#x76EE;&#x7684;&#xFF0C;&#x5C82;&#x4E0D;&#x662F;&#x66F4;&#x597D;&#x3002;  </p>
+<p>&#x60F0;&#x6027;&#x8BA1;&#x7B97;&#x5C31;&#x662F;&#x8FD9;&#x4E48;&#x505A;&#x7684;&#x3002;  </p>
+<p>&#x4EE5;&#x4E0B;&#x662F;&#x5B9E;&#x73B0;&#x7684;&#x601D;&#x8DEF;&#xFF1A;</p>
+<ul>
+<li><code>_(gems)</code>&#x62FF;&#x5230;&#x6570;&#x636E;&#x96C6;&#xFF0C;&#x7F13;&#x5B58;&#x8D77;&#x6765;</li>
+<li>&#x9047;&#x5230;<code>filter</code>&#x65B9;&#x6CD5;&#xFF0C;&#x5148;&#x8BB0;&#x4E0B;&#x6765;</li>
+<li>&#x9047;&#x5230;<code>take</code>&#x65B9;&#x6CD5;&#xFF0C;&#x5148;&#x8BB0;&#x4E0B;&#x6765;</li>
+<li>&#x9047;&#x5230;<code>value</code>&#x65B9;&#x6CD5;&#xFF0C;&#x8BF4;&#x660E;&#x65F6;&#x673A;&#x5230;&#x4E86;</li>
+<li>&#x628A;&#x5C0F;&#x672C;&#x672C;&#x62FF;&#x51FA;&#x6765;&#xFF0C;&#x770B;&#x4E0B;&#x8981;&#x6C42;&#xFF1A;&#x8981;&#x53D6;&#x51FA;3&#x4E2A;&#x6570;&#xFF0C;price&lt;10</li>
+<li>&#x4F7F;&#x7528;<code>filter</code>&#x65B9;&#x6CD5;&#x91CC;&#x7684;&#x5224;&#x65AD;&#x65B9;&#x6CD5;<code>priceLt</code>&#x5BF9;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x9010;&#x4E2A;&#x88C1;&#x51B3;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;[</span><br><span class="line">    { name: &apos;Sunstone&apos;, price: 4 }, =&gt; priceLt&#x88C1;&#x51B3; =&gt; &#x7B26;&#x5408;&#x8981;&#x6C42;&#xFF0C;&#x901A;&#x8FC7; =&gt; &#x62FF;&#x5230;1&#x4E2A;</span><br><span class="line">    { name: &apos;Amethyst&apos;, price: 15 }, =&gt; priceLt&#x88C1;&#x51B3; =&gt; &#x4E0D;&#x7B26;&#x5408;&#x8981;&#x6C42;</span><br><span class="line">    { name: &apos;Prehnite&apos;, price: 20}, =&gt; priceLt&#x88C1;&#x51B3; =&gt; &#x4E0D;&#x7B26;&#x5408;&#x8981;&#x6C42;</span><br><span class="line">    { name: &apos;Sugilite&apos;, price: 7  }, =&gt; priceLt&#x88C1;&#x51B3; =&gt; &#x7B26;&#x5408;&#x8981;&#x6C42;&#xFF0C;&#x901A;&#x8FC7; =&gt; &#x62FF;&#x5230;2&#x4E2A;</span><br><span class="line">    { name: &apos;Diopside&apos;, price: 3 }, =&gt; priceLt&#x88C1;&#x51B3; =&gt; &#x7B26;&#x5408;&#x8981;&#x6C42;&#xFF0C;&#x901A;&#x8FC7; =&gt; &#x62FF;&#x5230;3&#x4E2A; =&gt; &#x591F;&#x4E86;&#xFF0C;&#x6536;&#x5DE5;&#xFF01;</span><br><span class="line">    { name: &apos;Feldspar&apos;, price: 13 },</span><br><span class="line">    { name: &apos;Dioptase&apos;, price: 2 },</span><br><span class="line">    { name: &apos;Sapphire&apos;, price: 20 }</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x4E0A;&#x6240;&#x793A;&#xFF0C;&#x4E00;&#x5171;&#x53EA;&#x6267;&#x884C;&#x4E86;5&#x6B21;&#xFF0C;&#x5C31;&#x628A;&#x7ED3;&#x679C;&#x62FF;&#x5230;&#x3002;  </p>
+<p>&#x6267;&#x884C;&#x7684;&#x793A;&#x4F8B;&#x56FE;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/7996068ee1f7d2c63da714dd1a2962b5310cd1f78bc24b9cc1c29a2357bc0084" alt="&#x666E;&#x901A;&#x8BA1;&#x7B97;"></p>
+<h3 id="1-3-&#x5C0F;&#x7ED3;"><a href="#1-3-&#x5C0F;&#x7ED3;" class="headerlink" title="1.3 &#x5C0F;&#x7ED3;"></a>1.3 &#x5C0F;&#x7ED3;</h3><p>&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x4F8B;&#x5B50;&#x53EF;&#x4EE5;&#x5F97;&#x5230;&#x60F0;&#x6027;&#x8BA1;&#x7B97;&#x7684;&#x7279;&#x70B9;&#xFF1A;</p>
+<ul>
+<li><strong>&#x5EF6;&#x8FDF;&#x8BA1;&#x7B97;</strong>&#xFF0C;&#x628A;&#x8981;&#x505A;&#x7684;&#x8BA1;&#x7B97;&#x5148;&#x7F13;&#x5B58;&#xFF0C;&#x4E0D;&#x6267;&#x884C;</li>
+<li><strong>&#x6570;&#x636E;&#x7BA1;&#x9053;</strong>&#xFF0C;&#x9010;&#x4E2A;&#x6570;&#x636E;&#x901A;&#x8FC7;&#x201C;&#x88C1;&#x51B3;&#x201D;&#x65B9;&#x6CD5;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;&#x7C7B;&#x4F3C;&#x5B89;&#x68C0;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x8FDB;&#x884C;&#x8FC7;&#x5173;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x6700;&#x540E;&#x53EA;&#x7559;&#x4E0B;&#x7B26;&#x5408;&#x8981;&#x6C42;&#x7684;&#x6570;&#x636E;</li>
+<li><strong>&#x89E6;&#x53D1;&#x65F6;&#x673A;</strong>&#xFF0C;&#x65B9;&#x6CD5;&#x7F13;&#x5B58;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x9700;&#x8981;&#x4E00;&#x4E2A;&#x65B9;&#x6CD5;&#x6765;&#x89E6;&#x53D1;&#x6267;&#x884C;&#x3002;lodash&#x5C31;&#x662F;&#x4F7F;&#x7528;<code>value</code>&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x77E5;&#x771F;&#x6B63;&#x5F00;&#x59CB;&#x8BA1;&#x7B97;</li>
+</ul>
+<h2 id="&#x4E8C;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x5B9E;&#x73B0;"><a href="#&#x4E8C;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x5B9E;&#x73B0;" class="headerlink" title="&#x4E8C;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x5B9E;&#x73B0;"></a>&#x4E8C;&#x3001;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x5B9E;&#x73B0;</h2><p>&#x4F9D;&#x636E;&#x4E0A;&#x8FF0;&#x7684;&#x7279;&#x70B9;&#xFF0C;&#x6211;&#x5C06;lodash&#x7684;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x5B9E;&#x73B0;&#x8FDB;&#x884C;&#x62BD;&#x79BB;&#x4E3A;&#x4EE5;&#x4E0B;&#x51E0;&#x4E2A;&#x90E8;&#x5206;&#xFF1A;</p>
+<h3 id="2-1-&#x5B9E;&#x73B0;&#x5EF6;&#x8FDF;&#x8BA1;&#x7B97;&#x7684;&#x7F13;&#x5B58;"><a href="#2-1-&#x5B9E;&#x73B0;&#x5EF6;&#x8FDF;&#x8BA1;&#x7B97;&#x7684;&#x7F13;&#x5B58;" class="headerlink" title="2.1 &#x5B9E;&#x73B0;&#x5EF6;&#x8FDF;&#x8BA1;&#x7B97;&#x7684;&#x7F13;&#x5B58;"></a>2.1 &#x5B9E;&#x73B0;&#x5EF6;&#x8FDF;&#x8BA1;&#x7B97;&#x7684;&#x7F13;&#x5B58;</h3><p>&#x5B9E;&#x73B0;<code>_(gems)</code>&#x3002;&#x6211;&#x8FD9;&#x91CC;&#x4E3A;&#x4E86;&#x8BED;&#x4E49;&#x660E;&#x786E;&#xFF0C;&#x91C7;&#x7528;<code>lazy(gems)</code>&#x4EE3;&#x66FF;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var MAX_ARRAY_LENGTH = 4294967295; // &#x6700;&#x5927;&#x7684;&#x6570;&#x7EC4;&#x957F;&#x5EA6;</span><br><span class="line"></span><br><span class="line">// &#x7F13;&#x5B58;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x4F53;</span><br><span class="line">function LazyWrapper(value){</span><br><span class="line">    this.__wrapped__ = value;</span><br><span class="line">    this.__iteratees__ = [];</span><br><span class="line">    this.__takeCount__ = MAX_ARRAY_LENGTH;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x5165;&#x53E3;</span><br><span class="line">function lazy(value){</span><br><span class="line">    return new LazyWrapper(value);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>this.__wrapped__</code> &#x7F13;&#x5B58;&#x6570;&#x636E;</li>
+<li><code>this.__iteratees__</code> &#x7F13;&#x5B58;&#x6570;&#x636E;&#x7BA1;&#x9053;&#x4E2D;&#x8FDB;&#x884C;&#x201C;&#x88C1;&#x51B3;&#x201D;&#x7684;&#x65B9;&#x6CD5;</li>
+<li><code>this.__takeCount__</code> &#x8BB0;&#x5F55;&#x9700;&#x8981;&#x62FF;&#x7684;&#x7B26;&#x5408;&#x8981;&#x6C42;&#x7684;&#x6570;&#x636E;&#x96C6;&#x4E2A;&#x6570;</li>
+</ul>
+<p>&#x8FD9;&#x6837;&#xFF0C;&#x4E00;&#x4E2A;&#x57FA;&#x672C;&#x7684;&#x7ED3;&#x6784;&#x5C31;&#x5B8C;&#x6210;&#x4E86;&#x3002;</p>
+<h3 id="2-2-&#x5B9E;&#x73B0;filter&#x65B9;&#x6CD5;"><a href="#2-2-&#x5B9E;&#x73B0;filter&#x65B9;&#x6CD5;" class="headerlink" title="2.2 &#x5B9E;&#x73B0;filter&#x65B9;&#x6CD5;"></a>2.2 &#x5B9E;&#x73B0;<code>filter</code>&#x65B9;&#x6CD5;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var LAZY_FILTER_FLAG = 1; // filter&#x65B9;&#x6CD5;&#x7684;&#x6807;&#x8BB0;</span><br><span class="line"></span><br><span class="line">// &#x6839;&#x636E; &#x7B5B;&#x9009;&#x65B9;&#x6CD5;iteratee &#x7B5B;&#x9009;&#x6570;&#x636E;</span><br><span class="line">function filter(iteratee){</span><br><span class="line">    this.__iteratees__.push({</span><br><span class="line">        &apos;iteratee&apos;: iteratee,</span><br><span class="line">        &apos;type&apos;: LAZY_FILTER_FLAG</span><br><span class="line">    });</span><br><span class="line">    return this;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x7ED1;&#x5B9A;&#x65B9;&#x6CD5;&#x5230;&#x539F;&#x578B;&#x94FE;&#x4E0A;</span><br><span class="line">LazyWrapper.prototype.filter = filter;</span><br></pre></td></tr></table></figure>
+
+<p><code>filter</code>&#x65B9;&#x6CD5;&#xFF0C;&#x5C06;&#x88C1;&#x51B3;&#x65B9;&#x6CD5;<code>iteratee</code>&#x7F13;&#x5B58;&#x8D77;&#x6765;&#x3002;&#x8FD9;&#x91CC;&#x6709;&#x4E00;&#x4E2A;&#x91CD;&#x8981;&#x7684;&#x70B9;&#xFF0C;&#x5C31;&#x662F;&#x9700;&#x8981;&#x8BB0;&#x5F55;<code>iteratee</code>&#x7684;&#x7C7B;&#x578B;<code>type</code>&#x3002;  </p>
+<p>&#x56E0;&#x4E3A;&#x5728;<code>lodash</code>&#x4E2D;,&#x8FD8;&#x6709;<code>map</code>&#x7B49;&#x7B5B;&#x9009;&#x6570;&#x636E;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x4E5F;&#x662F;&#x4F1A;&#x4F20;&#x5165;&#x4E00;&#x4E2A;&#x88C1;&#x51B3;&#x65B9;&#x6CD5;<code>iteratee</code>&#x3002;&#x7531;&#x4E8E;<code>filter</code>&#x65B9;&#x6CD5;&#x548C;<code>map</code>&#x65B9;&#x6CD5;&#x7B5B;&#x9009;&#x65B9;&#x5F0F;&#x4E0D;&#x540C;&#xFF0C;&#x6240;&#x4EE5;&#x8981;&#x7528;<code>type</code>&#x8FDB;&#x884C;&#x6807;&#x8BB0;&#x3002;  </p>
+<p>&#x8FD9;&#x91CC;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x6280;&#x5DE7;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;(function(){</span><br><span class="line">    // &#x79C1;&#x6709;&#x65B9;&#x6CD5;</span><br><span class="line">    function filter(iteratee){</span><br><span class="line">        /* code */</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x7ED1;&#x5B9A;&#x65B9;&#x6CD5;&#x5230;&#x539F;&#x578B;&#x94FE;&#x4E0A;</span><br><span class="line">    LazyWrapper.prototype.filter = filter;</span><br><span class="line">})();</span><br></pre></td></tr></table></figure>
+
+<p>&#x539F;&#x578B;&#x4E0A;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x5148;&#x7528;&#x666E;&#x901A;&#x7684;&#x51FD;&#x6570;&#x58F0;&#x660E;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x7ED1;&#x5B9A;&#x5230;&#x539F;&#x578B;&#x4E0A;&#x3002;&#x5982;&#x679C;&#x5DE5;&#x5177;&#x5185;&#x90E8;&#x9700;&#x8981;&#x4F7F;&#x7528;<code>filter</code>&#xFF0C;&#x5219;&#x4F7F;&#x7528;&#x58F0;&#x660E;&#x597D;&#x7684;&#x79C1;&#x6709;&#x65B9;&#x6CD5;&#x3002;  </p>
+<p>&#x8FD9;&#x6837;&#x7684;&#x597D;&#x5904;&#x662F;&#xFF0C;&#x5916;&#x90E8;&#x5982;&#x679C;&#x6539;&#x53D8;<code>LazyWrapper.prototype.filter</code>&#xFF0C;&#x5BF9;&#x5DE5;&#x5177;&#x5185;&#x90E8;&#xFF0C;&#x662F;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x5F71;&#x54CD;&#x7684;&#x3002;</p>
+<h3 id="2-3-&#x5B9E;&#x73B0;take&#x65B9;&#x6CD5;"><a href="#2-3-&#x5B9E;&#x73B0;take&#x65B9;&#x6CD5;" class="headerlink" title="2.3 &#x5B9E;&#x73B0;take&#x65B9;&#x6CD5;"></a>2.3 &#x5B9E;&#x73B0;<code>take</code>&#x65B9;&#x6CD5;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x622A;&#x53D6;n&#x4E2A;&#x6570;&#x636E;</span><br><span class="line">function take(n){</span><br><span class="line">    this.__takeCount__ = n;</span><br><span class="line">    return this;</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">LazyWrapper.prototype.take = take;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-&#x5B9E;&#x73B0;value&#x65B9;&#x6CD5;"><a href="#2-4-&#x5B9E;&#x73B0;value&#x65B9;&#x6CD5;" class="headerlink" title="2.4 &#x5B9E;&#x73B0;value&#x65B9;&#x6CD5;"></a>2.4 &#x5B9E;&#x73B0;<code>value</code>&#x65B9;&#x6CD5;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x60F0;&#x6027;&#x6C42;&#x503C;</span><br><span class="line">function lazyValue(){</span><br><span class="line">    var array = this.__wrapped__;</span><br><span class="line">    var length = array.length;</span><br><span class="line">    var resIndex = 0;</span><br><span class="line">    var takeCount = this.__takeCount__;</span><br><span class="line">    var iteratees = this.__iteratees__;</span><br><span class="line">    var iterLength = iteratees.length;</span><br><span class="line">    var index = -1;</span><br><span class="line">    var dir = 1;</span><br><span class="line">    var result = [];</span><br><span class="line"></span><br><span class="line">    // &#x6807;&#x7B7E;&#x8BED;&#x53E5;</span><br><span class="line">    outer:</span><br><span class="line">    while(length-- &amp;&amp; resIndex &lt; takeCount){</span><br><span class="line">        // &#x5916;&#x5C42;&#x5FAA;&#x73AF;&#x5F85;&#x5904;&#x7406;&#x7684;&#x6570;&#x7EC4;</span><br><span class="line">        index += dir;</span><br><span class="line"></span><br><span class="line">        var iterIndex = -1;</span><br><span class="line">        var value = array[index];</span><br><span class="line"></span><br><span class="line">        while(++iterIndex &lt; iterLength){</span><br><span class="line">            // &#x5185;&#x5C42;&#x5FAA;&#x73AF;&#x5904;&#x7406;&#x94FE;&#x4E0A;&#x7684;&#x65B9;&#x6CD5;</span><br><span class="line">            var data = iteratees[iterIndex];</span><br><span class="line">            var iteratee = data.iteratee;</span><br><span class="line">            var type = data.type;</span><br><span class="line">            var computed = iteratee(value);</span><br><span class="line"></span><br><span class="line">            // &#x5904;&#x7406;&#x6570;&#x636E;&#x4E0D;&#x7B26;&#x5408;&#x8981;&#x6C42;&#x7684;&#x60C5;&#x51B5;</span><br><span class="line">            if(!computed){</span><br><span class="line">                if(type == LAZY_FILTER_FLAG){</span><br><span class="line">                    continue outer;</span><br><span class="line">                }else{</span><br><span class="line">                    break outer;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        // &#x7ECF;&#x8FC7;&#x5185;&#x5C42;&#x5FAA;&#x73AF;&#xFF0C;&#x7B26;&#x5408;&#x8981;&#x6C42;&#x7684;&#x6570;&#x636E;</span><br><span class="line">        result[resIndex++] = value;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    return result;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">LazyWrapper.prototype.value = lazyValue;</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x91CC;&#x7684;&#x4E00;&#x4E2A;&#x91CD;&#x70B9;&#x5C31;&#x662F;&#xFF1A;<strong>&#x6807;&#x7B7E;&#x8BED;&#x53E5;</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">    outer:</span><br><span class="line">    while(length-- &amp;&amp; resIndex &lt; takeCount){</span><br><span class="line">        // &#x5916;&#x5C42;&#x5FAA;&#x73AF;&#x5F85;&#x5904;&#x7406;&#x7684;&#x6570;&#x7EC4;</span><br><span class="line">        index += dir;</span><br><span class="line"></span><br><span class="line">        var iterIndex = -1;</span><br><span class="line">        var value = array[index];</span><br><span class="line"></span><br><span class="line">        while(++iterIndex &lt; iterLength){</span><br><span class="line">            // &#x5185;&#x5C42;&#x5FAA;&#x73AF;&#x5904;&#x7406;&#x94FE;&#x4E0A;&#x7684;&#x65B9;&#x6CD5;</span><br><span class="line">            var data = iteratees[iterIndex];</span><br><span class="line">            var iteratee = data.iteratee;</span><br><span class="line">            var type = data.type;</span><br><span class="line">            var computed = iteratee(value);</span><br><span class="line"></span><br><span class="line">            // &#x5904;&#x7406;&#x6570;&#x636E;&#x4E0D;&#x7B26;&#x5408;&#x8981;&#x6C42;&#x7684;&#x60C5;&#x51B5;</span><br><span class="line">            if(!computed){</span><br><span class="line">                if(type == LAZY_FILTER_FLAG){</span><br><span class="line">                    continue outer;</span><br><span class="line">                }else{</span><br><span class="line">                    break outer;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        // &#x7ECF;&#x8FC7;&#x5185;&#x5C42;&#x5FAA;&#x73AF;&#xFF0C;&#x7B26;&#x5408;&#x8981;&#x6C42;&#x7684;&#x6570;&#x636E;</span><br><span class="line">        result[resIndex++] = value;</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F53;&#x524D;&#x65B9;&#x6CD5;&#x7684;&#x6570;&#x636E;&#x7BA1;&#x9053;&#x5B9E;&#x73B0;&#xFF0C;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x5185;&#x5C42;&#x7684;<code>while</code>&#x5FAA;&#x73AF;&#x3002;&#x901A;&#x8FC7;&#x53D6;&#x51FA;&#x7F13;&#x5B58;&#x5728;<code>iteratees</code>&#x4E2D;&#x7684;&#x88C1;&#x51B3;&#x65B9;&#x6CD5;&#x53D6;&#x51FA;&#xFF0C;&#x5BF9;&#x5F53;&#x524D;&#x6570;&#x636E;<code>value</code>&#x8FDB;&#x884C;&#x88C1;&#x51B3;&#x3002;  </p>
+<p>&#x5982;&#x679C;&#x88C1;&#x51B3;&#x7ED3;&#x679C;&#x662F;&#x4E0D;&#x7B26;&#x5408;&#xFF0C;&#x4E5F;&#x5373;&#x4E3A;<code>false</code>&#x3002;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#xFF0C;&#x5C31;&#x6CA1;&#x5FC5;&#x8981;&#x7528;&#x540E;&#x7EED;&#x7684;&#x88C1;&#x51B3;&#x65B9;&#x6CD5;&#x8FDB;&#x884C;&#x5224;&#x65AD;&#x4E86;&#x3002;&#x800C;&#x662F;&#x5E94;&#x8BE5;&#x8DF3;&#x51FA;&#x5F53;&#x524D;&#x5FAA;&#x73AF;&#x3002;  </p>
+<p>&#x800C;&#x5982;&#x679C;&#x7528;<code>break</code>&#x8DF3;&#x51FA;&#x5185;&#x5C42;&#x5FAA;&#x73AF;&#x540E;&#xFF0C;&#x5916;&#x5C42;&#x5FAA;&#x73AF;&#x4E2D;&#x7684;<code>result[resIndex++] = value;</code>&#x8FD8;&#x662F;&#x4F1A;&#x88AB;&#x6267;&#x884C;&#xFF0C;&#x8FD9;&#x662F;&#x6211;&#x4EEC;&#x4E0D;&#x5E0C;&#x671B;&#x770B;&#x5230;&#x7684;&#x3002;  </p>
+<p>&#x5E94;&#x8BE5;&#x4E00;&#x6B21;&#x6027;&#x8DF3;&#x51FA;&#x5185;&#x5916;&#x4E24;&#x5C42;&#x5FAA;&#x73AF;&#xFF0C;&#x5E76;&#x4E14;&#x7EE7;&#x7EED;&#x5916;&#x5C42;&#x5FAA;&#x73AF;&#xFF0C;&#x624D;&#x662F;&#x6B63;&#x786E;&#x7684;&#x3002;  </p>
+<p>&#x6807;&#x7B7E;&#x8BED;&#x53E5;&#xFF0C;&#x521A;&#x597D;&#x53EF;&#x4EE5;&#x6EE1;&#x8DB3;&#x8FD9;&#x4E2A;&#x8981;&#x6C42;&#x3002;</p>
+<h3 id="2-5-&#x5C0F;&#x68C0;&#x6D4B;"><a href="#2-5-&#x5C0F;&#x68C0;&#x6D4B;" class="headerlink" title="2.5 &#x5C0F;&#x68C0;&#x6D4B;"></a>2.5 &#x5C0F;&#x68C0;&#x6D4B;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">var testArr = [1, 19, 30, 2, 12, 5, 28, 4];</span><br><span class="line"></span><br><span class="line">lazy(testArr)</span><br><span class="line">    .filter(function(x){</span><br><span class="line">        console.log(&apos;check x=&apos;+x);</span><br><span class="line">        return x &lt; 10</span><br><span class="line">    })</span><br><span class="line">    .take(2)</span><br><span class="line">    .value();</span><br><span class="line"></span><br><span class="line">// &#x8F93;&#x51FA;&#x5982;&#x4E0B;&#xFF1A;</span><br><span class="line">check x=1</span><br><span class="line">check x=19</span><br><span class="line">check x=30</span><br><span class="line">check x=2</span><br><span class="line"></span><br><span class="line">// &#x5F97;&#x5230;&#x7ED3;&#x679C;&#xFF1A; [1, 2]</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-&#x5C0F;&#x7ED3;"><a href="#2-6-&#x5C0F;&#x7ED3;" class="headerlink" title="2.6 &#x5C0F;&#x7ED3;"></a>2.6 &#x5C0F;&#x7ED3;</h3><p>&#x6574;&#x4E2A;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x91CD;&#x70B9;&#x8FD8;&#x662F;&#x5728;&#x6570;&#x636E;&#x7BA1;&#x9053;&#x8FD9;&#x5757;&#x3002;&#x4EE5;&#x53CA;&#xFF0C;&#x6807;&#x7B7E;&#x8BED;&#x53E5;&#x5728;&#x8FD9;&#x91CC;&#x7684;&#x5999;&#x7528;&#x3002;&#x5176;&#x5B9E;&#x5B9E;&#x73B0;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x4E0D;&#x53EA;&#x5F53;&#x524D;&#x8FD9;&#x79CD;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x8981;&#x70B9;&#x8FD8;&#x662F;&#x524D;&#x9762;&#x8BB2;&#x5230;&#x7684;&#x4E09;&#x4E2A;&#x3002;&#x638C;&#x63E1;&#x7CBE;&#x9AD3;&#xFF0C;&#x53D8;&#x901A;&#x5C31;&#x5F88;&#x5BB9;&#x6613;&#x4E86;&#x3002;</p>
+<h2 id="&#x7ED3;&#x8BED;"><a href="#&#x7ED3;&#x8BED;" class="headerlink" title="&#x7ED3;&#x8BED;"></a>&#x7ED3;&#x8BED;</h2><p>&#x60F0;&#x6027;&#x6C42;&#x503C;&#xFF0C;&#x662F;&#x6211;&#x5728;&#x9605;&#x8BFB;<code>lodash</code>&#x6E90;&#x7801;&#x4E2D;&#xFF0C;&#x53D1;&#x73B0;&#x7684;&#x6700;&#x5927;&#x95EA;&#x5149;&#x70B9;&#x3002;  </p>
+<p>&#x5F53;&#x521D;&#x5BF9;&#x60F0;&#x6027;&#x6C42;&#x503C;&#x4E0D;&#x751A;&#x7406;&#x89E3;&#xFF0C;&#x60F3;&#x770B;&#x4E0B;javascript&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x4F46;&#x7F51;&#x4E0A;&#x4E5F;&#x53EA;&#x627E;&#x5230;&#x4E0A;&#x6587;&#x63D0;&#x5230;&#x7684;&#x4E00;&#x7BC7;&#x6587;&#x732E;&#x3002;  </p>
+<p>&#x90A3;&#x5269;&#x4E0B;&#x7684;&#x9009;&#x62E9;&#xFF0C;&#x5C31;&#x662F;&#x5BF9;lodash&#x8FDB;&#x884C;&#x5256;&#x79BB;&#x5206;&#x6790;&#x3002;&#x4E5F;&#x56E0;&#x4E3A;&#x8FD9;&#xFF0C;&#x624D;&#x6709;&#x672C;&#x6587;&#x7684;&#x8BDE;&#x751F;&#x3002;  </p>
+<p>&#x5E0C;&#x671B;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x80FD;&#x5BF9;&#x4F60;&#x6709;&#x6240;&#x5E2E;&#x52A9;&#x3002;&#x5982;&#x679C;&#x53EF;&#x4EE5;&#x7684;&#x8BDD;&#xFF0C;&#x7ED9;&#x4E2A;star :)</p>
+<p>&#x6700;&#x540E;&#xFF0C;&#x9644;&#x4E0A;&#x672C;&#x6587;&#x5B9E;&#x73B0;&#x7684;&#x7B80;&#x6613;&#x7248;<code>lazy.js</code>&#x5B8C;&#x6574;&#x6E90;&#x7801;&#xFF1A;<br><a href="/external_links/dc76f1dfaf7b30ea8d9f921586df0966.html" target="blank" rel="noopener">github.com/wall-wxk/bl&#x2026;</a></p>
+<hr>
+<p>&#x559C;&#x6B22;&#x6211;&#x6587;&#x7AE0;&#x7684;&#x670B;&#x53CB;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x65B9;&#x5F0F;&#x5173;&#x6CE8;&#x6211;&#xFF1A;</p>
+<ul>
+<li><strong>&#x300C;star&#x300D;</strong> &#x6216; <strong>&#x300C;watch&#x300D;</strong> &#x6211;&#x7684;<a href="/external_links/cc0018edd1c3b7cbc442dc6f269a71d3.html" target="blank" rel="noopener">GitHub blog</a></li>
+<li>RSS&#x8BA2;&#x9605;&#x6211;&#x7684;&#x4E2A;&#x4EBA;&#x535A;&#x5BA2;&#xFF1A;<a href="/external_links/3e2045f8f68703a1b71b0e3613a10469.html" target="blank" rel="noopener">&#x738B;&#x5148;&#x751F;&#x7684;&#x57FA;&#x5730;</a><br><img src="https://gitee.com/songjianzaina/juejin_p2/raw/master/img/46c9da5e21de716e34c849956ad953445d627e89a1bd8722672eef211fff1c9a" alt="wall&#x7684;&#x4E2A;&#x4EBA;&#x535A;&#x5BA2;"></li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/9d26f66713d33bf58e3492c5b1cd7bcc.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/JavaScript-前端-算法-源码/" rel="tag"># JavaScript,前端,算法,源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903613609803783.html" rel="next" title="Axios源码深度剖析 - AJAX新王者">
+                <i class="fa fa-chevron-left"></i> Axios源码深度剖析 - AJAX新王者
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903664197320718.html" rel="prev" title="JavaScript集成Sentry Sentry-Java">
+                JavaScript集成Sentry Sentry-Java <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">795</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">327</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、惰性求值的原理分析"><span class="nav-number">2.</span> <span class="nav-text">一、惰性求值的原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-一般的做法"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 一般的做法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-惰性求值做法"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 惰性求值做法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-小结"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、惰性求值的实现"><span class="nav-number">3.</span> <span class="nav-text">二、惰性求值的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-实现延迟计算的缓存"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 实现延迟计算的缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-实现filter方法"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 实现filter方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-实现take方法"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 实现take方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-实现value方法"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 实现value方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-小检测"><span class="nav-number">3.5.</span> <span class="nav-text">2.5 小检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-小结"><span class="nav-number">3.6.</span> <span class="nav-text">2.6 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结语"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
