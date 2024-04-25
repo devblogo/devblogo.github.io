@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="前端,JavaScript,架构,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;&amp;#x5218;&amp;#x9526;&amp;#x6CC9;  &amp;#x5F15;&amp;#x8A00;Webpack &amp;#x662F;&amp;#x524D;&amp;#x7AEF;&amp;#x5DE5;&amp;#x7A0B;&amp;#x5316;&amp;#x5E38;&amp;#x7528;&amp;#x7684;&amp;#x9759;&amp;#x6001;&amp;#x6A21;&amp;#x5757;&amp;#x6253;&amp;#x5305;&amp;#x5D">
+<meta name="keywords" content="前端,JavaScript,架构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一文了解Webpack中Tapable事件机制">
+<meta property="og:url" content="https://dev.newban.cn/7300151966964662284.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;&amp;#x5218;&amp;#x9526;&amp;#x6CC9;  &amp;#x5F15;&amp;#x8A00;Webpack &amp;#x662F;&amp;#x524D;&amp;#x7AEF;&amp;#x5DE5;&amp;#x7A0B;&amp;#x5316;&amp;#x5E38;&amp;#x7528;&amp;#x7684;&amp;#x9759;&amp;#x6001;&amp;#x6A21;&amp;#x5757;&amp;#x6253;&amp;#x5305;&amp;#x5D">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/140cd971ca1634e0add2cfb6dd96234ce435da27a59e0f484f133e88a32adaaa">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/49fb195b2e15d00e8821f90636bbec806536e1809e51c9f5635ffb7234f165df">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/25dee517ef4779fe66ed130ac023348a4e656c4ec40a478d97c7a2243583a653">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/30b14e797a459cb2450ea254bf0ec6a1eee635966aa55b96c01d6377260926a7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/48afaa396946bb9ac21b8d9fac4bf2a742e8a4547297a7c80b0d3b82e7a7987e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/cdbffde85188ef1fd2cf52cc1fffcd5ae95f050a4fb01b6ca543a6c3174c6d02">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/d3b1252ead4d8b3825e11477877e80a289e2a66bc3aeb6453699897b3875d8e6">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/a4ce4096d4ab2e7846e45cd35686bbeb87036214f07569400513e3491c21f2c0">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/869c1f47dba59022f7434a728412e9eebf0587392c5f7ae034a1a24af27bf976">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/55414230d09ec7ce199b542c98bd09e195a78472fa55a6005d5cbb83ac840244">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2030a768422237373a27cee1fb2bb61b3e49e5a54f204afdbe4892cecaab5435">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/c25c9049cc43797192f048ee6ea11b1728e2707c7968743494a00289f4c37f6f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/e2f364b0375302f6aaf6a062b07bae7546ad6e6cc5a5496e5187a6274d21df56">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bc9253a0ddc145eba4b08995708967678f83080477fc93f9395947851c08e8f8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/de463109af76baf28892e282a98d7dd317cbeeeab30d73d087c3b60df500c06a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/cbf9a78338ba22a1b441d4e74cd493f34d4fb0fd06f909cbe77ea92687facc86">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/1ad3ded7171b30b541d9e9eab79d1c4fda769f3409d9a61061f8a40fde97123c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/f67ff8a814e21352ef835a03d88bb10584ddb1414c09b11104dd8f002c341f6a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/018a0187b864cff2b9f5859eba028a70552baf06bbb597ffa91e38b62e952b70">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/1a1ca81ce11458c145bf1288f6509a55d8e5461b59821eba36d6856c0f7398ff">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2cacdfff83cf944c07a18a4914132f049ac3c0cc01b9ecd18d7fd39b812b7632">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7d5ad026d9642bad9e046233e80b02eefdefd6cfd5900c27803e6ee5f7f9fadf">
+<meta property="og:updated_time" content="2024-04-24T01:47:02.136Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一文了解Webpack中Tapable事件机制">
+<meta name="twitter:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;&amp;#x5218;&amp;#x9526;&amp;#x6CC9;  &amp;#x5F15;&amp;#x8A00;Webpack &amp;#x662F;&amp;#x524D;&amp;#x7AEF;&amp;#x5DE5;&amp;#x7A0B;&amp;#x5316;&amp;#x5E38;&amp;#x7528;&amp;#x7684;&amp;#x9759;&amp;#x6001;&amp;#x6A21;&amp;#x5757;&amp;#x6253;&amp;#x5305;&amp;#x5D">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/140cd971ca1634e0add2cfb6dd96234ce435da27a59e0f484f133e88a32adaaa">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7300151966964662284.html">
+
+
+
+
+
+  <title>一文了解Webpack中Tapable事件机制 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">一文了解Webpack中Tapable事件机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-11-13T08:06:43+08:00">
+                2023-11-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x4F5C;&#x8005;&#xFF1A;&#x5218;&#x9526;&#x6CC9;</p>
+</blockquote>
+<h2 id="&#x5F15;&#x8A00;"><a href="#&#x5F15;&#x8A00;" class="headerlink" title="&#x5F15;&#x8A00;"></a>&#x5F15;&#x8A00;</h2><p><code>Webpack</code> &#x662F;&#x524D;&#x7AEF;&#x5DE5;&#x7A0B;&#x5316;&#x5E38;&#x7528;&#x7684;&#x9759;&#x6001;&#x6A21;&#x5757;&#x6253;&#x5305;&#x5DE5;&#x5177;&#x3002;&#x5728;&#x5408;&#x9002;&#x7684;&#x65F6;&#x673A;&#x901A;&#x8FC7; <code>Webpack</code> &#x63D0;&#x4F9B;&#x7684; API &#x6539;&#x53D8;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#xFF0C;&#x4F7F; <code>Webpack</code> &#x53EF;&#x4EE5;&#x6267;&#x884C;&#x66F4;&#x5E7F;&#x6CDB;&#x7684;&#x4EFB;&#x52A1;&#xFF0C;&#x62E5;&#x6709;&#x66F4;&#x5F3A;&#x7684;&#x6784;&#x5EFA;&#x80FD;&#x529B;&#x3002;</p>
+<p><code>Webpack</code> &#x7684;&#x63D2;&#x4EF6;&#x673A;&#x5236;&#x672C;&#x8D28;&#x4E0A;&#x662F;&#x4E00;&#x79CD;&#x4E8B;&#x4EF6;&#x6D41;&#x7684;&#x673A;&#x5236;&#xFF0C;&#x5B83;&#x7684;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x5C31;&#x662F;&#x5C06;&#x5404;&#x4E2A;&#x63D2;&#x4EF6;&#x4E32;&#x8054;&#x8D77;&#x6765;&#xFF0C;&#x800C;&#x5B9E;&#x73B0;&#x8FD9;&#x4E00;&#x5207;&#x7684;&#x6838;&#x5FC3;&#x5C31;&#x662F;<code>Tapable</code>&#xFF0C;<code>Webpack</code>&#x4E2D;&#x6700;&#x6838;&#x5FC3;&#x7684;&#x8D1F;&#x8D23;&#x7F16;&#x8BD1;&#x7684;<code>Compiler</code>&#x548C;&#x8D1F;&#x8D23;&#x521B;&#x5EFA;bundles&#x7684;<code>Compilation</code>&#x90FD;&#x662F;<code>Tapable</code>&#x7684;&#x5B9E;&#x4F8B;&#x3002;</p>
+<p>&#x672C;&#x6587;&#x5C06;&#x4ECB;&#x7ECD; <code>Tapable</code> &#x7684;&#x57FA;&#x672C;&#x4F7F;&#x7528;&#x4EE5;&#x53CA;&#x5E95;&#x5C42;&#x5B9E;&#x73B0;&#x3002;</p>
+<h2 id="Tapable"><a href="#Tapable" class="headerlink" title="Tapable"></a>Tapable</h2><p><code>Tapable</code> &#x662F;&#x4E00;&#x4E2A;&#x7C7B;&#x4F3C;&#x4E8E; <code>Node.js</code> &#x4E2D;&#x7684; <code>EventEmitter</code> &#x7684;&#x5E93;&#xFF0C;&#x4F46;&#x5B83;<strong>&#x66F4;&#x4E13;&#x6CE8;&#x4E8E;&#x81EA;&#x5B9A;&#x4E49;&#x4E8B;&#x4EF6;&#x7684;&#x89E6;&#x53D1;&#x548C;&#x5904;&#x7406;</strong>&#x3002;&#x901A;&#x8FC7; <code>Tapable</code> &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6CE8;&#x518C;&#x81EA;&#x5B9A;&#x4E49;&#x4E8B;&#x4EF6;&#xFF0C;&#x7136;&#x540E;&#x5728;&#x9002;&#x5F53;&#x7684;&#x65F6;&#x673A;&#x53BB;&#x6267;&#x884C;&#x81EA;&#x5B9A;&#x4E49;&#x4E8B;&#x4EF6;&#x3002;&#x8FD9;&#x4E2A;&#x548C;&#x6211;&#x4EEC;&#x6240;&#x719F;&#x77E5;&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#x51FD;&#x6570;&#x7C7B;&#x4F3C;&#xFF0C;&#x5728;&#x7279;&#x5B9A;&#x7684;&#x65F6;&#x673A;&#x53BB;&#x89E6;&#x53D1;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x5148;&#x770B;&#x4E00;&#x4E2A; &#x7B80;&#x5355; <code>Tapable</code> &#x7684; &#x4F8B;&#x5B50;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { SyncHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line">// &#x5B9E;&#x4F8B;&#x5316; &#x94A9;&#x5B50;&#x51FD;&#x6570; &#x5B9A;&#x4E49;&#x5F62;&#x53C2;</span><br><span class="line">const syncHook = new SyncHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.tap(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x540C;&#x6B65;&#x94A9;&#x5B50; &#x901A;&#x8FC7;call &#x53D1;&#x5E03;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.call(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x4E0A;&#x9762;&#x7684;&#x4F8B;&#x5B50;&#xFF0C;&#x6211;&#x4EEC;&#x5927;&#x81F4;&#x53EF;&#x4EE5;&#x5C06; <code>Tapable</code> &#x7684;&#x4F7F;&#x7528;&#x5206;&#x4E3A;&#x4EE5;&#x4E0B;&#x4E09;&#x6B65;:</p>
+<ul>
+<li>&#x5B9E;&#x4F8B;&#x5316;&#x94A9;&#x5B50;&#x51FD;&#x6570;</li>
+<li>&#x4E8B;&#x4EF6;&#x6CE8;&#x518C;</li>
+<li>&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x6CE8;&#x518C;</strong></p>
+<ul>
+<li>&#x540C;&#x6B65;&#x7684;&#x94A9;&#x5B50;&#x8981;&#x7528; <code>tap</code> &#x65B9;&#x6CD5;&#x6765;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</li>
+<li>&#x5F02;&#x6B65;&#x7684;&#x94A9;&#x5B50;&#x53EF;&#x4EE5;&#x50CF;&#x540C;&#x6B65;&#x65B9;&#x5F0F;&#x4E00;&#x6837;&#x7528; <code>tap</code> &#x65B9;&#x6CD5;&#x6765;&#x6CE8;&#x518C;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x7528; <code>tapAsync</code> &#x6216; <code>tapPromise</code> &#x5F02;&#x6B65;&#x65B9;&#x6CD5;&#x6765;&#x6CE8;&#x518C;&#x3002;<ul>
+<li><code>tapAsync</code>&#xFF1A; &#x4F7F;&#x7528;&#x7528; <code>tapAsync</code> &#x65B9;&#x6CD5;&#x6765;&#x6CE8;&#x518C; <code>hook</code> &#x65F6;&#xFF0C;&#x5FC5;&#x987B;&#x8C03;&#x7528;callback &#x56DE;&#x8C03;&#x51FD;&#x6570;&#x3002;</li>
+<li><code>tapPromise</code>&#xFF1A;&#x4F7F;&#x7528; <code>tapPromise</code> &#x65B9;&#x6CD5;&#x6765;&#x6CE8;&#x518C; <code>hook</code> &#x65F6;&#xFF0C;&#x5FC5;&#x987B;&#x8FD4;&#x56DE;&#x4E00;&#x4E2A; <code>pormise</code> &#xFF0C;&#x5F02;&#x6B65;&#x4EFB;&#x52A1;&#x5B8C;&#x6210;&#x540E; <code>resolve</code> &#x3002;</li>
+</ul>
+</li>
+</ul>
+<p><strong>&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;</strong></p>
+<ul>
+<li>&#x540C;&#x6B65;&#x7684;&#x94A9;&#x5B50;&#x8981;&#x7528; <code>call</code> &#x65B9;&#x6CD5;&#x6765;&#x89E6;&#x53D1;</li>
+<li>&#x5F02;&#x6B65;&#x7684;&#x94A9;&#x5B50;&#x9700;&#x8981;&#x7528; <code>callAsync</code> &#x6216; <code>promise</code> &#x5F02;&#x6B65;&#x65B9;&#x6CD5;&#x6765;&#x89E6;&#x53D1;&#x3002;<ul>
+<li><code>callAsync</code>&#xFF1A;&#x5F53;&#x6211;&#x4EEC;&#x7528; <code>callAsync</code> &#x65B9;&#x6CD5;&#x6765;&#x8C03;&#x7528; <code>hook</code> &#x65F6;&#xFF0C;&#x7B2C;&#x4E8C;&#x4E2A;&#x53C2;&#x6570;&#x662F;&#x4E00;&#x4E2A;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x7684;&#x53C2;&#x6570;&#x662F;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#x7684;&#x6700;&#x540E;&#x4E00;&#x4E2A;&#x8FD4;&#x56DE;&#x503C;</li>
+<li><code>promise</code>&#xFF1A;&#x5F53;&#x6211;&#x4EEC;&#x7528; <code>promise</code> &#x65B9;&#x6CD5;&#x6765;&#x8C03;&#x7528; <code>hook</code> &#x65F6;&#xFF0C;&#x9700;&#x8981;&#x4F7F;&#x7528; <code>then</code> &#x6765;&#x5904;&#x7406;&#x6267;&#x884C;&#x7ED3;&#x679C;&#xFF0C;&#x53C2;&#x6570;&#x662F;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#x7684;&#x6700;&#x540E;&#x4E00;&#x4E2A;&#x8FD4;&#x56DE;&#x503C;&#x3002;</li>
+</ul>
+</li>
+</ul>
+<h3 id="Tapable-Hook-&#x94A9;&#x5B50;"><a href="#Tapable-Hook-&#x94A9;&#x5B50;" class="headerlink" title="Tapable Hook &#x94A9;&#x5B50;"></a>Tapable Hook &#x94A9;&#x5B50;</h3><p>tapable &#x5185;&#x7F6E;&#x4E86; 9 &#x79CD; hook &#x3002;&#x5206;&#x4E3A; <code>&#x540C;&#x6B65;</code>&#x3001;<code>&#x5F02;&#x6B65;</code> &#x4E24;&#x79CD;&#x6267;&#x884C;&#x65B9;&#x5F0F;&#x3002;&#x5F02;&#x6B65;&#x6267;&#x884C; Hook &#x53C8;&#x53EF;&#x4EE5;&#x5206;&#x4E3A; <code>&#x4E32;&#x884C;</code> &#x6267;&#x884C;&#x548C; <code>&#x5E76;&#x884C;</code> &#x6267;&#x884C;&#x3002;&#x9664;&#x6B64;&#x4E4B;&#x5916;&#xFF0C;hook &#x53EF;&#x4EE5;&#x6839;&#x636E;&#x6267;&#x884C;&#x673A;&#x5236;&#x5206;&#x4E3A; <code>&#x5E38;&#x89C4;</code> <code>&#x7011;&#x5E03;&#x6A21;&#x5F0F;</code> <code>&#x7194;&#x65AD;&#x6A21;&#x5F0F;</code> <code>&#x5FAA;&#x73AF;&#x6A21;&#x5F0F;</code> &#x56DB;&#x79CD;&#x6267;&#x884C;&#x673A;&#x5236;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/140cd971ca1634e0add2cfb6dd96234ce435da27a59e0f484f133e88a32adaaa" alt="image.png"></p>
+<h4 id="&#x540C;&#x6B65;&#x94A9;&#x5B50;"><a href="#&#x540C;&#x6B65;&#x94A9;&#x5B50;" class="headerlink" title="&#x540C;&#x6B65;&#x94A9;&#x5B50;"></a>&#x540C;&#x6B65;&#x94A9;&#x5B50;</h4><blockquote>
+<p>&#x540C;&#x6B65;&#x94A9;&#x5B50;&#x987E;&#x540D;&#x601D;&#x4E49;&#xFF1A;&#x540C;&#x6B65;&#x6267;&#x884C;&#xFF0C;&#x4E0A;&#x4E00;&#x4E2A;&#x94A9;&#x5B50;&#x6267;&#x884C;&#x5B8C;&#x624D;&#x4F1A;&#x6267;&#x884C;&#x4E0B;&#x4E00;&#x4E2A;&#x94A9;&#x5B50;&#x3002;</p>
+</blockquote>
+<p>&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { SyncHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line">// &#x5B9E;&#x4F8B;&#x5316; &#x94A9;&#x5B50;&#x51FD;&#x6570; &#x5B9A;&#x4E49;&#x5F62;&#x53C2;</span><br><span class="line">const syncHook = new SyncHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.tap(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x8BE5;&#x76D1;&#x542C;&#x51FD;&#x6570;&#x6709;&#x8FD4;&#x56DE;&#x503C;</span><br><span class="line">syncHook.tap(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//&#x540C;&#x6B65;&#x94A9;&#x5B50; &#x901A;&#x8FC7;call &#x53D1;&#x5E03;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.call(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>&#x6267;&#x884C;&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/49fb195b2e15d00e8821f90636bbec806536e1809e51c9f5635ffb7234f165df" alt="image.png"></p>
+<h4 id="&#x5F02;&#x6B65;&#x94A9;&#x5B50;"><a href="#&#x5F02;&#x6B65;&#x94A9;&#x5B50;" class="headerlink" title="&#x5F02;&#x6B65;&#x94A9;&#x5B50;"></a>&#x5F02;&#x6B65;&#x94A9;&#x5B50;</h4><blockquote>
+<p>&#x5F02;&#x6B65;&#x94A9;&#x5B50;&#x5206;&#x4E3A;: &#x4E32;&#x884C;&#x6267;&#x884C;&#x548C;&#x5E76;&#x884C;&#x6267;&#x884C;&#x3002;&#x5728;&#x4E32;&#x884C;&#x6267;&#x884C;&#x4E2D;&#xFF0C;&#x5982;&#x679C;&#x4E0A;&#x4E00;&#x4E2A;&#x94A9;&#x5B50;&#x6CA1;&#x6709;&#x8C03;&#x7528;callback &#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x4E0B;&#x4E00;&#x4E2A;&#x94A9;&#x5B50;&#x5C06;&#x4E0D;&#x4F1A;&#x89E6;&#x53D1;&#x5BF9;&#x5E94;&#x7684;&#x4E8B;&#x4EF6;&#x76D1;&#x542C;&#x3002;</p>
+</blockquote>
+<p>&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { AsyncParallelHook, AsyncSeriesHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">const asyncParallelHook = new AsyncParallelHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">const asyncSeriesHook = new AsyncSeriesHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">asyncParallelHook.tapAsync(&quot;&#x5F02;&#x6B65;&#x5E76;&#x884C;&#x94A9;&#x5B50;1&quot;, (name, callback) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x5F02;&#x6B65;&#x5E76;&#x884C;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">  }, 3000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x8BE5;&#x76D1;&#x542C;&#x51FD;&#x6570;&#x6709;&#x8FD4;&#x56DE;&#x503C;</span><br><span class="line">asyncParallelHook.tapAsync(&quot;&#x5F02;&#x6B65;&#x5E76;&#x884C;&#x94A9;&#x5B50;2&quot;, (name, callback) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x5F02;&#x6B65;&#x5E76;&#x884C;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">  }, 1500);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">asyncSeriesHook.tapAsync(&quot;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;1&quot;, (name, callback) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">  }, 3000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x8BE5;&#x76D1;&#x542C;&#x51FD;&#x6570;&#x6709;&#x8FD4;&#x56DE;&#x503C;</span><br><span class="line">asyncSeriesHook.tapAsync(&quot;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;2&quot;, (name, callback) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">  }, 1500);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// &#x5F02;&#x6B65;&#x5E76;&#x884C;&#x94A9;&#x5B50; &#x901A;&#x8FC7; callAsync &#x53D1;&#x5E03;&#x4E8B;&#x4EF6;</span><br><span class="line">asyncParallelHook.callAsync(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;, () =&gt; {</span><br><span class="line">  console.log(&quot;1111&quot;);</span><br><span class="line">  return &quot;1122&quot;;</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">// &#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50; &#x901A;&#x8FC7; callAsync &#x53D1;&#x5E03;&#x4E8B;&#x4EF6;</span><br><span class="line">asyncSeriesHook.callAsync(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;, () =&gt; {</span><br><span class="line">  console.log(&quot;1111&quot;);</span><br><span class="line">  return &quot;1122&quot;;</span><br><span class="line">});</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A7;&#x5236;&#x53F0;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;:</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/25dee517ef4779fe66ed130ac023348a4e656c4ec40a478d97c7a2243583a653" alt="image.png"></p>
+<p>&#x4E32;&#x884C;&#x94A9;&#x5B50;1&#x6CA1;&#x6709;&#x8C03;&#x7528;callback, &#x6240;&#x4EE5;&#x4E32;&#x884C;&#x94A9;&#x5B50;2&#x6CA1;&#x6709;&#x89E6;&#x53D1;&#x3002;&#x6DFB;&#x52A0;callback&#x540E;&#xFF0C;&#x63A7;&#x5236;&#x53F0;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/30b14e797a459cb2450ea254bf0ec6a1eee635966aa55b96c01d6377260926a7" alt="image.png"></p>
+<h4 id="&#x7194;&#x65AD;&#x7C7B;"><a href="#&#x7194;&#x65AD;&#x7C7B;" class="headerlink" title="&#x7194;&#x65AD;&#x7C7B;"></a>&#x7194;&#x65AD;&#x7C7B;</h4><blockquote>
+<p><code>AsyncSeriesBailHook</code> &#x662F;&#x4E00;&#x4E2A;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x3001;&#x7194;&#x65AD;&#x7C7B;&#x578B;&#x7684; <code>Hook</code>&#x3002;&#x5728;&#x4E32;&#x884C;&#x7684;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x53EA;&#x8981;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#x6709;&#x8FD4;&#x56DE;&#x503C;&#xFF0C;&#x540E;&#x9762;&#x7684;&#x5C31;&#x4E0D;&#x4F1A;&#x6267;&#x884C;&#x4E86;&#x3002;</p>
+</blockquote>
+<p>&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { SyncBailHook, AsyncSeriesBailHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line">const syncBailHook = new SyncBailHook([&quot;name&quot;]);</span><br><span class="line">const asyncSeriesBailHook = new AsyncSeriesBailHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">syncBailHook.tap(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncBailHook.tap(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">  return &quot;&#x6709;&#x8FD4;&#x56DE;&#x503C;&quot;;</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncBailHook.tap(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x540C;&#x6B65;&#x94A9;&#x5B50;3&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x540C;&#x6B65;&#x94A9;&#x5B50;3&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">asyncSeriesBailHook.tapAsync(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;1&quot;, (name, callback) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">    callback();</span><br><span class="line">  }, 3000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">asyncSeriesBailHook.tapAsync(&quot;&#x4FDD;&#x9669;&#x7C7B;2&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;1&quot;, (name, callback) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">    callback(&quot;&#x6709;&#x8FD4;&#x56DE;&#x503C;&quot;);</span><br><span class="line">  }, 2000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">asyncSeriesBailHook.tapAsync(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;3&quot;, (name) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x4FDD;&#x9669;&#x7C7B;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;3&quot;, name);</span><br><span class="line">  }, 1000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncBailHook.call(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;);</span><br><span class="line">asyncSeriesBailHook.callAsync(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;, (result) =&gt; {</span><br><span class="line">  console.log(&quot;result&quot;, result);</span><br><span class="line">});</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A7;&#x5236;&#x53F0;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/48afaa396946bb9ac21b8d9fac4bf2a742e8a4547297a7c80b0d3b82e7a7987e" alt="image.png"></p>
+<h4 id="&#x5FAA;&#x73AF;&#x7C7B;"><a href="#&#x5FAA;&#x73AF;&#x7C7B;" class="headerlink" title="&#x5FAA;&#x73AF;&#x7C7B;"></a>&#x5FAA;&#x73AF;&#x7C7B;</h4><p><code>SyncLoopHook</code> &#x662F;&#x4E00;&#x4E2A;&#x540C;&#x6B65;&#x3001;&#x5FAA;&#x73AF;&#x7C7B;&#x578B;&#x7684; <code>Hook</code>&#x3002;&#x5FAA;&#x73AF;&#x7C7B;&#x578B;&#x7684;&#x542B;&#x4E49;&#x662F;&#x4E0D;&#x505C;&#x7684;&#x5FAA;&#x73AF;&#x6267;&#x884C;&#x4E8B;&#x4EF6;&#x51FD;&#x6570;&#xFF0C;&#x76F4;&#x5230;&#x6240;&#x6709;&#x51FD;&#x6570;&#x7ED3;&#x679C; <code>result === undefined</code>&#xFF0C;&#x4E0D;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x5C31;&#x8C03;&#x5934;&#x91CD;&#x65B0;&#x5F00;&#x59CB;&#x6267;&#x884C;&#x3002;</p>
+<p>&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { SyncLoopHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line">const syncLoopHook = new SyncLoopHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">let count = 4;</span><br><span class="line"></span><br><span class="line">syncLoopHook.tap(&quot;&#x5FAA;&#x73AF;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x5FAA;&#x73AF;&#x94A9;&#x5B50;1&quot;, count);</span><br><span class="line">  return count &lt;= 3 ? undefined : count--;</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncLoopHook.tap(&quot;&#x5FAA;&#x73AF;&#x94A9;&#x5B50;2&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x5FAA;&#x73AF;&#x94A9;&#x5B50;2&quot;, count);</span><br><span class="line">  return count &lt;= 2 ? undefined : count--;</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncLoopHook.tap(&quot;&#x5FAA;&#x73AF;&#x94A9;&#x5B50;3&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x5FAA;&#x73AF;&#x94A9;&#x5B50;3&quot;, count);</span><br><span class="line">  return count &lt;= 1 ? undefined : count--;</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">syncLoopHook.call();</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A7;&#x5236;&#x53F0;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/cdbffde85188ef1fd2cf52cc1fffcd5ae95f050a4fb01b6ca543a6c3174c6d02" alt="image.png"></p>
+<h4 id="&#x7011;&#x5E03;&#x7C7B;"><a href="#&#x7011;&#x5E03;&#x7C7B;" class="headerlink" title="&#x7011;&#x5E03;&#x7C7B;"></a>&#x7011;&#x5E03;&#x7C7B;</h4><p><code>AsyncSeriesWaterfallHook</code> &#x662F;&#x4E00;&#x4E2A;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x3001;&#x7011;&#x5E03;&#x7C7B;&#x578B;&#x7684; <code>Hook</code>&#x3002;&#x5982;&#x679C;&#x524D;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;&#x51FD;&#x6570;&#x7684;&#x7ED3;&#x679C; <code>result !== undefined</code>&#xFF0C;&#x5219; <code>result</code> &#x4F1A;&#x4F5C;&#x4E3A;&#x540E;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;&#x51FD;&#x6570;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#xFF08;&#x4E5F;&#x5C31;&#x662F;&#x4E0A;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x7684;&#x6267;&#x884C;&#x7ED3;&#x679C;&#x4F1A;&#x6210;&#x4E3A;&#x4E0B;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x7684;&#x53C2;&#x6570;&#xFF09;&#x3002;</p>
+<p>&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { AsyncSeriesWaterfallHook, SyncWaterfallHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line">const syncWaterfallHook = new SyncWaterfallHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">const asyncSeriesWaterfallHook = new AsyncSeriesWaterfallHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">syncWaterfallHook.tap(&quot;&#x7011;&#x5E03;&#x5F0F;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x7011;&#x5E03;&#x5F0F;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line"></span><br><span class="line">  return &quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;1&quot;;</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncWaterfallHook.tap(&quot;&#x7011;&#x5E03;&#x5F0F;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x7011;&#x5E03;&#x5F0F;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncWaterfallHook.tap(&quot;&#x7011;&#x5E03;&#x5F0F;&#x540C;&#x6B65;&#x94A9;&#x5B50;3&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x7011;&#x5E03;&#x5F0F;&#x540C;&#x6B65;&#x94A9;&#x5B50;3&quot;, name);</span><br><span class="line"></span><br><span class="line">  return &quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;3&quot;;</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">asyncSeriesWaterfallHook.tapAsync(&quot;&#x7011;&#x5E03;&#x5F0F;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;1&quot;, (name, callback) =&gt; {</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    console.log(&quot;&#x7011;&#x5E03;&#x5F0F;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line"></span><br><span class="line">    callback();</span><br><span class="line">  }, 1000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">asyncSeriesWaterfallHook.tapAsync(&quot;&#x7011;&#x5E03;&#x5F0F;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;2&quot;, (name, callback) =&gt; {</span><br><span class="line">  console.log(&quot;&#x7011;&#x5E03;&#x5F0F;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    callback();</span><br><span class="line">  }, 2000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">asyncSeriesWaterfallHook.tapAsync(&quot;&#x7011;&#x5E03;&#x5F0F;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;3&quot;, (name, callback) =&gt; {</span><br><span class="line">  console.log(&quot;&#x7011;&#x5E03;&#x5F0F;&#x5F02;&#x6B65;&#x4E32;&#x884C;&#x94A9;&#x5B50;3&quot;, name);</span><br><span class="line">  setTimeout(() =&gt; {</span><br><span class="line">    callback(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;3&quot;);</span><br><span class="line">  }, 3000);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">syncWaterfallHook.call(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;);</span><br><span class="line"></span><br><span class="line">asyncSeriesWaterfallHook.callAsync(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;, (result) =&gt; {</span><br><span class="line">  console.log(&quot;result&quot;, result);</span><br><span class="line">});</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A7;&#x5236;&#x53F0;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/d3b1252ead4d8b3825e11477877e80a289e2a66bc3aeb6453699897b3875d8e6" alt="image.png"></p>
+<h3 id="Tapable-&#x9AD8;&#x7EA7;&#x7279;&#x6027;"><a href="#Tapable-&#x9AD8;&#x7EA7;&#x7279;&#x6027;" class="headerlink" title="Tapable &#x9AD8;&#x7EA7;&#x7279;&#x6027;"></a>Tapable &#x9AD8;&#x7EA7;&#x7279;&#x6027;</h3><h4 id="Intercept"><a href="#Intercept" class="headerlink" title="Intercept"></a>Intercept</h4><p>&#x9664;&#x4E86;&#x901A;&#x5E38;&#x7684; <code>tap/call</code> &#x4E4B;&#x5916;&#xFF0C;&#x6240;&#x6709; <code>hook</code> &#x94A9;&#x5B50;&#x90FD;&#x63D0;&#x4F9B;&#x989D;&#x5916;&#x7684;&#x62E6;&#x622A;API&#x3002;&#x2014; <code>intercept</code> &#x63A5;&#x53E3;&#x3002;</p>
+<p><code>intercept</code> &#x652F;&#x6301;&#x7684;&#x4E2D;&#x95F4;&#x4EF6;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;:</p>
+<table>
+<thead>
+<tr>
+<th>intercept</th>
+<th>&#x7C7B;&#x578B;</th>
+<th>&#x63CF;&#x8FF0;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>call</strong></td>
+<td><code>(...args) =&gt; void</code></td>
+<td>&#x5F53;&#x94A9;&#x5B50;&#x88AB;&#x89E6;&#x53D1;&#x65F6;&#xFF0C;&#x5411;&#x62E6;&#x622A;&#x5668;&#x6DFB;&#x52A0;&#x8C03;&#x7528;&#x5C06;&#x88AB;&#x89E6;&#x53D1;&#x3002;&#x60A8;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;hooks&#x53C2;&#x6570;</td>
+</tr>
+<tr>
+<td><strong>tap</strong></td>
+<td><code>(tap: Tap)</code></td>
+<td>&#x5C06;tap&#x6DFB;&#x52A0;&#x5230;&#x62E6;&#x622A;&#x5668;&#x5C06;&#x5728;&#x63D2;&#x4EF6;&#x70B9;&#x51FB;&#x94A9;&#x5B50;&#x65F6;&#x89E6;&#x53D1;&#x3002;&#x63D0;&#x4F9B;&#x7684;&#x662F;Tap&#x5BF9;&#x8C61;&#x3002;&#x65E0;&#x6CD5;&#x66F4;&#x6539;Tap&#x5BF9;&#x8C61;</td>
+</tr>
+<tr>
+<td><strong>loop</strong></td>
+<td><code>(...args) =&gt; void</code></td>
+<td>&#x5411;&#x62E6;&#x622A;&#x5668;&#x6DFB;&#x52A0;&#x5FAA;&#x73AF;&#x5C06;&#x89E6;&#x53D1;&#x5FAA;&#x73AF;&#x94A9;&#x5B50;&#x7684;&#x6BCF;&#x4E2A;&#x5FAA;&#x73AF;&#x3002;</td>
+</tr>
+<tr>
+<td><strong>register</strong></td>
+<td><code>(tap: Tap) =&gt; Tap &#x6216; undefined</code></td>
+<td>&#x5C06;&#x6CE8;&#x518C;&#x6DFB;&#x52A0;&#x5230;&#x62E6;&#x622A;&#x5668;&#x5C06;&#x89E6;&#x53D1;&#x6BCF;&#x4E2A;&#x6DFB;&#x52A0;&#x7684;Tap&#xFF0C;&#x5E76;&#x5141;&#x8BB8;&#x5BF9;&#x5176;&#x8FDB;&#x884C;&#x4FEE;&#x6539;&#x3002;</td>
+</tr>
+</tbody></table>
+<p><strong>context</strong></p>
+<p>&#x63D2;&#x4EF6;&#x548C;&#x62E6;&#x622A;&#x5668;&#x53EF;&#x4EE5;&#x9009;&#x62E9;&#x8BBF;&#x95EE;&#x53EF;&#x9009;&#x7684;&#x4E0A;&#x4E0B;&#x6587;&#x5BF9;&#x8C61;&#xFF0C;&#x8BE5;&#x5BF9;&#x8C61;&#x53EF;&#x7528;&#x4E8E;&#x5411;&#x540E;&#x7EED;&#x63D2;&#x4EF6;&#x548C;&#x62E6;&#x622A;&#x5668;&#x4F20;&#x9012;&#x4EFB;&#x610F;&#x503C;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x901A;&#x8FC7;&#x4E0B;&#x9762;&#x7684;&#x5C0F;&#x6848;&#x4F8B;&#xFF0C;&#x6765;&#x5E2E;&#x52A9;&#x6211;&#x4EEC;&#x7406;&#x89E3;&#x3002;&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { SyncHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line">// &#x5B9E;&#x4F8B;&#x5316; &#x94A9;&#x5B50;&#x51FD;&#x6570; &#x5B9A;&#x4E49;&#x5F62;&#x53C2;</span><br><span class="line">const syncHook = new SyncHook([&quot;name&quot;]);</span><br><span class="line"></span><br><span class="line">syncHook.intercept({</span><br><span class="line">  context: true,</span><br><span class="line">  register(context, name) {</span><br><span class="line">    console.log(&quot;every time tap&quot;, context, name);</span><br><span class="line">  },</span><br><span class="line">  call(context, name) {</span><br><span class="line">    console.log(&quot;before call&quot;, context, name);</span><br><span class="line">  },</span><br><span class="line">  loop(context, name) {</span><br><span class="line">    console.log(&quot;before loop&quot;, context, name);</span><br><span class="line">  },</span><br><span class="line">  tap(context, name) {</span><br><span class="line">    console.log(&quot;before tap&quot;, context, name);</span><br><span class="line">  },</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.tap(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.tap(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;2&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x540C;&#x6B65;&#x94A9;&#x5B50; &#x901A;&#x8FC7;call &#x53D1;&#x5E03;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.call(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;&quot;);</span><br><span class="line">syncHook.call(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF; call2&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A7;&#x5236;&#x53F0;&#x8F93;&#x5165;&#x7ED3;&#x679C;&#x5982;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/a4ce4096d4ab2e7846e45cd35686bbeb87036214f07569400513e3491c21f2c0" alt="image.png"></p>
+<p>&#x7531;&#x4E0A;&#x9762;&#x7684;&#x6848;&#x4F8B;&#x7ED3;&#x679C;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x77E5;&#x9053;&#x3002;<code>intercept</code> &#x4E2D;&#x7684; <code>register</code> &#x4F1A;&#x5728;&#x6BCF;&#x4E00;&#x6B21;&#x7684; <code>tap</code> &#x89E6;&#x53D1;&#x3002; &#x6709;&#x51E0;&#x4E2A; <code>tap</code> &#x5C31;&#x4F1A;&#x89E6;&#x53D1;&#x51E0;&#x6B21; <code>register</code>&#x3002;&#x7136;&#x540E;&#x4F9D;&#x6B21;&#x6267;&#x884C;&#x94A9;&#x5B50;&#x91CC;&#x9762;&#x7684; <code>call</code>&#x3001;<code>tap</code>.</p>
+<p><code>intercept</code> &#x7279;&#x6027;&#x5728; webpack &#x5185;&#x4E3B;&#x8981;&#x88AB;&#x7528;&#x4F5C;&#x8FDB;&#x5EA6;&#x63D0;&#x793A;&#xFF0C;&#x5982; <code>webpack/lib/ProgressPlugin</code> &#x63D2;&#x4EF6;&#x4E2D;&#xFF0C;&#x5206;&#x522B;&#x5BF9; <code>compiler.hooks.emit</code> &#x3001;<code>compiler.hooks.afterEmit</code> &#x94A9;&#x5B50;&#x5E94;&#x7528;&#x4E86;&#x8BB0;&#x5F55;&#x8FDB;&#x5EA6;&#x7684;&#x4E2D;&#x95F4;&#x4EF6;&#x51FD;&#x6570;&#x3002;</p>
+<h4 id="HookMap"><a href="#HookMap" class="headerlink" title="HookMap"></a>HookMap</h4><p><code>HookMap</code> HookMap&#x662F;&#x5177;&#x6709;Hooks&#x7684;Map&#x7684;&#x8F85;&#x52A9;&#x7C7B;.&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x79CD;&#x96C6;&#x5408;&#x64CD;&#x4F5C;&#x80FD;&#x529B;&#xFF0C;&#x80FD;&#x591F;&#x964D;&#x4F4E;&#x521B;&#x5EFA;&#x4E0E;&#x4F7F;&#x7528;&#x7684;&#x590D;&#x6742;&#x5EA6;&#xFF0C;&#x7528;&#x6CD5;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { SyncHook, HookMap } = require(&quot;tapable&quot;); </span><br><span class="line">const syncMap = new HookMap(() =&gt; new SyncHook()); </span><br><span class="line"></span><br><span class="line">// &#x901A;&#x8FC7; for &#x51FD;&#x6570;&#x8FC7;&#x6EE4;&#x96C6;&#x5408;&#x4E2D;&#x7684;&#x7279;&#x5B9A;&#x94A9;&#x5B50; </span><br><span class="line">syncMap.for(&quot;some-key&quot;).tap(&quot;MyPlugin&quot;, (arg) =&gt; { /* ... */ });</span><br><span class="line">syncMap.for(&quot;some-key&quot;).tapAsync(&quot;MyPlugin&quot;, (arg, callback) =&gt; { /* ... */ });</span><br><span class="line">syncMap.for(&quot;some-key&quot;).tapPromise(&quot;MyPlugin&quot;, (arg) =&gt; { /* ... */ });</span><br><span class="line"></span><br><span class="line">// &#x89E6;&#x53D1; guming-test &#x7C7B;&#x578B;&#x7684;&#x94A9;&#x5B50; </span><br><span class="line">syncMap.get(&quot;guming-test&quot;).call();</span><br></pre></td></tr></table></figure>
+
+<h2 id="Tapable-&#x5E95;&#x5C42;&#x539F;&#x7406;"><a href="#Tapable-&#x5E95;&#x5C42;&#x539F;&#x7406;" class="headerlink" title="Tapable &#x5E95;&#x5C42;&#x539F;&#x7406;"></a>Tapable &#x5E95;&#x5C42;&#x539F;&#x7406;</h2><p>&#x6211;&#x4EEC;&#x5148;&#x5C06; <code>Tapable</code> &#x5DE5;&#x7A0B;&#x6E90;&#x7801;&#x514B;&#x9686;&#x5230;&#x672C;&#x5730;, &#x6267;&#x884C;&#x5982;&#x4E0B;&#x6307;&#x4EE4;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&#x590D;&#x5236;&#x4EE3;&#x7801;$ git clone https://github.com/webpack/tapable.git</span><br></pre></td></tr></table></figure>
+
+<p><code>Tapable</code> &#x6E90;&#x7801;&#x7684; <code>lib</code> &#x76EE;&#x5F55;&#x7ED3;&#x6784;&#xFF0C; &#x5982;&#x4E0B;&#x6240;&#x793A;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">vbnet&#x590D;&#x5236;&#x4EE3;&#x7801;lib</span><br><span class="line">&#x251C;&#x2500; AsyncParallelBailHook.js</span><br><span class="line">&#x251C;&#x2500; AsyncParallelHook.js</span><br><span class="line">&#x251C;&#x2500; AsyncSeriesBailHook.js</span><br><span class="line">&#x251C;&#x2500; AsyncSeriesHook.js</span><br><span class="line">&#x251C;&#x2500; AsyncSeriesLoopHook.js</span><br><span class="line">&#x251C;&#x2500; AsyncSeriesWaterfallHook.js</span><br><span class="line">&#x251C;&#x2500; Hook.js</span><br><span class="line">&#x251C;&#x2500; HookCodeFactory.js</span><br><span class="line">&#x251C;&#x2500; HookMap.js</span><br><span class="line">&#x251C;&#x2500; MultiHook.js</span><br><span class="line">&#x251C;&#x2500; SyncBailHook.js</span><br><span class="line">&#x251C;&#x2500; SyncHook.js</span><br><span class="line">&#x251C;&#x2500; SyncLoopHook.js</span><br><span class="line">&#x251C;&#x2500; SyncWaterfallHook.js</span><br><span class="line">&#x251C;&#x2500; index.js</span><br><span class="line">&#x2514;&#x2500; util-browser.js</span><br></pre></td></tr></table></figure>
+
+<p>&#x9664;&#x4E86;&#x4E0A;&#x9762;&#x6211;&#x4EEC;&#x6240;&#x63D0;&#x53CA;&#x7684;&#x57FA;&#x672C; <code>hooks</code> &#x51FD;&#x6570;&#x3001;<code>HookMap</code>&#x9AD8;&#x7EA7;&#x7279;&#x6027;&#xFF0C;&#x8FD8;&#x4F1A;&#x6709;&#x4E00;&#x4E9B; <code>HookCodeFactory</code>&#x3001;<code>Hook</code> &#x8FD9;&#x4E9B;&#x6587;&#x4EF6;&#x3002;&#x6211;&#x4EEC;&#x7B80;&#x5355;&#x8FC7;&#x4E00;&#x4E0B; <code>hooks</code> &#x51FD;&#x6570;&#x5185;&#x7684;&#x5185;&#x5BB9;&#xFF0C;<br>&#x4F1A;&#x53D1;&#x73B0;&#x6240;&#x6709;&#x7684; <code>hooks</code> &#x51FD;&#x6570;&#x90FD;&#x4F1A;&#x5F15;&#x7528; <code>HookCodeFactory</code> &#x548C; <code>Hook</code> &#x8FD9;&#x4E24;&#x4E2A;&#x6587;&#x4EF6;&#x6240;&#x5BFC;&#x51FA;&#x7684;&#x5BF9;&#x8C61;&#x5B9E;&#x4F8B;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x4EE5; <code>syncHook</code> &#x94A9;&#x5B50;&#x51FD;&#x6570;&#x4E3A;&#x4F8B;&#xFF0C; &#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;:</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/869c1f47dba59022f7434a728412e9eebf0587392c5f7ae034a1a24af27bf976" alt="image.png"></p>
+<p>&#x6211;&#x4EEC;&#x5927;&#x81F4;&#x80FD;&#x591F;&#x77E5;&#x9053; &#x4E00;&#x4E2A; <code>hooks</code> &#x51FD;&#x6570; &#x4F1A;&#x7531;&#x4E00;&#x4E2A; <code>CodeFactory</code> &#x4EE3;&#x7801;&#x5DE5;&#x5382; &#x4EE5;&#x53CA; <code>Hook</code> &#x5B9E;&#x4F8B;&#x7EC4;&#x6210;&#x3002; <code>Hook</code> &#x5B9E;&#x4F8B;&#x4F1A;&#x9488;&#x5BF9;&#x4E0D;&#x540C;&#x573A;&#x666F;&#x7684; <code>hooks</code> &#x51FD;&#x6570;&#xFF0C; &#x66F4;&#x6539;&#x5176;&#x5BF9;&#x5E94;&#x7684; <strong>&#x6CE8;&#x518C;&#x94A9;&#x5B50;(<code>tapAsync</code> ,<code>tap</code>, <code>tapPromise</code> )</strong>&#xFF0C;<strong>&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x94A9;&#x5B50;( <code>call</code> , <code>callAsync</code> )</strong>, <strong>&#x7F16;&#x8BD1;&#x51FD;&#x6570;(complier)</strong>&#x3002; <code>Complier</code> &#x51FD;&#x6570;&#x4F1A;&#x7531;&#x6211;&#x4EEC; <code>HookCodeFactory</code> &#x5B9E;&#x73B0;&#x3002;</p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x901A;&#x8FC7;&#x5206;&#x6790; <code>HookCodeFactory</code> &#x53CA; <code>Hook</code> &#x7684;&#x5185;&#x90E8;&#x5B9E;&#x73B0;&#x6765;&#x4E86;&#x89E3; <code>Tapable</code> &#x7684;&#x5185;&#x90E8;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x3002;</p>
+<h3 id="Hook-&#x5B9E;&#x4F8B;"><a href="#Hook-&#x5B9E;&#x4F8B;" class="headerlink" title="Hook &#x5B9E;&#x4F8B;"></a>Hook &#x5B9E;&#x4F8B;</h3><p><code>Hook</code> &#x5B9E;&#x4F8B;&#x4F1A;&#x751F;&#x6210;&#x6211;&#x4EEC; <code>hooks</code> &#x94A9;&#x5B50;&#x51FD;&#x6570;&#x901A;&#x7528;&#x7684; <code>&#x4E8B;&#x4EF6;&#x6CE8;&#x518C;</code>&#xFF0C;<code>&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;</code>&#x3002;&#x6838;&#x5FC3;&#x903B;&#x8F91;&#xFF0C;&#x6211;&#x4EEC;&#x5927;&#x81F4;&#x53EF;&#x4EE5;&#x5206;&#x4E3A;&#x4EE5;&#x4E0B;&#x4E09;&#x4E2A;&#x90E8;&#x5206;:</p>
+<ol>
+<li>&#x5B9E;&#x4F8B;&#x521D;&#x59CB;&#x5316;&#x6784;&#x9020;&#x51FD;&#x6570;</li>
+<li>&#x4E8B;&#x4EF6;&#x6CE8;&#x518C; &#x7684;&#x5B9E;&#x73B0;</li>
+<li>&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x7684;&#x5B9E;&#x73B0;</li>
+</ol>
+<h4 id="&#x6784;&#x9020;&#x51FD;&#x6570;"><a href="#&#x6784;&#x9020;&#x51FD;&#x6570;" class="headerlink" title="&#x6784;&#x9020;&#x51FD;&#x6570;"></a>&#x6784;&#x9020;&#x51FD;&#x6570;</h4><p>&#x6784;&#x9020;&#x51FD;&#x6570;&#x4F1A;&#x5BF9;&#x5B9E;&#x4F8B;&#x5C5E;&#x6027;&#x521D;&#x59CB;&#x5316;&#x8D4B;&#x503C;&#x3002;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/55414230d09ec7ce199b542c98bd09e195a78472fa55a6005d5cbb83ac840244" alt="image.png"></p>
+<h4 id="&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;"><a href="#&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;" class="headerlink" title="&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;"></a>&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</h4><p>&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;&#x4E3B;&#x8981;&#x5206;&#x4E3A;&#x4E24;&#x5757;&#xFF0C;&#x4E00;&#x5757;&#x662F; <code>&#x9002;&#x914D;&#x5668;&#x6CE8;&#x518C;&#x8C03;&#x7528;</code>&#xFF0C; &#x7B2C;&#x4E8C;&#x5757;&#x662F; <code>&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;&#x6CE8;&#x518C;</code>&#x3002;&#x6838;&#x5FC3;&#x903B;&#x8F91;&#x5728; <code>_tap</code> &#x51FD;&#x6570;&#x5185;&#x90E8;&#x5B9E;&#x73B0;&#xFF0C;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2030a768422237373a27cee1fb2bb61b3e49e5a54f204afdbe4892cecaab5435" alt="image.png"></p>
+<p><strong>&#x9002;&#x914D;&#x5668;&#x8C03;&#x7528;</strong></p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x4F1A;&#x5BF9;&#x643A;&#x5E26; <code>register</code> &#x51FD;&#x6570;&#x7684;&#x9002;&#x914D;&#x5668;&#x8FDB;&#x884C;&#x8C03;&#x7528;&#xFF0C;&#x66F4;&#x6539; <code>options</code> &#x914D;&#x7F6E;&#xFF0C;&#x8FD4;&#x56DE;&#x65B0;&#x7684; <code>options</code> &#x914D;&#x7F6E;&#x3002;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/c25c9049cc43797192f048ee6ea11b1728e2707c7968743494a00289f4c37f6f" alt="image.png"></p>
+<p><strong>&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;&#x6CE8;&#x518C;</strong></p>
+<p><code>Hook</code> &#x5B9E;&#x4F8B;&#x7684; <code>taps</code> &#x4F1A;&#x5B58;&#x50A8;&#x6211;&#x4EEC;&#x7684;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;&#xFF0C; &#x540C;&#x65F6;&#x4F1A;&#x6839;&#x636E;&#xFF0C;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;&#x914D;&#x7F6E;&#x7684;&#x6267;&#x884C;&#x987A;&#x5E8F;&#x53BB;&#x5B58;&#x50A8;&#x5BF9;&#x5E94;&#x7684;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/e2f364b0375302f6aaf6a062b07bae7546ad6e6cc5a5496e5187a6274d21df56" alt="image.png"></p>
+<h4 id="&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;"><a href="#&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;" class="headerlink" title="&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;"></a>&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;</h4><p>&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;&#x4F1A;&#x901A;&#x8FC7;&#x8C03;&#x7528;&#x5185;&#x90E8; &#x7684; <code>_createCall</code> &#x51FD;&#x6570;&#xFF0C;&#x51FD;&#x6570;&#x5185;&#x90E8;&#x4F1A;&#x8C03;&#x7528;&#x5B9E;&#x4F8B;&#x7684; <code>compile</code> &#x51FD;&#x6570;&#x3002;&#x6211;&#x4EEC;&#x4F1A;&#x53D1;&#x73B0;&#xFF1A;<code>Hook</code> &#x5B9E;&#x4F8B;&#x5185;&#x90E8;&#x4E0D;&#x4F1A;&#x53BB;&#x5B9E;&#x73B0; <code>complier</code>&#x7684;&#x903B;&#x8F91;&#xFF0C; &#x4E0D;&#x540C;&#x94A9;&#x5B50;&#x7684; <code>complier</code> &#x51FD;&#x6570;&#x4F1A;&#x901A;&#x8FC7;&#x901A;&#x8FC7;&#x5BF9;&#x5E94;&#x7684; &#x7EE7;&#x627F; <code>HookCodeFactory</code> &#x7684;&#x5B9E;&#x4F8B;&#x53BB;&#x5B9E;&#x73B0;&#x3002;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bc9253a0ddc145eba4b08995708967678f83080477fc93f9395947851c08e8f8" alt="image.png"></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/de463109af76baf28892e282a98d7dd317cbeeeab30d73d087c3b60df500c06a" alt="image.png"></p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#xFF0C;&#x6211;&#x4EEC;&#x7EE7;&#x7EED; &#x63A2;&#x7A76; <code>HookCodeFactory</code> &#x5B9E;&#x4F8B;&#xFF0C;&#x4E86;&#x89E3; <code>Tapable</code> &#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x7684;&#x903B;&#x8F91;&#x3002;</p>
+<h3 id="HookCodeFactory-&#x5B9E;&#x4F8B;"><a href="#HookCodeFactory-&#x5B9E;&#x4F8B;" class="headerlink" title="HookCodeFactory &#x5B9E;&#x4F8B;"></a>HookCodeFactory &#x5B9E;&#x4F8B;</h3><p><code>HookCodeFactory</code> &#x5B9E;&#x4F8B;&#x4F1A;&#x6839;&#x636E;&#x6211;&#x4EEC;&#x4F20;&#x5165;&#x7684;&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x7C7B;&#x578B; (<code>sync, async, promise</code>)&#x4EE5;&#x53CA;&#x6211;&#x4EEC;&#x7684;&#x89E6;&#x53D1;&#x673A;&#x5236;&#x7C7B;&#x578B; (<code>&#x5E38;&#x89C4;</code> <code>&#x7011;&#x5E03;&#x6A21;&#x5F0F;</code> <code>&#x4FDD;&#x9669;&#x6A21;&#x5F0F;</code> <code>&#x5FAA;&#x73AF;&#x6A21;&#x5F0F;</code>), &#x751F;&#x6210;&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x51FD;&#x6570;&#x7684;&#x51FD;&#x6570;&#x5934;&#xFF0C; &#x51FD;&#x6570;&#x4F53;&#x3002;&#x901A;&#x8FC7; <code>new Function</code> &#x6784;&#x9020;&#x51FA;&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x51FD;&#x6570;&#x3002;</p>
+<blockquote>
+<p><code>Tapable</code> &#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x7684;&#x6267;&#x884C;&#xFF0C;&#x662F;&#x52A8;&#x6001;&#x751F;&#x6210;&#x6267;&#x884C;&#x4EE3;&#x7801;, &#x5305;&#x542B;&#x6211;&#x4EEC;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x51FD;&#x6570;&#x5934;&#xFF0C;&#x51FD;&#x6570;&#x4F53;&#xFF0C;&#x7136;&#x540E;&#x901A;&#x8FC7; <code>new Function</code> &#x6765;&#x6267;&#x884C;&#x3002;&#x76F8;&#x8F83;&#x4E8E;&#x6211;&#x4EEC;&#x901A;&#x5E38;&#x7684;&#x904D;&#x5386;/&#x9012;&#x5F52;&#x8C03;&#x7528;&#x4E8B;&#x4EF6;&#xFF0C;&#x8FD9;&#x65E0;&#x7591;&#x8BA9; <code>webpack</code> &#x7684;&#x6574;&#x4E2A;&#x4E8B;&#x4EF6;&#x673A;&#x5236;&#x7684;&#x6267;&#x884C;&#x6709;&#x4E86;&#x4E00;&#x4E2A;&#x66F4;&#x9AD8;&#x7684;&#x6027;&#x80FD;&#x4F18;&#x52BF;&#x3002;</p>
+</blockquote>
+<p>&#x7531;&#x4E0A;&#x9762;&#x6211;&#x4EEC;&#x53EF;&#x77E5;&#xFF0C; <code>Hook</code> &#x5B9E;&#x4F8B; &#x7684; <code>complier</code> &#x51FD;&#x6570;&#x662F; <code>HookCodeFactory</code> &#x5B9E;&#x4F8B; <code>create</code> &#x51FD;&#x6570; &#x7684;&#x8FD4;&#x56DE;&#x3002;</p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x4ECE; <code>create</code> &#x51FD;&#x6570; &#x4E00;&#x6B65;&#x6B65;&#x63ED;&#x79D8; <code>Tapable</code> &#x7684;&#x52A8;&#x6001;&#x751F;&#x6210;&#x6267;&#x884C;&#x51FD;&#x6570;&#x7684;&#x6838;&#x5FC3;&#x5B9E;&#x73B0;&#x3002;</p>
+<h4 id="create"><a href="#create" class="headerlink" title="create"></a>create</h4><p><code>create</code> &#x51FD;&#x6570;&#x901A;&#x8FC7;&#x5BF9;&#x5E94;&#x7684; <code>&#x51FD;&#x6570;&#x53C2;&#x6570;</code>&#xFF0C; <code>&#x51FD;&#x6570; header</code>, <code>&#x51FD;&#x6570; content</code>&#x65B9;&#x6CD5;&#x6784;&#x9020;&#x51FA;&#x6211;&#x4EEC;&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x7684;&#x51FD;&#x6570;&#x7684;&#x5185;&#x5BB9;&#xFF0C; &#x901A;&#x8FC7; <code>new Function</code> &#x521B;&#x5EFA;&#x51FA;&#x6211;&#x4EEC;&#x7684;&#x89E6;&#x53D1;&#x51FD;&#x6570;&#x3002;</p>
+<p>create &#x51FD;&#x6570;&#x4F1A;&#x6839;&#x636E;&#x4E8B;&#x4EF6;&#x7684;&#x89E6;&#x53D1;&#x7C7B;&#x578B; ( sync&#x3001;async&#x3001;promise)&#xFF0C;&#x8FDB;&#x884C;&#x4E0D;&#x540C;&#x7684;&#x903B;&#x8F91;&#x5904;&#x7406;&#x3002;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;:<br><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/cbf9a78338ba22a1b441d4e74cd493f34d4fb0fd06f909cbe77ea92687facc86" alt="image.png"></p>
+<p>&#x6BCF;&#x4E00;&#x79CD;&#x89E6;&#x53D1;&#x673A;&#x5236;&#xFF0C;&#x90FD;&#x4F1A;&#x7531; <code>this.args</code>, <code>this.header</code>, <code>this.contentWithInterceptors</code> &#x4E09;&#x4E2A;&#x51FD;&#x6570;&#x53BB;&#x5B9E;&#x73B0; &#x52A8;&#x6001;&#x51FD;&#x6570;&#x7684; <code>code</code>&#x3002;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/1ad3ded7171b30b541d9e9eab79d1c4fda769f3409d9a61061f8a40fde97123c" alt="image.png"></p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#x6211;&#x4EEC;&#x770B;&#x4E00;&#x770B; <code>this.contentWithInterceptors</code> &#x51FD;&#x6570;&#x5982;&#x4F55;&#x751F;&#x6210;&#x6211;&#x4EEC;&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x51FD;&#x6570;&#x7684;&#x51FD;&#x6570;&#x4F53;&#x3002;</p>
+<h4 id="contentWithInterceptors"><a href="#contentWithInterceptors" class="headerlink" title="contentWithInterceptors"></a>contentWithInterceptors</h4><p><code>contentWithInterceptors</code> &#x51FD;&#x6570;&#x91CC;&#x5305;&#x542B;&#x4E24;&#x4E2A;&#x6A21;&#x5757;&#xFF0C; &#x4E00;&#x4E2A;&#x662F;&#x9002;&#x914D;&#x5668; (<code>interceptor</code>), &#x4E00;&#x4E2A; <code>content</code> &#x751F;&#x6210;&#x51FD;&#x6570;&#x3002; &#x540C;&#x65F6;&#xFF0C;<code>HookCodeFactory</code> &#x5B9E;&#x4F8B;&#x672C;&#x8EAB;&#x4E0D;&#x4F1A;&#x53BB;&#x5B9E;&#x73B0; <code>content</code> &#x51FD;&#x6570;&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x4F1A;&#x7531;&#x7EE7;&#x627F;&#x7684;&#x5B9E;&#x4F8B;&#x53BB;&#x5B9E;&#x73B0;&#x3002;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/f67ff8a814e21352ef835a03d88bb10584ddb1414c09b11104dd8f002c341f6a" alt="image.png"></p>
+<p>&#x6BCF;&#x4E2A; <code>hooks</code> &#x94A9;&#x5B50;&#x51FD;&#x6570;&#x7684; <code>CodeFactory</code> &#x5B9E;&#x4F8B;&#x4F1A;&#x53BB;&#x5B9E;&#x73B0; <code>content</code> &#x51FD;&#x6570;&#x3002; <code>content</code> &#x51FD;&#x6570;&#x4F1A;&#x8C03;&#x7528; <code>HookCodeFactory</code> &#x5B9E;&#x73B0;&#x7684;&#x4E0D;&#x540C;&#x8FD0;&#x884C;&#x673A;&#x5236;&#x7684;&#x65B9;&#x6CD5;( <code>callTap</code>&#x3001;<code>callTapsSeries</code>&#x3001;<code>callTapsLooping</code>&#x3001;<code>callTapsParallel</code>)&#xFF0C; &#x6784;&#x9020;&#x51FA;&#x6700;&#x7EC8;&#x7684;&#x51FD;&#x6570;&#x4F53;&#x3002;&#x5B9E;&#x73B0;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/018a0187b864cff2b9f5859eba028a70552baf06bbb597ffa91e38b62e952b70" alt="image.png"></p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#xFF0C;&#x5C31;&#x662F;&#x4E0D;&#x540C;&#x8FD0;&#x884C;&#x673A;&#x5236;&#xFF0C;&#x6839;&#x636E;&#x4E0D;&#x540C;&#x7684;&#x8C03;&#x7528;&#x65B9;&#x5F0F; ( <code>sync</code>, <code>async</code>, <code>promise</code> ) &#x751F;&#x6210;&#x5BF9;&#x5E94;&#x7684;&#x6267;&#x884C;&#x4EE3;&#x7801;&#x3002;</p>
+<h4 id="&#x52A8;&#x6001;&#x51FD;&#x6570;"><a href="#&#x52A8;&#x6001;&#x51FD;&#x6570;" class="headerlink" title="&#x52A8;&#x6001;&#x51FD;&#x6570;"></a>&#x52A8;&#x6001;&#x51FD;&#x6570;</h4><p>&#x6211;&#x4EEC;&#x901A;&#x8FC7;&#x4E0B;&#x9762;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x6848;&#x4F8B;&#xFF0C;&#x770B; <code>New Function</code> &#x8F93;&#x5165;&#x7684;&#x5185;&#x5BB9;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;</p>
+<p>&#x5B9E;&#x4F8B;&#x4EE3;&#x7801;&#x5982;&#x4E0B;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">const { SyncHook, AsyncSeriesHook } = require(&quot;tapable&quot;);</span><br><span class="line"></span><br><span class="line">// &#x5B9E;&#x4F8B;&#x5316; &#x94A9;&#x5B50;&#x51FD;&#x6570; &#x5B9A;&#x4E49;&#x5F62;&#x53C2;</span><br><span class="line">const syncHook = new SyncHook([&quot;name&quot;]);</span><br><span class="line">const asyncSeriesHook = new AsyncSeriesHook([&quot;name&quot;])</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.tap(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x901A;&#x8FC7;tap&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E8B;&#x4EF6;</span><br><span class="line">asyncSeriesHook.tapAsync(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, (name) =&gt; {</span><br><span class="line">  console.log(&quot;&#x540C;&#x6B65;&#x94A9;&#x5B50;1&quot;, name);</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">//&#x540C;&#x6B65;&#x94A9;&#x5B50; &#x901A;&#x8FC7;call &#x53D1;&#x5E03;&#x4E8B;&#x4EF6;</span><br><span class="line">syncHook.call(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;sync&quot;);</span><br><span class="line">asyncSeriesHook.callAsync(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;async&quot;);</span><br><span class="line">asyncSeriesHook.promise(&quot;&#x53E4;&#x8317;&#x524D;&#x7AEF;promise&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728; <code>HookCodeFactory</code> &#x7684; <code>create</code> &#x6253;&#x5370; <code>fn</code>, &#x5B9E;&#x4F8B;&#x4EE3;&#x7801;&#x5982;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/1a1ca81ce11458c145bf1288f6509a55d8e5461b59821eba36d6856c0f7398ff" alt="image.png"></p>
+<p><code>sync</code> &#x540C;&#x6B65;&#x8C03;&#x7528;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801; function anonymous(name</span><br><span class="line">) {</span><br><span class="line">&quot;use strict&quot;;</span><br><span class="line">var _context;</span><br><span class="line">var _x = this._x;</span><br><span class="line">var _fn0 = _x[0];</span><br><span class="line">_fn0(name);</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><code>async</code> &#x5F02;&#x6B65;&#x8C03;&#x7528;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;function anonymous(name, _callback</span><br><span class="line">) {</span><br><span class="line">&quot;use strict&quot;;</span><br><span class="line">var _context;</span><br><span class="line">var _x = this._x;</span><br><span class="line">var _fn0 = _x[0];</span><br><span class="line">_fn0(name, (function(_err0) {</span><br><span class="line">if(_err0) {</span><br><span class="line">_callback(_err0);</span><br><span class="line">} else {</span><br><span class="line">_callback();</span><br><span class="line">}</span><br><span class="line">}));</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><code>promise</code> &#x8C03;&#x7528;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801; function anonymous(name</span><br><span class="line">) {</span><br><span class="line">&quot;use strict&quot;;</span><br><span class="line">var _context;</span><br><span class="line">var _x = this._x;</span><br><span class="line">return new Promise((function(_resolve, _reject) {</span><br><span class="line">var _sync = true;</span><br><span class="line">function _error(_err) {</span><br><span class="line">if(_sync)</span><br><span class="line">_resolve(Promise.resolve().then((function() { throw _err; })));</span><br><span class="line">else</span><br><span class="line">_reject(_err);</span><br><span class="line">};</span><br><span class="line">var _fn0 = _x[0];</span><br><span class="line">_fn0(name, (function(_err0) {</span><br><span class="line">if(_err0) {</span><br><span class="line">_error(_err0);</span><br><span class="line">} else {</span><br><span class="line">_resolve();</span><br><span class="line">}</span><br><span class="line">}));</span><br><span class="line">_sync = false;</span><br><span class="line">}));</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E09;&#x79CD;&#x4E0D;&#x540C;&#x65B9;&#x5F0F;&#x8C03;&#x7528;&#xFF0C;&#x5185;&#x90E8;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x5DEE;&#x5F02;&#x8FD8;&#x662F;&#x6BD4;&#x8F83;&#x6E05;&#x6670;&#x7684;&#x3002;<code>async</code> &#x8C03;&#x7528;&#x76F8;&#x8F83;&#x4E8E; <code>sync</code> &#x591A;&#x4E86;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x3002; <code>async</code> &#x548C; <code>promise</code> &#x7684;&#x533A;&#x522B;&#x518D;&#x53BB;&#x8FD4;&#x56DE; <code>promise</code> &#x8FD8;&#x662F;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x3002;</p>
+<p>&#x6700;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x7528;&#x4E00;&#x4E9B;&#x7ED3;&#x6784;&#x56FE;&#x6765;&#x603B;&#x7ED3;&#x4E00;&#x4E0B; <code>Tapable</code> &#x4E2D;&#x4E8B;&#x4EF6;&#x89E6;&#x53D1;&#x7684;&#x903B;&#x8F91;&#x3002;</p>
+<p><code>HookCodeFactory</code> &#x4F1A;&#x6839;&#x636E;&#x6211;&#x4EEC;&#x89E6;&#x53D1;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x751F;&#x6210;&#x6211;&#x4EEC;&#x5BF9;&#x5E94;  <code>new Function</code> &#x91CC;&#x9762;&#x7684; <code>content</code>, <code>args</code>, <code>header</code>&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2cacdfff83cf944c07a18a4914132f049ac3c0cc01b9ecd18d7fd39b812b7632" alt="image.png"></p>
+<p><code>content</code> &#x6700;&#x7EC8;&#x4F1A;&#x7531; <code>callTapsSeries</code>&#x3001;<code>callTapsLooping</code>&#x3001;<code>callTapsParallel</code> &#x751F;&#x6210;&#x3002;&#x6BCF;&#x79CD;&#x751F;&#x6210;&#x65B9;&#x5F0F;&#x90FD;&#x4F1A;&#x5305;&#x542B; <code>Done</code> &#x5904;&#x7406;&#x3001;<code>Error</code> &#x5904;&#x7406;&#x4EE5;&#x53CA; <code>Result</code> &#x5904;&#x7406;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7d5ad026d9642bad9e046233e80b02eefdefd6cfd5900c27803e6ee5f7f9fadf" alt="image.png"></p>
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x5176;&#x4ED6;&#x673A;&#x5236;&#x7684; <code>Hooks</code> &#x94A9;&#x5B50;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#x5927;&#x81F4;&#x662F;&#x76F8;&#x540C;&#x7684;&#xFF0C; &#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x4E00;&#x4E00;&#x8D58;&#x8FF0;&#x4E86;&#x3002;<code>Tapable</code> &#x662F;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x4F18;&#x79C0;&#x7684;&#x5E93;&#xFF0C;&#x7075;&#x6D3B;&#x6269;&#x5C55;&#x6027;&#x9AD8;&#xFF0C;&#x8BB8;&#x591A;&#x4F18;&#x79C0;&#x7684;&#x5F00;&#x6E90;&#x9879;&#x76EE;&#x7684;&#x63D2;&#x4EF6;&#x5316;&#x8BBE;&#x8BA1;&#x90FD;&#x501F;&#x9274;&#x6216;&#x91C7;&#x7EB3;&#x4E86; <code>Tapable</code> &#x7684;&#x8BBE;&#x8BA1;&#x601D;&#x60F3;&#xFF0C;&#x662F;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x503C;&#x5F97;&#x63A8;&#x8350;&#x5B66;&#x4E60;&#x7684;&#x4E00;&#x4E2A;&#x5F00;&#x6E90;&#x5DE5;&#x5177;&#x5E93;&#x3002;</p>
+<h2 id="&#x6700;&#x540E;"><a href="#&#x6700;&#x540E;" class="headerlink" title="&#x6700;&#x540E;"></a>&#x6700;&#x540E;</h2><p>&#x1F4DA; &#x5C0F;&#x8317;&#x6587;&#x7AE0;&#x63A8;&#x8350;&#xFF1A;</p>
+<ul>
+<li><a href="https://dev.newban.cn/7297529039312158730">&#x53E4;&#x8317;&#x6253;&#x5370;&#x673A;&#x6280;&#x672F;&#x7684;&#x6F14;&#x8FDB;</a></li>
+<li><a href="https://dev.newban.cn/7295160228878106650">5&#x5206;&#x949F;&#x5E26;&#x4F60;&#x4E86;&#x89E3;&#xFF0C;&#x53E4;&#x8317;&#x7684;&#x4EE3;&#x7801;&#x53D1;&#x5E03;&#x4E0E;&#x56DE;&#x6EDA;</a></li>
+<li><a href="https://dev.newban.cn/7293387622851657762">&#x53E4;&#x8317;&#x524D;&#x7AEF;&#x7B2C;&#x4E8C;&#x5C4A;&#x8BBA;&#x575B; &#x2014;&#x2014; Typescript&#x7BC7;</a></li>
+</ul>
+<p>&#x5173;&#x6CE8;&#x516C;&#x4F17;&#x53F7;&#x300C;<a href="/external_links/f40b7034b31e24ca9725d4bcf11e27fb.html" target="blank" rel="noopener">Goodme&#x524D;&#x7AEF;&#x56E2;&#x961F;</a>&#x300D;&#xFF0C;&#x83B7;&#x53D6;&#x66F4;&#x591A;&#x5E72;&#x8D27;&#x5B9E;&#x8DF5;&#xFF0C;&#x6B22;&#x8FCE;&#x4EA4;&#x6D41;&#x5206;&#x4EAB;~</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/bd04bc71a90c3f021ee2d4c42659b336.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/前端-JavaScript-架构/" rel="tag"># 前端,JavaScript,架构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7299834584375869474.html" rel="next" title="Android 14 正式版适配笔记（一）— 针对所有应用的">
+                <i class="fa fa-chevron-left"></i> Android 14 正式版适配笔记（一）— 针对所有应用的
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7302348032544866316.html" rel="prev" title="Android 14 正式版适配笔记（二）— 针对Andro">
+                Android 14 正式版适配笔记（二）— 针对Andro <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">399</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tapable"><span class="nav-number">2.</span> <span class="nav-text">Tapable</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Tapable-Hook-钩子"><span class="nav-number">2.1.</span> <span class="nav-text">Tapable Hook 钩子</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#同步钩子"><span class="nav-number">2.1.1.</span> <span class="nav-text">同步钩子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#异步钩子"><span class="nav-number">2.1.2.</span> <span class="nav-text">异步钩子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#熔断类"><span class="nav-number">2.1.3.</span> <span class="nav-text">熔断类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#循环类"><span class="nav-number">2.1.4.</span> <span class="nav-text">循环类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#瀑布类"><span class="nav-number">2.1.5.</span> <span class="nav-text">瀑布类</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tapable-高级特性"><span class="nav-number">2.2.</span> <span class="nav-text">Tapable 高级特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Intercept"><span class="nav-number">2.2.1.</span> <span class="nav-text">Intercept</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HookMap"><span class="nav-number">2.2.2.</span> <span class="nav-text">HookMap</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tapable-底层原理"><span class="nav-number">3.</span> <span class="nav-text">Tapable 底层原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hook-实例"><span class="nav-number">3.1.</span> <span class="nav-text">Hook 实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#构造函数"><span class="nav-number">3.1.1.</span> <span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#注册事件"><span class="nav-number">3.1.2.</span> <span class="nav-text">注册事件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#触发事件"><span class="nav-number">3.1.3.</span> <span class="nav-text">触发事件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HookCodeFactory-实例"><span class="nav-number">3.2.</span> <span class="nav-text">HookCodeFactory 实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#create"><span class="nav-number">3.2.1.</span> <span class="nav-text">create</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#contentWithInterceptors"><span class="nav-number">3.2.2.</span> <span class="nav-text">contentWithInterceptors</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态函数"><span class="nav-number">3.2.3.</span> <span class="nav-text">动态函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

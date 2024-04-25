@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Rust,前端框架,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;&amp;#x738B;&amp;#x8212;&amp;#x6E90;  &amp;#x672C;&amp;#x6587;&amp;#x9884;&amp;#x8BA1;&amp;#x9605;&amp;#x8BFB;&amp;#x65F6;&amp;#x957F;&amp;#x7EA6;&amp;#x4E3A; 20min &amp;#x672C;&amp;#x6587;&amp;#x4E3A;&amp;#x516C;&amp;#x53F8;&amp;#x5185;&amp;#x90E8;&amp;#x7684">
+<meta name="keywords" content="Rust,前端框架">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NAPI-RS 是怎么工作的  从 NAPI 到 Build">
+<meta property="og:url" content="https://dev.newban.cn/7202541740934709303.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;&amp;#x738B;&amp;#x8212;&amp;#x6E90;  &amp;#x672C;&amp;#x6587;&amp;#x9884;&amp;#x8BA1;&amp;#x9605;&amp;#x8BFB;&amp;#x65F6;&amp;#x957F;&amp;#x7EA6;&amp;#x4E3A; 20min &amp;#x672C;&amp;#x6587;&amp;#x4E3A;&amp;#x516C;&amp;#x53F8;&amp;#x5185;&amp;#x90E8;&amp;#x7684">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/e8251b545c3fc8c042e1663b292fe464521d4a4caabc735e9f51755d655b4484">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bddf6afe70f5e191a9a26bc6adc01978d6db2dea62c9331a56cabad74fcec17f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/c3cc74e44573a9437042fa97ab72b92bd56380ac284db581cc54f84f188417cc">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7d87f7bae6a24cb951a1be7738f0756670c09d71f4e27fbd57f1b53b3d959b2a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/0ec41a6a8a106ab339a9dbb2bcb30ddff1d9830b254c6ddba22744048733cf7d">
+<meta property="og:updated_time" content="2024-04-24T04:14:55.961Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NAPI-RS 是怎么工作的  从 NAPI 到 Build">
+<meta name="twitter:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;&amp;#x738B;&amp;#x8212;&amp;#x6E90;  &amp;#x672C;&amp;#x6587;&amp;#x9884;&amp;#x8BA1;&amp;#x9605;&amp;#x8BFB;&amp;#x65F6;&amp;#x957F;&amp;#x7EA6;&amp;#x4E3A; 20min &amp;#x672C;&amp;#x6587;&amp;#x4E3A;&amp;#x516C;&amp;#x53F8;&amp;#x5185;&amp;#x90E8;&amp;#x7684">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/e8251b545c3fc8c042e1663b292fe464521d4a4caabc735e9f51755d655b4484">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7202541740934709303.html">
+
+
+
+
+
+  <title>NAPI-RS 是怎么工作的  从 NAPI 到 Build | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">NAPI-RS 是怎么工作的  从 NAPI 到 Build</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-02-21T20:01:19+08:00">
+                2023-02-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x4F5C;&#x8005;&#xFF1A;&#x738B;&#x8212;&#x6E90;</p>
+<blockquote>
+<p>&#x672C;&#x6587;&#x9884;&#x8BA1;&#x9605;&#x8BFB;&#x65F6;&#x957F;&#x7EA6;&#x4E3A; 20min</p>
+<p>&#x672C;&#x6587;&#x4E3A;&#x516C;&#x53F8;&#x5185;&#x90E8;&#x7684;&#x5206;&#x4EAB;&#xFF0C;&#x90E8;&#x5206;&#x5185;&#x5BB9;&#x662F; live coding &#x73B0;&#x573A;&#x7F16;&#x5199;&#xFF0C;&#x9700;&#x8981;&#x53C2;&#x8003;&#x4EE3;&#x7801;&#x793A;&#x4F8B;</p>
+<p>&#x5B8C;&#x6574;&#x7684;&#x4EE3;&#x7801;&#x793A;&#x4F8B;&#x53EF;&#x4EE5;&#x5728;<a href="/external_links/8c381fe6fdbc375b4c413d5f0b4908ff.html" target="blank" rel="noopener">&#x8FD9;&#x91CC;</a>&#x627E;&#x5230;</p>
+</blockquote>
+<h1 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h1><p>&#x5BF9;&#x4E8E; NAPI-RS &#x6765;&#x8BF4;&#xFF0C;&#x5927;&#x5BB6;&#x4E00;&#x5B9A;&#x5DF2;&#x7ECF;&#x4E0D;&#x964C;&#x751F;&#x4E86;&#x3002;&#x548C; Neon&#xFF0C;WASM-Bindgen &#x76F8;&#x540C;&#xFF0C;&#x5B83;&#x4EEC;&#x5747;&#x662F;&#x7528;&#x6765;&#x751F;&#x6210;&#x5BF9;&#x4E8E;&#x67D0;&#x79CD; Binding &#x7684;&#x5DE5;&#x5177;&#x5E93;&#xFF0C;&#x524D;&#x8005; Neon &#x548C; NAPI-RS &#x57FA;&#x672C;&#x662F;&#x540C;&#x7C7B;&#x4EA7;&#x54C1;&#xFF0C;&#x7528;&#x4E8E;&#x751F;&#x6210;&#x548C; Node &#x7684; Binding&#x3002;</p>
+<p><strong>Binding &#x662F;&#x4EC0;&#x4E48;&#xFF1F;</strong></p>
+<p>&#x8FD9;&#x91CC;&#x7684; binding &#x7B49;&#x4EF7;&#x4E8E; <a href="/external_links/a3db8b8b315df284825dce6727fff25d.html" target="blank" rel="noopener">Language binding</a>&#xFF0C;&#x6458;&#x5F55;&#x4E00;&#x6BB5;&#x7EF4;&#x57FA;&#x767E;&#x79D1;&#x4E2D;&#x7684;&#x63CF;&#x8FF0;&#xFF1A;</p>
+<blockquote>
+<p>In <a href="/external_links/25155b4f7d58ca4c83001cd748abf5c3.html" target="blank" rel="noopener">programming</a> and <a href="/external_links/a55d7b4eae036da0116290ea5720c670.html" target="blank" rel="noopener">software design</a>, <strong>binding</strong> is an <a href="/external_links/c3b6475d989fc4f46d473299c5f0a76b.html" target="blank" rel="noopener">application programming interface</a> (API) that provides <a href="/external_links/106b9a94e538648eff863c6ba155df44.html" target="blank" rel="noopener">glue code</a> specifically made to allow a <a href="/external_links/c33f61aa9cacdeed3a83742756b0942d.html" target="blank" rel="noopener">programming language</a> to use a foreign <a href="/external_links/10b09c3d96651eedd8577080f0ded099.html" target="blank" rel="noopener">library</a> or <a href="/external_links/0115155e5fbeaa764ceaa4a8714a8951.html" target="blank" rel="noopener">operating system</a> service (one that is not native to that language). From <a href="/external_links/a3db8b8b315df284825dce6727fff25d.html" target="blank" rel="noopener">Wikipedia</a></p>
+</blockquote>
+<p>&#x5927;&#x90E8;&#x5206;&#x540C;&#x7C7B;&#x578B;&#x7684;&#x5DE5;&#x5177;&#x7684;&#x67B6;&#x6784;&#x90FD;&#x6BD4;&#x8F83;&#x7C7B;&#x4F3C;&#xFF0C;&#x5BF9;&#x4E8E; NAPI-RS &#x6765;&#x8BF4;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/e8251b545c3fc8c042e1663b292fe464521d4a4caabc735e9f51755d655b4484" alt></p>
+<ul>
+<li><strong>NAPI-SYS</strong>&#xFF1A;NAPI &#x7684; SYS crate&#xFF0C;&#x8D1F;&#x8D23;&#x548C; Node &#x901A;&#x4FE1;&#x3002;&#x793E;&#x533A;&#x4E0A;&#x901A;&#x5E38;&#x4F7F;&#x7528; <code>*-sys</code> &#x547D;&#x540D;&#x8FD9;&#x4E9B;&#x5E95;&#x5C42;&#x8C03;&#x7528;&#x7684;&#x5E93;&#x3002;</li>
+<li><strong>NAPI</strong>: NAPI crate &#x5219;&#x662F;&#x5BF9; NAPI-SYS &#x5E93;&#x7684;&#x4E0A;&#x5C42;&#x5C01;&#x88C5;&#x3002;&#x7531;&#x4E8E; Sys crate &#x901A;&#x5E38;&#x662F;&#x539F;&#x751F;&#x7684;&#x5E95;&#x5C42; API&#xFF0C;&#x56E0;&#x6B64;&#x57FA;&#x672C;&#x6240;&#x6709;&#x539F;&#x751F;&#x5E93;&#x90FD;&#x4F1A;&#x5B58;&#x5728;&#x4E00;&#x4E2A;&#x5BF9;&#x8BED;&#x8A00;&#x53CB;&#x597D;&#x7684;&#x5C01;&#x88C5;&#xFF0C;&#x8FDB;&#x800C;&#x964D;&#x4F4E;&#x7528;&#x6237;&#x7684;&#x4F7F;&#x7528;&#x6210;&#x672C;&#x4E0E;&#x4EE3;&#x7801;&#x7684;&#x51C6;&#x786E;&#x6027;&#x3002;</li>
+</ul>
+<p><strong>&#x4E3A;&#x4EC0;&#x4E48;</strong> <strong>Sys</strong> <strong>crate &#x901A;&#x5E38;&#x548C; Wrapper crate &#x5206;&#x5F00;&#x5B58;&#x5728;&#xFF1F;</strong></p>
+<p>&#x5BF9;&#x4E8E; Sys crate &#x6765;&#x8BF4;&#xFF0C;&#x5B83;&#x4EEC;&#x7684;&#x5DE5;&#x4F5C;&#x662F;&#x548C;&#x5E95;&#x5C42;&#x7684; lib &#x76F8;&#x7ED1;&#x5B9A;&#xFF0C;API &#x7684;&#x53D8;&#x5316;&#x901A;&#x5E38;&#x4E0D;&#x4F1A;&#x90A3;&#x4E48;&#x9891;&#x7E41;&#xFF0C;&#x800C;&#x5BF9;&#x4E8E; wrapper &#x5C42;&#x6765;&#x8BF4;&#x5B83;&#x4EEC;&#x662F;&#x6781;&#x6613;&#x4EA7;&#x751F; breaking change &#x7684;&#x3002;&#x5F53; Sys &#x548C; Wrapper &#x653E;&#x5728;&#x540C;&#x4E00;&#x4E2A; crate &#x4E2D;&#x5219;&#x975E;&#x5E38;&#x5BB9;&#x6613;&#x4EA7;&#x751F; breaking change&#xFF0C;&#x5982;&#x6B64;&#x65F6;&#x8FDB;&#x884C;&#x5927;&#x7248;&#x672C;&#x5347;&#x7EA7;&#xFF0C;&#x5219;&#x53EF;&#x80FD;&#x4F1A;&#x5BFC;&#x81F4;&#x9879;&#x76EE;&#x4E2D;&#x5355;&#x72EC;&#x4F7F;&#x7528; Sys crate &#x7684; Dependency&#xFF08;&#x65E0;&#x8BBA;&#x662F;&#x95F4;&#x63A5;&#xFF0C;&#x8FD8;&#x662F;&#x76F4;&#x63A5;&#xFF09;&#x4EEC;&#x90FD;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x5347;&#x7EA7;&#xFF0C;&#x56E0;&#x6B64;&#x8FD9;&#x662F;&#x4E0D;&#x5408;&#x7406;&#x7684;&#x3002;&#x8BE6;&#x60C5;&#x89C1; <em><a href="/external_links/6ee939850db4f7e73f7f9dd6778571e1.html" target="blank" rel="noopener">Semver Compatability</a></em></p>
+<ul>
+<li><strong>NAPI Macro</strong> &#x4E0E; <strong>NAPI Macro</strong> <strong>backend</strong>&#xFF1A;&#x901A;&#x5E38;&#x4E3A;&#x4F7F;&#x7528; NAPI &#x7684; Rust API &#x5728;&#x7F16;&#x8BD1;&#x65F6;&#x751F;&#x6210;&#x76F8;&#x5173;&#x6A21;&#x677F;&#x4EE3;&#x7801;&#xFF0C;&#x89E3;&#x653E;&#x7528;&#x6237;&#x7684;&#x53CC;&#x624B;&#x3002;&#x5982; NAPI Macro &#x8FD8;&#x505A;&#x4E86;&#x4E00;&#x4E9B; TS &#x7C7B;&#x578B;&#x751F;&#x6210;&#x7684;&#x5DE5;&#x4F5C;&#x3002;</li>
+</ul>
+<p>&#x5BF9;&#x4E8E;&#x4E0A;&#x5C42;&#x7684; crate &#x6211;&#x4EEC;&#x4E0D;&#x4F1A;&#x5728;&#x672C;&#x7BC7;&#x4E2D;&#x505A;&#x8FC7;&#x591A;&#x7684;&#x4ECB;&#x7ECD;&#xFF0C;&#x5BF9;&#x4E8E;&#x5B83;&#x4EEC;&#x6765;&#x8BF4;&#xFF0C;&#x66F4;&#x591A;&#x7684;&#x91CD;&#x5FC3;&#x5219;&#x662F;&#x653E;&#x5728;&#x201C;&#x600E;&#x4E48;&#x8BA9;&#x7528;&#x6237;&#x964D;&#x4F4E;&#x5F00;&#x53D1;&#x6210;&#x672C;&#x201D;&#xFF08;&#x4F8B;&#x5982;&#x662F;&#x57FA;&#x4E8E; Macro &#x7684;&#x7F16;&#x8BD1;&#x65F6;&#x751F;&#x6210;&#x6A21;&#x677F;&#x4EE3;&#x7801;&#x3001;&#x5BF9; Promise &#x7C7B;&#x578B;&#x7684;&#x5C01;&#x88C5;&#x4F7F;&#x5F97;&#x5B83;&#x80FD;&#x591F;&#x5BF9;&#x63A5; Rust Future&#x7B49;&#xFF09;&#x4E0E;&#x201C;&#x600E;&#x4E48;&#x8BA9;&#x7528;&#x6237;&#x7684;&#x4EE3;&#x7801;&#x53D8;&#x5F97;&#x66F4;&#x52A0;&#x7684;&#x5B89;&#x5168;&#x201D;&#xFF08;&#x4F8B;&#x5982;&#xFF1A;&#x5BF9;&#x4E8E;&#x67D0;&#x4E9B; Opaque &#x7C7B;&#x578B;&#x7684;&#x4E0A;&#x5C42;&#x5C01;&#x88C5;&#xFF09;&#x4E0A;&#x3002;</p>
+<p>&#x672C;&#x7BC7;&#xFF0C;&#x6211;&#x4EEC;&#x4F1A;&#x5C06;&#x66F4;&#x591A;&#x7684;&#x76EE;&#x5149;&#x805A;&#x7126;&#x4E8E; Sys crate &#x548C; Node &#x7684;&#x901A;&#x4FE1;&#x4E0A;&#xFF0C;&#x56E0;&#x4E3A;&#x8FD9;&#x662F; NAPI &#x7684;&#x672C;&#x8D28;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bddf6afe70f5e191a9a26bc6adc01978d6db2dea62c9331a56cabad74fcec17f" alt></p>
+<p>&#x603B;&#x7ED3;&#x6210;&#x4E00;&#x53E5;&#x8BDD;&#x6765;&#x8BF4;&#xFF1A;<strong>NAPI-SYS &#x548C; Node &#x7684;&#x901A;&#x4FE1;&#x662F;&#x5EFA;&#x7ACB;&#x5728; C</strong> <strong>ABI</strong> <strong>&#x4E4B;&#x4E0A;&#x7684;</strong> <strong>FFI</strong> <strong>&#x7684;&#x8C03;&#x7528;</strong>&#x3002;</p>
+<p><strong>C</strong> <strong>ABI</strong> <strong>?</strong></p>
+<p>&#x770B;&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x6709;&#x4E9B;&#x4EBA;&#x53EF;&#x80FD;&#x4F1A;&#x5BF9;&#x8FD9;&#x4E2A;&#x6982;&#x5FF5;&#x6709;&#x4E00;&#x4E9B;&#x6B67;&#x4E49;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x4F1A;&#x5728;&#x4E0B;&#x65B9;&#x505A;&#x8FDB;&#x4E00;&#x6B65;&#x89E3;&#x91CA;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x4F1A;&#x4EE5;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684; NAPI-SYS crate &#x7684;&#x5B9E;&#x73B0;&#x4F5C;&#x4E3A;&#x7ED3;&#x675F;&#x3002;&#x540C;&#x65F6;&#x4E3A;&#x4E86;&#x8BA9;&#x6574;&#x4F53;&#x7684;&#x8854;&#x63A5;&#x4E0D;&#x81F3;&#x4E8E;&#x592A;&#x8FC7;&#x50F5;&#x786C;&#xFF0C;&#x4E0B;&#x65B9;&#x4F1A;&#x4F7F;&#x7528;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x6848;&#x4F8B;&#x8FDB;&#x884C;&#x5177;&#x4F53;&#x5206;&#x6790;&#x3002;&#x90A3;&#x4E48;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x8BA9;&#x6211;&#x4EEC;&#x8BE6;&#x7EC6;&#x5C55;&#x5F00;&#x3002;</p>
+<h1 id="Build-Script-&#xFF5C;&#x6587;&#x6863;"><a href="#Build-Script-&#xFF5C;&#x6587;&#x6863;" class="headerlink" title="Build Script &#xFF5C;&#x6587;&#x6863;"></a>Build Script &#xFF5C;<a href="/external_links/5e6fe18a4415706aa449850cfcd156b6.html" target="blank" rel="noopener">&#x6587;&#x6863;</a></h1><p>&#x4ECE;&#x7F16;&#x8BD1;&#x7684;&#x89D2;&#x5EA6;&#x6765;&#x770B;&#xFF0C;&#x5F53;&#x4E00;&#x4E2A; Package &#x88AB;&#x7F16;&#x8BD1;&#x65F6;&#xFF0C;Cargo &#x4F1A;&#x9996;&#x5148;&#x7F16;&#x8BD1;&#x8FD9;&#x4E2A; build script&#xFF0C;&#x518D;&#x8FDB;&#x884C;&#x540E;&#x7EED;&#x7684;&#x7F16;&#x8BD1;&#x64CD;&#x4F5C;&#x3002;&#x4F60;&#x53EF;&#x4EE5;&#x8BA4;&#x4E3A; Build Script &#x53EA;&#x662F;&#x53E6;&#x4E00;&#x4E2A; Package&#xFF0C;&#x5E76;&#x5728;&#x5F53;&#x524D;&#x7684; Package &#x7F16;&#x8BD1;&#x524D;&#x5148;&#x8FDB;&#x884C;&#x4E86;&#x7F16;&#x8BD1;&#x3002;&#x4E8B;&#x5B9E;&#x4E0A;&#x786E;&#x5B9E;&#x5982;&#x6B64;&#xFF0C;&#x6211;&#x4EEC;&#x80FD;&#x5728; Target &#x4E2D;&#x627E;&#x5230;&#x4E24;&#x7EC4;&#x4EA7;&#x7269;&#xFF0C;&#x5176;&#x4E2D;&#x4E00;&#x7EC4;&#x4FBF;&#x662F; Build script &#x7684;&#x4EA7;&#x7269;&#x3002;</p>
+<p>&#x4ECE;&#x4E8B;&#x52A1;&#x7684;&#x89D2;&#x5EA6;&#x51FA;&#x53D1;&#xFF0C;Build Script &#x5BF9;&#x4E8E; Sys crate &#x6765;&#x8BF4;&#xFF0C;&#x4E00;&#x822C;&#x4F1A;&#x505A;&#x4E00;&#x4E9B;&#x6E90;&#x7801;&#x7F16;&#x8BD1;&#x3001;lib &#x641C;&#x7D22;&#x76F8;&#x5173;&#x7684;&#x4E8B;&#x52A1;&#xFF0C;&#x800C;&#x5BF9;&#x4E8E; Turbopack &#x6765;&#x8BF4;&#xFF0C;&#x5219;&#x662F;&#x8FDB;&#x884C;&#x4E86;&#x6CE8;&#x518C;&#x3001;&#x4EE3;&#x7801;&#x751F;&#x6210;&#x76F8;&#x5173;&#x7684;&#x4E8B;&#x9879;&#x3002;&#x603B;&#x4E4B;&#xFF0C;&#x5C3D;&#x7BA1;&#x5B83;&#x88AB;&#x53EB;&#x505A; build script&#xFF0C;&#x800C;&#x73B0;&#x5B9E;&#x4E16;&#x754C;&#x4E2D;&#xFF0C;&#x7406;&#x8BBA;&#x4E0A;&#x4F60;&#x53EF;&#x4EE5;&#x7528;&#x6765;&#x5BF9;&#x4ED6;&#x505A;&#x4EFB;&#x4F55;&#x4E8B;&#x60C5;&#xFF0C;&#x751A;&#x81F3;&#x662F;&#x53D1;&#x9001;&#x4E00;&#x4E2A; HTTP &#x8BF7;&#x6C42;&#x6216;&#x505A;&#x4E00;&#x4E9B;&#x5371;&#x53CA;&#x8BA1;&#x7B97;&#x673A;&#x5B89;&#x5168;&#x7684;&#x4E8B;&#x60C5;&#xFF0C;Rust &#x7684; Secure code team &#x8FD8;&#x4E3A;&#x6B64;&#x53D1;&#x8D77;&#x4E86;&#x76F8;&#x5173;&#x662F;&#x5426;&#x8981;&#x505A; Build-time Sandbox &#x7684;*<a href="/external_links/03faa5732c763f7bcb8a9581768162a7.html" target="blank" rel="noopener">&#x8BA8;&#x8BBA;</a>* <em>&#x3002;</em></p>
+<p>&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x4F60;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x5728; Package &#x7684;&#x6839;&#x76EE;&#x5F55;&#x4E2D;&#x751F;&#x6210;&#x4E00;&#x4E2A;&#x5E26;&#x6709; fn main &#x7684; build.rs &#x6765;&#x4F5C;&#x4E3A; build script&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">csharp&#x590D;&#x5236;&#x4EE3;&#x7801;// build.rs</span><br><span class="line">fn main() {</span><br><span class="line"> </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x679C;&#x5728; build script &#x7684;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#x53D1;&#x751F;&#x4E86; panic&#xFF0C;&#x5219;&#x4E0D;&#x4F1A;&#x5BF9;&#x8BE5; Package &#x8FDB;&#x884C;&#x540E;&#x7EED;&#x7684;&#x7F16;&#x8BD1;&#x6D41;&#x7A0B;&#x3002;</p>
+<p>&#x503C;&#x5F97;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x5728; build script &#x4E2D;&#x7684;&#x4E00;&#x5207; print &#x64CD;&#x4F5C;&#x662F;&#x4E0D;&#x4F1A;&#x88AB;&#x6253;&#x5370;&#x5230; stdio &#x4E0A;&#x7684;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;// build.rs</span><br><span class="line">fn main() {</span><br><span class="line"> println!(&quot;hello from build.rs&quot;); // &#x6CA1;&#x6709;&#x7528;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;&#x4E8E; print &#x6765;&#x8BF4;&#xFF0C;&#x4F60;&#x53EF;&#x4EE5;&#x5728;&#x4EA7;&#x7269;&#x6587;&#x4EF6;&#x5939;&#x4E0B; output &#x6587;&#x4EF6;&#x4E2D;&#x627E;&#x5230;&#x5BF9;&#x5E94;&#x7684;&#x8F93;&#x51FA;&#xFF0C;&#x5BF9;&#x4E8E; <code>dbg!</code> &#x7684;&#x76F8;&#x5173;&#x8F93;&#x51FA;&#x5219;&#x53EF;&#x4EE5;&#x5728;&#x4EA7;&#x7269;&#x6587;&#x4EF6;&#x5939;&#x4E2D;&#x7684; stderr &#x6587;&#x4EF6;&#x4E2D;&#x627E;&#x5230;&#xFF08;&#x8FD9;&#x4E2A; macro &#x7684;&#x672C;&#x8D28;&#x662F; stderr &#x7684; output&#xFF09;</p>
+<p>&#x5BF9;&#x4E8E;&#x4E3A;&#x4EC0;&#x4E48;&#x4E0D;&#x5BF9; print &#x76F8;&#x5173;&#x7684;&#x5185;&#x5BB9;&#x8FDB;&#x884C;&#x63A7;&#x5236;&#x53F0;&#x7684;&#x8F93;&#x51FA;&#xFF0C;*<a href="/external_links/12da514829ffebc93cc765e38bd5d6a4.html" target="blank" rel="noopener">&#x5B98;&#x65B9;</a>*&#x7ED9;&#x51FA;&#x7684;&#x7406;&#x7531;&#x662F;&#x4E0D;&#x60F3;&#x5236;&#x9020;&#x66F4;&#x591A;&#x7684;&#x566A;&#x97F3;&#x3002;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x5728; build script &#x4E2D;&#x8FD8;&#x6709;&#x4E00;&#x4EF6;&#x5927;&#x4E8B;&#x53EF;&#x4EE5;&#x505A;&#xFF0C;&#x90A3;&#x5C31;&#x662F;&#x8C03;&#x7528; print &#x751F;&#x6210; Cargo Instructions</p>
+<h2 id="Cargo-Instructions-&#x6587;&#x6863;"><a href="#Cargo-Instructions-&#x6587;&#x6863;" class="headerlink" title="Cargo Instructions | &#x6587;&#x6863;"></a>Cargo Instructions | <a href="/external_links/5e6fe18a4415706aa449850cfcd156b6.html" target="blank" rel="noopener">&#x6587;&#x6863;</a></h2><p>&#x8FD9;&#x91CC;&#x5217;&#x4E3E;&#x4E00;&#x4E9B;&#x5E38;&#x7528;&#x7684; Instructions:</p>
+<ul>
+<li><code>cargo:rerun-if-changed=PATH</code> &#x2014; Tells Cargo when to re-run the script.</li>
+<li><code>cargo:rustc-link-arg=FLAG</code> &#x2014; Passes custom flags to a linker for benchmarks, binaries, <code>cdylib</code> crates, examples, and tests.</li>
+<li><code>cargo:rustc-link-lib=LIB</code> &#x2014; Adds a library to link.</li>
+<li><code>cargo:rustc-link-search=[KIND=]PATH</code> &#x2014; Adds to the library search path.</li>
+<li><code>cargo:rustc-cfg=KEY[=&quot;VALUE&quot;]</code> &#x2014; Enables compile-time <code>cfg</code> settings.</li>
+<li><code>cargo:rustc-cdylib-link-arg=FLAG</code> &#x2014; Passes custom flags to a linker for cdylib crates.</li>
+</ul>
+<p>&#x9664;&#x6B64;&#x4E4B;&#x5916;&#xFF0C;&#x6211;&#x4EEC;&#x901A;&#x5E38;&#x4E5F;&#x4F1A;&#x5728; build script &#x4E2D;&#x83B7;&#x53D6;&#x76F8;&#x5173; env &#x5B57;&#x6BB5;&#xFF0C;&#x5E38;&#x89C1;&#x7684;&#x6709; <code>OUT_DIR</code>&#xFF0C;<code>CARGO_FEATURE_XXX</code> &#x7B49;&#x7B49;&#xFF0C;&#x8FD9;&#x4E9B;&#x90FD;&#x53EF;&#x4EE5;&#x901A;&#x8FC7; <code>std::env::var</code> &#x83B7;&#x5F97;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x5E0C;&#x671B;&#x5FFD;&#x7565; UTF-8 &#x7684;&#x6821;&#x9A8C;&#xFF0C;&#x5219;&#x53EF;&#x4EE5;&#x7528;&#x6027;&#x80FD;&#x66F4;&#x597D;&#x7684; <code>std::env::var_os</code> &#x8FBE;&#x5230;&#x51E0;&#x4E4E;&#x76F8;&#x540C;&#x7684;&#x6548;&#x679C;&#x3002;</p>
+<p>&#x8FD9;&#x4E9B;&#x90FD;&#x662F;&#x65E5;&#x5E38;&#x5F00;&#x53D1;&#x4E0A;&#x57FA;&#x672C;&#x4F1A;&#x7528;&#x5230;&#x7684;&#x76F8;&#x5173;&#x5185;&#x5BB9;&#xFF0C;&#x5728;&#x8FD9;&#x4E4B;&#x4E0A;&#xFF0C;&#x5BF9;&#x4E8E;&#x4E00;&#x4E2A; Sys crate &#x7684;&#x7F16;&#x8BD1;&#x6765;&#x8BF4;&#xFF0C;&#x6211;&#x4EEC;&#x901A;&#x5E38;&#x4F1A;&#x5BF9;&#x672C;&#x673A;&#x7684; lib &#x8FDB;&#x884C;&#x67E5;&#x627E;&#xFF0C;&#x4ECE;&#x800C;<strong>&#x5F15;&#x5BFC;</strong> rustc &#x5B8C;&#x6210;&#x5BF9;&#x8BE5; lib &#x7684; linking&#x3002;</p>
+<h2 id="Pattern"><a href="#Pattern" class="headerlink" title="Pattern"></a>Pattern</h2><p>&#x6682;&#x65F6;&#x65E0;&#x6CD5;&#x5728;&#x98DE;&#x4E66;&#x6587;&#x6863;&#x5916;&#x5C55;&#x793A;&#x6B64;&#x5185;&#x5BB9;</p>
+<p>&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x4F1A;&#x5728;&#x4E00;&#x4E2A;&#x7248;&#x672C;&#x53F7;&#x533A;&#x95F4;&#x5185;&#x67E5;&#x627E;&#x7CFB;&#x7EDF;&#x4E2D;&#x5B58;&#x5728;&#x7684; lib &#x5305;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x5B58;&#x5728;&#x5219;&#x8FDB;&#x884C;&#x57FA;&#x4E8E;&#x6E90;&#x7801;&#x7684;&#x6784;&#x5EFA;&#x3002;</p>
+<p>&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x4EE5; <em><a href="/external_links/c73585bef810af55c3d5d1df07f4849a.html" target="blank" rel="noopener">libgit2</a></em> &#x4F5C;&#x4E3A;&#x53C2;&#x8003;&#xFF0C;&#x5C31;&#x4E0D;&#x5728;&#x672C;&#x6587;&#x4E2D;&#x8BE6;&#x7EC6;&#x5C55;&#x5F00;&#x4E86;&#x3002;</p>
+<h1 id="Foreign-Function-Interface-FFI"><a href="#Foreign-Function-Interface-FFI" class="headerlink" title="Foreign Function Interface (FFI)"></a>Foreign Function Interface (FFI)</h1><blockquote>
+<p>A <strong>foreign function interface</strong> (<strong>FFI</strong>) is a mechanism by which a program written in one <a href="/external_links/c33f61aa9cacdeed3a83742756b0942d.html" target="blank" rel="noopener">programming language</a> can call routines or make use of services written in another. From <em><a href="/external_links/d8215dc0c2850239db9abf48aba33743.html" target="blank" rel="noopener">Wikepedia</a></em></p>
+</blockquote>
+<p>FFI &#x53EF;&#x4EE5;&#x8BA9;&#x8DE8;&#x8BED;&#x8A00;&#x7684;&#x7A0B;&#x5E8F;&#x4E4B;&#x95F4;&#x5B8C;&#x6210;&#x76F8;&#x4E92;&#x7684;&#x8C03;&#x7528;&#x3002;&#x5C31;&#x50CF; IPC(Inter-process communication)&#x4E00;&#x6837;&#x9700;&#x8981;&#x5EFA;&#x7ACB;&#x4E00;&#x5957; protocol&#xFF0C;FFI &#x540C;&#x6837;&#x4E5F;&#x662F;&#x4E00;&#x79CD;&#x6EE1;&#x8DB3;&#x4E86;&#x7EA6;&#x5B9A;&#x7684;&#x89C4;&#x5219;(&#x5982;&#xFF1A;Calling conventions &#x7B49;, ABI)&#x7684;&#x8C03;&#x7528;&#xFF0C;Rust &#x652F;&#x6301;&#x7684; ABI &#x53EF;&#x4EE5;&#x5728;<a href="/external_links/878c06993327952e45dde7f301309a3c.html" target="blank" rel="noopener">&#x8FD9;&#x91CC;</a>&#x627E;&#x5230;&#x3002;&#x7531;&#x4E8E; C &#x7684; ABI &#x5728;<strong>&#x540C;&#x4E00;&#x4E2A;&#x5E73;&#x53F0;</strong>&#x4E0A;&#x662F;&#x517C;&#x5BB9;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#x5927;&#x90E8;&#x5206;&#x5E93;&#x90FD;&#x662F;&#x5EFA;&#x7ACB;&#x5728; C ABI &#x4E0A;&#x7684;&#x3002;</p>
+<p><strong>ABI</strong> <strong>&#x548C; C ABI?</strong></p>
+<p>ABI(Application Binary Interface) &#x548C; API(Application Programming Interface)&#x975E;&#x5E38;&#x76F8;&#x4F3C;&#xFF0C;&#x524D;&#x8005;&#x63CF;&#x8FF0;&#x4E86; Binary &#x7684;&#x517C;&#x5BB9;&#x6027;&#xFF0C;&#x8FD9;&#x5176;&#x4E2D;&#x5305;&#x62EC;&#x4E86;&#x5404;&#x79CD;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x7684; <a href="/external_links/a07564af61e47c11187a3adc0395bfea.html" target="blank" rel="noopener">size &#x548C; alignment</a>&#x3001;&#x5185;&#x5B58;&#x5E03;&#x5C40;&#xFF08;Layout&#xFF09;&#x4EE5;&#x53CA;&#x7CFB;&#x7EDF;&#x7684;&#x8C03;&#x7528;&#x7EA6;&#x5B9A;&#xFF08;&#x7528;&#x6765;&#x63CF;&#x8FF0;&#x4F8B;&#x5982;&#x53C2;&#x6570;&#x662F;&#x600E;&#x4E48;&#x88AB;&#x4F20;&#x9012;&#x7684;&#x7B49;&#x7B49;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;<a href="/external_links/3ba55a2a666434baebc885e2098e8d7e.html" target="blank" rel="noopener">x86 calling conventions</a>&#xFF09;&#xFF0C;&#x751A;&#x81F3;&#x5305;&#x62EC;&#x4E86; Compiler &#x7B49;&#x7B49;&#x4E4B;&#x95F4;&#x7684;&#x4E00;&#x81F4;&#x6027;&#xFF08;Conformance&#xFF09; &#x7B49;&#x7B49;&#x3002;<em><a href="/external_links/cf17fd913505c4eed50f188f7c3d66c2.html" target="blank" rel="noopener">&#x66F4;&#x591A;</a></em></p>
+<p>&#x5728; C &#x7684;&#x6807;&#x51C6;&#x4E2D;&#xFF0C;&#x5176;&#x5B9E;&#x662F;&#x6CA1;&#x6709;&#x5BF9; C ABI &#x6807;&#x51C6;&#x7684;&#x5B9A;&#x4E49;&#x7684;&#x3002;&#x4F46;&#x5BF9;&#x4E8E;<strong>&#x540C;&#x4E00;&#x4E2A;&#x5E73;&#x53F0;</strong>&#xFF0C;&#x8FD9;&#x4E9B;&#x57FA;&#x672C;&#x662F;&#x53EF;&#x4EE5;&#x88AB;&#x8BA4;&#x4E3A;&#x662F;&#x4E00;&#x81F4;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#x6211;&#x4EEC;&#x57FA;&#x672C;&#x53EF;&#x4EE5;&#x8BA4;&#x4E3A;&#x5B83;&#x4EEC;&#x662F;&#x517C;&#x5BB9;&#x7684;&#x3002;&#x800C;&#x5BF9;&#x4E8E;&#x4E0D;&#x540C;&#x7684;&#x5E73;&#x53F0;&#x6765;&#x8BF4;&#xFF0C;&#x5B83;&#x4EEC;&#x7CFB;&#x7EDF;&#x4E4B;&#x95F4;&#x7684;&#x8C03;&#x7528;&#x7EA6;&#x5B9A;&#x53EF;&#x80FD;&#x662F;&#x4E0D;&#x4E00;&#x81F4;&#x7684;&#xFF0C;&#x56E0;&#x6B64;&#x6211;&#x4EEC;&#x8BA4;&#x4E3A;&#x5B83;&#x4EEC;&#x662F;&#x4E0D;&#x517C;&#x5BB9;&#x7684;&#x3002;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x5728;&#x63CF;&#x8FF0; C ABI &#x7684;&#x517C;&#x5BB9;&#x6027;&#x65F6;&#xFF0C;&#x90FD;&#x5305;&#x6DB5;&#x4E86;&#x4E00;&#x4E2A;&#x9690;&#x5F0F;&#x7EA6;&#x5B9A;&#xFF1A;<strong>&#x540C;&#x4E00;&#x5E73;&#x53F0;</strong></p>
+<h2 id="FFI"><a href="#FFI" class="headerlink" title="FFI"></a>FFI</h2><p>&#x5728; Rust &#x4E2D;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8FD9;&#x6837;&#x6765;&#x58F0;&#x660E;&#xFF0C;<a href="/external_links/4618bd6748eec2fab1905749086e8a48.html" target="blank" rel="noopener">extern &#x201C;abi&#x201D;</a>&#xFF1A;&#x5982; extern &#x201C;C&#x201D;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;extern &quot;C&quot; {</span><br><span class="line">  fn napi_create_object(...)</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x4E0D;&#x9700;&#x8981;&#x624B;&#x52A8;&#x5B9A;&#x4E49; unsafe&#xFF0C;&#x56E0;&#x4E3A; FFI &#x7684;&#x8C03;&#x7528;&#x6C38;&#x8FDC;&#x662F; unsafe &#x7684;&#x3002;</p>
+<h2 id="Reverse-FFI"><a href="#Reverse-FFI" class="headerlink" title="Reverse FFI"></a>Reverse FFI</h2><p>&#x540C;&#x6837;&#x7684;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x5B9A;&#x4E49;&#x5BF9;&#x5E94;&#x7684; fn &#x7ED9;&#x5176;&#x4ED6;&#x652F;&#x6301;&#x8BE5; ABI &#x7684;&#x8BED;&#x8A00;&#x8C03;&#x7528;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rust&#x590D;&#x5236;&#x4EE3;&#x7801;#[no_mangle]</span><br><span class="line">pub extern &quot;C&quot; fn napi_register_module_v1(...) {</span><br><span class="line">  // ...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x6DFB;&#x52A0; <code>no_mangle</code> &#x7684;&#x6807;&#x8BB0;&#x3002;&#x5426;&#x5219;&#x5BF9;&#x5E94;&#x7684; symbol name &#x4F1A;&#x88AB; mangle&#xFF0C;&#x800C;&#x5BFC;&#x81F4;&#x8C03;&#x7528;&#x65B9;&#x65E0;&#x6CD5;&#x5BFB;&#x5740;&#x3002;&#x4F60;&#x53EF;&#x4EE5;&#x4F7F;&#x7528; <code>nm</code> &#x547D;&#x4EE4;&#x9A8C;&#x8BC1;&#x8FD9;&#x4E00;&#x70B9;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell&#x590D;&#x5236;&#x4EE3;&#x7801;$ nm &lt;path/to/generated-binary&gt; | grep napi</span><br></pre></td></tr></table></figure>
+
+<p>macOS &#x4E0B; symbol &#x4F1A;&#x5E26;&#x6709;&#x4E00;&#x4E2A;&#x4E0B;&#x5212;&#x7EBF;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;<code>_napi_register_module_v1</code> &#x88AB;&#x5305;&#x542B;&#x5728; Symbol table &#x4E2D;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r&#x590D;&#x5236;&#x4EE3;&#x7801;0000000000001650 T _napi_register_module_v1</span><br></pre></td></tr></table></figure>
+
+<h2 id="FFI-Safety"><a href="#FFI-Safety" class="headerlink" title="FFI Safety"></a>FFI Safety</h2><p>&#x6709;&#x4E86; ABI &#x7684;&#x9650;&#x5236;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5F97;&#x5230;&#xFF1A;&#x53EA;&#x6709;&#x6709;&#x9650;&#x7684;&#x503C;&#x7C7B;&#x578B;&#x624D;&#x53EF;&#x4EE5;&#x5B8C;&#x6210;&#x8DE8; FFI &#x8FB9;&#x754C;&#x7684;&#x503C;&#x4F20;&#x9012;&#xFF08;&#x901A;&#x4FE1;&#xFF09;&#xFF0C;&#x5C31;&#x50CF; IPC protocol &#x4E5F;&#x6709;&#x7279;&#x5B9A;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x7684;&#x8981;&#x6C42;&#xFF0C;&#x90A3;&#x4E48;&#xFF0C;&#x5E38;&#x7528;&#x7684; C ABI &#x4E5F;&#x662F;&#x4E00;&#x6837;&#xFF0C;&#x7B80;&#x5355;&#x6765;&#x8BF4;&#xFF0C;C &#x91CC;&#x9762;&#x65E0;&#x6CD5;&#x8868;&#x8FBE;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;&#x4F60;&#x5C31;&#x4E0D;&#x80FD;&#x901A;&#x8FC7; FFI &#x8FD9;&#x6761; Boundary&#xFF0C;&#x540C;&#x6837;&#x7684;&#x5BF9;&#x4E8E; Rust &#x7684; Error &#x4E5F;&#x662F;&#x65E0;&#x6CD5;&#x901A;&#x8FC7; FFI &#x8FB9;&#x754C;&#x7684;&#xFF0C;etc&#x3002;</p>
+<p>&#x8981;&#x6807;&#x8BB0;&#x4E00;&#x4E2A;&#x503C;&#x4E3A; C ABI Compatible&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528; <code>#[repr(C)]</code>&#xFF0C;&#x8FD9;&#x4F1A;&#x8BA9; rustc &#x5F00;&#x542F;&#x5BF9;&#x5E94;&#x7684;&#x7F16;&#x8BD1;&#x65F6;&#x68C0;&#x67E5;&#xFF0C;&#x786E;&#x4FDD;&#x8FD9;&#x4E2A;&#x7C7B;&#x578B;&#x662F; FFI Safe &#x7684;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rust&#x590D;&#x5236;&#x4EE3;&#x7801;#[repr(C)]</span><br><span class="line">struct some_data_type {</span><br><span class="line">  foo: [u8;0],</span><br><span class="line">  bar: usize</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>C&#x7684;&#x8303;&#x5F0F;&#x8FD8;&#x9650;&#x5236;&#x4E86; enum &#x7684;&#x4F20;&#x9012;&#xFF0C;&#x4F46;&#x53EF;&#x4EE5;&#x7528; <code>#[repr(u32, i8, etc..)]</code> and <code>#[repr(C)]</code> &#x6765;&#x5F3A;&#x5236;&#x5C06;&#x975E; C &#x8303;&#x5F0F;&#x7684; enum &#x62E5;&#x6709;&#x7279;&#x5B9A;&#x7684; Memory Layout&#xFF0C;&#x56E0;&#x6B64;&#x4E0B;&#x9762;&#x4E24;&#x79CD;&#x7C7B;&#x578B;&#x662F;&#x53EF;&#x4EE5;&#x4E92;&#x76F8; Interop &#x7684;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;#[repr(u8)]</span><br><span class="line">pub enum LineStyle {</span><br><span class="line">    Solid,</span><br><span class="line">    Dotted,</span><br><span class="line">    Dashed,</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;enum class LineStyle: uint8_t {</span><br><span class="line">    Solid,</span><br><span class="line">    Dotted,</span><br><span class="line">    Dashed,</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x66F4;&#x591A;&#x7684;&#x4FE1;&#x606F;&#x53EF;&#x4EE5;&#x5728;<a href="/external_links/d92370b720316bb1bd175eda9a3f650e.html" target="blank" rel="noopener">&#x8FD9;&#x91CC;</a>&#x627E;&#x5230;</p>
+<h2 id="Opaque-Type"><a href="#Opaque-Type" class="headerlink" title="Opaque Type"></a>Opaque Type</h2><p>&#x5728; FFI &#x7684;&#x4EA4;&#x4E92;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x6709;&#x5F88;&#x591A;&#x503C;&#x662F;&#x4E0D;&#x5E0C;&#x671B;&#x88AB;&#x8BBF;&#x95EE;&#x5230;&#x5176;&#x5B9E;&#x9645;&#x5185;&#x5BB9;&#x7684;&#x3002;&#x5BF9;&#x4E8E;&#x719F;&#x6089; NAPI &#x53EF;&#x80FD;&#x4E86;&#x89E3;&#x8FC7; External &#x7C7B;&#x578B;&#xFF0C;&#x5B83;&#x662F;&#x4E00;&#x4E2A; Opaque Type&#xFF0C;&#x8FD9;&#x4E2A; Opaque Type &#x5C06;&#x4F1A;&#x901A;&#x8FC7; FFI &#x8C03;&#x7528;&#x83B7;&#x53D6;&#x5230;&#xFF0C;&#x518D;&#x901A;&#x8FC7; FFI &#x4F5C;&#x4E3A;&#x53C2;&#x6570;&#x8FDB;&#x884C;&#x4F20;&#x9012;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;napi_status napi_create_external(napi_env env,</span><br><span class="line">                                 void* data, // &#x9700;&#x8981;&#x5305;&#x88F9;&#x7684;&#x503C;</span><br><span class="line">                                 napi_finalize finalize_cb,</span><br><span class="line">                                 void* finalize_hint,</span><br><span class="line">                                 napi_value* result) // &#x751F;&#x6210;&#x7684; JS &#x7C7B;&#x578B; External Type</span><br><span class="line">                                 </span><br><span class="line">napi_status napi_get_value_external(napi_env env,</span><br><span class="line">                                    napi_value value, // &#x8FD9;&#x4E2A; JS ExternalType</span><br><span class="line">                                    void** result) // &#x83B7;&#x53D6;&#x5230;&#x8FD9;&#x4E2A;&#x503C;&#x4E4B;&#x524D;&#x88AB;&#x5305;&#x88F9;&#x7684; Data</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F97;&#x5230;&#x8FD9;&#x4E24;&#x7EC4;&#x5B9A;&#x4E49;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5C06; data &#x5305;&#x88F9;&#x6210;&#x4E00;&#x4E2A;&#x503C;&#x505A;&#x4E3A;&#x6807;&#x5FD7;&#x5B58;&#x50A8;&#x5728; JS &#x4FA7;&#xFF0C;&#x800C; JS &#x4FA7;&#x662F;&#x65E0;&#x6CD5;&#x611F;&#x77E5;&#x5230;&#x5185;&#x90E8;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x7684;&#xFF0C;&#x4E00;&#x4E2A;&#x5B9E;&#x9645;&#x7684;&#x4F8B;&#x5B50;&#x53EF;&#x4EE5;&#x53C2;&#x8003; <em><a href="/external_links/5c2e4732f94918fdc1dfd97c3e27f320.html" target="blank" rel="noopener">NAPI-RS External Type</a></em></p>
+<p>&#x540C;&#x6837;&#x7684;&#xFF0C;&#x6211;&#x4EEC;&#x5728; Rust &#x4E2D;&#x4E5F;&#x53EF;&#x4EE5;&#x5B9A;&#x4E49;&#x76F8;&#x5173;&#x7684; Opaque Type&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">rust&#x590D;&#x5236;&#x4EE3;&#x7801;#[repr(C)]</span><br><span class="line">struct foo_opaque {</span><br><span class="line"> _data: [u8;0],</span><br><span class="line"> _marker: PhantomData&lt;*mut ()&gt; // &#x6807;&#x8BB0;&#x8FD9;&#x4E2A; struct &#x4E3A; !Send &#x548C; !Sync &#x7684;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">#[no_mangle]</span><br><span class="line">extern &quot;C&quot; fn some_init_function(foo: *const foo_opaque) {</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x6837;&#x4E00;&#x6765;&#xFF0C;&#x4E0A;&#x8FF0;&#x7684;&#x4F8B;&#x5B50;&#x4E2D;&#xFF0C;&#x5728;&#x5176;&#x4ED6;&#x8BED;&#x8A00;&#x8C03;&#x7528;&#x5B83;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4F60;&#x4EC5;&#x80FD;&#x62FF;&#x5230; foo &#x7684;&#x6307;&#x9488;&#x3002;</p>
+<p>&#x53E6;&#x4E00;&#x4E2A; Opaque Type &#x7684;&#x597D;&#x5904;&#x5728;&#x4E8E;&#x53EF;&#x4EE5;&#x5B8C;&#x6210;&#x7C7B;&#x578B;&#x7684;&#x533A;&#x5206;&#xFF0C;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#x5728; C &#x4E2D;&#xFF0C;&#x4E00;&#x5207;&#x4EFB;&#x610F; Type &#x7684; pointer &#x90FD;&#x53EF;&#x4EE5;&#x7528; void &#x6765;&#x5B9A;&#x4E49;&#xFF0C;&#x8FD9;&#x5728; Rust &#x4E2D;&#x7684;&#x8868;&#x793A;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;extern &quot;C&quot; fn some_init_function(foo: *const ::std::os::raw::c_void, </span><br><span class="line">                                 bar: *const ::std::os::raw::c_void) {</span><br><span class="line">  do_something_with_bar(foo); // &#x53EF;&#x4EE5;&#x7F16;&#x8BD1;&#xFF01;                                 </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F46;&#x5F53;&#x4E24;&#x4E2A; pointer &#x5747;&#x4E3A; c_void &#x65F6;&#xFF0C;&#x5219;&#x65E0;&#x6CD5;&#x533A;&#x5206;&#xFF0C;&#x4E5F;&#x5C31;&#x4E22;&#x5931;&#x4E86; rustc &#x7F16;&#x8BD1;&#x65F6;&#x7684;&#x7C7B;&#x578B;&#x68C0;&#x67E5;&#xFF0C;&#x8FD9;&#x662F;&#x6211;&#x4EEC;&#x5E0C;&#x671B;&#x80FD;&#x591F;&#x907F;&#x514D;&#x7684;&#x3002;</p>
+<h1 id="&#x5199;&#x4E00;&#x4E2A;-sys-crate"><a href="#&#x5199;&#x4E00;&#x4E2A;-sys-crate" class="headerlink" title="&#x5199;&#x4E00;&#x4E2A; *-sys crate"></a>&#x5199;&#x4E00;&#x4E2A; *-sys crate</h1><p>&#x5728;&#x8FD9;&#x4E00;&#x7AE0;&#x8282;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x7528; libsodium &#x4F5C;&#x4E3A;&#x6848;&#x4F8B;&#x7F16;&#x5199;&#x4E00;&#x4E2A; libsodium-sys&#xFF0C;&#x4F7F;&#x5176;&#x80FD;&#x591F;&#x5B8C;&#x6210;&#x7B80;&#x5355;&#x7684; hasher &#x7684;&#x529F;&#x80FD;&#x3002;&#x8FD9;&#x4E2A; Demo &#x4E2D;&#x5C06;&#x76F4;&#x63A5;&#x4F7F;&#x7528; <em><a href="/external_links/7ddffe7da925219e41b426af70a94b1e.html" target="blank" rel="noopener">rust-bindgen</a></em> **&#x5B8C;&#x6210; binding &#x7684;&#x751F;&#x6210;&#x3002; **&#x7531;&#x4E8E;&#x7BC7;&#x5E45;&#x7684;&#x5173;&#x7CFB;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x4E0D;&#x6D89;&#x53CA; vendor &#x65F6;&#x7684;&#x201C;&#x4ECE;&#x6E90;&#x7801;&#x6784;&#x5EFA;&#x201D;&#x3002;</p>
+<h2 id="&#x51C6;&#x5907;&#x5DE5;&#x4F5C;"><a href="#&#x51C6;&#x5907;&#x5DE5;&#x4F5C;" class="headerlink" title="&#x51C6;&#x5907;&#x5DE5;&#x4F5C;"></a>&#x51C6;&#x5907;&#x5DE5;&#x4F5C;</h2><p>&#x9996;&#x5148;&#x9700;&#x8981;&#x5B89;&#x88C5; libsodium</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">shell&#x590D;&#x5236;&#x4EE3;&#x7801;# &#x901A;&#x8FC7; brew &#x5B89;&#x88C5;</span><br><span class="line">$ brew install libsodium</span><br><span class="line"></span><br><span class="line"># &#x901A;&#x8FC7;&#x5176;&#x4ED6;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x5B89;&#x88C5; https://libsodium.gitbook.io/doc/installation</span><br></pre></td></tr></table></figure>
+
+<p>&#x5B89;&#x88C5;&#x5B8C;&#x6210;&#x540E;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x547D;&#x4EE4;&#x9A8C;&#x8BC1;&#x662F;&#x5426;&#x6210;&#x529F;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lua&#x590D;&#x5236;&#x4EE3;&#x7801;$ pkg-config --libs libsodium</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x65B0;&#x5EFA;&#x4E00;&#x4E2A;-libsodium-sys"><a href="#&#x65B0;&#x5EFA;&#x4E00;&#x4E2A;-libsodium-sys" class="headerlink" title="&#x65B0;&#x5EFA;&#x4E00;&#x4E2A; libsodium-sys"></a>&#x65B0;&#x5EFA;&#x4E00;&#x4E2A; libsodium-sys</h2><p>Cargo.toml:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;[package]</span><br><span class="line">edition = &quot;2021&quot;</span><br><span class="line">name = &quot;libsodium-sys&quot;</span><br><span class="line">version = &quot;0.1.0&quot;</span><br><span class="line"></span><br><span class="line">[build-dependencies]</span><br><span class="line">pkg-config = &quot;0.3.1&quot;</span><br><span class="line">bindgen = &quot;0.63.0&quot;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>&#x6211;&#x4EEC;&#x901A;&#x8FC7; pkg-config &#x67E5;&#x627E;&#x7CFB;&#x7EDF;&#x4F9D;&#x8D56;&#xFF0C;&#x5B83;&#x53EF;&#x4EE5;&#x81EA;&#x52A8;&#x8BBE;&#x7F6E; rustc &#x4F9D;&#x8D56;&#x7684;&#x53C2;&#x6570;</li>
+<li>bindgen &#x7528;&#x4E8E;&#x57FA;&#x4E8E; libsodium &#x7684; header &#x751F;&#x6210; FFI Binding</li>
+</ol>
+<h2 id="&#x5B9A;&#x4E49;-wrapper-h"><a href="#&#x5B9A;&#x4E49;-wrapper-h" class="headerlink" title="&#x5B9A;&#x4E49; wrapper.h"></a>&#x5B9A;&#x4E49; wrapper.h</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;#include &quot;sodium.h&quot;</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x5C06;&#x9700;&#x8981;&#x7684; header &#x6587;&#x4EF6; sodium.h &#x6DFB;&#x52A0;&#x5230; wrapper.h&#xFF0C;rust-bindgen &#x5C06;&#x4F1A;&#x7F16;&#x8BD1;&#x751F;&#x6210; FFI &#x58F0;&#x660E;</p>
+<h2 id="&#x7F16;&#x5199;-build-script"><a href="#&#x7F16;&#x5199;-build-script" class="headerlink" title="&#x7F16;&#x5199; build script"></a>&#x7F16;&#x5199; build script</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">rust&#x590D;&#x5236;&#x4EE3;&#x7801;fn main() {</span><br><span class="line">  // &#x901A;&#x8FC7; pkg_config &#x67E5;&#x627E; syslib</span><br><span class="line">  let lib = pkg_config::Config::new()</span><br><span class="line">        .atleast_version(&quot;1.0.18&quot;)</span><br><span class="line">        .probe(&quot;libsodium&quot;)</span><br><span class="line">        .unwrap();</span><br><span class="line">        </span><br><span class="line">  println!(&quot;cargo:rerun-if-changed=wrapper.h&quot;);</span><br><span class="line">  </span><br><span class="line">  // The bindgen::Builder is the main entry point</span><br><span class="line">  // to bindgen, and lets you build up options for</span><br><span class="line">  // the resulting bindings.</span><br><span class="line">  let bindings = bindgen::Builder::default()</span><br><span class="line">    // The input header we would like to generate</span><br><span class="line">    // bindings for.</span><br><span class="line">    .header(&quot;wrapper.h&quot;)</span><br><span class="line">    .clang_args(</span><br><span class="line">        lib.include_paths</span><br><span class="line">            .iter()</span><br><span class="line">            .map(|p| format!(&quot;-I{}&quot;, p.display())),</span><br><span class="line">     )</span><br><span class="line">    .allowlist_function(&quot;crypto_generichash&quot;)</span><br><span class="line">    .allowlist_function(&quot;sodium_init&quot;)</span><br><span class="line">    .allowlist_var(&quot;crypto_generichash_.*&quot;)</span><br><span class="line">    // Tell cargo to invalidate the built crate whenever any of the</span><br><span class="line">    // included header files changed.</span><br><span class="line">    .parse_callbacks(Box::new(bindgen::CargoCallbacks))</span><br><span class="line">    // Finish the builder and generate the bindings.</span><br><span class="line">    .generate()</span><br><span class="line">    // Unwrap the Result and panic on failure.</span><br><span class="line">    .expect(&quot;Unable to generate bindings&quot;);</span><br><span class="line"></span><br><span class="line">  // Write the bindings to the $OUT_DIR/bindings.rs file.</span><br><span class="line">  let out_path = PathBuf::from(env::var(&quot;OUT_DIR&quot;).unwrap());</span><br><span class="line">  bindings</span><br><span class="line">    .write_to_file(out_path.join(&quot;bindings.rs&quot;))</span><br><span class="line">    .expect(&quot;Couldn&apos;t write bindings!&quot;);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>&#x6211;&#x4EEC;&#x901A;&#x8FC7; pkg-config &#x67E5;&#x627E;&#x5E76; set rustc flags&#xFF0C;&#x5C06; <code>include_paths</code> &#x6DFB;&#x52A0;&#x5230; bindgen &#x7684; <code>clang_args</code> &#x53C2;&#x6570;</li>
+<li>&#x540C;&#x65F6;&#x5F53; wrapper.h &#x53D8;&#x5316;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x91CD;&#x65B0;&#x6267;&#x884C; build script</li>
+<li><code>allow_list</code> &#x4E2D;&#x6DFB;&#x52A0;&#x672C;&#x6B21; DEMO &#x9700;&#x8981;&#x7528;&#x5230;&#x7684; fn, const</li>
+<li>&#x6700;&#x7EC8;&#x7684; bindings.rs &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5728; OUT_DIR &#x4E2D;&#x627E;&#x5230;&#xFF0C;&#x5B83;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;</li>
+</ol>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/c3cc74e44573a9437042fa97ab72b92bd56380ac284db581cc54f84f188417cc" alt></p>
+<h2 id="&#x7F16;&#x5199;-binding-&#x5E76;&#x6D4B;&#x8BD5;"><a href="#&#x7F16;&#x5199;-binding-&#x5E76;&#x6D4B;&#x8BD5;" class="headerlink" title="&#x7F16;&#x5199; binding &#x5E76;&#x6D4B;&#x8BD5;"></a>&#x7F16;&#x5199; binding &#x5E76;&#x6D4B;&#x8BD5;</h2><p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x901A;&#x8FC7; libsodium &#x5B98;&#x7F51;&#x7684; FFI &#x5B9A;&#x4E49;&#x4E86;&#x89E3;&#x5404;&#x4E2A;&#x5B57;&#x6BB5;&#x7684;&#x4F5C;&#x7528;&#xFF1A;<a href="/external_links/6133a8ea4a778eba39653e9c094043f7.html" target="blank" rel="noopener">Generic hashing</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">rust&#x590D;&#x5236;&#x4EE3;&#x7801;#![allow(unused)]</span><br><span class="line">#![allow(non_upper_case_globals)]</span><br><span class="line">#![allow(non_camel_case_types)]</span><br><span class="line">#![allow(non_snake_case)]</span><br><span class="line"></span><br><span class="line">mod ffi {</span><br><span class="line">  // &#x5185;&#x8054; bindings.rs &#x7684; codegen &#x7684;&#x7ED3;&#x679C;&#x5230; mod ffi</span><br><span class="line">  include!(concat!(env!(&quot;OUT_DIR&quot;), &quot;/bindings.rs&quot;));</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">pub use ffi::*;</span><br></pre></td></tr></table></figure>
+
+<p>&#x6D4B;&#x8BD5;&#x90E8;&#x5206;&#x53EF;&#x4EE5;<a href="/external_links/b0c3a7cdab6146d7af874d318ac6b5ba.html" target="blank" rel="noopener">&#x53C2;&#x8003;</a></p>
+<h2 id="Tips"><a href="#Tips" class="headerlink" title="Tips"></a>Tips</h2><ul>
+<li>&#x53EF;&#x4EE5;&#x4F7F;&#x7528; pkg-config crate &#x8FDB;&#x884C; libs &#x7684;&#x67E5;&#x627E;&#xFF0C;&#x67E5;&#x8BE2;&#x6210;&#x529F;&#x540E;&#x4F1A;&#x81EA;&#x52A8;&#x6DFB;&#x52A0;&#x76F8;&#x5E94;&#x7684; cargo instructions&#xFF0C;&#x7701;&#x53BB;&#x4E86;&#x624B;&#x52A8;&#x6DFB;&#x52A0;</li>
+<li>&#x4F7F;&#x7528; Bindgen &#x751F;&#x6210;&#x7684;&#x4EE3;&#x7801;&#x662F;&#x4E00;&#x4E2A;&#x201C;&#x5927;&#x6742;&#x70E9;&#x201D;&#xFF0C;&#x53EF;&#x4EE5;&#x9650;&#x5236;&#x5BFC;&#x51FA;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x5982;&#xFF1A;&#x4F7F;&#x7528; allowlist &#x7B49;</li>
+<li>&#x4E0D;&#x5EFA;&#x8BAE;&#x5728; sys crate &#x4E2D;&#x7F16;&#x5199;&#x9664; ffi &#x58F0;&#x660E;&#x4EE5;&#x5916;&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x907F;&#x514D; breaking change</li>
+<li>&#x53EF;&#x4EE5;&#x901A;&#x8FC7; cargo instructions &#x66B4;&#x9732;&#x76F8;&#x5173;&#x7684; metadata &#x7ED9;&#x4F9D;&#x8D56;&#x65B9;&#xFF0C;&#x4EE5;&#x4FDD;&#x6301;&#x5982;&#x5168;&#x5C40;&#x7684; lib &#x7248;&#x672C;&#x7EDF;&#x4E00;</li>
+</ul>
+<h1 id="&#x5199;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;-napi-sys"><a href="#&#x5199;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;-napi-sys" class="headerlink" title="&#x5199;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684; napi-sys"></a>&#x5199;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684; <code>napi-sys</code></h1><p>&#x5728;&#x8FD9;&#x4E00;&#x7AE0;&#x8282;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x521B;&#x5EFA;&#x4E00;&#x4E2A; dynamic library &#x5E76;&#x8C03;&#x7528; napi &#x5B8C;&#x6210;&#x7B80;&#x5355;&#x7684;&#x6CE8;&#x518C;&#xFF0C;&#x6DFB;&#x52A0;&#x6A21;&#x5757;&#x5BFC;&#x51FA;&#x7B49;&#x529F;&#x80FD;&#xFF0C;&#x5E76;&#x5728; Node &#x4E2D;&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#x3002;</p>
+<h2 id="&#x51C6;&#x5907;&#x5DE5;&#x4F5C;-1"><a href="#&#x51C6;&#x5907;&#x5DE5;&#x4F5C;-1" class="headerlink" title="&#x51C6;&#x5907;&#x5DE5;&#x4F5C;"></a>&#x51C6;&#x5907;&#x5DE5;&#x4F5C;</h2><p>&#x6211;&#x4EEC;&#x5C06;&#x4F1A;&#x65B0;&#x5EFA;&#x4E24;&#x4E2A; crate&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A; crate &#x4E3A; napi-sys &#x7528;&#x4E8E;&#x58F0;&#x660E;&#x4E00;&#x4E9B; Node &#x7ED9;&#x6211;&#x4EEC;&#x63D0;&#x4F9B;&#x7684; FFI&#xFF0C;&#x5B8C;&#x6574;&#x7684; FFI &#x5217;&#x8868;&#x53EF;&#x4EE5;&#x53C2;&#x8003; <a href="/external_links/a3b1861786b023c48a9fca89df01153d.html" target="blank" rel="noopener">N-API &#x6587;&#x6863;</a>&#x3002;&#x5176;&#x6B21;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x4F1A;&#x521B;&#x5EFA;&#x7B2C;&#x4E8C;&#x4E2A; crate NAPI &#x7528;&#x4E8E;&#x7F16;&#x5199; binding &#x7684;&#x6D4B;&#x8BD5;&#x3002;</p>
+<p><strong>&#x7528;&#x5230;&#x7684;</strong> <strong>FFI</strong> <strong>:</strong></p>
+<ul>
+<li><a href="/external_links/a3b1861786b023c48a9fca89df01153d.html" target="blank" rel="noopener">napi_create_string_utf8</a></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;napi_status napi_create_string_utf8(napi_env env,</span><br><span class="line">                                    const char* str,</span><br><span class="line">                                    size_t length,</span><br><span class="line">                                    napi_value* result)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><a href="/external_links/a3b1861786b023c48a9fca89df01153d.html" target="blank" rel="noopener">napi_set_named_property</a></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">csharp&#x590D;&#x5236;&#x4EE3;&#x7801;napi_status napi_set_named_property(napi_env env,</span><br><span class="line">                                    napi_value object,</span><br><span class="line">                                    const char* utf8Name,</span><br><span class="line">                                    napi_value value);</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x7528;&#x5230;&#x7684; Reverse</strong> <strong>FFI</strong> <strong>:</strong></p>
+<p>&#x7531;&#x4E8E;&#x5F53;&#x524D;&#x63D2;&#x4EF6;&#x4E3A; dynamic library&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5728; crate NAPI &#x4E2D;&#x5BFC;&#x51FA;&#x6CE8;&#x518C;&#x7684;&#x94A9;&#x5B50;&#xFF0C;&#x7528;&#x4E8E;&#x5728;&#x8FD0;&#x884C;&#x65F6;&#x5B8C;&#x6210; Module &#x7684;&#x6CE8;&#x518C;&#xFF1A;</p>
+<ul>
+<li><a href="/external_links/b61b01f18176d422a730716ad690a94f.html" target="blank" rel="noopener">napi_register_module_v1</a>&#xFF1A;&#x73B0;&#x5728; Register &#x7684;&#x7248;&#x672C;&#x53F7;&#x4E3A; 1&#xFF0C;&#x53EF;&#x4EE5;&#x53C2;&#x8003;<a href="/external_links/b61b01f18176d422a730716ad690a94f.html" target="blank" rel="noopener">&#x8FD9;&#x91CC;</a></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;napi_value napi_register_module_v1(napi_env env,</span><br><span class="line">                                   napi_value exports)</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x7528;&#x5230;&#x7684;&#x8FD4;&#x56DE;&#x503C;&#xFF1A;</strong></p>
+<ul>
+<li><a href="/external_links/a3b1861786b023c48a9fca89df01153d.html" target="blank" rel="noopener">napi_status</a>: NAPI &#x8C03;&#x7528;&#x6210;&#x529F;&#x4E0E;&#x5426;&#xFF0C;0 &#x4E3A;&#x6210;&#x529F;</li>
+</ul>
+<p>&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5728; Rust &#x4FA7;&#x521B;&#x5EFA;&#x4E00;&#x4E2A; named export&#xFF0C;&#x5B83;&#x7684; key &#x4E3A; <code>foo</code>&#xFF0C;&#x503C;&#x4E3A; <code>bar</code>&#xFF0C;&#x6700;&#x7EC8;&#x7684;&#x6548;&#x679C;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">javascript&#x590D;&#x5236;&#x4EE3;&#x7801;const foo = require(&quot;./binding.node&quot;).foo;</span><br><span class="line">console.log(foo) // bar</span><br></pre></td></tr></table></figure>
+
+<h2 id="live-coding"><a href="#live-coding" class="headerlink" title="[live-coding]"></a><strong><em>[live-coding]</em></strong></h2><p>&#x5B8C;&#x6574;&#x7684;&#x4EE3;&#x7801;&#x793A;&#x4F8B;&#xFF1A;<a href="/external_links/8c381fe6fdbc375b4c413d5f0b4908ff.html" target="blank" rel="noopener">github.com/h-a-n-a/bui&#x2026;</a></p>
+<h2 id="&#x53EF;&#x80FD;&#x9047;&#x5230;&#x7684;&#x95EE;&#x9898;"><a href="#&#x53EF;&#x80FD;&#x9047;&#x5230;&#x7684;&#x95EE;&#x9898;" class="headerlink" title="&#x53EF;&#x80FD;&#x9047;&#x5230;&#x7684;&#x95EE;&#x9898;"></a>&#x53EF;&#x80FD;&#x9047;&#x5230;&#x7684;&#x95EE;&#x9898;</h2><ul>
+<li>&#x5728; Clang(macOS &#x9ED8;&#x8BA4;) &#x4E2D;&#x4F60;&#x9700;&#x8981;&#x4F7F;&#x7528; -undefined, dynamic_lookup &#x6765;&#x6807;&#x8BB0; linker symbol &#x67E5;&#x627E;&#x7684;&#x884C;&#x4E3A;&#xFF08;&#x5728; Runtime &#x4E2D;&#x67E5;&#x627E;&#xFF0C;<code>-C</code> &#x8868;&#x793A; codegen flags&#xFF09;&#xFF0C;&#x5426;&#x5219;&#x4F1A;&#x4EA7;&#x751F;&#x627E;&#x4E0D;&#x5230; Symbol &#x7684;&#x7F16;&#x8BD1;&#x62A5;&#x9519;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;[target.x86_64-apple-darwin]</span><br><span class="line">rustflags = [</span><br><span class="line">  &quot;-C&quot;, &quot;link-arg=-undefined&quot;,</span><br><span class="line">  &quot;-C&quot;, &quot;link-arg=dynamic_lookup&quot;,</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">[target.aarch64-apple-darwin]</span><br><span class="line">rustflags = [</span><br><span class="line">  &quot;-C&quot;, &quot;link-arg=-undefined&quot;,</span><br><span class="line">  &quot;-C&quot;, &quot;link-arg=dynamic_lookup&quot;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7d87f7bae6a24cb951a1be7738f0756670c09d71f4e27fbd57f1b53b3d959b2a" alt></p>
+<p><em>&#x56FE; 1.1&#xFF1A;</em> <em>LLVM</em> <em>&#x67B6;&#x6784;&#x56FE;</em> <em><a href="/external_links/b4d444d40cca9663543b6aa14a93bc54.html" target="blank" rel="noopener">blog.gopheracademy.com/advent-2018&#x2026;</a></em></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/0ec41a6a8a106ab339a9dbb2bcb30ddff1d9830b254c6ddba22744048733cf7d" alt></p>
+<p><em>&#x56FE; 1.2:</em> <em>Linker</em> **<em><a href="/external_links/d7bf3810939c5bc6ed47803c25b62ec3.html" target="blank" rel="noopener">en.wikipedia.org/wiki/Linker&#x2026;</a></em></p>
+<p><strong>Linker</strong> <strong>&#x6709;&#x4EC0;&#x4E48;&#x7528;?</strong></p>
+<p>&#x7F16;&#x8BD1;&#x5668;&#x7684;&#x67B6;&#x6784;&#xFF1A;Frontend(C -&gt; Clang) -&gt; LLVM Optimizer -&gt; LLVM Backend&#xFF08;&#x56FE;1.1&#xFF09;</p>
+<p>Linker &#x7684;&#x4F5C;&#x7528;(&#x56FE; 1.2)</p>
+<ul>
+<li>&#x7531;&#x4E8E;&#x6211;&#x4EEC;&#x5E0C;&#x671B;&#x751F;&#x6210;&#x7684;&#x662F;&#x4E00;&#x4E2A;&#x57FA;&#x4E8E; C ABI &#x7684; dynamic library&#xFF0C;&#x56E0;&#x6B64;&#x9700;&#x8981;&#x5728; cargo.toml &#x4E2D;&#x6807;&#x8BB0;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;[lib]</span><br><span class="line">crate-type = [&quot;cdylib&quot;]</span><br></pre></td></tr></table></figure>
+
+<h2 id="Tips-1"><a href="#Tips-1" class="headerlink" title="Tips"></a>Tips</h2><ul>
+<li>&#x53EF;&#x4EE5;&#x7528; <a href="/external_links/6c68f014ad5bc0a451e34bbb39506c80.html" target="blank" rel="noopener">nm</a> &#x67E5;&#x770B; binary &#x4E2D;&#x7684; Symbol&#xFF0C;&#x5982;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">markdown&#x590D;&#x5236;&#x4EE3;&#x7801;                 U _napi_create_string_utf8</span><br><span class="line">00000000000015b0 T _napi_register_module_v1</span><br><span class="line">                 U _napi_set_named_property</span><br></pre></td></tr></table></figure>
+
+<p>T &#x4EE3;&#x8868; Global text symbol</p>
+<p>U &#x4EE3;&#x8868; Undefined symbol&#xFF0C;&#x8FD9;&#x6B63;&#x662F;&#x6211;&#x4EEC;&#x671F;&#x671B;&#x7684;&#xFF0C;&#x5B83;&#x5C06;&#x4F1A;&#x5728;&#x5BBF;&#x4E3B;&#x73AF;&#x5883;&#x4E2D;&#x63D0;&#x4F9B;&#xFF0C;&#x4F8B;&#x5982;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x7B80;&#x5355;&#x9A8C;&#x8BC1; node &#x4E2D;&#x662F;&#x5426;&#x5B9A;&#x4E49;&#x4E86; napi_create_string_utf8&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby&#x590D;&#x5236;&#x4EE3;&#x7801;$ nm $(which node) | grep napi_create_string_utf8</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x4FBF;&#x80FD;&#x5F97;&#x5230;&#x5BF9;&#x5E94;&#x7684; FFI &#x5B9A;&#x4E49;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r&#x590D;&#x5236;&#x4EE3;&#x7801;0000000100087c00 T _napi_create_string_utf8</span><br></pre></td></tr></table></figure>
+
+<p><strong>FFI</strong> <strong>&#x7684;&#x5B9A;&#x4E49;&#x548C;&#x58F0;&#x660E;&#x7684;&#x533A;&#x522B;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;</strong></p>
+<p>&#x5728;&#x4E0A;&#x8FF0;&#x4F8B;&#x5B50;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x7684; napi-sys crate &#x4EC5;&#x4EC5;&#x5B8C;&#x6210;&#x4E86; FFI &#x7684;&#x58F0;&#x660E;&#xFF0C;&#x5C31;&#x597D;&#x6BD4;&#x4F60;&#x76F4;&#x63A5;&#x5F15;&#x7528;&#x4E86; napi &#x7684; header file&#xFF0C;&#x800C;&#x53EA;&#x6709;&#x5728;&#x5BF9;&#x5E94; Node binary &#x4E2D;&#x5B9A;&#x4E49;&#x4E86;&#x8FD9;&#x4E9B; FFI &#x540E;&#x4F60;&#x624D;&#x80FD;&#x4F7F;&#x7528;&#x3002;&#x8FD9;&#x4E5F;&#x662F;&#x4E3A;&#x4EC0;&#x4E48; FFI &#x6C38;&#x8FDC;&#x662F; unsafe &#x7684;&#x539F;&#x56E0;&#x4E4B;&#x4E00;</p>
+<ul>
+<li>&#x53EF;&#x4EE5;&#x7528; file &#x67E5;&#x770B;&#x6587;&#x4EF6;&#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x5982;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;file binding.node</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5F97;&#x5230;&#x8FD9;&#x662F;&#x4E00;&#x4E2A; x86_64-apple-darwin&#xFF08;&#x901A;&#x8FC7; Apple iMac 3.8 GHz 8-Core Intel Core i7 &#x7F16;&#x8BD1;&#xFF09; &#x7684; shared library&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;binding.node: Mach-O 64-bit dynamically linked shared library x86_64</span><br></pre></td></tr></table></figure>
+
+<h1 id="&#x4EA4;&#x53C9;&#x7F16;&#x8BD1;"><a href="#&#x4EA4;&#x53C9;&#x7F16;&#x8BD1;" class="headerlink" title="&#x4EA4;&#x53C9;&#x7F16;&#x8BD1;"></a>&#x4EA4;&#x53C9;&#x7F16;&#x8BD1;</h1><p>&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x800C;&#x8A00;&#xFF0C;&#x4E00;&#x4E2A;&#x5E73;&#x53F0;&#x53EA;&#x80FD;&#x7F16;&#x8BD1;&#x51FA;&#x5F53;&#x524D;&#x5E73;&#x53F0;&#x652F;&#x6301;&#x7684;&#x53EF;&#x6267;&#x884C;&#x4EE3;&#x7801;&#xFF0C;&#x800C;&#x4EA4;&#x53C9;&#x7F16;&#x8BD1;&#x5219;&#x662F;&#x60F3;&#x89E3;&#x51B3;&#x8DE8;&#x5E73;&#x53F0;&#x7F16;&#x8BD1;&#x7684;&#x95EE;&#x9898;&#x3002;&#x5982;&#x5728; M1(aarch64-apple-darwin) &#x4E0A;&#x7F16;&#x8BD1;&#x51FA; x86_64-linux-gnu &#x7684;&#x4EE3;&#x7801;&#xFF08;&#x6BCF;&#x4E00;&#x79CD; compiler &#x7684; triple &#x5199;&#x6CD5;&#x90FD;&#x4E0D;&#x592A;&#x4E00;&#x6837;&#xFF0C;&#x8FD9;&#x91CC;&#x5217;&#x4E3E;&#x4E86; Rust &#x7684;&#xFF09;&#x3002;Rust &#x63D0;&#x4F9B;&#x4E86;&#x5F00;&#x7BB1;&#x5373;&#x7528;&#x7684; cross-compilation &#x652F;&#x6301;&#xFF0C;&#x4F60;&#x53EA;&#x9700;&#x8981;&#x5B89;&#x88C5; target &#x5BF9;&#x5E94;&#x7684; toolchain &#x5373;&#x53EF;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;$ rustup target add x86_64-unknown-linux-gnu</span><br></pre></td></tr></table></figure>
+
+<p>&#x7136;&#x540E;&#x4F7F;&#x7528; Cargo build &#x2013;target &#x8FDB;&#x884C;&#x7F16;&#x8BD1;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">css&#x590D;&#x5236;&#x4EE3;&#x7801;$ cargo build --target x86_64-unknown-linux-gnu</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;&#x4E8E;&#x7F16;&#x8BD1;&#x4E00;&#x4E2A;&#x9879;&#x76EE;&#x6765;&#x8BF4;&#xFF0C;&#x4EC5;&#x4EC5;&#x652F;&#x6301;&#x4E0D;&#x540C; target &#x7684;&#x6807;&#x51C6;&#x5E93;&#x662F;&#x5927;&#x6982;&#x7387;&#x4E0D;&#x591F;&#x7528;&#x7684;&#xFF0C;&#x5BF9;&#x4E8E;&#x4E0D;&#x540C;&#x7684; target &#x4F60;&#x4E5F;&#x8BB8;&#x9700;&#x8981;&#x4F7F;&#x7528;&#x4E0D;&#x540C;&#x7684; Linker &#x7B49;&#xFF0C;&#x8FD9;&#x4E9B;&#x90FD;&#x53EF;&#x4EE5;&#x5728; .cargo/config.toml &#x6587;&#x4EF6;&#x4E2D;&#x5B9A;&#x4E49;&#xFF0C;&#x8BE6;&#x7EC6;&#x5185;&#x5BB9;&#x53EF;&#x4EE5;&#x53C2;&#x8003; <a href="/external_links/62d2c4e49595f467f322d617127af5f3.html" target="blank" rel="noopener">The Cargo Book</a>&#x3002;&#x5927;&#x81F4;&#x7684;&#x8BBE;&#x7F6E;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;[target.x86_64-unknown-linux-gnu]</span><br><span class="line">linker = &quot;x86_64-unknown-linux-gnu-gcc&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Linux</strong> <strong>&#x7684;&#x4E00;&#x4E9B; C &#x6807;&#x51C6;&#x5E93;</strong></p>
+<ul>
+<li>GNU (glibc)</li>
+<li>Musl</li>
+</ul>
+<p>&#x5BF9;&#x4E8E; gnu &#x8F93;&#x51FA;&#x7684;&#x4E00;&#x822C;&#x662F;&#x52A8;&#x6001;&#x94FE;&#x63A5;&#x7684; binary&#xFF0C;&#x9700;&#x8981;&#x5728;&#x4F7F;&#x7528;&#x65B9;&#x7684;&#x7535;&#x8111;&#x4E0A;&#x5B89;&#x88C5; glibc&#x3002;&#x800C; musl &#x5219;&#x662F;&#x9759;&#x6001;&#x94FE;&#x63A5;&#xFF08;&#x4F60;&#x53EF;&#x4EE5;&#x8BA4;&#x4E3A;&#x5C31;&#x662F;&#x4E00;&#x4E2A; Tree-shaked &#x8FC7;&#x7684; Bundle&#xFF09;&#x7684;&#xFF0C;Bundle &#x7684;&#x4F53;&#x79EF;&#x4F1A;&#x53D8;&#x5927;&#x4E00;&#x4E9B;&#xFF0C;&#x4F46;&#x4F18;&#x52BF;&#x5728;&#x4E8E;&#x5B83;&#x4E0D;&#x9700;&#x8981;&#x4EFB;&#x4F55;&#x7684; Dependency&#x3002;</p>
+<p>&#x4F60;&#x4F1A;&#x53D1;&#x73B0;&#xFF0C;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x9700;&#x8981; cross-compile &#x591A;&#x4E2A;&#x5E73;&#x53F0;&#xFF0C;&#x5219;&#x9700;&#x8981;&#x5B8C;&#x6210;&#x591A;&#x4E2A;&#x5E73;&#x53F0;&#x7684;&#x53C2;&#x6570;&#x7684;&#x8C03;&#x4F18;&#xFF08;&#x4E0D;&#x540C;&#x7684; Compiler &#x7684;&#x53C2;&#x6570;&#x8FD8;&#x4E0D;&#x592A;&#x4E00;&#x6837;&#xFF09;&#xFF0C;&#x8FD9;&#x8BA9;&#x4EBA;&#x975E;&#x5E38;&#x5934;&#x75BC;&#x3002;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#xFF0C;Zig cc &#x53EF;&#x4EE5;&#x975E;&#x5E38;&#x597D;&#x5730;&#x5E2E;&#x52A9;&#x6211;&#x4EEC;&#x89E3;&#x51B3;&#x8FD9;&#x4E00;&#x7CFB;&#x5217;&#x95EE;&#x9898;&#x3002;</p>
+<h2 id="Zig"><a href="#Zig" class="headerlink" title="Zig"></a>Zig</h2><p>&#x4ECE;&#x8BED;&#x8A00;&#x7684;&#x89D2;&#x5EA6;&#x770B;&#xFF0C;Zig &#x662F;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x8F7B;&#x91CF;&#x7EA7;&#x7684;&#x9759;&#x6001;&#x8BED;&#x8A00;&#xFF0C;&#x5B83;&#x6CA1;&#x6709;Macro &#x7B49;&#x7B49;&#x3002;&#x9664;&#x6B64;&#x4E4B;&#x5916;&#xFF0C;&#x5B83;&#x63D0;&#x4F9B;&#x4E86;&#x975E;&#x5E38;&#x597D;&#x7684; C Interoperability&#xFF0C;&#x4F60;&#x751A;&#x81F3;&#x53EF;&#x4EE5;&#x76F4;&#x63A5; include &#x4E00;&#x4E2A; C &#x7684; header&#x3002;&#x9664;&#x6B64;&#x4E4B;&#x5916;&#x5B83;&#x8FD8;&#x662F;&#x4E00;&#x4E2A; C/C++ Compiler&#xFF0C;&#x5E95;&#x5C42;&#x8C03;&#x7528;&#x7684;&#x662F; Clang&#xFF0C;&#x4EE4;&#x4EBA;&#x5403;&#x60CA;&#x7684;&#x662F;&#x5B83;&#x7ADF;&#x7136;&#x517C;&#x5BB9;&#x4E86; Clang &#x548C; gcc &#x7684;&#x7F16;&#x8BD1;&#x53C2;&#x6570;&#xFF01;&#x4ECE;&#x539F;&#x7406;&#x4E0A;&#x6765;&#x8BF4;&#xFF0C;&#x5B83;&#x627F;&#x62C5;&#x4E86;&#x548C; Clang &#x6C9F;&#x901A;&#x7684;&#x89D2;&#x8272;&#xFF0C;&#x622A;&#x83B7;&#x90E8;&#x5206;&#x9700;&#x8981;&#x7684;&#x6307;&#x4EE4;&#xFF0C;&#x5982; <code>--target</code> &#x7B49;&#xFF0C;&#x52A0;&#x4EE5;&#x5904;&#x7406;&#x540E;&#x4EA4;&#x7ED9; Clang &#x8FDB;&#x884C;&#x540E;&#x7EED;&#x7684;&#x7F16;&#x8BD1;&#x6D41;&#x7A0B;&#xFF0C;&#x5982;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ruby&#x590D;&#x5236;&#x4EE3;&#x7801;$ zig cc -target x86_64-linux-gnu ...</span><br><span class="line">&#x2B07;&#xFE0F;</span><br><span class="line">$ clang xxx</span><br></pre></td></tr></table></figure>
+
+<p>&#x90A3;&#x4E48;&#x5982;&#x4F55;&#x5C06; Zig &#x5E94;&#x7528;&#x5230;&#x6211;&#x4EEC;&#x7684;&#x5DE5;&#x4F5C;&#x6D41;&#x4E0A;&#x5462;&#xFF1F;&#x9996;&#x5148;&#x5728;&#x4EFB;&#x610F;&#x4F4D;&#x7F6E;&#x521B;&#x5EFA;&#x4E00;&#x4E2A; zcc &#x7684;&#x6587;&#x4EF6;&#xFF08;Zig cc&#xFF09;&#xFF0C;&#x5982;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;#!/bin/sh</span><br><span class="line">zig cc -target x86_64-linux-gnu $@</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x5BF9;&#x5E94;&#x7684; .cargo/config.toml &#x4E2D;&#x5B8C;&#x6210;&#x5BF9; linker &#x7684;&#x8BBE;&#x7F6E;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;[target.x86_64-unknown-linux-gnu]</span><br><span class="line">linker = &quot;path/to/zcc&quot;</span><br></pre></td></tr></table></figure>
+
+<p>&#x8C03;&#x7528; Cargo build &#x5373;&#x53EF;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">css&#x590D;&#x5236;&#x4EE3;&#x7801;$ cargo build --target x86_64-unknown-linux-gnu</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x6D4B;&#x8BD5;"><a href="#&#x6D4B;&#x8BD5;" class="headerlink" title="&#x6D4B;&#x8BD5;"></a>&#x6D4B;&#x8BD5;</h2><p>&#x5982;&#x679C;&#x9700;&#x8981;&#x5BF9; binding &#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#xFF0C;&#x5EFA;&#x8BAE;&#x8FD8;&#x662F; follow docker&#x3002;&#x63A8;&#x8350;&#x6240;&#x6709;&#x5927;&#x578B;&#x9879;&#x76EE;&#xFF0C;&#x80FD;&#x4E0D;&#x7528;&#x4EA4;&#x53C9;&#x7F16;&#x8BD1;&#x5C31;&#x4E0D;&#x7528;&#xFF0C;&#x56E0;&#x4E3A;&#x6700;&#x540E;&#x5B83;&#x4EEC;&#x5747;&#x8981;&#x5B8C;&#x6210;&#x5728;&#x5404;&#x4E2A;&#x5E73;&#x53F0;&#x4E0A;&#x7684;&#x6D4B;&#x8BD5;&#xFF0C;&#x4EE5;&#x9A8C;&#x8BC1;&#x7F16;&#x8BD1;&#x540E;&#x7684;&#x4EA7;&#x7269;&#x7684;&#x6B63;&#x786E;&#x6027;&#x3002;</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><strong>Build Script</strong></p>
+<p><a href="/external_links/5e6fe18a4415706aa449850cfcd156b6.html" target="blank" rel="noopener">doc.rust-lang.org/cargo/refer&#x2026;</a></p>
+<p><strong>FFI</strong></p>
+<p><a href="/external_links/ecb7fd2a26b0716e74a0dce7626ddbfe.html" target="blank" rel="noopener">www.youtube.com/watch?v=peP&#x2026;</a></p>
+<p><a href="/external_links/9e23cd0dfd2bf1d437d44018da9e44e0.html" target="blank" rel="noopener">doc.rust-lang.org/nightly/nom&#x2026;</a></p>
+<p><a href="/external_links/429578c272d0145fcf6482a1e5d892fd.html" target="blank" rel="noopener">doc.rust-lang.org/nightly/nom&#x2026;</a></p>
+<p><a href="/external_links/68b948ecf2262018109034bc187ea7a2.html" target="blank" rel="noopener">nickdesaulniers.github.io/blog/2016/0&#x2026;</a></p>
+<p><strong>&#x4EA4;&#x53C9;&#x7F16;&#x8BD1;</strong></p>
+<p><a href="/external_links/327f77b5a3cb7a3c5d4bb92c1694828f.html" target="blank" rel="noopener">actually.fyi/posts/zig-m&#x2026;</a></p>
+<p><a href="/external_links/62d2c4e49595f467f322d617127af5f3.html" target="blank" rel="noopener">doc.rust-lang.org/cargo/refer&#x2026;</a></p>
+<p><a href="/external_links/5d7413ff97fb7114575b9b3b2ce13c9f.html" target="blank" rel="noopener">rustc-dev-guide.rust-lang.org/backend/cod&#x2026;</a></p>
+<p><a href="/external_links/c86320d5c695b406439844c12dfef7b8.html" target="blank" rel="noopener">andrewkelley.me/post/zig-cc&#x2026;</a></p>
+<p><a href="/external_links/ccdafba60856a2e8d608ca7d6f8b866f.html" target="blank" rel="noopener">www.aosabook.org/en/llvm.htm&#x2026;</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/68a0787f5b80dfb30b8c642499597c1d.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Rust-前端框架/" rel="tag"># Rust,前端框架</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7202085514400038969.html" rel="next" title="【动图+大白话🍓解析React源码】Render阶段中Fib">
+                <i class="fa fa-chevron-left"></i> 【动图+大白话🍓解析React源码】Render阶段中Fib
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7206723874506850360.html" rel="prev" title="【若川视野 x 源码共读】第42期   跟着 vant4 源">
+                【若川视野 x 源码共读】第42期   跟着 vant4 源 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">399</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Build-Script-｜文档"><span class="nav-number">2.</span> <span class="nav-text">Build Script ｜文档</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cargo-Instructions-文档"><span class="nav-number">2.1.</span> <span class="nav-text">Cargo Instructions | 文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pattern"><span class="nav-number">2.2.</span> <span class="nav-text">Pattern</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Foreign-Function-Interface-FFI"><span class="nav-number">3.</span> <span class="nav-text">Foreign Function Interface (FFI)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#FFI"><span class="nav-number">3.1.</span> <span class="nav-text">FFI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reverse-FFI"><span class="nav-number">3.2.</span> <span class="nav-text">Reverse FFI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FFI-Safety"><span class="nav-number">3.3.</span> <span class="nav-text">FFI Safety</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Opaque-Type"><span class="nav-number">3.4.</span> <span class="nav-text">Opaque Type</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写一个-sys-crate"><span class="nav-number">4.</span> <span class="nav-text">写一个 *-sys crate</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备工作"><span class="nav-number">4.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新建一个-libsodium-sys"><span class="nav-number">4.2.</span> <span class="nav-text">新建一个 libsodium-sys</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#定义-wrapper-h"><span class="nav-number">4.3.</span> <span class="nav-text">定义 wrapper.h</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写-build-script"><span class="nav-number">4.4.</span> <span class="nav-text">编写 build script</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写-binding-并测试"><span class="nav-number">4.5.</span> <span class="nav-text">编写 binding 并测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tips"><span class="nav-number">4.6.</span> <span class="nav-text">Tips</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写一个简单的-napi-sys"><span class="nav-number">5.</span> <span class="nav-text">写一个简单的 napi-sys</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备工作-1"><span class="nav-number">5.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#live-coding"><span class="nav-number">5.2.</span> <span class="nav-text">[live-coding]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可能遇到的问题"><span class="nav-number">5.3.</span> <span class="nav-text">可能遇到的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tips-1"><span class="nav-number">5.4.</span> <span class="nav-text">Tips</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#交叉编译"><span class="nav-number">6.</span> <span class="nav-text">交叉编译</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Zig"><span class="nav-number">6.1.</span> <span class="nav-text">Zig</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试"><span class="nav-number">6.2.</span> <span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">7.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

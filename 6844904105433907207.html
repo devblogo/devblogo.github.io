@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="源码,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5F15;&amp;#x8A00;  &amp;#x8FD9;&amp;#x662F; Android 10 &amp;#x6E90;&amp;#x7801;&amp;#x5206;&amp;#x6790;&amp;#x7CFB;&amp;#x5217;&amp;#x7684;&amp;#x7B2C; 4 &amp;#x7BC7; &amp;#x5206;&amp;#x652F;&amp;#xFF1A;android-10.0.0_r14 &amp;#x5168;&amp;#x6587;&amp;#x9605;&amp;#x8BFB;&amp;#x">
+<meta name="keywords" content="源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="0xA04 Android 10 源码分析：Apk加载流程之">
+<meta property="og:url" content="https://dev.newban.cn/6844904105433907207.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x5F15;&amp;#x8A00;  &amp;#x8FD9;&amp;#x662F; Android 10 &amp;#x6E90;&amp;#x7801;&amp;#x5206;&amp;#x6790;&amp;#x7CFB;&amp;#x5217;&amp;#x7684;&amp;#x7B2C; 4 &amp;#x7BC7; &amp;#x5206;&amp;#x652F;&amp;#xFF1A;android-10.0.0_r14 &amp;#x5168;&amp;#x6587;&amp;#x9605;&amp;#x8BFB;&amp;#x">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/34511fde9190be35dc40908fce5e0f59502df798ba6fcd4214c52f8b2bef7123">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7bd793233eacbad92bec1d8eb0682178f5fc7337bf4759804824bd9c93aa1528">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/288e1edbca32417d7185ce538bdfacd28c154a7eb822c082fe7278b32f0764bc">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/288e1edbca32417d7185ce538bdfacd28c154a7eb822c082fe7278b32f0764bc">
+<meta property="og:updated_time" content="2024-04-24T02:02:20.458Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="0xA04 Android 10 源码分析：Apk加载流程之">
+<meta name="twitter:description" content="&amp;#x5F15;&amp;#x8A00;  &amp;#x8FD9;&amp;#x662F; Android 10 &amp;#x6E90;&amp;#x7801;&amp;#x5206;&amp;#x6790;&amp;#x7CFB;&amp;#x5217;&amp;#x7684;&amp;#x7B2C; 4 &amp;#x7BC7; &amp;#x5206;&amp;#x652F;&amp;#xFF1A;android-10.0.0_r14 &amp;#x5168;&amp;#x6587;&amp;#x9605;&amp;#x8BFB;&amp;#x">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/34511fde9190be35dc40908fce5e0f59502df798ba6fcd4214c52f8b2bef7123">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844904105433907207.html">
+
+
+
+
+
+  <title>0xA04 Android 10 源码分析：Apk加载流程之 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">0xA04 Android 10 源码分析：Apk加载流程之</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-28T16:57:00+08:00">
+                2020-03-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x5F15;&#x8A00;"><a href="#&#x5F15;&#x8A00;" class="headerlink" title="&#x5F15;&#x8A00;"></a>&#x5F15;&#x8A00;</h2><blockquote>
+<ul>
+<li>&#x8FD9;&#x662F; Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#x7CFB;&#x5217;&#x7684;&#x7B2C; 4 &#x7BC7;</li>
+<li>&#x5206;&#x652F;&#xFF1A;android-10.0.0_r14</li>
+<li>&#x5168;&#x6587;&#x9605;&#x8BFB;&#x5927;&#x6982; 10 &#x5206;&#x949F;</li>
+</ul>
+</blockquote>
+<p><strong>&#x901A;&#x8FC7;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4F60;&#x5C06;&#x5B66;&#x4E60;&#x5230;&#x4EE5;&#x4E0B;&#x5185;&#x5BB9;&#xFF0C;&#x5C06;&#x5728;&#x6587;&#x672B;&#x4F1A;&#x7ED9;&#x51FA;&#x76F8;&#x5E94;&#x7684;&#x7B54;&#x6848;</strong></p>
+<ul>
+<li>View&#x4E2D;&#x7684;INVISIBLE&#x3001;VISIBLE&#x3001;GONE&#x90FD;&#x6709;&#x4EC0;&#x4E48;&#x4F5C;&#x7528;&#xFF1F;</li>
+<li>&#x4E3A;&#x4EC0;&#x4E48;ViewStub&#x662F;&#x5927;&#x5C0F;&#x4E3A;0&#x7684;&#x89C6;&#x56FE;</li>
+<li>ViewStub&#x6709;&#x4EC0;&#x4E48;&#x4F5C;&#x7528;&#xFF1F;</li>
+<li>ViewStub&#x662F;&#x5982;&#x4F55;&#x521B;&#x5EFA;&#x7684;&#xFF1F;</li>
+<li>&#x4E3A;&#x4EC0;&#x4E48;ViewStub&#x80FD;&#x505A;&#x5230;&#x5EF6;&#x8FDF;&#x52A0;&#x8F7D;&#xFF1F;</li>
+<li>ViewStub&#x6307;&#x5B9A;&#x7684;Layout&#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x662F;&#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x88AB;&#x52A0;&#x8F7D;&#x7684;&#xFF1F;</li>
+<li>LayoutInflater&#x662F;&#x4E00;&#x4E2A;&#x62BD;&#x8C61;&#x7C7B;&#x5B83;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;&#xFF1F;</li>
+<li>&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#x5B58;&#x50A8;&#x5728;&#x54EA;&#x91CC;&#xFF1F;&#x5982;&#x4F55;&#x83B7;&#x53D6;&#x548C;&#x6DFB;&#x52A0;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#xFF1F;</li>
+</ul>
+<p>&#x5728;&#x4E0A;&#x4E00;&#x7BC7;&#x6587;&#x7AE0; <a href="https://dev.newban.cn/6844904089696862221">0xA02 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;Apk&#x52A0;&#x8F7D;&#x6D41;&#x7A0B;&#x4E4B;&#x8D44;&#x6E90;&#x52A0;&#x8F7D;</a> &#x4E2D;&#x901A;&#x8FC7;LayoutInflater.inflate&#x65B9;&#x6CD5;&#x89E3;&#x6790;xml&#x6587;&#x4EF6;&#xFF0C;&#x4E86;&#x89E3;&#x5230;&#x4E86;&#x7CFB;&#x7EDF;&#x5982;&#x4F55;&#x5BF9;merge&#x3001;include&#x6807;&#x7B7E;&#x662F;&#x5982;&#x4F55;&#x5904;&#x7406;&#x7684;&#xFF0C;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x56F4;&#x7ED5;&#x4EE5;&#x4E0B;&#x4E24;&#x65B9;&#x9762;&#x5185;&#x5BB9;</p>
+<ul>
+<li>&#x7CFB;&#x7EDF;&#x5BF9;ViewStub&#x5982;&#x4F55;&#x5904;&#x7406;&#xFF1F;</li>
+<li>LayoutInflater&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;&#xFF1F;</li>
+</ul>
+<p><strong>&#x7CFB;&#x7EDF;&#x5BF9;merge&#x3001;include&#x662F;&#x5982;&#x4F55;&#x5904;&#x7406;&#x7684;</strong></p>
+<ul>
+<li>&#x4F7F;&#x7528;merge&#x6807;&#x7B7E;&#x5FC5;&#x987B;&#x6709;&#x7236;&#x5E03;&#x5C40;&#xFF0C;&#x4E14;&#x4F9D;&#x8D56;&#x4E8E;&#x7236;&#x5E03;&#x5C40;&#x52A0;&#x8F7D;</li>
+<li>merge&#x5E76;&#x4E0D;&#x662F;&#x4E00;&#x4E2A;ViewGroup&#xFF0C;&#x4E5F;&#x4E0D;&#x662F;&#x4E00;&#x4E2A;View&#xFF0C;&#x5B83;&#x76F8;&#x5F53;&#x4E8E;&#x58F0;&#x660E;&#x4E86;&#x4E00;&#x4E9B;&#x89C6;&#x56FE;&#xFF0C;&#x7B49;&#x5F85;&#x88AB;&#x6DFB;&#x52A0;&#xFF0C;&#x89E3;&#x6790;&#x8FC7;&#x7A0B;&#x4E2D;&#x9047;&#x5230;merge&#x6807;&#x7B7E;&#x4F1A;&#x5C06;merge&#x6807;&#x7B7E;&#x4E0B;&#x9762;&#x7684;&#x6240;&#x6709;&#x5B50;view&#x6DFB;&#x52A0;&#x5230;&#x6839;&#x5E03;&#x5C40;&#x4E2D;</li>
+<li>merge&#x6807;&#x7B7E;&#x5728; XML &#x4E2D;&#x5FC5;&#x987B;&#x662F;&#x6839;&#x5143;&#x7D20;</li>
+<li>&#x76F8;&#x53CD;&#x7684;include&#x4E0D;&#x80FD;&#x4F5C;&#x4E3A;&#x6839;&#x5143;&#x7D20;&#xFF0C;&#x9700;&#x8981;&#x653E;&#x5728;&#x4E00;&#x4E2A;ViewGroup&#x4E2D;</li>
+<li>&#x4F7F;&#x7528; include &#x6807;&#x7B7E;&#x5FC5;&#x987B;&#x6307;&#x5B9A;&#x6709;&#x6548;&#x7684; layout &#x5C5E;&#x6027;</li>
+<li>&#x4F7F;&#x7528; include &#x6807;&#x7B7E;&#x4E0D;&#x5199;&#x5BBD;&#x9AD8;&#x662F;&#x6CA1;&#x6709;&#x5173;&#x7CFB;&#x7684;&#xFF0C;&#x4F1A;&#x53BB;&#x89E3;&#x6790;&#x88AB; include &#x7684; layout</li>
+</ul>
+<p><strong>merge&#x6807;&#x7B7E;&#x4E3A;&#x4EC0;&#x4E48;&#x53EF;&#x4EE5;&#x8D77;&#x5230;&#x4F18;&#x5316;&#x5E03;&#x5C40;&#x7684;&#x6548;&#x679C;&#xFF1F;</strong></p>
+<p>&#x89E3;&#x6790;&#x8FC7;&#x7A0B;&#x4E2D;&#x9047;&#x5230;merge&#x6807;&#x7B7E;&#xFF0C;&#x4F1A;&#x8C03;&#x7528;rInflate&#x65B9;&#x6CD5;&#xFF0C;&#x90E8;&#x5206;&#x4EE3;&#x7801;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x6839;&#x636E;&#x5143;&#x7D20;&#x540D;&#x89E3;&#x6790;&#xFF0C;&#x751F;&#x6210;&#x5BF9;&#x5E94;&#x7684;view</span><br><span class="line">final View view = createViewFromTag(parent, name, context, attrs);</span><br><span class="line">final ViewGroup viewGroup = (ViewGroup) parent;</span><br><span class="line">final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);</span><br><span class="line">// rInflateChildren&#x65B9;&#x6CD5;&#x5185;&#x90E8;&#x8C03;&#x7528;&#x7684;rInflate&#x65B9;&#x6CD5;&#xFF0C;&#x6DF1;&#x5EA6;&#x4F18;&#x5148;&#x904D;&#x5386;&#x89E3;&#x6790;&#x6240;&#x6709;&#x7684;&#x5B50;view</span><br><span class="line">rInflateChildren(parser, view, attrs, true);</span><br><span class="line">// &#x6DFB;&#x52A0;&#x89E3;&#x6790;&#x7684;view</span><br><span class="line">viewGroup.addView(view, params);</span><br></pre></td></tr></table></figure>
+
+<p>&#x89E3;&#x6790;merge&#x6807;&#x7B7E;&#x4E0B;&#x9762;&#x7684;&#x6240;&#x6709;&#x5B50;view&#xFF0C;&#x7136;&#x540E;&#x6DFB;&#x52A0;&#x5230;&#x6839;&#x5E03;&#x5C40;&#x4E2D;  </p>
+<p>&#x66F4;&#x591A;&#x4FE1;&#x606F;&#x67E5;&#x770B;<a href="https://dev.newban.cn/6844904089696862221">0xA02 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;Apk&#x52A0;&#x8F7D;&#x6D41;&#x7A0B;&#x4E4B;&#x8D44;&#x6E90;&#x52A0;&#x8F7D;</a>&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x770B;&#x4E00;&#x4E0B;&#x7CFB;&#x7EDF;&#x5BF9;ViewStub&#x5982;&#x4F55;&#x5904;&#x7406;</p>
+<ol>
+<li>ViewStub&#x662F;&#x4EC0;&#x4E48;</li>
+</ol>
+<hr>
+<p><strong>&#x5173;&#x4E8E;ViewStub&#x7684;&#x4ECB;&#x7ECD;&#xFF0C;&#x53EF;&#x4EE5;&#x70B9;&#x51FB;&#x4E0B;&#x65B9;&#x5B98;&#x7F51;&#x94FE;&#x63A5;&#x67E5;&#x770B;</strong><br><a href="/external_links/e684e3c2948c8b0ceda94e4f9731c635.html" target="blank" rel="noopener">&#x5B98;&#x7F51;&#x94FE;&#x63A5;https://developer.android.google.cn/reference/android&#x2026;ViewStub</a></p>
+<p><strong>ViewStub&#x7684;&#x7EE7;&#x627F;&#x7ED3;&#x6784;</strong><br><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/34511fde9190be35dc40908fce5e0f59502df798ba6fcd4214c52f8b2bef7123" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7bd793233eacbad92bec1d8eb0682178f5fc7337bf4759804824bd9c93aa1528" alt></p>
+<p><strong>&#x7B80;&#x5355;&#x6765;&#x8BF4;&#x4E3B;&#x8981;&#x4EE5;&#x4E0B;&#x51E0;&#x70B9;&#xFF1A;</strong></p>
+<ul>
+<li>ViewStub&#x63A7;&#x4EF6;&#x662F;&#x4E00;&#x4E2A;&#x4E0D;&#x53EF;&#x89C1;&#xFF0C;</li>
+<li>&#x5927;&#x5C0F;&#x4E3A;0&#x7684;&#x89C6;&#x56FE;</li>
+<li>&#x5F53;ViewStub&#x63A7;&#x4EF6;&#x8BBE;&#x7F6E;&#x53EF;&#x89C1;&#xFF0C;&#x6216;&#x8005;&#x8C03;&#x7528;inflate()&#x65B9;&#x6CD5;&#xFF0C;ViewStub&#x6240;&#x6307;&#x5B9A;&#x7684;layout&#x8D44;&#x6E90;&#x5C31;&#x4F1A;&#x88AB;&#x52A0;&#x8F7D;</li>
+<li>ViewStub&#x4E5F;&#x4F1A;&#x4ECE;&#x5176;&#x7236;&#x63A7;&#x4EF6;&#x4E2D;&#x79FB;&#x9664;&#xFF0C;ViewStub&#x4F1A;&#x88AB;&#x65B0;&#x52A0;&#x8F7D;&#x7684;layout&#x6587;&#x4EF6;&#x4EE3;&#x66FF;</li>
+</ul>
+<p><strong>&#x4E3A;&#x4EC0;&#x4E48;ViewStub&#x662F;&#x5927;&#x5C0F;&#x4E3A;0&#x7684;&#x89C6;&#x56FE;</strong><br><strong>frameworks/base/core/java/android/view/ViewStub.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {</span><br><span class="line">    // &#x8BBE;&#x7F6E;&#x89C6;&#x56FE;&#x5927;&#x5C0F;&#x4E3A;0</span><br><span class="line">    setMeasuredDimension(0, 0);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>ViewStub&#x7684;&#x4F5C;&#x7528;</strong></p>
+<p>&#x4E3B;&#x8981;&#x7528;&#x6765;&#x5EF6;&#x8FDF;&#x5E03;&#x5C40;&#x7684;&#x52A0;&#x8F7D;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;&#x5728;Android&#x4E2D;&#x975E;&#x5E38;&#x5E38;&#x89C1;&#x7684;&#x5E03;&#x5C40;&#xFF0C;&#x7528;ListView&#x6765;&#x5C55;&#x793A;&#x5217;&#x8868;&#x4FE1;&#x606F;&#xFF0C;&#x5F53;&#x6CA1;&#x6709;&#x6570;&#x636E;&#x6216;&#x8005;&#x7F51;&#x7EDC;&#x52A0;&#x8F7D;&#x5931;&#x8D25;&#x65F6;, &#x52A0;&#x8F7D;&#x7A7A;&#x7684; ListView &#x4F1A;&#x5360;&#x7528;&#x4E00;&#x4E9B;&#x8D44;&#x6E90;&#xFF0C;&#x5982;&#x679C;&#x7528;ViewStub&#x5305;&#x88F9;ListView&#xFF0C;&#x5F53;&#x6709;&#x6570;&#x636E;&#x65F6;&#xFF0C;&#x624D;&#x4F1A;&#x8C03;&#x7528;inflate()&#x65B9;&#x6CD5;&#x663E;&#x793A;ListView&#xFF0C;&#x8D77;&#x5230;&#x5EF6;&#x8FDF;&#x52A0;&#x8F7D;&#x4E86;&#x5E03;&#x5C40;&#x6548;&#x679C;</p>
+<h3 id="1-1-ViewStub-&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;"><a href="#1-1-ViewStub-&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;" class="headerlink" title="1.1 ViewStub &#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;"></a>1.1 ViewStub &#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;</h3><p>&#x5728;&#x4E0A;&#x7BC7;&#x6587;&#x7AE0;<a href="https://dev.newban.cn/6844904089696862221">0xA02 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;Apk&#x52A0;&#x8F7D;&#x6D41;&#x7A0B;&#x4E4B;&#x8D44;&#x6E90;&#x52A0;&#x8F7D;</a>&#x4E2D;&#xFF0C;&#x4ECB;&#x7ECD;&#x4E86;view&#x7684;&#x521B;&#x5EFA;&#x662F;&#x901A;&#x8FC7;&#x8C03;&#x7528;&#x4E86;LayoutInflater.createView&#x65B9;&#x6CD5;&#x6839;&#x636E;&#x5B8C;&#x6574;&#x7684;&#x7C7B;&#x7684;&#x8DEF;&#x5F84;&#x540D;&#x5229;&#x7528;&#x53CD;&#x5C04;&#x673A;&#x5236;&#x6784;&#x5EFA;View&#x5BF9;&#x8C61;&#xFF0C;&#x56E0;&#x4E3A;ViewStub&#x662F;&#x7EE7;&#x627F;View&#xFF0C;&#x6240;&#x4EE5;ViewStub&#x7684;&#x521B;&#x5EFA;&#x548C;View&#x7684;&#x521B;&#x5EFA;&#x662F;&#x76F8;&#x540C;&#x7684;&#xFF0C;&#x6765;&#x770B;&#x4E00;&#x4E0B;LayoutInflater.createView&#x65B9;&#x6CD5;<br><strong>frameworks/base/core/java/android/view/LayoutInflater.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;...</span><br><span class="line"></span><br><span class="line">try {</span><br><span class="line">    // &#x5229;&#x7528;&#x6784;&#x9020;&#x51FD;&#x6570;&#xFF0C;&#x521B;&#x5EFA;View</span><br><span class="line">    final View view = constructor.newInstance(args);</span><br><span class="line">    if (view instanceof ViewStub) {</span><br><span class="line">        // &#x5982;&#x679C;&#x662F;ViewStub&#xFF0C;&#x5219;&#x8BBE;&#x7F6E;LayoutInflater</span><br><span class="line">        final ViewStub viewStub = (ViewStub) view;</span><br><span class="line">        viewStub.setLayoutInflater(cloneInContext((Context) args[0]));</span><br><span class="line">    }</span><br><span class="line">    return view;</span><br><span class="line">} finally {</span><br><span class="line">    mConstructorArgs[0] = lastContext;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>&#x6839;&#x636E;&#x5B8C;&#x6574;&#x7684;&#x7C7B;&#x7684;&#x8DEF;&#x5F84;&#x540D;&#x5229;&#x7528;&#x53CD;&#x5C04;&#x673A;&#x5236;&#x6784;&#x5EFA;View&#x5BF9;&#x8C61;&#xFF0C;&#x5982;&#x679C;&#x9047;&#x5230;ViewStub&#x5C06;&#x5F53;&#x524D;LayoutInflater&#x8BBE;&#x7F6E;&#x7ED9;ViewStub&#xFF0C;&#x5F53;ViewStub&#x63A7;&#x4EF6;&#x8BBE;&#x7F6E;&#x53EF;&#x89C1;&#xFF0C;&#x6216;&#x8005;&#x8C03;&#x7528;inflate()&#xFF0C;&#x4F1A;&#x8C03;&#x7528;LayoutInflater&#x7684;inflate&#x65B9;&#x6CD5;&#x5B8C;&#x6210;&#x5E03;&#x5C40;&#x52A0;&#x8F7D;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x5206;&#x6790;ViewStub&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;</p>
+<h3 id="1-2-ViewStub&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;"><a href="#1-2-ViewStub&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;" class="headerlink" title="1.2 ViewStub&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;"></a>1.2 ViewStub&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;</h3><p>&#x5728;&#x4E0A;&#x9762;&#x63D0;&#x5230;&#x4E86;&#x6839;&#x636E;&#x5B8C;&#x6574;&#x7684;&#x7C7B;&#x7684;&#x8DEF;&#x5F84;&#x540D;&#x5229;&#x7528;&#x53CD;&#x5C04;&#x673A;&#x5236;&#x6784;&#x5EFA;View&#x5BF9;&#x8C61;&#xFF0C;&#x5F53;view&#x5BF9;&#x8C61;&#x88AB;&#x521B;&#x5EFA;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4F1A;&#x8C03;&#x7528;&#x5B83;&#x7684;&#x6784;&#x9020;&#x51FD;&#x6570;&#xFF0C;&#x6765;&#x770B;&#x4E00;&#x4E0B;ViewStub&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;public ViewStub(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {</span><br><span class="line">    super(context);</span><br><span class="line"></span><br><span class="line">    final TypedArray a = context.obtainStyledAttributes(attrs,</span><br><span class="line">            R.styleable.ViewStub, defStyleAttr, defStyleRes);</span><br><span class="line">    saveAttributeDataForStyleable(context, R.styleable.ViewStub, attrs, a, defStyleAttr,</span><br><span class="line">            defStyleRes);</span><br><span class="line">    // &#x89E3;&#x6790;xml&#x4E2D;&#x8BBE;&#x7F6E;&#x7684; android:inflatedId &#x7684;&#x5C5E;&#x6027;</span><br><span class="line">    mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);</span><br><span class="line">    // &#x89E3;&#x6790;xml&#x4E2D;&#x8BBE;&#x7F6E;&#x7684; android:layout &#x5C5E;&#x6027;</span><br><span class="line">    mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, 0);</span><br><span class="line">    // &#x89E3;&#x6790;xml&#x4E2D;&#x8BBE;&#x7F6E;&#x7684; android:id &#x5C5E;&#x6027;</span><br><span class="line">    mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);</span><br><span class="line">    a.recycle();</span><br><span class="line">    // view&#x4E0D;&#x53EF;&#x89C1;</span><br><span class="line">    setVisibility(GONE);</span><br><span class="line">    // &#x4E0D;&#x4F1A;&#x8C03;&#x7528; onDraw &#x65B9;&#x6CD5;&#x7ED8;&#x5236;&#x5185;&#x5BB9;</span><br><span class="line">    setWillNotDraw(true);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>&#x83B7;&#x53D6;android:inflatedId&#x3001;android:layout&#x3001;android:id&#x7684;&#x503C;</li>
+<li>&#x8C03;&#x7528;setVisibility&#x65B9;&#x6CD5;&#xFF0C;&#x8BBE;&#x7F6E;View&#x4E0D;&#x53EF;&#x89C1;</li>
+<li>&#x8C03;&#x7528;setWillNotDraw&#x65B9;&#x6CD5;&#xFF0C;&#x4E0D;&#x4F1A;&#x8C03;&#x7528; onDraw &#x65B9;&#x6CD5;&#x7ED8;&#x5236;&#x5185;&#x5BB9;</li>
+</ol>
+<p>&#x5728;&#x4E0A;&#x9762;&#x63D0;&#x5230;&#x4E86;&#x5982;&#x679C;&#x60F3;&#x8981;&#x52A0;&#x8F7D;ViewStub&#x6240;&#x6307;&#x5B9A;&#x7684;layout&#x8D44;&#x6E90;&#xFF0C;&#x9700;&#x8981;&#x8BBE;&#x7F6E;ViewStub&#x63A7;&#x4EF6;&#x8BBE;&#x7F6E;&#x53EF;&#x89C1;&#xFF0C;&#x6216;&#x8005;&#x8C03;&#x7528;inflate()&#x65B9;&#x6CD5;&#xFF0C;&#x6765;&#x770B;&#x4E00;&#x4E0B;ViewStub&#x7684;setVisibility&#x65B9;&#x6CD5;</p>
+<h3 id="1-3-ViewStub&#x7684;setVisibility&#x65B9;&#x6CD5;"><a href="#1-3-ViewStub&#x7684;setVisibility&#x65B9;&#x6CD5;" class="headerlink" title="1.3 ViewStub&#x7684;setVisibility&#x65B9;&#x6CD5;"></a>1.3 ViewStub&#x7684;setVisibility&#x65B9;&#x6CD5;</h3><p>setVisibility(int visibility)&#x65B9;&#x6CD5;&#xFF0C;&#x53C2;&#x6570;visibility&#x5BF9;&#x5E94;&#x4E09;&#x4E2A;&#x503C;&#x5206;&#x522B;&#x662F;INVISIBLE&#x3001;VISIBLE&#x3001;GONE</p>
+<ul>
+<li>VISIBLE&#xFF1A;&#x89C6;&#x56FE;&#x53EF;&#x89C1;</li>
+<li>INVISIBLE&#xFF1A;&#x89C6;&#x56FE;&#x4E0D;&#x53EF;&#x89C1;&#x7684;&#xFF0C;&#x5B83;&#x4ECD;&#x7136;&#x5360;&#x7528;&#x5E03;&#x5C40;&#x7684;&#x7A7A;&#x95F4;</li>
+<li>GONE&#xFF1A;&#x89C6;&#x56FE;&#x4E0D;&#x53EF;&#x89C1;&#xFF0C;&#x5B83;&#x4E0D;&#x5360;&#x7528;&#x5E03;&#x5C40;&#x7684;&#x7A7A;&#x95F4;</li>
+</ul>
+<p>&#x63A5;&#x4E0B;&#x91CC;&#x67E5;&#x770B;&#x4E00;&#x4E0B;ViewStub&#x7684;setVisibility&#x65B9;&#x6CD5;<br><strong>frameworks/base/core/java/android/view/ViewStub.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Override</span><br><span class="line">public void setVisibility(int visibility) {</span><br><span class="line">    if (mInflatedViewRef != null) {</span><br><span class="line">        // mInflatedViewRef &#x662F; WeakReference&#x7684;&#x5B9E;&#x4F8B;&#xFF0C;&#x8C03;&#x7528;inflate&#x65B9;&#x6CD5;&#x65F6;&#x5019;&#x521D;&#x59CB;&#x5316;</span><br><span class="line">        View view = mInflatedViewRef.get();</span><br><span class="line">        if (view != null) {</span><br><span class="line">            // &#x8BBE;&#x7F6E;View&#x53EF;&#x89C1;</span><br><span class="line">            view.setVisibility(visibility);</span><br><span class="line">        } else {</span><br><span class="line">            throw new IllegalStateException(&quot;setVisibility called on un-referenced view&quot;);</span><br><span class="line">        }</span><br><span class="line">    } else {</span><br><span class="line">        super.setVisibility(visibility);</span><br><span class="line">        // &#x5F53;View&#x4E3A;&#x7A7A;&#x4E14;&#x8BBE;&#x7F6E;&#x89C6;&#x56FE;&#x53EF;&#x89C1;(VISIBLE&#x3001;INVISIBLE)&#xFF0C;&#x8C03;&#x7528;inflate&#x65B9;&#x6CD5;</span><br><span class="line">        if (visibility == VISIBLE || visibility == INVISIBLE) {</span><br><span class="line">            inflate();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>mInflatedViewRef &#x662F; WeakReference&#x7684;&#x5B9E;&#x4F8B;&#xFF0C;&#x8C03;&#x7528;inflate&#x65B9;&#x6CD5;&#x65F6;&#x5019;&#x521D;&#x59CB;&#x5316;</li>
+<li>&#x4ECE; mInflatedViewRef &#x7F13;&#x5B58;&#x4E2D;&#x83B7;&#x53D6;View&#xFF0C;&#x5E76;&#x4E14;&#x8BBE;&#x7F6E;View&#x53EF;&#x89C1;</li>
+<li>&#x5F53;View&#x4E3A;&#x7A7A;&#x4E14;&#x8BBE;&#x7F6E;&#x89C6;&#x56FE;&#x53EF;&#x89C1;(VISIBLE&#x3001;INVISIBLE)&#xFF0C;&#x4F1A;&#x8C03;&#x7528;inflate&#x65B9;&#x6CD5;</li>
+</ol>
+<h3 id="1-4-ViewStub-inflate&#x65B9;&#x6CD5;"><a href="#1-4-ViewStub-inflate&#x65B9;&#x6CD5;" class="headerlink" title="1.4 ViewStub.inflate&#x65B9;&#x6CD5;"></a>1.4 ViewStub.inflate&#x65B9;&#x6CD5;</h3><p>&#x8C03;&#x7528;&#x4E86;ViewStub&#x7684;setVisibility&#x65B9;&#x6CD5;&#xFF0C;&#x6700;&#x540E;&#x90FD;&#x4F1A;&#x8C03;&#x7528;ViewStub.inflate&#x65B9;&#x6CD5;&#xFF0C;&#x6765;&#x67E5;&#x770B;&#x4E00;&#x4E0B;<br><strong>frameworks/base/core/java/android/view/ViewStub.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public View inflate() {</span><br><span class="line">    final ViewParent viewParent = getParent();</span><br><span class="line"></span><br><span class="line">    if (viewParent != null &amp;&amp; viewParent instanceof ViewGroup) {</span><br><span class="line">        if (mLayoutResource != 0) {</span><br><span class="line">            final ViewGroup parent = (ViewGroup) viewParent;</span><br><span class="line">            // &#x89E3;&#x6790;&#x5E03;&#x5C40;&#x89C6;&#x56FE;</span><br><span class="line">            // &#x8FD4;&#x56DE;&#x7684;view&#x662F;android:layout&#x6307;&#x5B9A;&#x7684;&#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x6700;&#x9876;&#x5C42;&#x7684;view</span><br><span class="line">            final View view = inflateViewNoAdd(parent);</span><br><span class="line">            </span><br><span class="line">            // &#x79FB;&#x9664;ViewStub</span><br><span class="line">            // &#x6DFB;&#x52A0;view&#x5230;&#x88AB;&#x79FB;&#x9664;&#x7684;ViewStub&#x7684;&#x4F4D;&#x7F6E;</span><br><span class="line">            replaceSelfWithView(view, parent);</span><br><span class="line"></span><br><span class="line">            // &#x6DFB;&#x52A0;view&#x5230; mInflatedViewRef &#x4E2D;</span><br><span class="line">            mInflatedViewRef = new WeakReference&lt;&gt;(view);</span><br><span class="line">            if (mInflateListener != null) {</span><br><span class="line">                // &#x52A0;&#x8F7D;&#x5B8C;&#x6210;&#x4E4B;&#x540E;&#xFF0C;&#x56DE;&#x8C03;onInflate &#x65B9;&#x6CD5;</span><br><span class="line">                mInflateListener.onInflate(this, view);</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            return view;</span><br><span class="line">        } else {</span><br><span class="line">            // &#x9700;&#x8981;&#x5728;xml&#x4E2D;&#x8BBE;&#x7F6E;android:layout&#xFF0C;&#x4E0D;&#x662F;layout&#xFF0C;&#x5426;&#x5219;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;</span><br><span class="line">            throw new IllegalArgumentException(&quot;ViewStub must have a valid layoutResource&quot;);</span><br><span class="line">        }</span><br><span class="line">    } else {</span><br><span class="line">        // ViewStub&#x4E0D;&#x80FD;&#x4F5C;&#x4E3A;&#x6839;&#x5E03;&#x5C40;&#xFF0C;&#x5B83;&#x9700;&#x8981;&#x653E;&#x5728;ViewGroup&#x4E2D;, &#x5426;&#x5219;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;</span><br><span class="line">        throw new IllegalStateException(&quot;ViewStub must have a non-null ViewGroup viewParent&quot;);</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>&#x8C03;&#x7528;inflateViewNoAdd&#x65B9;&#x6CD5;&#x8FD4;&#x56DE;android:layout&#x6307;&#x5B9A;&#x7684;&#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x6700;&#x9876;&#x5C42;&#x7684;view</li>
+<li>&#x8C03;&#x7528;replaceSelfWithView&#x65B9;&#x6CD5;, &#x79FB;&#x9664;ViewStub, &#x6DFB;&#x52A0;view&#x5230;&#x88AB;&#x79FB;&#x9664;&#x7684;ViewStub&#x7684;&#x4F4D;&#x7F6E;</li>
+<li>&#x6DFB;&#x52A0;view&#x5230; mInflatedViewRef &#x4E2D;</li>
+<li>&#x52A0;&#x8F7D;&#x5B8C;&#x6210;&#x4E4B;&#x540E;&#xFF0C;&#x56DE;&#x8C03;onInflate &#x65B9;&#x6CD5;</li>
+</ol>
+<p><strong>&#x9700;&#x8981;&#x6CE8;&#x610F;&#x4EE5;&#x4E0B;&#x4E24;&#x70B9;&#xFF1A;</strong></p>
+<ul>
+<li>&#x4F7F;&#x7528;ViewStub&#x9700;&#x8981;&#x5728;xml&#x4E2D;&#x8BBE;&#x7F6E;android:layout&#xFF0C;&#x4E0D;&#x662F;layout&#xFF0C;&#x5426;&#x5219;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;</li>
+<li>ViewStub&#x4E0D;&#x80FD;&#x4F5C;&#x4E3A;&#x6839;&#x5E03;&#x5C40;&#xFF0C;&#x5B83;&#x9700;&#x8981;&#x653E;&#x5728;ViewGroup&#x4E2D;, &#x5426;&#x5219;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;</li>
+</ul>
+<p>&#x6765;&#x67E5;&#x770B;&#x4E00;&#x4E0B;inflateViewNoAdd&#x65B9;&#x6CD5;&#x548C;replaceSelfWithView&#x65B9;&#x6CD5;</p>
+<h3 id="1-5-ViewStub-inflateViewNoAdd&#x65B9;&#x6CD5;"><a href="#1-5-ViewStub-inflateViewNoAdd&#x65B9;&#x6CD5;" class="headerlink" title="1.5 ViewStub.inflateViewNoAdd&#x65B9;&#x6CD5;"></a>1.5 ViewStub.inflateViewNoAdd&#x65B9;&#x6CD5;</h3><p>&#x8C03;&#x7528;inflateViewNoAdd&#x65B9;&#x6CD5;&#x8FD4;&#x56DE;android:layout&#x6307;&#x5B9A;&#x7684;&#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x6700;&#x9876;&#x5C42;&#x7684;view<br><strong>frameworks/base/core/java/android/view/ViewStub.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">dart&#x590D;&#x5236;&#x4EE3;&#x7801;private View inflateViewNoAdd(ViewGroup parent) {</span><br><span class="line">    final LayoutInflater factory;</span><br><span class="line"></span><br><span class="line">    // mInflater &#x662F;View&#x88AB;&#x521B;&#x5EFA;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5982;&#x679C;&#x662F;ViewStub, &#x5C06;LayoutInflater&#x8D4B;&#x503C;&#x7ED9;mInflater</span><br><span class="line">    if (mInflater != null) {</span><br><span class="line">        factory = mInflater;</span><br><span class="line">    } else {</span><br><span class="line">        // &#x5982;&#x679C;mInflater&#x4E3A;&#x7A7A;&#xFF0C;&#x5219;&#x521B;&#x5EFA;LayoutInflater</span><br><span class="line">        factory = LayoutInflater.from(mContext);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x4ECE;&#x6307;&#x5B9A;&#x7684; mLayoutResource &#x8D44;&#x6E90;&#x4E2D;&#x89E3;&#x6790;&#x5E03;&#x5C40;&#x89C6;&#x56FE;</span><br><span class="line">    // mLayoutResource &#x662F;&#x5728;xml&#x8BBE;&#x7F6E;&#x7684; Android:layout &#x6307;&#x5B9A;&#x7684;&#x5E03;&#x5C40;&#x6587;&#x4EF6;</span><br><span class="line">    final View view = factory.inflate(mLayoutResource, parent, false);</span><br><span class="line"></span><br><span class="line">    // mInflatedId &#x662F;&#x5728;xml&#x8BBE;&#x7F6E;&#x7684; inflateId</span><br><span class="line">    if (mInflatedId != NO_ID) {</span><br><span class="line">        // &#x5C06;id&#x590D;&#x5236;&#x7ED9;view</span><br><span class="line">        view.setId(mInflatedId);</span><br><span class="line">        //&#x6CE8;&#x610F;&#xFF1A;&#x5982;&#x679C;&#x6307;&#x5B9A;&#x4E86;mInflatedId , &#x88AB;inflate&#x7684;layoutView&#x7684;id&#x5C31;&#x662F;mInflatedId</span><br><span class="line">    }</span><br><span class="line">    return view;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>mInflater&#x662F;View&#x88AB;&#x521B;&#x5EFA;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5982;&#x679C;&#x662F;ViewStub, &#x5C06;LayoutInflater&#x8D4B;&#x503C;&#x7ED9;mInflater</li>
+<li>&#x5982;&#x679C;mInflater&#x4E3A;&#x7A7A;&#x5219;&#x901A;&#x8FC7;LayoutInflater.from(mContext)&#x6784;&#x5EFA;LayoutInflater</li>
+<li>&#x8C03;&#x7528;LayoutInflater&#x7684;inflate&#x65B9;&#x6CD5;&#x89E3;&#x6790;&#x5E03;&#x5C40;&#x89C6;&#x56FE;</li>
+<li>&#x5C06;mInflatedId&#x8BBE;&#x7F6E;View</li>
+</ul>
+<h3 id="1-6-ViewStub-replaceSelfWithView&#x65B9;&#x6CD5;"><a href="#1-6-ViewStub-replaceSelfWithView&#x65B9;&#x6CD5;" class="headerlink" title="1.6 ViewStub.replaceSelfWithView&#x65B9;&#x6CD5;"></a>1.6 ViewStub.replaceSelfWithView&#x65B9;&#x6CD5;</h3><p>&#x8C03;&#x7528;replaceSelfWithView&#x65B9;&#x6CD5;, &#x79FB;&#x9664;ViewStub, &#x6DFB;&#x52A0;view&#x5230;&#x88AB;&#x79FB;&#x9664;&#x7684;ViewStub&#x7684;&#x4F4D;&#x7F6E;<br><strong>frameworks/base/core/java/android/view/ViewStub.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;private void replaceSelfWithView(View view, ViewGroup parent) {</span><br><span class="line">    // &#x83B7;&#x53D6;ViewStub&#x5728;&#x89C6;&#x56FE;&#x4E2D;&#x7684;&#x4F4D;&#x7F6E;</span><br><span class="line">    final int index = parent.indexOfChild(this);</span><br><span class="line">    // &#x79FB;&#x9664;ViewStub</span><br><span class="line">    // &#x6CE8;&#x610F;&#xFF1A;&#x8C03;&#x7528;removeViewInLayout&#x65B9;&#x6CD5;&#x4E4B;&#x540E;&#xFF0C;&#x8C03;&#x7528;findViewById()&#x662F;&#x627E;&#x4E0D;&#x5230;&#x8BE5;ViewStub&#x5BF9;&#x8C61;</span><br><span class="line">    parent.removeViewInLayout(this);</span><br><span class="line"></span><br><span class="line">    final ViewGroup.LayoutParams layoutParams = getLayoutParams();</span><br><span class="line">    // &#x5C06;xml&#x4E2D;&#x6307;&#x5B9A;&#x7684; android:layout &#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x4E2D;&#x6700;&#x9876;&#x5C42;&#x7684;View&#xFF0C;&#x6DFB;&#x52A0;&#x5230;&#x88AB;&#x79FB;&#x9664;&#x7684; ViewStub&#x7684;&#x4F4D;&#x7F6E;</span><br><span class="line">    if (layoutParams != null) {</span><br><span class="line">        parent.addView(view, index, layoutParams);</span><br><span class="line">    } else {</span><br><span class="line">        parent.addView(view, index);</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>&#x83B7;&#x53D6;ViewStub&#x5728;&#x89C6;&#x56FE;&#x4E2D;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x7136;&#x540E;&#x79FB;&#x9664;ViewStub</li>
+<li>&#x6DFB;&#x52A0;android:layout &#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x4E2D;&#x6700;&#x9876;&#x5C42;&#x7684;View&#x5230;&#x88AB;&#x79FB;&#x9664;&#x7684;ViewStub&#x7684;&#x4F4D;&#x7F6E;</li>
+</ol>
+<h3 id="1-7-ViewStub&#x7684;&#x6CE8;&#x610F;&#x4E8B;&#x9879;"><a href="#1-7-ViewStub&#x7684;&#x6CE8;&#x610F;&#x4E8B;&#x9879;" class="headerlink" title="1.7 ViewStub&#x7684;&#x6CE8;&#x610F;&#x4E8B;&#x9879;"></a>1.7 ViewStub&#x7684;&#x6CE8;&#x610F;&#x4E8B;&#x9879;</h3><ul>
+<li>&#x4F7F;&#x7528;ViewStub&#x9700;&#x8981;&#x5728;xml&#x4E2D;&#x8BBE;&#x7F6E;android:layout&#xFF0C;&#x4E0D;&#x662F;layout&#xFF0C;&#x5426;&#x5219;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;throw new IllegalArgumentException(&quot;ViewStub must have a valid layoutResource&quot;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ViewStub&#x4E0D;&#x80FD;&#x4F5C;&#x4E3A;&#x6839;&#x5E03;&#x5C40;&#xFF0C;&#x5B83;&#x9700;&#x8981;&#x653E;&#x5728;ViewGroup&#x4E2D;, &#x5426;&#x5219;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;throw new IllegalStateException(&quot;ViewStub must have a non-null ViewGroup viewParent&quot;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x4E00;&#x65E6;&#x8C03;&#x7528;setVisibility(View.VISIBLE)&#x6216;&#x8005;inflate()&#x65B9;&#x6CD5;&#x4E4B;&#x540E;&#xFF0C;&#x8BE5;ViewStub&#x5C06;&#x4F1A;&#x4ECE;&#x8BD5;&#x56FE;&#x4E2D;&#x88AB;&#x79FB;&#x9664;&#xFF08;&#x6B64;&#x65F6;&#x8C03;&#x7528;findViewById()&#x662F;&#x627E;&#x4E0D;&#x5230;&#x8BE5;ViewStub&#x5BF9;&#x8C61;).</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x83B7;&#x53D6;ViewStub&#x5728;&#x89C6;&#x56FE;&#x4E2D;&#x7684;&#x4F4D;&#x7F6E;</span><br><span class="line">final int index = parent.indexOfChild(this);</span><br><span class="line">// &#x79FB;&#x9664;ViewStub</span><br><span class="line">// &#x6CE8;&#x610F;&#xFF1A;&#x8C03;&#x7528;removeViewInLayout&#x65B9;&#x6CD5;&#x4E4B;&#x540E;&#xFF0C;&#x8C03;&#x7528;findViewById()&#x662F;&#x627E;&#x4E0D;&#x5230;&#x8BE5;ViewStub&#x5BF9;&#x8C61;</span><br><span class="line">parent.removeViewInLayout(this);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x5982;&#x679C;&#x6307;&#x5B9A;&#x4E86;mInflatedId , &#x88AB;inflate&#x7684;layoutView&#x7684;id&#x5C31;&#x662F;mInflatedId</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;// mInflatedId &#x662F;&#x5728;xml&#x8BBE;&#x7F6E;&#x7684; inflateId</span><br><span class="line">if (mInflatedId != NO_ID) {</span><br><span class="line">    // &#x5C06;id&#x590D;&#x5236;&#x7ED9;view</span><br><span class="line">    view.setId(mInflatedId);</span><br><span class="line">    //&#x6CE8;&#x610F;&#xFF1A;&#x5982;&#x679C;&#x6307;&#x5B9A;&#x4E86;mInflatedId , &#x88AB;inflate&#x7684;layoutView&#x7684;id&#x5C31;&#x662F;mInflatedId</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x88AB;inflate&#x7684;layoutView&#x7684;layoutParams&#x4E0E;ViewStub&#x7684;layoutParams&#x76F8;&#x540C;.</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;final ViewGroup.LayoutParams layoutParams = getLayoutParams();</span><br><span class="line">// &#x5C06;xml&#x4E2D;&#x6307;&#x5B9A;&#x7684; android:layout &#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x4E2D;&#x6700;&#x9876;&#x5C42;&#x7684;View &#x4E5F;&#x5C31;&#x662F;&#x6839;view&#xFF0C;</span><br><span class="line">// &#x6DFB;&#x52A0;&#x5230;&#x88AB;&#x79FB;&#x9664;&#x7684; ViewStub&#x7684;&#x4F4D;&#x7F6E;</span><br><span class="line">if (layoutParams != null) {</span><br><span class="line">    parent.addView(view, index, layoutParams);</span><br><span class="line">} else {</span><br><span class="line">    parent.addView(view, index);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5230;&#x8FD9;&#x91CC;&#x5173;&#x4E8E;ViewStub&#x7684;&#x6784;&#x5EFA;&#x3001;&#x5E03;&#x5C40;&#x7684;&#x52A0;&#x8F7D;&#x4EE5;&#x53CA;&#x6CE8;&#x610F;&#x4E8B;&#x9879;&#x5206;&#x6790;&#x5B8C;&#x4E86;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x5206;&#x6790;&#x4E00;&#x4E0B; LayoutInflater&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;</p>
+<h2 id="2-&#x5173;&#x4E8E;LayoutInflater"><a href="#2-&#x5173;&#x4E8E;LayoutInflater" class="headerlink" title="2 &#x5173;&#x4E8E;LayoutInflater"></a>2 &#x5173;&#x4E8E;LayoutInflater</h2><p>&#x5728;<a href="https://dev.newban.cn/6844904089696862221">0xA02 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;Apk&#x52A0;&#x8F7D;&#x6D41;&#x7A0B;&#x4E4B;&#x8D44;&#x6E90;&#x52A0;&#x8F7D;</a>&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x4ECB;&#x7ECD;&#x4E86;Activity&#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#x901A;&#x8FC7;&#x8C03;&#x7528;LayoutInflater&#x7684;inflater&#x7684;&#x65B9;&#x6CD5;&#x52A0;&#x8F7D;layout&#x6587;&#x4EF6;&#xFF0C;&#x90A3;&#x4E48;LayoutInflater&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;&#x5462;&#xFF0C;&#x5148;&#x6765;&#x770B;&#x4E00;&#x6BB5;&#x4EE3;&#x7801;&#xFF0C;&#x76F8;&#x4FE1;&#x4E0B;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x90FD;&#x4E0D;&#x4F1A;&#x5F88;&#x964C;&#x751F;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">less&#x590D;&#x5236;&#x4EE3;&#x7801;public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {</span><br><span class="line">    return new AllVh(LayoutInflater</span><br><span class="line">            .from(viewGroup.getContext())</span><br><span class="line">            .inflate(R.layout.list_item, viewGroup, false));</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>LayoutInflater&#x7684;inflate&#x65B9;&#x6CD5;&#x7684;&#x4E09;&#x4E2A;&#x53C2;&#x6570;&#x90FD;&#x4EE3;&#x8868;&#x4EC0;&#x4E48;&#x610F;&#x601D;&#xFF1F;</strong></p>
+<ul>
+<li>resource&#xFF1A;&#x8981;&#x89E3;&#x6790;&#x7684;xml&#x5E03;&#x5C40;&#x6587;&#x4EF6;Id</li>
+<li>root&#xFF1A;&#x8868;&#x793A;&#x6839;&#x5E03;&#x5C40;</li>
+<li>attachToRoot&#xFF1A;&#x662F;&#x5426;&#x8981;&#x6DFB;&#x52A0;&#x5230;&#x7236;&#x5E03;&#x5C40;root&#x4E2D;</li>
+</ul>
+<p>resource&#x5176;&#x5B9E;&#x5F88;&#x597D;&#x7406;&#x89E3;&#x5C31;&#x662F;&#x8D44;&#x6E90;Id&#xFF0C;&#x800C;root &#x548C; attachToRoot &#x5206;&#x522B;&#x4EE3;&#x8868;&#x4EC0;&#x4E48;&#x610F;&#x601D;&#xFF1A;</p>
+<ul>
+<li>&#x5F53;attachToRoot == true&#x4E14;root &#xFF01;= null&#x65F6;&#xFF0C;&#x65B0;&#x89E3;&#x6790;&#x51FA;&#x6765;&#x7684;View&#x4F1A;&#x88AB;add&#x5230;root&#x4E2D;&#x53BB;&#xFF0C;&#x7136;&#x540E;&#x5C06;root&#x4F5C;&#x4E3A;&#x7ED3;&#x679C;&#x8FD4;&#x56DE;</li>
+<li>&#x5F53;attachToRoot == false&#x4E14;root &#xFF01;= null&#x65F6;&#xFF0C;&#x65B0;&#x89E3;&#x6790;&#x7684;View&#x4F1A;&#x76F4;&#x63A5;&#x4F5C;&#x4E3A;&#x7ED3;&#x679C;&#x8FD4;&#x56DE;&#xFF0C;&#x800C;&#x4E14;root&#x4F1A;&#x4E3A;&#x65B0;&#x89E3;&#x6790;&#x7684;View&#x751F;&#x6210;LayoutParams&#x5E76;&#x8BBE;&#x7F6E;&#x5230;&#x8BE5;View&#x4E2D;&#x53BB;</li>
+<li>&#x5F53;attachToRoot == false&#x4E14;root == null&#x65F6;&#xFF0C;&#x65B0;&#x89E3;&#x6790;&#x7684;View&#x4F1A;&#x76F4;&#x63A5;&#x4F5C;&#x4E3A;&#x7ED3;&#x679C;&#x8FD4;&#x56DE;</li>
+</ul>
+<h3 id="2-1-LayoutInflater&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;"><a href="#2-1-LayoutInflater&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;" class="headerlink" title="2.1 LayoutInflater&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;"></a>2.1 LayoutInflater&#x662F;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;</h3><p>LayoutInflater&#x662F;&#x4E00;&#x4E2A;&#x62BD;&#x8C61;&#x7C7B;&#xFF0C;&#x901A;&#x8FC7;&#x8C03;&#x7528;&#x4E86;from()&#x7684;&#x9759;&#x6001;&#x51FD;&#x6570;&#xFF0C;&#x7ECF;&#x7531;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;LAYOUT_INFLATER_SERVICE&#xFF0C;&#x6700;&#x7EC8;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;LayoutInflater&#x7684;&#x5B50;&#x7C7B;&#x5BF9;&#x8C61;PhoneLayoutInflater&#xFF0C;&#x7EE7;&#x627F;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/288e1edbca32417d7185ce538bdfacd28c154a7eb822c082fe7278b32f0764bc" alt></p>
+<p>LayoutInflater.from(ctx) &#x5C31;&#x662F;&#x6839;&#x636E;&#x4F20;&#x9012;&#x8FC7;&#x6765;&#x7684;Context&#x5BF9;&#x8C61;&#xFF0C;&#x8C03;&#x7528;getSystemService()&#x6765;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;, &#x6765;&#x770B;&#x4E00;&#x4E0B;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;<br><strong>frameworks/base/core/java/android/view/LayoutInflater.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public static LayoutInflater from(Context context) {</span><br><span class="line">    // &#x83B7;&#x53D6;&#x7CFB;&#x7EDF;&#x670D;&#x52A1; LAYOUT_INFLATER_SERVICE &#xFF0C;&#x5E76;&#x8D4B;&#x503C;&#x7ED9; LayoutInflater</span><br><span class="line">    // Context &#x662F;&#x4E00;&#x4E2A;&#x62BD;&#x8C61;&#x7C7B;&#xFF0C;&#x771F;&#x6B63;&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#x662F;ContextImpl</span><br><span class="line">    LayoutInflater LayoutInflater =</span><br><span class="line">            (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);</span><br><span class="line">    if (LayoutInflater == null) {</span><br><span class="line">        throw new AssertionError(&quot;LayoutInflater not found.&quot;);</span><br><span class="line">    }</span><br><span class="line">    return LayoutInflater;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x800C;Context&#x672C;&#x8EAB;&#x662F;&#x4E00;&#x4E2A;&#x62BD;&#x8C61;&#x7C7B;&#xFF0C;&#x5B83;&#x771F;&#x6B63;&#x7684;&#x5B9E;&#x4F8B;&#x5316;&#x5BF9;&#x8C61;&#x662F;ContextImpl<br><strong>frameworks/base/core/java/android/app/ContextImpl.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typescript&#x590D;&#x5236;&#x4EE3;&#x7801;public Object getSystemService(String name) {</span><br><span class="line">    // SystemServiceRegistry &#x662F;&#x7BA1;&#x7406;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#x7684;</span><br><span class="line">    // &#x8C03;&#x7528;getSystemService&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x8FC7;&#x670D;&#x52A1;&#x540D;&#x5B57;&#x67E5;&#x627E;&#x5BF9;&#x5E94;&#x7684;&#x670D;&#x52A1;</span><br><span class="line">    return SystemServiceRegistry.getSystemService(this, name);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-SystemServiceRegistry"><a href="#2-2-SystemServiceRegistry" class="headerlink" title="2.2 SystemServiceRegistry"></a>2.2 SystemServiceRegistry</h3><p>SystemServiceRegistry&#x7BA1;&#x7406;&#x6240;&#x6709;&#x7684;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#xFF0C;&#x8C03;&#x7528;getSystemService&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x8FC7;&#x670D;&#x52A1;&#x540D;&#x5B57;&#x67E5;&#x627E;&#x5BF9;&#x5E94;&#x7684;&#x670D;&#x52A1;<br><strong>frameworks/base/core/java/android/app/SystemServiceRegistry.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typescript&#x590D;&#x5236;&#x4EE3;&#x7801;public static Object getSystemService(ContextImpl ctx, String name) {</span><br><span class="line">    // SYSTEM_SERVICE_FETCHERS &#x662F;&#x4E00;&#x4E2A;map&#x96C6;&#x5408;</span><br><span class="line">    // &#x4ECE; map &#x96C6;&#x5408;&#x4E2D;&#x53D6;&#x51FA;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;</span><br><span class="line">    ServiceFetcher&lt;?&gt; fetcher = SYSTEM_SERVICE_FETCHERS.get(name);</span><br><span class="line">    return fetcher != null ? fetcher.getService(ctx) : null;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ServiceFetcher&#x4E3A;SystemServiceRegistry&#x7C7B;&#x7684;&#x9759;&#x6001;&#x5185;&#x90E8;&#x63A5;&#x53E3;&#xFF0C;&#x5B9A;&#x4E49;&#x4E86;getService&#x65B9;&#x6CD5;</li>
+<li>ServiceFetcher&#x7684;&#x5B9E;&#x73B0;&#x7C7B;CachedServiceFetcher&#x5B9E;&#x73B0;&#x4E86;getService&#x65B9;&#x6CD5;</li>
+<li>&#x6240;&#x6709;&#x7684;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#x90FD;&#x5B58;&#x50A8;&#x5728;&#x4E00;&#x4E2A;map&#x96C6;&#x5408;SYSTEM_SERVICE_FETCHERS&#x5F53;&#x4E2D;&#xFF0C;&#x8C03;&#x7528;get&#x65B9;&#x6CD5;&#x6765;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;&#x670D;&#x52A1;</li>
+</ul>
+<p>&#x5982;&#x679C;&#x6709;getSystemService&#x65B9;&#x6CD5;&#x6765;&#x83B7;&#x53D6;&#x670D;&#x52A1;&#xFF0C;&#x90A3;&#x4E48;&#x76F8;&#x5E94;&#x7684;&#x4E5F;&#x4F1A;&#x6709;&#x6DFB;&#x52A0;&#x670D;&#x52A1;&#x7684;&#x65B9;&#x6CD5;<br><strong>frameworks/base/core/java/android/app/SystemServiceRegistry.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typescript&#x590D;&#x5236;&#x4EE3;&#x7801;private static &lt;T&gt; void registerService(String serviceName, Class&lt;T&gt; serviceClass,</span><br><span class="line">        ServiceFetcher&lt;T&gt; serviceFetcher) {</span><br><span class="line">    SYSTEM_SERVICE_NAMES.put(serviceClass, serviceName);</span><br><span class="line">    SYSTEM_SERVICE_FETCHERS.put(serviceName, serviceFetcher);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x8C03;&#x7528;SYSTEM_SERVICE_NAMES&#x7684;put&#x65B9;&#x6CD5;&#xFF0C;&#x5F80;map&#x96C6;&#x5408;&#x4E2D;&#x6DFB;&#x52A0;&#x6570;&#x636E;&#xFF0C;&#x90A3;&#x4E48;registerService&#x662F;&#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x8C03;&#x7528;&#x7684;&#xFF0C;&#x5728;SystemServiceRegistry&#x7C7B;&#x4E2D;&#x641C;&#x7D22;registerService&#x65B9;&#x6CD5;&#xFF0C;&#x77E5;&#x9053;&#x4E86;&#x5728;&#x7C7B;&#x52A0;&#x8F7D;&#x7684;&#x65F6;&#x5019;&#x901A;&#x8FC7;&#x9759;&#x6001;&#x4EE3;&#x7801;&#x5757;&#x4E2D;&#x6DFB;&#x52A0;&#x7684;&#xFF0C;&#x6765;&#x770B;&#x4E00;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">typescript&#x590D;&#x5236;&#x4EE3;&#x7801;static {</span><br><span class="line">    // &#x521D;&#x59CB;&#x5316;&#x52A0;&#x8F7D;&#x6240;&#x6709;&#x7684;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    // &#x7701;&#x7565;&#x4E86;&#x5F88;&#x591A;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;</span><br><span class="line"></span><br><span class="line">    registerService(Context.LAYOUT_INFLATER_SERVICE, LayoutInflater.class,</span><br><span class="line">            new CachedServiceFetcher&lt;LayoutInflater&gt;() {</span><br><span class="line">        @Override</span><br><span class="line">        public LayoutInflater createService(ContextImpl ctx) {</span><br><span class="line">            return new PhoneLayoutInflater(ctx.getOuterContext());</span><br><span class="line">        }});</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    // &#x7701;&#x7565;&#x4E86;&#x5F88;&#x591A;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6700;&#x7EC8;&#x662F;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;PhoneLayoutInflater&#x5E76;&#x8FD4;&#x56DE;&#x7684;&#xFF0C;&#x5230;&#x8FD9;&#x91CC;LayoutInflater&#x7684;&#x521B;&#x5EFA;&#x6D41;&#x7A0B;&#x5C31;&#x5206;&#x6790;&#x5B8C;&#x4E86;</p>
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p><strong>View&#x4E2D;&#x7684;INVISIBLE&#x3001;VISIBLE&#x3001;GONE&#x90FD;&#x6709;&#x4EC0;&#x4E48;&#x4F5C;&#x7528;&#xFF1F;</strong></p>
+<p>&#x5982;&#x679C;&#x60F3;&#x9690;&#x85CF;&#x6216;&#x8005;&#x663E;&#x793A;View&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x8C03;&#x7528;setVisibility(int visibility)&#x65B9;&#x6CD5;&#x6765;&#x5B9E;&#x73B0;&#xFF0C;&#x53C2;&#x6570;visibility&#x5BF9;&#x5E94;&#x4E09;&#x4E2A;&#x503C;&#x5206;&#x522B;&#x662F;INVISIBLE&#x3001;VISIBLE&#x3001;GONE</p>
+<ul>
+<li>VISIBLE&#xFF1A;&#x89C6;&#x56FE;&#x53EF;&#x89C1;</li>
+<li>INVISIBLE&#xFF1A;&#x89C6;&#x56FE;&#x4E0D;&#x53EF;&#x89C1;&#x7684;&#xFF0C;&#x5B83;&#x4ECD;&#x7136;&#x5360;&#x7528;&#x5E03;&#x5C40;&#x7684;&#x7A7A;&#x95F4;</li>
+<li>GONE&#xFF1A;&#x89C6;&#x56FE;&#x4E0D;&#x53EF;&#x89C1;&#xFF0C;&#x5B83;&#x4E0D;&#x5360;&#x7528;&#x5E03;&#x5C40;&#x7684;&#x7A7A;&#x95F4;</li>
+</ul>
+<p><strong>&#x4E3A;&#x4EC0;&#x4E48;ViewStub&#x662F;&#x5927;&#x5C0F;&#x4E3A;0&#x7684;&#x89C6;&#x56FE;&#xFF1F;</strong><br><strong>frameworks/base/core/java/android/view/ViewStub.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {</span><br><span class="line">    // &#x8BBE;&#x7F6E;&#x89C6;&#x56FE;&#x5927;&#x5C0F;&#x4E3A;0</span><br><span class="line">    setMeasuredDimension(0, 0);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>ViewStub&#x6709;&#x4EC0;&#x4E48;&#x4F5C;&#x7528;&#xFF1F;</strong></p>
+<p>ViewStub&#x7684;&#x4F5C;&#x7528;&#x4E3B;&#x8981;&#x7528;&#x6765;&#x5EF6;&#x8FDF;&#x5E03;&#x5C40;&#x7684;&#x52A0;&#x8F7D;</p>
+<p><strong>ViewStub&#x662F;&#x5982;&#x4F55;&#x521B;&#x5EFA;&#x7684;&#xFF1F;</strong></p>
+<p>&#x56E0;&#x4E3A;ViewStub&#x662F;&#x7EE7;&#x627F;View, &#x6240;&#x4EE5;ViewStub&#x7684;&#x521B;&#x5EFA;&#x548C;View&#x7684;&#x521B;&#x5EFA;&#x662F;&#x76F8;&#x540C;&#x7684;&#xFF0C;&#x901A;&#x8FC7;&#x8C03;&#x7528;&#x4E86;LayoutInflater.createView&#x65B9;&#x6CD5;&#x6839;&#x636E;&#x5B8C;&#x6574;&#x7684;&#x7C7B;&#x7684;&#x8DEF;&#x5F84;&#x540D;&#x5229;&#x7528;&#x53CD;&#x5C04;&#x673A;&#x5236;&#x6784;&#x5EFA;View&#x5BF9;&#x8C61;<br><strong>frameworks/base/core/java/android/view/LayoutInflater.java</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;...</span><br><span class="line"></span><br><span class="line">try {</span><br><span class="line">    // &#x5229;&#x7528;&#x6784;&#x9020;&#x51FD;&#x6570;&#xFF0C;&#x521B;&#x5EFA;View</span><br><span class="line">    final View view = constructor.newInstance(args);</span><br><span class="line">    if (view instanceof ViewStub) {</span><br><span class="line">        // &#x5982;&#x679C;&#x662F;ViewStub&#xFF0C;&#x5219;&#x8BBE;&#x7F6E;LayoutInflater</span><br><span class="line">        final ViewStub viewStub = (ViewStub) view;</span><br><span class="line">        viewStub.setLayoutInflater(cloneInContext((Context) args[0]));</span><br><span class="line">    }</span><br><span class="line">    return view;</span><br><span class="line">} finally {</span><br><span class="line">    mConstructorArgs[0] = lastContext;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x4E3A;&#x4EC0;&#x4E48;ViewStub&#x80FD;&#x505A;&#x5230;&#x5EF6;&#x8FDF;&#x52A0;&#x8F7D;&#xFF1F;</strong></p>
+<p>&#x56E0;&#x4E3A;&#x5728;&#x89E3;&#x6790;layout&#x6587;&#x4EF6;&#x8FC7;&#x7A0B;&#x4E2D;&#x9047;&#x5230;ViewStub&#xFF0C;&#x53EA;&#x662F;&#x6784;&#x5EFA;ViewStub&#x7684;&#x5BF9;&#x8C61;&#x548C;&#x521D;&#x59CB;&#x5316;ViewStub&#x7684;&#x5C5E;&#x6027;&#xFF0C;&#x6CA1;&#x6709;&#x771F;&#x6B63;&#x5F00;&#x59CB;&#x89E3;&#x6790;view&#xFF0C;&#x6240;&#x4EE5;&#x53EF;&#x4EE5;&#x505A;&#x5230;&#x5EF6;&#x8FDF;&#x521D;&#x59CB;&#x5316;</p>
+<p><strong>ViewStub&#x6307;&#x5B9A;&#x7684;Layout&#x5E03;&#x5C40;&#x6587;&#x4EF6;&#x662F;&#x4EC0;&#x4E48;&#x65F6;&#x5019;&#x88AB;&#x52A0;&#x8F7D;&#x7684;&#xFF1F;</strong></p>
+<p>&#x5F53;ViewStub&#x63A7;&#x4EF6;&#x8BBE;&#x7F6E;&#x53EF;&#x89C1;&#xFF0C;&#x6216;&#x8005;&#x8C03;&#x7528;inflate()&#x65B9;&#x6CD5;&#xFF0C;ViewStub&#x6240;&#x6307;&#x5B9A;&#x7684;layout&#x8D44;&#x6E90;&#x5C31;&#x4F1A;&#x88AB;&#x52A0;&#x8F7D;</p>
+<p><strong>LayoutInflater&#x662F;&#x4E00;&#x4E2A;&#x62BD;&#x8C61;&#x7C7B;&#x5B83;&#x5982;&#x4F55;&#x88AB;&#x521B;&#x5EFA;&#x7684;&#xFF1F;</strong></p>
+<p>LayoutInflater&#x662F;&#x4E00;&#x4E2A;&#x62BD;&#x8C61;&#x7C7B;&#xFF0C;&#x901A;&#x8FC7;&#x8C03;&#x7528;&#x4E86;from()&#x7684;&#x9759;&#x6001;&#x51FD;&#x6570;&#xFF0C;&#x7ECF;&#x7531;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;LAYOUT_INFLATER_SERVICE&#xFF0C;&#x6700;&#x7EC8;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x4E2A;LayoutInflater&#x7684;&#x5B50;&#x7C7B;&#x5BF9;&#x8C61;PhoneLayoutInflater&#xFF0C;&#x7EE7;&#x627F;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/288e1edbca32417d7185ce538bdfacd28c154a7eb822c082fe7278b32f0764bc" alt></p>
+<p>LayoutInflater.from(ctx) &#x5C31;&#x662F;&#x6839;&#x636E;&#x4F20;&#x9012;&#x8FC7;&#x6765;&#x7684;Context&#x5BF9;&#x8C61;&#xFF0C;&#x8C03;&#x7528;getSystemService()&#x6765;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;</p>
+<p><strong>&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#x5B58;&#x50A8;&#x5728;&#x54EA;&#x91CC;&#xFF1F;&#x5982;&#x4F55;&#x83B7;&#x53D6;&#x548C;&#x6DFB;&#x52A0;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#xFF1F;</strong></p>
+<p>SystemServiceRegistry&#x7BA1;&#x7406;&#x6240;&#x6709;&#x7684;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#xFF0C;&#x6240;&#x6709;&#x7684;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#x90FD;&#x5B58;&#x50A8;&#x5728;&#x4E00;&#x4E2A;map&#x96C6;&#x5408;SYSTEM_SERVICE_FETCHERS&#x5F53;&#x4E2D;&#xFF0C;&#x8C03;&#x7528;getSystemService&#x65B9;&#x6CD5;&#x83B7;&#x53D6;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;&#xFF0C;&#x8C03;&#x7528;registerService&#x65B9;&#x6CD5;&#x6DFB;&#x52A0;&#x7CFB;&#x7EDF;&#x670D;&#x52A1;</p>
+<h2 id="&#x7ED3;&#x8BED;"><a href="#&#x7ED3;&#x8BED;" class="headerlink" title="&#x7ED3;&#x8BED;"></a>&#x7ED3;&#x8BED;</h2><p>&#x81F4;&#x529B;&#x4E8E;&#x5206;&#x4EAB;&#x4E00;&#x7CFB;&#x5217; Android &#x7CFB;&#x7EDF;&#x6E90;&#x7801;&#x3001;&#x9006;&#x5411;&#x5206;&#x6790;&#x3001;&#x7B97;&#x6CD5;&#x3001;&#x7FFB;&#x8BD1;&#x3001;Jetpack &#x6E90;&#x7801;&#x76F8;&#x5173;&#x7684;&#x6587;&#x7AE0;&#xFF0C;&#x6B63;&#x5728;&#x52AA;&#x529B;&#x5199;&#x51FA;&#x66F4;&#x597D;&#x7684;&#x6587;&#x7AE0;&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x5BF9;&#x4F60;&#x6709;&#x5E2E;&#x52A9;&#x7ED9;&#x4E2A; star&#xFF0C;&#x6587;&#x7AE0;&#x4E2D;&#x6709;&#x4EC0;&#x4E48;&#x6CA1;&#x6709;&#x5199;&#x660E;&#x767D;&#x7684;&#x5730;&#x65B9;&#xFF0C;&#x6216;&#x8005;&#x6709;&#x4EC0;&#x4E48;&#x66F4;&#x597D;&#x7684;&#x5EFA;&#x8BAE;&#x6B22;&#x8FCE;&#x7559;&#x8A00;&#xFF0C;&#x6B22;&#x8FCE;&#x4E00;&#x8D77;&#x6765;&#x5B66;&#x4E60;&#xFF0C;&#x5728;&#x6280;&#x672F;&#x7684;&#x9053;&#x8DEF;&#x4E0A;&#x4E00;&#x8D77;&#x524D;&#x8FDB;&#x3002;</p>
+<blockquote>
+<p>&#x8BA1;&#x5212;&#x5EFA;&#x7ACB;&#x4E00;&#x4E2A;&#x6700;&#x5168;&#x3001;&#x6700;&#x65B0;&#x7684; AndroidX Jetpack &#x76F8;&#x5173;&#x7EC4;&#x4EF6;&#x7684;&#x5B9E;&#x6218;&#x9879;&#x76EE; &#x4EE5;&#x53CA; &#x76F8;&#x5173;&#x7EC4;&#x4EF6;&#x539F;&#x7406;&#x5206;&#x6790;&#x6587;&#x7AE0;&#xFF0C;&#x6B63;&#x5728;&#x9010;&#x6E10;&#x589E;&#x52A0; Jetpack &#x65B0;&#x6210;&#x5458;&#xFF0C;&#x4ED3;&#x5E93;&#x6301;&#x7EED;&#x66F4;&#x65B0;&#xFF0C;&#x53EF;&#x4EE5;&#x524D;&#x53BB;&#x67E5;&#x770B;&#xFF1A;<a href="/external_links/b80583732bf296966253b1e973e41238.html" target="blank" rel="noopener">AndroidX-Jetpack-Practice</a>, &#x5982;&#x679C;&#x8FD9;&#x4E2A;&#x4ED3;&#x5E93;&#x5BF9;&#x4F60;&#x6709;&#x5E2E;&#x52A9;&#xFF0C;&#x8BF7;&#x5E2E;&#x6211;&#x70B9;&#x4E2A;&#x8D5E;&#xFF0C;&#x6211;&#x4F1A;&#x9646;&#x7EED;&#x5B8C;&#x6210;&#x66F4;&#x591A; Jetpack &#x65B0;&#x6210;&#x5458;&#x7684;&#x9879;&#x76EE;&#x5B9E;&#x8DF5;&#x3002;</p>
+</blockquote>
+<h3 id="&#x7B97;&#x6CD5;"><a href="#&#x7B97;&#x6CD5;" class="headerlink" title="&#x7B97;&#x6CD5;"></a>&#x7B97;&#x6CD5;</h3><p>&#x7531;&#x4E8E; LeetCode &#x7684;&#x9898;&#x5E93;&#x5E9E;&#x5927;&#xFF0C;&#x6BCF;&#x4E2A;&#x5206;&#x7C7B;&#x90FD;&#x80FD;&#x7B5B;&#x9009;&#x51FA;&#x6570;&#x767E;&#x9053;&#x9898;&#xFF0C;&#x7531;&#x4E8E;&#x6BCF;&#x4E2A;&#x4EBA;&#x7684;&#x7CBE;&#x529B;&#x6709;&#x9650;&#xFF0C;&#x4E0D;&#x53EF;&#x80FD;&#x5237;&#x5B8C;&#x6240;&#x6709;&#x9898;&#x76EE;&#xFF0C;&#x56E0;&#x6B64;&#x6211;&#x6309;&#x7167;&#x7ECF;&#x5178;&#x7C7B;&#x578B;&#x9898;&#x76EE;&#x53BB;&#x5206;&#x7C7B;&#x3001;&#x548C;&#x9898;&#x76EE;&#x7684;&#x96BE;&#x6613;&#x7A0B;&#x5EA6;&#x53BB;&#x6392;&#x5E8F;&#x3002;</p>
+<ul>
+<li>&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF1A; &#x6570;&#x7EC4;&#x3001;&#x6808;&#x3001;&#x961F;&#x5217;&#x3001;&#x5B57;&#x7B26;&#x4E32;&#x3001;&#x94FE;&#x8868;&#x3001;&#x6811;&#x2026;&#x2026;</li>
+<li>&#x7B97;&#x6CD5;&#xFF1A; &#x67E5;&#x627E;&#x7B97;&#x6CD5;&#x3001;&#x641C;&#x7D22;&#x7B97;&#x6CD5;&#x3001;&#x4F4D;&#x8FD0;&#x7B97;&#x3001;&#x6392;&#x5E8F;&#x3001;&#x6570;&#x5B66;&#x3001;&#x2026;&#x2026;</li>
+</ul>
+<p>&#x6BCF;&#x9053;&#x9898;&#x76EE;&#x90FD;&#x4F1A;&#x7528; Java &#x548C; kotlin &#x53BB;&#x5B9E;&#x73B0;&#xFF0C;&#x5E76;&#x4E14;&#x6BCF;&#x9053;&#x9898;&#x76EE;&#x90FD;&#x6709;&#x89E3;&#x9898;&#x601D;&#x8DEF;&#x3001;&#x65F6;&#x95F4;&#x590D;&#x6742;&#x5EA6;&#x548C;&#x7A7A;&#x95F4;&#x590D;&#x6742;&#x5EA6;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x540C;&#x6211;&#x4E00;&#x6837;&#x559C;&#x6B22;&#x7B97;&#x6CD5;&#x3001;LeetCode&#xFF0C;&#x53EF;&#x4EE5;&#x5173;&#x6CE8;&#x6211; GitHub &#x4E0A;&#x7684; LeetCode &#x9898;&#x89E3;&#xFF1A;<a href="/external_links/48692a253fdcd93124fad2e322bd1f8f.html" target="blank" rel="noopener">Leetcode-Solutions-with-Java-And-Kotlin</a>&#xFF0C;&#x4E00;&#x8D77;&#x6765;&#x5B66;&#x4E60;&#xFF0C;&#x671F;&#x5F85;&#x4E0E;&#x4F60;&#x4E00;&#x8D77;&#x6210;&#x957F;&#x3002;</p>
+<h3 id="Android-10-&#x6E90;&#x7801;&#x7CFB;&#x5217;"><a href="#Android-10-&#x6E90;&#x7801;&#x7CFB;&#x5217;" class="headerlink" title="Android 10 &#x6E90;&#x7801;&#x7CFB;&#x5217;"></a>Android 10 &#x6E90;&#x7801;&#x7CFB;&#x5217;</h3><p>&#x6B63;&#x5728;&#x5199;&#x4E00;&#x7CFB;&#x5217;&#x7684; Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#x7684;&#x6587;&#x7AE0;&#xFF0C;&#x4E86;&#x89E3;&#x7CFB;&#x7EDF;&#x6E90;&#x7801;&#xFF0C;&#x4E0D;&#x4EC5;&#x6709;&#x52A9;&#x4E8E;&#x5206;&#x6790;&#x95EE;&#x9898;&#xFF0C;&#x5728;&#x9762;&#x8BD5;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x5BF9;&#x6211;&#x4EEC;&#x4E5F;&#x662F;&#x975E;&#x5E38;&#x6709;&#x5E2E;&#x52A9;&#x7684;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x540C;&#x6211;&#x4E00;&#x6837;&#x559C;&#x6B22;&#x7814;&#x7A76; Android &#x6E90;&#x7801;&#xFF0C;&#x53EF;&#x4EE5;&#x5173;&#x6CE8;&#x6211; GitHub &#x4E0A;&#x7684; <a href="/external_links/4a94962ce416fb077106d86ba9ff2d03.html" target="blank" rel="noopener">Android10-Source-Analysis</a>&#xFF0C;&#x6587;&#x7AE0;&#x90FD;&#x4F1A;&#x540C;&#x6B65;&#x5230;&#x8FD9;&#x4E2A;&#x4ED3;&#x5E93;&#x3002;</p>
+<ul>
+<li><a href="https://dev.newban.cn/6844904063155322887">0xA01 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;APK &#x662F;&#x5982;&#x4F55;&#x751F;&#x6210;&#x7684;</a></li>
+<li><a href="https://dev.newban.cn/6844904078015725576">0xA02 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;APK &#x7684;&#x5B89;&#x88C5;&#x6D41;&#x7A0B;</a></li>
+<li><a href="https://dev.newban.cn/6844904089696862221">0xA03 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;APK &#x52A0;&#x8F7D;&#x6D41;&#x7A0B;&#x4E4B;&#x8D44;&#x6E90;&#x52A0;&#x8F7D;</a></li>
+<li><a href="https://dev.newban.cn/6844904105433907207">0xA04 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;APK &#x52A0;&#x8F7D;&#x6D41;&#x7A0B;&#x4E4B;&#x8D44;&#x6E90;&#x52A0;&#x8F7D;&#xFF08;&#x4E8C;&#xFF09;</a></li>
+<li><a href="https://dev.newban.cn/6844904122467123214">0xA05 Android 10 &#x6E90;&#x7801;&#x5206;&#x6790;&#xFF1A;Dialog &#x52A0;&#x8F7D;&#x7ED8;&#x5236;&#x6D41;&#x7A0B;&#x4EE5;&#x53CA;&#x5728; Kotlin&#x3001;DataBinding &#x4E2D;&#x7684;&#x4F7F;&#x7528;</a></li>
+<li><a href="/external_links/4a94962ce416fb077106d86ba9ff2d03.html" target="blank" rel="noopener">&#x66F4;&#x591A;&#x2026;&#x2026;</a></li>
+</ul>
+<h3 id="&#x5DE5;&#x5177;&#x7CFB;&#x5217;"><a href="#&#x5DE5;&#x5177;&#x7CFB;&#x5217;" class="headerlink" title="&#x5DE5;&#x5177;&#x7CFB;&#x5217;"></a>&#x5DE5;&#x5177;&#x7CFB;&#x5217;</h3><ul>
+<li><a href="https://dev.newban.cn/6844904020511981581">&#x4E3A;&#x6570;&#x4E0D;&#x591A;&#x7684;&#x4EBA;&#x77E5;&#x9053;&#x7684; AndroidStudio &#x5FEB;&#x6377;&#x952E;(&#x4E00;)</a></li>
+<li><a href="https://dev.newban.cn/6844904023082926087">&#x4E3A;&#x6570;&#x4E0D;&#x591A;&#x7684;&#x4EBA;&#x77E5;&#x9053;&#x7684; AndroidStudio &#x5FEB;&#x6377;&#x952E;(&#x4E8C;)</a></li>
+<li><a href="https://dev.newban.cn/6844903918112079885">&#x5173;&#x4E8E; adb &#x547D;&#x4EE4;&#x4F60;&#x6240;&#x9700;&#x8981;&#x77E5;&#x9053;&#x7684;</a></li>
+<li><a href="https://dev.newban.cn/6844903874361311239">&#x5982;&#x4F55;&#x9AD8;&#x6548;&#x83B7;&#x53D6;&#x89C6;&#x9891;&#x622A;&#x56FE;</a></li>
+<li><a href="https://dev.newban.cn/6844903553119748109">10&#x5206;&#x949F;&#x5165;&#x95E8; Shell &#x811A;&#x672C;&#x7F16;&#x7A0B;</a></li>
+<li><a href="https://dev.newban.cn/6844904131803480071">&#x5982;&#x4F55;&#x5728;&#x9879;&#x76EE;&#x4E2D;&#x5C01;&#x88C5; Kotlin + Android Databinding</a></li>
+</ul>
+<h3 id="&#x9006;&#x5411;&#x7CFB;&#x5217;"><a href="#&#x9006;&#x5411;&#x7CFB;&#x5217;" class="headerlink" title="&#x9006;&#x5411;&#x7CFB;&#x5217;"></a>&#x9006;&#x5411;&#x7CFB;&#x5217;</h3><ul>
+<li><a href="https://dev.newban.cn/6844903798972891144">&#x57FA;&#x4E8E; Smali &#x6587;&#x4EF6; Android Studio &#x52A8;&#x6001;&#x8C03;&#x8BD5; APP</a></li>
+<li><a href="https://dev.newban.cn/6844903773890936839">&#x89E3;&#x51B3;&#x5728; Android Studio 3.2 &#x627E;&#x4E0D;&#x5230; Android Device Monitor &#x5DE5;&#x5177;</a></li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/d474abfa818bed125757790e1bbc913b.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/源码/" rel="tag"># 源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844904104053964808.html" rel="next" title="【译】kotlin 协程官方文档（8）-共享可变状态和并发性">
+                <i class="fa fa-chevron-left"></i> 【译】kotlin 协程官方文档（8）-共享可变状态和并发性
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844904106788667400.html" rel="prev" title="【译】kotlin 协程官方文档（9）-选择表达式(实验阶段">
+                【译】kotlin 协程官方文档（9）-选择表达式(实验阶段 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">399</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-ViewStub-是如何被创建的"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 ViewStub 是如何被创建的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-ViewStub的构造方法"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 ViewStub的构造方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-ViewStub的setVisibility方法"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 ViewStub的setVisibility方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-ViewStub-inflate方法"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 ViewStub.inflate方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-ViewStub-inflateViewNoAdd方法"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 ViewStub.inflateViewNoAdd方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-6-ViewStub-replaceSelfWithView方法"><span class="nav-number">1.6.</span> <span class="nav-text">1.6 ViewStub.replaceSelfWithView方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-7-ViewStub的注意事项"><span class="nav-number">1.7.</span> <span class="nav-text">1.7 ViewStub的注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-关于LayoutInflater"><span class="nav-number">2.</span> <span class="nav-text">2 关于LayoutInflater</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-LayoutInflater是如何被创建的"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 LayoutInflater是如何被创建的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-SystemServiceRegistry"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 SystemServiceRegistry</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结语"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#算法"><span class="nav-number">4.1.</span> <span class="nav-text">算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-10-源码系列"><span class="nav-number">4.2.</span> <span class="nav-text">Android 10 源码系列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工具系列"><span class="nav-number">4.3.</span> <span class="nav-text">工具系列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#逆向系列"><span class="nav-number">4.4.</span> <span class="nav-text">逆向系列</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="C++,性能优化,代码规范,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x63A5;&amp;#x4E0B;&amp;#x6765;&amp;#x6211;&amp;#x5C06;&amp;#x6301;&amp;#x7EED;&amp;#x66F4;&amp;#x65B0;&amp;#x201C;&amp;#x6DF1;&amp;#x5EA6;&amp;#x89E3;&amp;#x8BFB;&amp;#x300A;&amp;#x6DF1;&amp;#x5EA6;&amp;#x63A2;&amp;#x7D22;C++&amp;#x5BF9;&amp;#x8C61;&amp;#x6A21;&amp;#x578B;&amp;#x300B;&amp;#x2">
+<meta name="keywords" content="C++,性能优化,代码规范">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度解读《深度探索C++对象模型》之C++虚函数实现分析（一">
+<meta property="og:url" content="https://dev.newban.cn/7360871152035643392.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x63A5;&amp;#x4E0B;&amp;#x6765;&amp;#x6211;&amp;#x5C06;&amp;#x6301;&amp;#x7EED;&amp;#x66F4;&amp;#x65B0;&amp;#x201C;&amp;#x6DF1;&amp;#x5EA6;&amp;#x89E3;&amp;#x8BFB;&amp;#x300A;&amp;#x6DF1;&amp;#x5EA6;&amp;#x63A2;&amp;#x7D22;C++&amp;#x5BF9;&amp;#x8C61;&amp;#x6A21;&amp;#x578B;&amp;#x300B;&amp;#x2">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-25T01:59:23.784Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深度解读《深度探索C++对象模型》之C++虚函数实现分析（一">
+<meta name="twitter:description" content="&amp;#x63A5;&amp;#x4E0B;&amp;#x6765;&amp;#x6211;&amp;#x5C06;&amp;#x6301;&amp;#x7EED;&amp;#x66F4;&amp;#x65B0;&amp;#x201C;&amp;#x6DF1;&amp;#x5EA6;&amp;#x89E3;&amp;#x8BFB;&amp;#x300A;&amp;#x6DF1;&amp;#x5EA6;&amp;#x63A2;&amp;#x7D22;C++&amp;#x5BF9;&amp;#x8C61;&amp;#x6A21;&amp;#x578B;&amp;#x300B;&amp;#x2">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7360871152035643392.html">
+
+
+
+
+
+  <title>深度解读《深度探索C++对象模型》之C++虚函数实现分析（一 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深度解读《深度探索C++对象模型》之C++虚函数实现分析（一</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-04-23T17:13:57+08:00">
+                2024-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x63A5;&#x4E0B;&#x6765;&#x6211;&#x5C06;&#x6301;&#x7EED;&#x66F4;&#x65B0;&#x201C;&#x6DF1;&#x5EA6;&#x89E3;&#x8BFB;&#x300A;&#x6DF1;&#x5EA6;&#x63A2;&#x7D22;C++&#x5BF9;&#x8C61;&#x6A21;&#x578B;&#x300B;&#x201D;&#x7CFB;&#x5217;&#xFF0C;&#x656C;&#x8BF7;&#x671F;&#x5F85;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;&#xFF01;&#x4E5F;&#x53EF;&#x4EE5;&#x5173;&#x6CE8;&#x516C;&#x4F17;&#x53F7;&#xFF1A;iShare&#x7231;&#x5206;&#x4EAB;&#xFF0C;&#x81EA;&#x52A8;&#x83B7;&#x5F97;&#x63A8;&#x6587;&#x548C;&#x5168;&#x90E8;&#x7684;&#x6587;&#x7AE0;&#x5217;&#x8868;&#x3002;</p>
+</blockquote>
+<p>&#x5047;&#x5982;&#x6709;&#x8FD9;&#x6837;&#x7684;&#x4E00;&#x6BB5;&#x4EE3;&#x7801;&#xFF0C;&#x4EE3;&#x7801;&#x4E2D;&#x5B9A;&#x4E49;&#x4E86;&#x4E00;&#x4E2A;Object&#x7C7B;&#xFF0C;&#x7C7B;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x6210;&#x5458;&#x51FD;&#x6570;print&#xFF0C;&#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x7684;&#x4E24;&#x79CD;&#x8C03;&#x7528;&#x65B9;&#x5F0F;&#x8C03;&#x7528;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;Object b;</span><br><span class="line">Object* p = new Object;</span><br><span class="line">b.print();</span><br><span class="line">p-&gt;print();</span><br></pre></td></tr></table></figure>
+
+<p>&#x8BF7;&#x95EE;&#x8FD9;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#x6709;&#x4EC0;&#x4E48;&#x533A;&#x522B;&#x5417;&#xFF1F;&#x5728;&#x6548;&#x7387;&#x4E0A;&#x4E00;&#x6837;&#x5417;&#xFF1F;&#x7B54;&#x6848;&#x662F;&#x4E0D;&#x786E;&#x5B9A;&#x3002;&#x56E0;&#x4E3A;&#x5F97;&#x770B;&#x6210;&#x5458;&#x51FD;&#x6570;print&#x7684;&#x58F0;&#x660E;&#x65B9;&#x5F0F;&#xFF0C;&#x5B83;&#x53EF;&#x80FD;&#x662F;&#x9759;&#x6001;&#x7684;&#xFF0C;&#x53EF;&#x80FD;&#x662F;&#x975E;&#x9759;&#x6001;&#x7684;&#xFF0C;&#x4E5F;&#x53EF;&#x80FD;&#x662F;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x3002;&#x8FD8;&#x5F97;&#x770B;Object&#x7C7B;&#x7684;&#x5177;&#x4F53;&#x5B9A;&#x4E49;&#xFF0C;&#x5B83;&#x53EF;&#x80FD;&#x662F;&#x72EC;&#x7ACB;&#x7684;&#x7C7B;&#xFF0C;&#x4E5F;&#x6709;&#x53EF;&#x80FD;&#x662F;&#x7ECF;&#x8FC7;&#x591A;&#x91CD;&#x7EE7;&#x627F;&#x6765;&#x7684;&#x7C7B;&#xFF0C;&#x6216;&#x8005;&#x7EE7;&#x627F;&#x7684;&#x7236;&#x7C7B;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x865A;&#x57FA;&#x7C7B;&#x3002;</p>
+<p>&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x548C;&#x975E;&#x865A;&#x6210;&#x5458;&#x51FD;&#x6570;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x6211;&#x4EEC;&#x5728;&#x4E0B;&#x4E00;&#x5C0F;&#x8282;&#x7B80;&#x5355;&#x4ECB;&#x7ECD;&#x4E00;&#x4E0B;&#x5373;&#x53EF;&#xFF0C;&#x672C;&#x6587;&#x91CD;&#x70B9;&#x8BB2;&#x89E3;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;&#x53CA;&#x5176;&#x6548;&#x7387;&#x3002;</p>
+<h3 id="&#x6210;&#x5458;&#x51FD;&#x6570;&#x79CD;&#x7C7B;"><a href="#&#x6210;&#x5458;&#x51FD;&#x6570;&#x79CD;&#x7C7B;" class="headerlink" title="&#x6210;&#x5458;&#x51FD;&#x6570;&#x79CD;&#x7C7B;"></a>&#x6210;&#x5458;&#x51FD;&#x6570;&#x79CD;&#x7C7B;</h3><ul>
+<li><strong>&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;</strong></li>
+</ul>
+<p>&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x548C;&#x666E;&#x901A;&#x7684;&#x975E;&#x6210;&#x5458;&#x51FD;&#x6570;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x5B83;&#x4E5F;&#x662F;&#x88AB;&#x7F16;&#x8BD1;&#x5668;&#x653E;&#x7F6E;&#x5728;&#x4EE3;&#x7801;&#x6BB5;&#x4E2D;&#xFF0C;&#x4E14;&#x53EF;&#x4EE5;&#x50CF;&#x666E;&#x901A;&#x51FD;&#x6570;&#x90A3;&#x6837;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x5230;&#x5B83;&#x7684;&#x5730;&#x5740;&#x3002;&#x548C;&#x666E;&#x901A;&#x975E;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x533A;&#x522B;&#x662F;&#x5B83;&#x7684;&#x8C03;&#x7528;&#x5FC5;&#x987B;&#x5F97;&#x7ECF;&#x7531;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x6216;&#x8005;&#x5BF9;&#x8C61;&#x7684;&#x6307;&#x9488;&#x6765;&#x8C03;&#x7528;&#xFF0C;&#x800C;&#x4E14;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8BBF;&#x95EE;&#x7C7B;&#x4E2D;&#x975E;&#x516C;&#x5F00;&#x7684;&#x6570;&#x636E;&#x6210;&#x5458;&#x3002;&#x4E0B;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x6253;&#x5370;&#x51FA;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;#include &lt;cstdio&gt;</span><br><span class="line"></span><br><span class="line">class Object {</span><br><span class="line">public:</span><br><span class="line">    void print() {</span><br><span class="line">        printf(&quot;a=%d, b=%d\n&quot;, a, b);</span><br><span class="line">    }</span><br><span class="line">    int a = 1;</span><br><span class="line">    int b = 2;</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">void printObject(Object* obj) {</span><br><span class="line">    printf(&quot;a=%d, b=%d\n&quot;, obj-&gt;a, obj-&gt;b);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">int main() {</span><br><span class="line">    printf(&quot;Object::print = %p\n&quot;, &amp;Object::print);</span><br><span class="line">    printf(&quot;printObject = %p\n&quot;, &amp;printObject);</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7A0B;&#x5E8F;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#xFF0C;&#x4ECE;&#x6253;&#x5370;&#x7ED3;&#x679C;&#x6765;&#x770B;&#xFF0C;&#x4E24;&#x8005;&#x7684;&#x5730;&#x5740;&#x6BD4;&#x8F83;&#x76F8;&#x8FD1;&#xFF0C;&#x8BF4;&#x660E;&#x5B83;&#x4EEC;&#x90FD;&#x662F;&#x4E00;&#x8D77;&#x653E;&#x5728;&#x4EE3;&#x7801;&#x6BB5;&#x4E2D;&#x7684;&#xFF0C;&#x4ECE;&#x751F;&#x6210;&#x7684;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#x4E5F;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x6765;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;Object::print = 0x1007b3f30</span><br><span class="line">printObject = 0x1007b3e70</span><br></pre></td></tr></table></figure>
+
+<p>&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x548C;&#x666E;&#x901A;&#x975E;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x8FD0;&#x884C;&#x6548;&#x7387;&#x4E0A;&#x4E5F;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x666E;&#x901A;&#x975E;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;&#x4E0A;&#xFF0C;&#x5BF9;&#x7C7B;&#x4E2D;&#x6210;&#x5458;&#x7684;&#x8BBF;&#x95EE;&#x770B;&#x8D77;&#x6765;&#x50CF;&#x662F;&#x8981;&#x7ECF;&#x8FC7;&#x6307;&#x9488;&#x7684;&#x95F4;&#x63A5;&#x8BBF;&#x95EE;&#xFF0C;&#x5982;<code>obj-&gt;a</code>&#xFF0C;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x8BBF;&#x95EE;&#x770B;&#x8D77;&#x6765;&#x66F4;&#x76F4;&#x63A5;&#x4E00;&#x70B9;&#xFF0C;&#x76F4;&#x63A5;&#x53EF;&#x4EE5;&#x5BF9;&#x7C7B;&#x4E2D;&#x7684;&#x6210;&#x5458;&#x8FDB;&#x884C;&#x5B58;&#x53D6;&#xFF0C;&#x597D;&#x50CF;&#x662F;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x6548;&#x7387;&#x66F4;&#x9AD8;&#x4E00;&#x4E9B;&#xFF0C;&#x5176;&#x5B9E;&#x4E0D;&#x7136;&#xFF0C;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x7F16;&#x8BD1;&#x5668;&#x4F1A;&#x9690;&#x5F0F;&#x7684;&#x628A;&#x5B83;&#x8F6C;&#x6362;&#x6210;&#x53E6;&#x4E00;&#x79CD;&#x5F62;&#x5F0F;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;Object obj;</span><br><span class="line">obj.print();</span><br><span class="line">// &#x8F6C;&#x6362;&#x6210;&#xFF1A;</span><br><span class="line">print(&amp;obj);</span><br><span class="line">// print&#x7684;&#x5B9A;&#x4E49;&#x8F6C;&#x6362;&#x6210;&#xFF1A;</span><br><span class="line">print(Object* const this) {</span><br><span class="line">    printf(&quot;a=%d, b=%d\n&quot;, this-&gt;a, this-&gt;b);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E24;&#x8005;&#x5728;&#x672C;&#x8D28;&#x4E0A;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x67E5;&#x770B;&#x751F;&#x6210;&#x7684;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#x4E5F;&#x662F;&#x4E00;&#x6837;&#x7684;&#x3002;&#x53E6;&#x5916;&#x4E5F;&#x8BF4;&#x660E;&#x4E86;&#x4E3A;&#x4EC0;&#x4E48;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x8981;&#x7ECF;&#x7531;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x6216;&#x5BF9;&#x8C61;&#x7684;&#x6307;&#x9488;&#x6765;&#x8C03;&#x7528;&#x3002;</p>
+<ul>
+<li><strong>&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;</strong></li>
+</ul>
+<p>&#x4E0A;&#x9762;&#x63D0;&#x5230;&#x7684;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x5FC5;&#x987B;&#x8981;&#x7ECF;&#x7531;&#x7C7B;&#x7684;&#x5BF9;&#x8C61;&#x6765;&#x8C03;&#x7528;&#xFF0C;&#x662F;&#x56E0;&#x4E3A;&#x9700;&#x8981;&#x5C06;&#x5BF9;&#x8C61;&#x7684;&#x5730;&#x5740;&#x4F5C;&#x4E3A;&#x51FD;&#x6570;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x9690;&#x5F0F;&#x7684;this&#x6307;&#x9488;&#xFF0C;&#x8FD9;&#x6837;&#x5728;&#x51FD;&#x6570;&#x4E2D;&#x8BBF;&#x95EE;&#x7C7B;&#x7684;&#x975E;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#x65F6;&#x5C06;&#x7ED1;&#x5B9A;&#x5230;&#x6B64;&#x5730;&#x5740;&#x4E0A;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x5C06;&#x6B64;&#x5730;&#x5740;&#x4F5C;&#x4E3A;&#x57FA;&#x5730;&#x5740;&#xFF0C;&#x7ECF;&#x8FC7;&#x504F;&#x79FB;&#x5F97;&#x5230;&#x6570;&#x636E;&#x6210;&#x5458;&#x7684;&#x5730;&#x5740;&#x3002;&#x4F46;&#x662F;&#x5982;&#x679C;&#x51FD;&#x6570;&#x4E2D;&#x4E0D;&#x9700;&#x8981;&#x8BBF;&#x95EE;&#x975E;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#x7684;&#x8BDD;&#xFF0C;&#x662F;&#x4E0D;&#x9700;&#x8981;this&#x6307;&#x9488;&#x7684;&#xFF0C;&#x4F46;&#x76EE;&#x524D;&#x7684;&#x7F16;&#x8BD1;&#x5668;&#x5E76;&#x4E0D;&#x533A;&#x5206;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x3002;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x4E0D;&#x80FD;&#x8BBF;&#x95EE;&#x7C7B;&#x4E2D;&#x7684;&#x975E;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#xFF0C;&#x6240;&#x4EE5;&#x662F;&#x4E0D;&#x9700;&#x8981;this&#x6307;&#x9488;&#x7684;&#xFF0C;&#x5982;Object&#x7C7B;&#x4E2D;&#x5B9A;&#x4E49;&#x4E86;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;<code>static int static_func()</code>&#xFF0C;&#x901A;&#x8FC7;&#x5BF9;&#x8C61;&#x8C03;&#x7528;&#xFF1A;</p>
+<p><strong><code>Object obj;</code></strong></p>
+<p><strong><code>obj.static_func();</code></strong></p>
+<p>&#x6216;&#x8005;&#x901A;&#x8FC7;&#x5BF9;&#x8C61;&#x7684;&#x6307;&#x9488;&#x8C03;&#x7528;&#xFF1A;</p>
+<p><strong><code>Object* pobj = new Object;</code></strong></p>
+<p><strong><code>pobj-&gt;static_func();</code></strong></p>
+<p>&#x6700;&#x7EC8;&#x90FD;&#x4F1A;&#x8F6C;&#x6362;&#x6210;&#x5458;&#x5982;&#x4E0B;&#x7684;&#x5F62;&#x5F0F;&#xFF1A;</p>
+<p><strong><code>Object::static_func();</code></strong></p>
+<p>&#x901A;&#x8FC7;&#x5BF9;&#x8C61;&#x6216;&#x8005;&#x5BF9;&#x8C61;&#x7684;&#x6307;&#x9488;&#x6765;&#x8C03;&#x7528;&#x53EA;&#x662F;&#x8BED;&#x6CD5;&#x4E0A;&#x7684;&#x4FBF;&#x5229;&#x800C;&#x5DF2;&#xFF0C;&#x5B83;&#x5E76;&#x4E0D;&#x9700;&#x8981;&#x5BF9;&#x8C61;&#x7684;&#x5730;&#x5740;&#x4F5C;&#x4E3A;&#x53C2;&#x6570;&#xFF08;this&#x6307;&#x9488;&#xFF09;&#x3002;</p>
+<p>&#x90A3;&#x4E48;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x5B58;&#x5728;&#x7684;&#x610F;&#x4E49;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x5728;C++&#x8BDE;&#x751F;&#x4E4B;&#x521D;&#x662F;&#x4E0D;&#x652F;&#x6301;&#x7684;&#xFF0C;&#x662F;&#x5728;&#x540E;&#x9762;&#x7684;&#x7248;&#x672C;&#x4E2D;&#x589E;&#x52A0;&#x8FDB;&#x53BB;&#x7684;&#x3002;&#x5047;&#x8BBE;&#x4E0D;&#x652F;&#x6301;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x65F6;&#xFF0C;&#x7C7B;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x975E;&#x516C;&#x5F00;&#x7684;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#xFF0C;&#x5982;&#x679C;&#x5916;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x9700;&#x8981;&#x8BBF;&#x95EE;&#x8FD9;&#x4E2A;&#x9759;&#x6001;&#x6570;&#x636E;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x9700;&#x8981;&#x5199;&#x4E00;&#x4E2A;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x6765;&#x5B58;&#x53D6;&#x5B83;&#xFF0C;&#x800C;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x9700;&#x8981;&#x7ECF;&#x7531;&#x5BF9;&#x8C61;&#x6765;&#x8C03;&#x7528;&#xFF0C;&#x4F46;&#x6709;&#x65F6;&#x5019;&#x5728;&#x8FD9;&#x4E2A;&#x65F6;&#x95F4;&#x70B9;&#x6CA1;&#x6709;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x6216;&#x8005;&#x6CA1;&#x6709;&#x5FC5;&#x8981;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x6709;&#x4E86;&#x4EE5;&#x4E0B;&#x7684;&#x53D8;&#x901A;&#x505A;&#x6CD5;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x5047;&#x8BBE;&#x5B9A;&#x4E49;&#x4E86;get_static_var&#x51FD;&#x6570;&#x7528;&#x4E8E;&#x8FD4;&#x56DE;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;</span><br><span class="line">((Object*) 0))-&gt;get_static_var();</span><br><span class="line">// &#x7F16;&#x8BD1;&#x5668;&#x4F1A;&#x8F6C;&#x6362;&#x6210;&#xFF1A;</span><br><span class="line">get_static_var((Object*) 0));</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x628A;0&#x5F3A;&#x5236;&#x8F6C;&#x6362;&#x4E3A;Object&#x7C7B;&#x578B;&#x7684;&#x6307;&#x9488;&#xFF0C;&#x7136;&#x540E;&#x7ECF;&#x7531;&#x5B83;&#x6765;&#x8C03;&#x7528;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#xFF0C;&#x7F16;&#x8BD1;&#x5668;&#x4F1A;&#x628A;0&#x4F5C;&#x4E3A;&#x5BF9;&#x8C61;&#x7684;&#x5730;&#x5740;&#x4F20;&#x9012;&#x7ED9;&#x51FD;&#x6570;&#xFF0C;&#x4F46;&#x51FD;&#x6570;&#x4E2D;&#x4E0D;&#x4F1A;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;0&#xFF0C;&#x6240;&#x4EE5;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0;&#x95EE;&#x9898;&#x3002;&#x7531;&#x4E8E;&#x6709;&#x8FD9;&#x4E9B;&#x9700;&#x6C42;&#x7684;&#x5B58;&#x5728;&#xFF0C;C++&#x6807;&#x51C6;&#x59D4;&#x5458;&#x4F1A;&#x589E;&#x52A0;&#x4E86;&#x652F;&#x6301;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#xFF0C;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x7C7B;&#x4E2D;&#x7684;&#x975E;&#x516C;&#x5F00;&#x7684;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#xFF0C;&#x4E14;&#x4E0D;&#x9700;&#x8981;&#x7ECF;&#x7531;&#x7C7B;&#x7684;&#x5BF9;&#x8C61;&#x6765;&#x8C03;&#x7528;&#x3002;</p>
+<p>&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x548C;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x3001;&#x666E;&#x901A;&#x51FD;&#x6570;&#x4E00;&#x6837;&#x90FD;&#x662F;&#x5B58;&#x50A8;&#x5728;&#x4EE3;&#x7801;&#x6BB5;&#x4E2D;&#x7684;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x5230;&#x5B83;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x5B83;&#x662F;&#x4E00;&#x4E2A;&#x5B9E;&#x9645;&#x7684;&#x5185;&#x5B58;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x662F;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#xFF0C;&#x5982;&#x4E0A;&#x9762;&#x5B9A;&#x4E49;&#x7684;static_func&#x51FD;&#x6570;&#xFF0C;&#x5B83;&#x7684;&#x7C7B;&#x578B;&#x4E3A;<code>int (*)()</code>&#xFF0C;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x666E;&#x901A;&#x7684;&#x51FD;&#x6570;&#x7C7B;&#x578B;&#x3002;&#x800C;&#x975E;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#xFF0C;&#x8FD4;&#x56DE;&#x7684;&#x662F;&#x4E00;&#x4E2A;&#x201C;&#x6307;&#x5411;&#x7C7B;&#x6210;&#x5458;&#x51FD;&#x6570;&#x7684;&#x6307;&#x9488;&#x201D;&#xFF0C;&#x5982;&#x4E0A;&#x9762;&#x5B9A;&#x4E49;&#x7684;print&#x51FD;&#x6570;&#xFF0C;&#x8FD4;&#x56DE;&#x7684;&#x7C7B;&#x578B;&#x662F;:</p>
+<p><strong><code>void (Object::*) ();</code></strong></p>
+<p>&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x57FA;&#x672C;&#x4E0A;&#x7B49;&#x540C;&#x4E8E;&#x666E;&#x901A;&#x51FD;&#x6570;&#xFF0C;&#x6240;&#x4EE5;&#x548C;C&#x8BED;&#x8A00;&#x7ED3;&#x5408;&#x7F16;&#x7A0B;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x4F5C;&#x4E3A;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#x4F20;&#x9012;&#x7ED9;C&#x8BED;&#x8A00;&#x5199;&#x7684;&#x51FD;&#x6570;&#x3002;</p>
+<p>&#x603B;&#x7ED3;&#x4E00;&#x4E0B;&#xFF0C;&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x5177;&#x6709;&#x4EE5;&#x4E0B;&#x7684;&#x7279;&#x6027;&#xFF1A;</p>
+<ul>
+<li><ul>
+<li>&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x4E0D;&#x80FD;&#x5B58;&#x53D6;&#x7C7B;&#x4E2D;&#x7684;&#x975E;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#x3002;<ul>
+<li>&#x9759;&#x6001;&#x6210;&#x5458;&#x51FD;&#x6570;&#x4E0D;&#x80FD;&#x88AB;&#x58F0;&#x660E;&#x4E3A;const&#x3001;volatile&#x6216;&#x8005;&#x662F;virtual&#x3002;</li>
+<li>&#x9759;&#x6001;&#x6210;&#x5458;&#x4E0D;&#x9700;&#x8981;&#x7ECF;&#x7531;&#x7C7B;&#x7684;&#x5BF9;&#x8C61;&#x6765;&#x8C03;&#x7528;&#x3002;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>&#x865A;&#x51FD;&#x6570;</strong></li>
+</ul>
+<p>&#x865A;&#x51FD;&#x6570;&#x662F;&#x5426;&#x4E5F;&#x53EF;&#x4EE5;&#x50CF;&#x975E;&#x865A;&#x51FD;&#x6570;&#x90A3;&#x6837;&#x83B7;&#x53D6;&#x5230;&#x5B83;&#x7684;&#x5730;&#x5740;&#x5462;&#xFF1F;&#x6211;&#x4EEC;&#x5199;&#x4E2A;&#x7A0B;&#x5E8F;&#x6765;&#x6D4B;&#x8BD5;&#x4E00;&#x4E0B;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;#include &lt;cstdio&gt;</span><br><span class="line"></span><br><span class="line">class Object {</span><br><span class="line">public:</span><br><span class="line">    virtual void virtual_func1() {</span><br><span class="line">        printf(&quot;this is virtual function 1\n&quot;);</span><br><span class="line">    }</span><br><span class="line">    virtual void virtual_func2() {</span><br><span class="line">        printf(&quot;this is virtual function 2\n&quot;);</span><br><span class="line">    }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">int main() {</span><br><span class="line">    printf(&quot;Object::virtual_func1 = %p\n&quot;, &amp;Object::virtual_func1);</span><br><span class="line">    printf(&quot;Object::virtual_func2 = %p\n&quot;, &amp;Object::virtual_func2);</span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x9762;&#x7A0B;&#x5E8F;&#x7684;&#x8F93;&#x51FA;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;Object::virtual_func1 = 0x0</span><br><span class="line">Object::virtual_func2 = 0x8</span><br></pre></td></tr></table></figure>
+
+<p>&#x7A0B;&#x5E8F;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x5E76;&#x4E0D;&#x662F;&#x4E00;&#x4E2A;&#x5185;&#x5B58;&#x5730;&#x5740;&#xFF0C;&#x800C;&#x662F;&#x4E00;&#x4E2A;&#x6570;&#x5B57;&#xFF0C;&#x5176;&#x5B9E;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x504F;&#x79FB;&#x503C;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x662F;&#x8FD9;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x5728;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x4E00;&#x4E2A;&#x4F4D;&#x7F6E;&#x5360;&#x7528;8&#x5B57;&#x8282;&#x5927;&#x5C0F;&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x662F;0&#xFF0C;&#x7B2C;&#x4E8C;&#x4E2A;&#x662F;8&#xFF0C;&#x4EE5;&#x6B64;&#x7C7B;&#x63A8;&#xFF0C;&#x6BCF;&#x591A;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x5C31;&#x5728;&#x8FD9;&#x4E2A;&#x8868;&#x4E2D;&#x5360;&#x7528;&#x4E00;&#x4E2A;&#x4F4D;&#x7F6E;&#x3002;&#x770B;&#x8D77;&#x6765;&#x50CF;&#x662F;&#x65E0;&#x6CD5;&#x83B7;&#x53D6;&#x5230;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x5176;&#x5B9E;&#x4E0D;&#x7136;&#xFF0C;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x5C31;&#x5B58;&#x653E;&#x5728;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#xFF0C;&#x53EA;&#x662F;&#x6211;&#x4EEC;&#x65E0;&#x6CD5;&#x76F4;&#x63A5;&#x83B7;&#x53D6;&#x5230;&#x5B83;&#xFF0C;&#x4F46;&#x662F;&#x6211;&#x4EEC;&#x8BB0;&#x5F97;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x865A;&#x51FD;&#x6570;&#x65F6;&#xFF0C;&#x5BF9;&#x8C61;&#x7684;&#x524D;&#x9762;&#x4F1A;&#x88AB;&#x7F16;&#x8BD1;&#x5668;&#x63D2;&#x5165;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x8868;&#x6307;&#x9488;&#xFF0C;&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x5C31;&#x662F;&#x6307;&#x5411;&#x7C7B;&#x7684;&#x865A;&#x51FD;&#x6570;&#x8868;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5B83;&#x6765;&#x83B7;&#x53D6;&#x5230;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x4E0B;&#x9762;&#x6F14;&#x793A;&#x4E00;&#x4E0B;&#x901A;&#x8FC7;&#x975E;&#x5E38;&#x89C4;&#x624B;&#x6BB5;&#x6765;&#x8C03;&#x7528;&#x865A;&#x51FD;&#x6570;&#x7684;&#x505A;&#x6CD5;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;#include &lt;cstdio&gt;</span><br><span class="line"></span><br><span class="line">class Object {</span><br><span class="line">public:</span><br><span class="line">    virtual void virtual_func1() {</span><br><span class="line">        printf(&quot;this is virtual function 1\n&quot;);</span><br><span class="line">    }</span><br><span class="line">    virtual void virtual_func2() {</span><br><span class="line">        printf(&quot;this is virtual function 2\n&quot;);</span><br><span class="line">    }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">int main() {</span><br><span class="line">    Object* pobj = new Object;</span><br><span class="line">    using Fun = void (*)(void);</span><br><span class="line">    Fun** ptr = (Fun**)pobj;</span><br><span class="line">    printf(&quot;vptr = %p\n&quot;, *ptr);</span><br><span class="line">    for (auto i = 0; i &lt; 2; ++i) {</span><br><span class="line">        Fun fp = *(*ptr + i);	//&#x53D6;&#x5F97;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5185;&#x5B58;&#x5730;&#x5740;</span><br><span class="line">        printf(&quot;vptr[%d] = %p\n&quot;, i, fp);</span><br><span class="line">        fp();	//&#x6B64;&#x884C;&#x8C03;&#x7528;&#x865A;&#x51FD;&#x6570;</span><br><span class="line">    }</span><br><span class="line">    delete pobj;</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7A0B;&#x5E8F;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;vptr = 0x100264030</span><br><span class="line">vptr[0] = 0x100263ea4</span><br><span class="line">this is virtual function 1</span><br><span class="line">vptr[1] = 0x100263ecc</span><br><span class="line">this is virtual function 2</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x4E0D;&#x5149;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x5F97;&#x5230;&#xFF0C;&#x800C;&#x4E14;&#x8FD8;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8C03;&#x7528;&#x5B83;&#xFF0C;&#x8C03;&#x7528;&#x5B83;&#x7684;&#x524D;&#x63D0;&#x662F;&#x51FD;&#x6570;&#x4E2D;&#x6CA1;&#x6709;&#x8BBF;&#x95EE;&#x7C7B;&#x7684;&#x975E;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#xFF0C;&#x4E0D;&#x7136;&#x5C31;&#x4F1A;&#x51FA;&#x73B0;&#x8FD0;&#x884C;&#x9519;&#x8BEF;&#x3002;vptr&#x5C31;&#x662F;&#x5199;&#x5165;&#x5230;&#x5BF9;&#x8C61;&#x524D;&#x9762;&#x7684;&#x865A;&#x51FD;&#x6570;&#x8868;&#x6307;&#x9488;&#xFF0C;&#x5B83;&#x7684;&#x503C;&#x5C31;&#x662F;&#x865A;&#x51FD;&#x6570;&#x8868;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#x8BB0;&#x5F55;&#x4E86;&#x4E24;&#x9879;&#x5185;&#x5BB9;&#xFF0C;&#x5BF9;&#x5E94;&#x4E86;&#x4E24;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x5373;vptr[0]&#x662F;&#x865A;&#x51FD;&#x6570;virtual_func1&#x7684;&#x5730;&#x5740;&#xFF0C;vptr[1]&#x662F;&#x865A;&#x51FD;&#x6570;virtual_func2&#x7684;&#x5730;&#x5740;&#x3002;&#x628A;&#x4ED6;&#x4EEC;&#x5F3A;&#x5236;&#x8F6C;&#x6362;&#x6210;&#x666E;&#x901A;&#x51FD;&#x6570;&#x7684;&#x7C7B;&#x578B;&#x6307;&#x9488;&#xFF0C;&#x7136;&#x540E;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8C03;&#x7528;&#x4ED6;&#x4EEC;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x662F;&#x6CA1;&#x6709;&#x5BF9;&#x8C61;&#x7684;this&#x6307;&#x9488;&#x7684;&#xFF0C;&#x4E5F;&#x5C31;&#x4E0D;&#x80FD;&#x8BBF;&#x95EE;&#x7C7B;&#x4E2D;&#x7684;&#x975E;&#x9759;&#x6001;&#x6570;&#x636E;&#x6210;&#x5458;&#x4E86;&#x3002;</p>
+<h3 id="&#x865A;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;"><a href="#&#x865A;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;" class="headerlink" title="&#x865A;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;"></a>&#x865A;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;</h3><p>&#x4ECE;&#x4E0A;&#x4E00;&#x5C0F;&#x8282;&#x4E2D;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x7AA5;&#x63A2;&#x5230;&#x865A;&#x51FD;&#x6570;&#x7684;&#x4E00;&#x822C;&#x5B9E;&#x73B0;&#x6A21;&#x578B;&#xFF0C;&#x6BCF;&#x4E00;&#x4E2A;&#x7C7B;&#x6709;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x8868;&#xFF0C;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#x5305;&#x542B;&#x7C7B;&#x4E2D;&#x6BCF;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x7136;&#x540E;&#x6BCF;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x524D;&#x9762;&#x4F1A;&#x88AB;&#x7F16;&#x8BD1;&#x5668;&#x63D2;&#x5165;&#x4E00;&#x4E2A;&#x6307;&#x5411;&#x865A;&#x51FD;&#x6570;&#x8868;&#x7684;&#x6307;&#x9488;&#xFF0C;&#x540C;&#x4E00;&#x4E2A;&#x7C7B;&#x7684;&#x6240;&#x6709;&#x5BF9;&#x8C61;&#x90FD;&#x5171;&#x4EAB;&#x540C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x8868;&#x3002;&#x63A5;&#x4E0B;&#x6765;&#x7684;&#x5185;&#x5BB9;&#x4E2D;&#x5C06;&#x8BE6;&#x7EC6;&#x5206;&#x6790;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;&#x7EC6;&#x8282;&#xFF0C;&#x5305;&#x62EC;&#x5355;&#x4E00;&#x7EE7;&#x627F;&#x3001;&#x591A;&#x91CD;&#x7EE7;&#x627F;&#x548C;&#x865A;&#x7EE7;&#x627F;&#x7684;&#x60C5;&#x51B5;&#x3002;</p>
+<p>&#x591A;&#x6001;&#x662F;C++&#x4E2D;&#x6700;&#x91CD;&#x8981;&#x7684;&#x7279;&#x6027;&#x4E4B;&#x4E00;&#xFF0C;&#x4E5F;&#x662F;&#x7EC4;&#x6210;&#x9762;&#x5411;&#x5BF9;&#x8C61;&#x7F16;&#x7A0B;&#x8303;&#x5F0F;&#x7684;&#x57FA;&#x77F3;&#xFF0C;&#x865A;&#x51FD;&#x6570;&#x5219;&#x662F;&#x4E3A;&#x591A;&#x6001;&#x800C;&#x751F;&#x3002;&#x90A3;&#x4E48;&#x4F55;&#x4E3A;&#x591A;&#x6001;&#xFF1F;&#x591A;&#x6001;&#x662F;&#x5728;&#x57FA;&#x7C7B;&#x4E2D;&#x5B9A;&#x4E49;&#x4E00;&#x7EC4;&#x63A5;&#x53E3;&#xFF0C;&#x6839;&#x636E;&#x4E0D;&#x540C;&#x7684;&#x4E1A;&#x52A1;&#x573A;&#x666F;&#x6D3E;&#x751F;&#x51FA;&#x4E0D;&#x540C;&#x7684;&#x5B50;&#x7C7B;&#xFF0C;&#x5728;&#x5B50;&#x7C7B;&#x4E2D;&#x5B9E;&#x73B0;&#x63A5;&#x53E3;&#xFF0C;&#x4E0A;&#x5C42;&#x4EE3;&#x7801;&#x6839;&#x636E;&#x4E1A;&#x52A1;&#x903B;&#x8F91;&#x8C03;&#x7528;&#x63A5;&#x53E3;&#xFF0C;&#x4E0D;&#x5173;&#x5FC3;&#x63A5;&#x53E3;&#x7684;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x3002;&#x5728;&#x4EE3;&#x7801;&#x4E2D;&#xFF0C;&#x4E00;&#x822C;&#x662F;&#x58F0;&#x660E;&#x4E00;&#x4E2A;&#x57FA;&#x7C7B;&#x7684;&#x6307;&#x9488;&#xFF0C;&#x6B64;&#x6307;&#x9488;&#x5728;&#x8FD0;&#x884C;&#x671F;&#x95F4;&#x53EF;&#x80FD;&#x6307;&#x5411;&#x4E0D;&#x540C;&#x7684;&#x6D3E;&#x751F;&#x7C7B;&#xFF0C;&#x7136;&#x540E;&#x901A;&#x8FC7;&#x57FA;&#x7C7B;&#x7684;&#x6307;&#x9488;&#x8C03;&#x7528;&#x4E00;&#x4E2A;&#x63A5;&#x53E3;&#xFF0C;&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;&#x5728;&#x4E0D;&#x540C;&#x7684;&#x6D3E;&#x751F;&#x7C7B;&#x4E2D;&#x6709;&#x4E0D;&#x540C;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x6240;&#x4EE5;&#x6839;&#x636E;&#x57FA;&#x7C7B;&#x7684;&#x6307;&#x9488;&#x6307;&#x5411;&#x54EA;&#x4E2A;&#x5177;&#x4F53;&#x7684;&#x6D3E;&#x751F;&#x7C7B;&#xFF0C;&#x8C03;&#x7528;&#x7684;&#x5C31;&#x662F;&#x8FD9;&#x4E2A;&#x6D3E;&#x751F;&#x7C7B;&#x7684;&#x5B9E;&#x4F8B;&#x3002;&#x5047;&#x8BBE;&#x6709;&#x4E00;&#x4E2A;&#x540D;&#x79F0;&#x4E3A;print&#x7684;&#x63A5;&#x53E3;&#xFF0C;p&#x662F;&#x57FA;&#x7C7B;&#x7C7B;&#x578B;&#x7684;&#x6307;&#x9488;&#xFF0C;&#x90A3;&#x4E48;&#x4E0B;&#x9762;&#x7684;&#x8C03;&#x7528;&#xFF1A;</p>
+<p><strong><code>p-&gt;print();</code></strong></p>
+<p>&#x662F;&#x5982;&#x4F55;&#x8BC6;&#x522B;&#x51FA;&#x8981;&#x5B9E;&#x65BD;&#x591A;&#x6001;&#x7684;&#x884C;&#x4E3A;&#xFF1F;&#x4EE5;&#x53CA;&#x5982;&#x4F55;&#x8C03;&#x7528;&#x5230;&#x5177;&#x4F53;&#x54EA;&#x4E2A;&#x6D3E;&#x751F;&#x7C7B;&#x4E2D;&#x7684;print&#xFF1F;&#x5982;&#x679C;&#x662F;&#x5728;&#x6307;&#x9488;&#x7C7B;&#x578B;&#x4E0A;&#x589E;&#x52A0;&#x4FE1;&#x606F;&#xFF0C;&#x4EE5;&#x6307;&#x660E;&#x5177;&#x4F53;&#x6240;&#x6307;&#x5BF9;&#x8C61;&#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x90A3;&#x4E48;&#x4F1A;&#x6539;&#x53D8;&#x6307;&#x9488;&#x539F;&#x6709;&#x7684;&#x8BED;&#x4E49;&#xFF0C;&#x9020;&#x6210;&#x548C;C&#x8BED;&#x8A00;&#x7684;&#x4E0D;&#x517C;&#x5BB9;&#xFF0C;&#x800C;&#x4E14;&#x4E5F;&#x4E0D;&#x662F;&#x6BCF;&#x4E2A;&#x7C7B;&#x578B;&#x90FD;&#x9700;&#x8981;&#x8FD9;&#x4E2A;&#x4FE1;&#x606F;&#xFF0C;&#x8FD9;&#x4F1A;&#x9020;&#x6210;&#x4E0D;&#x5FC5;&#x8981;&#x7684;&#x7A7A;&#x95F4;&#x6D6A;&#x8D39;&#x3002;&#x5982;&#x679C;&#x662F;&#x5728;&#x6BCF;&#x4E2A;&#x7C7B;&#x5BF9;&#x8C61;&#x4E2D;&#x589E;&#x52A0;&#x4FE1;&#x606F;&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x4E0D;&#x9700;&#x8981;&#x591A;&#x6001;&#x7684;&#x5BF9;&#x8C61;&#x4E2D;&#x4E5F;&#x9700;&#x8981;&#x5B58;&#x653E;&#x8FD9;&#x4E9B;&#x4FE1;&#x606F;&#xFF0C;&#x4E5F;&#x4F1A;&#x9020;&#x6210;&#x7A7A;&#x95F4;&#x4E0A;&#x7684;&#x6D6A;&#x8D39;&#x3002;&#x56E0;&#x6B64;&#x589E;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;&#x5173;&#x952E;&#x5B57;virtual&#xFF0C;&#x7528;&#x4E8E;&#x4FEE;&#x9970;&#x90A3;&#x4E9B;&#x9700;&#x8981;&#x591A;&#x6001;&#x7684;&#x51FD;&#x6570;&#xFF0C;&#x8FD9;&#x6837;&#x7684;&#x51FD;&#x6570;&#x5C31;&#x53EB;&#x505A;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x6240;&#x4EE5;&#x8BC6;&#x522B;&#x4E00;&#x4E2A;&#x7C7B;&#x662F;&#x5426;&#x652F;&#x6301;&#x591A;&#x6001;&#xFF0C;&#x5C31;&#x770B;&#x8FD9;&#x4E2A;&#x7C7B;&#x4E2D;&#x662F;&#x5426;&#x58F0;&#x660E;&#x4E86;&#x865A;&#x51FD;&#x6570;&#x3002;&#x53EA;&#x8981;&#x7C7B;&#x4E2D;&#x6709;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x5C31;&#x8BF4;&#x660E;&#x9700;&#x8981;&#x5728;&#x7C7B;&#x5BF9;&#x8C61;&#x4E2D;&#x5B58;&#x50A8;&#x8FD0;&#x884C;&#x671F;&#x7684;&#x4FE1;&#x606F;&#x3002;</p>
+<p>&#x90A3;&#x4E48;&#x5728;&#x5BF9;&#x8C61;&#x4E2D;&#x8981;&#x5B58;&#x50A8;&#x54EA;&#x4E9B;&#x4FE1;&#x606F;&#x624D;&#x80FD;&#x591F;&#x4FDD;&#x8BC1;&#x4FDD;&#x8BC1;&#x4E0A;&#x9762;&#x4EE3;&#x7801;&#x4E2D;print&#x7684;&#x8C03;&#x7528;&#x662F;&#x8C03;&#x7528;&#x5230;&#x6B63;&#x786E;&#x7684;&#x6D3E;&#x751F;&#x7C7B;&#x4E2D;&#x7684;&#x5B9E;&#x4F8B;&#x5462;&#xFF1F;&#x8981;&#x8C03;&#x7528;&#x5230;&#x6B63;&#x786E;&#x7684;print&#x5B9E;&#x4F8B;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x77E5;&#x9053;&#xFF1A;</p>
+<ul>
+<li>p&#x6307;&#x5411;&#x5177;&#x4F53;&#x7684;&#x5BF9;&#x8C61;&#x7C7B;&#x578B;&#xFF0C;&#x8BA9;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#x8981;&#x8C03;&#x7528;&#x54EA;&#x4E2A;print&#xFF1B;</li>
+<li>print&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x4EE5;&#x4FBF;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6B63;&#x786E;&#x8C03;&#x7528;&#x5B83;&#x3002;</li>
+</ul>
+<p>&#x8981;&#x5982;&#x4F55;&#x5B9E;&#x73B0;&#x5B83;&#xFF0C;&#x4E0D;&#x540C;&#x7684;&#x7F16;&#x8BD1;&#x5668;&#x53EF;&#x80FD;&#x6709;&#x4E0D;&#x540C;&#x7684;&#x5B9E;&#x73B0;&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x5E38;&#x662F;&#x4F7F;&#x7528;&#x865A;&#x51FD;&#x6570;&#x8868;&#x7684;&#x505A;&#x6CD5;&#x3002;&#x7F16;&#x8BD1;&#x5668;&#x5728;&#x7F16;&#x8BD1;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x6536;&#x96C6;&#x5230;&#x54EA;&#x4E9B;&#x662F;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E9B;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x5B58;&#x653E;&#x4E00;&#x4E2A;&#x8868;&#x683C;&#x4E2D;&#xFF0C;&#x8FD9;&#x4E9B;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x5728;&#x7F16;&#x8BD1;&#x671F;&#x95F4;&#x786E;&#x5B9A;&#x7684;&#xFF0C;&#x8FD0;&#x884C;&#x671F;&#x95F4;&#x662F;&#x4E0D;&#x4F1A;&#x6539;&#x53D8;&#x7684;&#xFF0C;&#x865A;&#x51FD;&#x6570;&#x7684;&#x4E2A;&#x6570;&#x4E5F;&#x662F;&#x56FA;&#x5B9A;&#x7684;&#xFF0C;&#x5728;&#x7A0B;&#x5E8F;&#x7684;&#x6267;&#x884C;&#x671F;&#x95F4;&#x4E0D;&#x80FD;&#x5220;&#x9664;&#x6216;&#x8005;&#x589E;&#x52A0;&#xFF0C;&#x6240;&#x4EE5;&#x8868;&#x683C;&#x7684;&#x5927;&#x5C0F;&#x4E5F;&#x662F;&#x56FA;&#x5B9A;&#x7684;&#xFF0C;&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x7531;&#x7F16;&#x8BD1;&#x5668;&#x5728;&#x7F16;&#x8BD1;&#x671F;&#x95F4;&#x5B8C;&#x6210;&#x3002;&#x8868;&#x683C;&#x4E2D;&#x865A;&#x51FD;&#x6570;&#x7684;&#x4F4D;&#x7F6E;&#x6309;&#x7167;&#x7C7B;&#x4E2D;&#x58F0;&#x660E;&#x7684;&#x987A;&#x5E8F;&#xFF0C;&#x4F4D;&#x7F6E;&#x662F;&#x56FA;&#x5B9A;&#x4E0D;&#x53D8;&#x7684;&#xFF0C;&#x6211;&#x4EEC;&#x5728;&#x4E0A;&#x8282;&#x4E2D;&#x901A;&#x8FC7;&#x865A;&#x51FD;&#x6570;&#x540D;&#x79F0;&#x6253;&#x5370;&#x51FA;&#x6765;&#x7684;&#x503C;&#x5C31;&#x662F;&#x865A;&#x51FD;&#x6570;&#x5728;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x5373;&#x76F8;&#x5BF9;&#x4E8E;&#x8868;&#x683C;&#x9996;&#x5730;&#x5740;&#x7684;&#x504F;&#x79FB;&#x503C;&#x3002;</p>
+<p>&#x6709;&#x4E86;&#x8FD9;&#x4E2A;&#x8868;&#x683C;&#xFF0C;&#x90A3;&#x4E48;&#x5982;&#x4F55;&#x5BFB;&#x5740;&#x5230;&#x8FD9;&#x4E2A;&#x8868;&#x683C;&#x5462;&#xFF1F;&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x7F16;&#x8BD1;&#x5668;&#x6839;&#x636E;&#x7C7B;&#x4E2D;&#x662F;&#x5426;&#x6709;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x5C31;&#x5728;&#x7C7B;&#x7684;&#x6784;&#x9020;&#x51FD;&#x6570;&#x91CC;&#x63D2;&#x5165;&#x4E00;&#x4E9B;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#xFF0C;&#x5728;&#x6784;&#x9020;&#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x5728;&#x5BF9;&#x8C61;&#x7684;&#x524D;&#x9762;&#x63D2;&#x5165;&#x4E00;&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x6307;&#x5411;&#x8FD9;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x8868;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x4E2A;&#x6307;&#x9488;&#x4E5F;&#x53EB;&#x505A;&#x865A;&#x51FD;&#x6570;&#x8868;&#x6307;&#x9488;&#x3002;&#x4E0B;&#x9762;&#x4EE5;&#x5177;&#x4F53;&#x7684;&#x4EE3;&#x7801;&#x6765;&#x770B;&#x770B;&#x865A;&#x51FD;&#x6570;&#x662F;&#x600E;&#x4E48;&#x8C03;&#x7528;&#x7684;&#xFF0C;&#x628A;&#x4E0A;&#x9762;&#x7684;&#x4F8B;&#x5B50;main&#x51FD;&#x6570;&#x4FEE;&#x6539;&#x5982;&#x4E0B;&#xFF0C;&#x5176;&#x5B83;&#x5730;&#x65B9;&#x4E0D;&#x53D8;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;int main() {</span><br><span class="line">    Object* pobj = new Object;</span><br><span class="line">    pobj-&gt;virtual_func1();</span><br><span class="line">    pobj-&gt;virtual_func2();</span><br><span class="line">    delete pobj;</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x6765;&#x770B;&#x4E0B;&#x751F;&#x6210;&#x7684;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#xFF0C;&#x9996;&#x5148;&#x6765;&#x770B;&#x770B;&#x865A;&#x51FD;&#x6570;&#x8868;&#x957F;&#x4EC0;&#x4E48;&#x6837;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;vtable for Object:</span><br><span class="line">    .quad   0</span><br><span class="line">    .quad   typeinfo for Object</span><br><span class="line">    .quad   Object::virtual_func1()</span><br><span class="line">    .quad   Object::virtual_func2()</span><br></pre></td></tr></table></figure>
+
+<p>&#x5B83;&#x662F;&#x6C47;&#x7F16;&#x4E2D;&#x5B9A;&#x4E49;&#x5728;&#x6570;&#x636E;&#x6BB5;&#x7684;&#x4E00;&#x7EC4;&#x6570;&#x636E;&#xFF0C;&#x201C;vtable for Object&#x201D;&#x662F;&#x5B83;&#x7684;&#x6807;&#x7B7E;&#xFF0C;&#x4EE3;&#x8868;&#x4E86;&#x8FD9;&#x4E2A;&#x6570;&#x636E;&#x533A;&#x7684;&#x8D77;&#x59CB;&#x5730;&#x5740;&#xFF0C;&#x6BCF;&#x4E00;&#x884C;&#x5B9A;&#x4E49;&#x4E00;&#x6761;&#x6570;&#x636E;&#xFF0C;&#x7B2C;&#x4E00;&#x5217;.quad&#x8868;&#x793A;&#x6570;&#x636E;&#x7684;&#x5927;&#x5C0F;&#xFF0C;&#x5360;&#x7528;8&#x5B57;&#x8282;&#xFF0C;&#x7B2C;&#x4E8C;&#x5217;&#x8868;&#x793A;&#x6570;&#x636E;&#x7684;&#x503C;&#xFF0C;&#x53EF;&#x4EE5;&#x662F;&#x6570;&#x5B57;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x662F;&#x6807;&#x7B7E;&#xFF0C;&#x6807;&#x7B7E;&#x662F;&#x5730;&#x5740;&#x7684;&#x5F15;&#x7528;&#x3002;&#x5176;&#x5B9E;&#x8FD9;&#x4E2A;&#x5B8C;&#x6574;&#x7684;&#x8868;&#x53EB;&#x505A;&#x865A;&#x8868;&#xFF0C;&#x5B83;&#x5305;&#x542B;&#x4E86;&#x865A;&#x51FD;&#x6570;&#x8868;&#x3001;RTTI&#x4FE1;&#x606F;&#x548C;&#x865A;&#x7EE7;&#x627F;&#x76F8;&#x5173;&#x7684;&#x4FE1;&#x606F;&#xFF0C;Clang&#x548C;Gcc&#x7F16;&#x8BD1;&#x5668;&#x662F;&#x628A;&#x5B83;&#x4EEC;&#x5408;&#x5728;&#x4E00;&#x8D77;&#x4E86;&#xFF0C;&#x5176;&#x5B83;&#x7F16;&#x8BD1;&#x5668;&#x53EF;&#x80FD;&#x662F;&#x5206;&#x5F00;&#x7684;&#x3002;&#x7B2C;&#x4E00;&#x884C;&#x662F;&#x865A;&#x7EE7;&#x627F;&#x4E2D;&#x7528;&#x5230;&#xFF0C;&#x4E4B;&#x524D;&#x5DF2;&#x7ECF;&#x8BB2;&#x8FC7;&#x4E86;&#xFF0C;&#x7B2C;&#x4E8C;&#x884C;&#x662F;RTTI&#x4FE1;&#x606F;&#xFF0C;&#x8FD9;&#x4E2A;&#x4EE5;&#x540E;&#x518D;&#x8BB2;&#x3002;&#x7B2C;&#x4E09;&#x3001;&#x56DB;&#x884C;&#x662F;&#x4E24;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x3002;</p>
+<p>&#x63A5;&#x7740;&#x770B;&#x770B;Object&#x7C7B;&#x7684;&#x9ED8;&#x8BA4;&#x6784;&#x9020;&#x51FD;&#x6570;&#x7684;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;Object::Object() [base object constructor]: 	# @Object::Object() [base object constructor]</span><br><span class="line">    # &#x7565;...</span><br><span class="line">    lea     rcx, [rip + vtable for Object]</span><br><span class="line">    add     rcx, 16</span><br><span class="line">    mov     qword ptr [rax], rcx</span><br><span class="line">    # &#x7565;...</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E4B;&#x524D;&#x5DF2;&#x7ECF;&#x8BB2;&#x8FC7;&#xFF0C;&#x6709;&#x865A;&#x51FD;&#x6570;&#x65F6;&#x7F16;&#x8BD1;&#x5668;&#x4F1A;&#x4E3A;&#x7C7B;&#x751F;&#x6210;&#x9ED8;&#x8BA4;&#x6784;&#x9020;&#x51FD;&#x6570;&#xFF0C;&#x5728;&#x9ED8;&#x8BA4;&#x6784;&#x9020;&#x51FD;&#x6570;&#x91CC;&#x5728;&#x7C7B;&#x5BF9;&#x8C61;&#x7684;&#x524D;&#x9762;&#x8BBE;&#x7F6E;&#x4E86;&#x865A;&#x51FD;&#x6570;&#x8868;&#x6307;&#x9488;&#x3002;&#x5728;&#x8FD9;&#x4E2A;&#x9ED8;&#x8BA4;&#x6784;&#x9020;&#x51FD;&#x6570;&#x91CC;&#xFF0C;&#x4E3B;&#x8981;&#x7684;&#x4EE3;&#x7801;&#x5C31;&#x662F;&#x4E0A;&#x9762;&#x8FD9;&#x4E09;&#x884C;&#xFF0C;&#x9996;&#x5148;&#x83B7;&#x53D6;&#x865A;&#x8868;&#xFF08;&#x5C06;&#x4E0A;&#x9762;&#xFF09;&#x7684;&#x8D77;&#x59CB;&#x5730;&#x5740;&#x5B58;&#x653E;&#x5728;rcx&#x5BC4;&#x5B58;&#x5668;&#xFF0C;&#x7136;&#x540E;&#x52A0;&#x4E0A;16&#x7684;&#x504F;&#x79FB;&#x503C;&#x8DF3;&#x8FC7;&#x7B2C;&#x4E00;&#x3001;&#x4E8C;&#x884C;&#xFF0C;&#x8FD9;&#x65F6;&#x6307;&#x5411;&#x7B2C;&#x4E09;&#x884C;&#x6570;&#x636E;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x7B2C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x8FD9;&#x4E2A;&#x5730;&#x5740;&#x8D4B;&#x503C;&#x7ED9;[rax]&#xFF0C;rax&#x662F;&#x5B58;&#x653E;&#x7684;&#x5BF9;&#x8C61;&#x7684;&#x9996;&#x5730;&#x5740;&#xFF0C;&#x8FD9;&#x5C31;&#x5B8C;&#x6210;&#x4E86;&#x7ED9;&#x5BF9;&#x8C61;&#x8BBE;&#x7F6E;&#x865A;&#x51FD;&#x6570;&#x8868;&#x6307;&#x9488;&#x3002;</p>
+<p>&#x63A5;&#x7740;&#x770B;main&#x51FD;&#x6570;&#x4E2D;&#x5BF9;&#x865A;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;main:								# @main</span><br><span class="line">    # &#x7565;...</span><br><span class="line">  	# &#x8C03;&#x7528;&#x6784;&#x9020;&#x51FD;&#x6570;</span><br><span class="line">    mov     rdi, rax</span><br><span class="line">    mov     qword ptr [rbp - 32], rdi       # 8-byte Spill</span><br><span class="line">    call    Object::Object() [base object constructor]</span><br><span class="line">    mov     rax, qword ptr [rbp - 32]       # 8-byte Reload</span><br><span class="line">    mov     qword ptr [rbp - 16], rax</span><br><span class="line">		# &#x8C03;&#x7528;&#x7B2C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;</span><br><span class="line">    mov     rdi, qword ptr [rbp - 16]</span><br><span class="line">    mov     rax, qword ptr [rdi]</span><br><span class="line">    call    qword ptr [rax]</span><br><span class="line">  	# &#x8C03;&#x7528;&#x7B2C;&#x4E8C;&#x4E2A;&#x865A;&#x51FD;&#x6570;</span><br><span class="line">    mov     rdi, qword ptr [rbp - 16]</span><br><span class="line">    mov     rax, qword ptr [rdi]</span><br><span class="line">    call    qword ptr [rax + 8]</span><br><span class="line">    # &#x7565;...</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x9762;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#x4E2D;&#x7684;&#x7B2C;4&#x884C;rax&#x662F;&#x8C03;&#x7528;new&#x51FD;&#x6570;&#x540E;&#x8FD4;&#x56DE;&#x6765;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;pobj&#x6307;&#x9488;&#xFF0C;&#x628A;&#x5B83;&#x5B58;&#x653E;&#x5230;rdi&#x5BC4;&#x5B58;&#x5668;&#x4E2D;&#x4F5C;&#x4E3A;&#x53C2;&#x6570;&#xFF0C;&#x540C;&#x65F6;&#x4E5F;&#x4FDD;&#x5B58;&#x5230;&#x6808;&#x7A7A;&#x95F4;rbp - 32&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x8C03;&#x7528;&#x6784;&#x9020;&#x51FD;&#x6570;&#xFF0C;&#x6784;&#x9020;&#x5B8C;&#x6210;&#x4E4B;&#x540E;&#x518D;&#x62F7;&#x8D1D;&#x8FD9;&#x4E2A;&#x5730;&#x5740;&#x5230;&#x6808;&#x7A7A;&#x95F4;rbp - 16&#x4E2D;&#x3002;&#x63A5;&#x4E0B;&#x6765;&#x7684;&#x7B2C;10&#x5230;12&#x884C;&#x662F;&#x7B2C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x5C06;&#x5BF9;&#x8C61;&#x7684;&#x9996;&#x5730;&#x5740;&#x52A0;&#x8F7D;&#x5230;rdi&#x5BC4;&#x5B58;&#x5668;&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x5BF9;&#x5176;&#x53D6;&#x5185;&#x5BB9;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x662F;&#x76F8;&#x5F53;&#x4E8E;&#x6307;&#x9488;&#x7684;&#x89E3;&#x5F15;&#x7528;&#xFF0C;&#x5373; <code>(*pobj)</code>&#xFF0C;&#x53D6;&#x5F97;&#x7684;&#x5185;&#x5BB9;&#x5373;&#x662F;&#x6784;&#x9020;&#x51FD;&#x6570;&#x4E2D;&#x8BBE;&#x7F6E;&#x7684;&#x865A;&#x51FD;&#x6570;&#x8868;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x5B83;&#x662F;&#x4E00;&#x4E2A;&#x6307;&#x5411;&#x7B2C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x7136;&#x540E;&#x7B2C;12&#x884C;&#x5BF9;&#x5176;&#x53D6;&#x5185;&#x5BB9;&#xFF0C;&#x4E5F;&#x5373;&#x662F;&#x5BF9;&#x8FD9;&#x4E2A;&#x5730;&#x5740;&#x89E3;&#x5F15;&#x7528;&#xFF0C;&#x53D6;&#x5F97;&#x7B2C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x7136;&#x540E;&#x4EE5;rdi&#x5BC4;&#x5B58;&#x5668;&#xFF08;&#x5373;&#x5BF9;&#x8C61;&#x7684;&#x9996;&#x5730;&#x5740;&#xFF09;&#x4E3A;&#x7B2C;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#x8C03;&#x7528;&#x5B83;&#xFF0C;&#x76F8;&#x5F53;&#x4E8E;&#xFF1A;<code>virtual_func1(pobj)</code>&#x3002;&#x7B2C;14&#x5230;16&#x884C;&#x662F;&#x5BF9;&#x7B2C;&#x4E8C;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x6D41;&#x7A0B;&#x548C;&#x7B2C;&#x4E00;&#x4E2A;&#x57FA;&#x672C;&#x4E00;&#x6837;&#xFF0C;&#x533A;&#x522B;&#x5728;&#x4E8E;&#x5C06;&#x865A;&#x51FD;&#x6570;&#x8868;&#x7684;&#x5730;&#x5740;&#x52A0;&#x4E0A;8&#x7684;&#x504F;&#x79FB;&#x91CF;&#x4EE5;&#x6307;&#x5411;&#x7B2C;&#x4E8C;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x5728;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x4E2D;&#x8C03;&#x7528;&#x53E6;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x53C8;&#x4F1A;&#x600E;&#x6837;&#xFF1F;&#x7B2C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x5DF2;&#x7ECF;&#x51B3;&#x8BAE;&#x51FA;&#x662F;&#x8C03;&#x7528;&#x54EA;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x5B9E;&#x4F8B;&#x4E86;&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x5176;&#x4E2D;&#x8C03;&#x7528;&#x5176;&#x5B83;&#x865A;&#x51FD;&#x6570;&#x8FD8;&#x9700;&#x8981;&#x518D;&#x52A8;&#x6001;&#x51B3;&#x8BAE;&#x5417;&#xFF1F;&#x628A;main&#x51FD;&#x6570;&#x4E2D;&#x5BF9;&#x7B2C;&#x4E8C;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x7684;&#x8C03;&#x7528;&#x53BB;&#x6389;&#xFF0C;&#x5728;&#x7B2C;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x4E2D;&#x589E;&#x52A0;&#x4EE5;&#x4E0B;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;virtual_func2();</span><br><span class="line">Object::virtual_func2();</span><br></pre></td></tr></table></figure>
+
+<p>&#x6765;&#x770B;&#x4E0B;&#x5BF9;&#x5E94;&#x751F;&#x6210;&#x7684;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#xFF0C;&#x5176;&#x5B83;&#x4EE3;&#x7801;&#x90FD;&#x5DEE;&#x4E0D;&#x591A;&#xFF0C;&#x4E3B;&#x8981;&#x770B;virtual_func1&#x51FD;&#x6570;&#x7684;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;Object::virtual_func1():            # @Object::virtual_func1()</span><br><span class="line">    # &#x7565;...</span><br><span class="line">    mov     rdi, qword ptr [rbp - 16]       # 8-byte Reload</span><br><span class="line">    mov     rax, qword ptr [rdi]</span><br><span class="line">    call    qword ptr [rax + 8]</span><br><span class="line">    mov     rdi, qword ptr [rbp - 16]       # 8-byte Reload</span><br><span class="line">    call    Object::virtual_func2()</span><br><span class="line">    # &#x7565;...</span><br></pre></td></tr></table></figure>
+
+<p>rbp - 16&#x4FDD;&#x5B58;&#x7684;&#x662F;&#x5BF9;&#x8C61;&#x7684;&#x9996;&#x5730;&#x5740;&#xFF0C;&#x7B2C;3&#x5230;5&#x884C;&#x5BF9;&#x5E94;&#x7684;&#x662F;&#x4E0A;&#x9762;C++&#x4EE3;&#x7801;&#x4E2D;&#x7B2C;&#x4E00;&#x53E5;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x770B;&#x8D77;&#x6765;&#x5728;&#x865A;&#x51FD;&#x6570;&#x4E2D;&#x8C03;&#x7528;&#x53E6;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x7528;&#x7684;&#x8FD8;&#x662F;&#x52A8;&#x6001;&#x51B3;&#x8BAE;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x8FD9;&#x91CC;&#x7F16;&#x8BD1;&#x5668;&#x6CA1;&#x6709;&#x8BC6;&#x522B;&#x51FA;&#x5DF2;&#x7ECF;&#x51B3;&#x8BAE;&#x51FA;&#x5177;&#x4F53;&#x7684;&#x5BF9;&#x8C61;&#x4E86;&#x3002;&#x4ECE;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#x7684;&#x7B2C;6&#x3001;7&#x884C;&#x770B;&#x5230;&#xFF0C;&#x901A;&#x8FC7;&#x524D;&#x9762;&#x52A0;&#x7C7B;&#x540D;&#x7684;&#x9650;&#x5B9A;&#x7B26;&#xFF0C;&#x662F;&#x76F4;&#x63A5;&#x8C03;&#x7528;&#x5230;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x660E;&#x786E;&#x8C03;&#x7528;&#x7684;&#x662F;&#x54EA;&#x4E2A;&#x51FD;&#x6570;&#x7684;&#x8BDD;&#xFF0C;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x5728;&#x51FD;&#x6570;&#x7684;&#x524D;&#x9762;&#x52A0;&#x4E0A;&#x7C7B;&#x540D;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x4E0D;&#x9700;&#x8981;&#x7528;&#x591A;&#x6001;&#x7684;&#x65B9;&#x5F0F;&#x53BB;&#x8C03;&#x7528;&#x4E86;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x4E0D;&#x662F;&#x901A;&#x8FC7;&#x6307;&#x9488;&#x7C7B;&#x578B;&#x6765;&#x8C03;&#x7528;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x800C;&#x662F;&#x901A;&#x8FC7;&#x5BF9;&#x8C61;&#x6765;&#x8C03;&#x7528;&#xFF0C;&#x7ED3;&#x679C;&#x662F;&#x4EC0;&#x4E48;&#x60C5;&#x51B5;&#xFF1F;&#x628A;main&#x51FD;&#x6570;&#x6539;&#x6210;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;int main() {</span><br><span class="line">    Object obj;</span><br><span class="line">    obj.virtual_func1();</span><br><span class="line">    obj.virtual_func2();</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x67E5;&#x770B;main&#x51FD;&#x6570;&#x5BF9;&#x5E94;&#x7684;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;main:                           # @main</span><br><span class="line">    # &#x7565;...</span><br><span class="line">    lea     rdi, [rbp - 16]</span><br><span class="line">    call    Object::virtual_func1()</span><br><span class="line">    lea     rdi, [rbp - 16]</span><br><span class="line">    call    Object::virtual_func2()</span><br><span class="line">    # &#x7565;...</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x901A;&#x8FC7;&#x5BF9;&#x8C61;&#x6765;&#x8C03;&#x7528;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x662F;&#x76F4;&#x63A5;&#x8C03;&#x7528;&#x5230;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x7684;&#x51FD;&#x6570;&#x5B9E;&#x4F8B;&#x7684;&#xFF0C;&#x6CA1;&#x6709;&#x4F7F;&#x7528;&#x591A;&#x6001;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x6240;&#x4EE5;&#x901A;&#x8FC7;&#x5BF9;&#x8C61;&#x7684;&#x65B9;&#x5F0F;&#x8C03;&#x7528;&#x662F;&#x6CA1;&#x6709;&#x591A;&#x6001;&#x7684;&#x884C;&#x4E3A;&#x7684;&#xFF0C;&#x53EA;&#x6709;&#x901A;&#x8FC7;&#x7C7B;&#x7684;&#x6307;&#x9488;&#x6216;&#x8005;&#x5F15;&#x7528;&#x7C7B;&#x578B;&#x6765;&#x8C03;&#x7528;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x624D;&#x4F1A;&#x6709;&#x591A;&#x6001;&#x7684;&#x884C;&#x4E3A;&#x3002;</p>
+<h3 id="&#x5355;&#x4E00;&#x7EE7;&#x627F;&#x4E0B;&#x7684;&#x865A;&#x51FD;&#x6570;"><a href="#&#x5355;&#x4E00;&#x7EE7;&#x627F;&#x4E0B;&#x7684;&#x865A;&#x51FD;&#x6570;" class="headerlink" title="&#x5355;&#x4E00;&#x7EE7;&#x627F;&#x4E0B;&#x7684;&#x865A;&#x51FD;&#x6570;"></a>&#x5355;&#x4E00;&#x7EE7;&#x627F;&#x4E0B;&#x7684;&#x865A;&#x51FD;&#x6570;</h3><p>&#x5047;&#x8BBE;&#x6709;&#x4EE5;&#x4E0B;&#x7684;&#x7C7B;&#x5B9A;&#x4E49;&#x53CA;&#x7EE7;&#x627F;&#x5173;&#x7CFB;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;class Point {</span><br><span class="line">public:</span><br><span class="line">    Point(int x = 0) { _x = x; }</span><br><span class="line">    virtual ~Point() = default;</span><br><span class="line">    virtual void drawLine() = 0;</span><br><span class="line">    int x() { return _x; }</span><br><span class="line">    virtual int y() { return 0; }</span><br><span class="line">    virtual int z() { return 0; }</span><br><span class="line">private:</span><br><span class="line">    int _x;</span><br><span class="line">};</span><br><span class="line">class Point2d: public Point {</span><br><span class="line">public:</span><br><span class="line">    Point2d(int x = 0, int y = 0): Point(x) { _y = y; }</span><br><span class="line">    virtual ~Point2d() = default;</span><br><span class="line">    void drawLine() override { }</span><br><span class="line">    virtual void rotate() { }</span><br><span class="line">    int y() override { return _y; }</span><br><span class="line">private:</span><br><span class="line">    int _y;</span><br><span class="line">};</span><br><span class="line">class Point3d: public Point2d {</span><br><span class="line">public:</span><br><span class="line">    Point3d(int x = 0, int y = 0, int z = 0): Point2d(x, y) { _z = z; }</span><br><span class="line">    virtual ~Point3d() = default;</span><br><span class="line">    void drawLine() override { }</span><br><span class="line">    void rotate() override { }</span><br><span class="line">    int z() override { return _z; }</span><br><span class="line">private:</span><br><span class="line">    int _z;</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">int main() {</span><br><span class="line">    Point* p = new Point3d(1, 1, 1);</span><br><span class="line">    printf(&quot;z = %d\n&quot;, p-&gt;z());</span><br><span class="line">    delete p;</span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5148;&#x6765;&#x770B;&#x770B;&#x751F;&#x6210;&#x7684;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#x4E2D;&#x7684;&#x865A;&#x51FD;&#x6570;&#x8868;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">text&#x590D;&#x5236;&#x4EE3;&#x7801;vtable for Point:</span><br><span class="line">    .quad   0</span><br><span class="line">    .quad   typeinfo for Point</span><br><span class="line">    .quad   Point::~Point() [base object destructor]</span><br><span class="line">    .quad   Point::~Point() [deleting destructor]</span><br><span class="line">    .quad   __cxa_pure_virtual</span><br><span class="line">    .quad   Point::y()</span><br><span class="line">    .quad   Point::z()</span><br><span class="line"></span><br><span class="line">vtable for Point2d:</span><br><span class="line">    .quad   0</span><br><span class="line">    .quad   typeinfo for Point2d</span><br><span class="line">    .quad   Point2d::~Point2d() [base object destructor]</span><br><span class="line">    .quad   Point2d::~Point2d() [deleting destructor]</span><br><span class="line">    .quad   Point2d::drawLine()</span><br><span class="line">    .quad   Point2d::y()</span><br><span class="line">    .quad   Point::z()</span><br><span class="line">    .quad   Point2d::rotate()</span><br><span class="line"></span><br><span class="line">vtable for Point3d:</span><br><span class="line">    .quad   0</span><br><span class="line">    .quad   typeinfo for Point3d</span><br><span class="line">    .quad   Point3d::~Point3d() [base object destructor]</span><br><span class="line">    .quad   Point3d::~Point3d() [deleting destructor]</span><br><span class="line">    .quad   Point3d::drawLine()</span><br><span class="line">    .quad   Point2d::y()</span><br><span class="line">    .quad   Point3d::z()</span><br><span class="line">    .quad   Point3d::rotate()</span><br></pre></td></tr></table></figure>
+
+<p>&#x6BCF;&#x4E2A;&#x7C7B;&#x90FD;&#x6709;&#x4E00;&#x4E2A;&#x5BF9;&#x5E94;&#x7684;&#x865A;&#x51FD;&#x6570;&#x8868;&#xFF0C;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#x7684;&#x5185;&#x5BB9;&#x4E3B;&#x8981;&#x6765;&#x81EA;&#x4E8E;&#x4E09;&#x65B9;&#x9762;&#xFF1A;</p>
+<ul>
+<li>&#x6539;&#x5199;&#x57FA;&#x7C7B;&#x4E2D;&#x5BF9;&#x5E94;&#x7684;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x7528;&#x81EA;&#x5DF1;&#x5B9E;&#x73B0;&#x7684;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x5199;&#x5165;&#x5230;&#x5BF9;&#x5E94;&#x8868;&#x683C;&#x4E2D;&#x7684;&#x4F4D;&#x7F6E;&#xFF1B;</li>
+<li>&#x4ECE;&#x57FA;&#x7C7B;&#x4E2D;&#x7EE7;&#x627F;&#x800C;&#x6765;&#x7684;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x76F4;&#x63A5;&#x62F7;&#x8D1D;&#x57FA;&#x7C7B;&#x865A;&#x51FD;&#x6570;&#x7684;&#x5730;&#x5740;&#x6DFB;&#x52A0;&#x5230;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#xFF1B;</li>
+<li>&#x65B0;&#x589E;&#x7684;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x57FA;&#x7C7B;&#x4E2D;&#x6CA1;&#x6709;&#xFF0C;&#x5B50;&#x7C7B;&#x7684;&#x865A;&#x51FD;&#x6570;&#x8868;&#x4F1A;&#x589E;&#x52A0;&#x4E00;&#x884C;&#x5BB9;&#x7EB3;&#x65B0;&#x6761;&#x76EE;&#xFF1B;</li>
+</ul>
+<p>&#x57FA;&#x7C7B;&#x548C;&#x5B50;&#x7C7B;&#x4F7F;&#x7528;&#x5404;&#x81EA;&#x7684;&#x865A;&#x51FD;&#x6570;&#x8868;&#xFF0C;&#x4E92;&#x4E0D;&#x5E72;&#x6270;&#xFF0C;&#x5373;&#x4F7F;&#x5B50;&#x7C7B;&#x4E2D;&#x6CA1;&#x6709;&#x6539;&#x5199;&#x57FA;&#x7C7B;&#x7684;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x4E5F;&#x6CA1;&#x6709;&#x65B0;&#x589E;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x7F16;&#x8BD1;&#x5668;&#x4E5F;&#x4F1A;&#x4E3A;&#x5B50;&#x7C7B;&#x65B0;&#x5EFA;&#x4E00;&#x4E2A;&#x865A;&#x51FD;&#x6570;&#x8868;&#xFF0C;&#x5185;&#x5BB9;&#x4ECE;&#x57FA;&#x7C7B;&#x4E2D;&#x62F7;&#x8D1D;&#x8FC7;&#x6765;&#xFF0C;&#x5185;&#x5BB9;&#x548C;&#x57FA;&#x7C7B;&#x5B8C;&#x5168;&#x4E00;&#x6837;&#x3002;</p>
+<p>&#x865A;&#x51FD;&#x6570;&#x8868;&#x4E2D;&#x7684;&#x865A;&#x51FD;&#x6570;&#x7684;&#x6392;&#x5217;&#x987A;&#x5E8F;&#x662F;&#x56FA;&#x5B9A;&#x7684;&#xFF0C;&#x4E00;&#x822C;&#x662F;&#x6309;&#x7167;&#x5728;&#x7C7B;&#x4E2D;&#x7684;&#x58F0;&#x660E;&#x987A;&#x5E8F;&#xFF0C;&#x5982;C++&#x4EE3;&#x7801;&#x4E2D;&#x7684;&#x8FD9;&#x884C;&#x4EE3;&#x7801;&#xFF1A;</p>
+<p><strong><code>p-&gt;z();</code></strong></p>
+<p>&#x8981;&#x5BFB;&#x5740;&#x5230;&#x6B63;&#x786E;&#x7684;z&#x51FD;&#x6570;&#x5B9E;&#x4F8B;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x6211;&#x4EEC;&#x9996;&#x5148;&#x9700;&#x8981;&#x77E5;&#x9053;p&#x6307;&#x9488;&#x6240;&#x6307;&#x5411;&#x7684;&#x5177;&#x4F53;&#x5BF9;&#x8C61;&#xFF0C;&#x7136;&#x540E;&#x9700;&#x8981;&#x77E5;&#x9053;z&#x51FD;&#x6570;&#x5728;&#x8868;&#x683C;&#x4E2D;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x5982;&#x4E0A;&#x4F8B;&#x4E2D;&#xFF0C;z&#x51FD;&#x6570;&#x5728;&#x7B2C;5&#x4E2A;&#x6761;&#x76EE;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x865A;&#x51FD;&#x6570;&#x8868;&#x7684;&#x8D77;&#x59CB;&#x5730;&#x5740;&#x52A0;&#x4E0A;32&#x7684;&#x504F;&#x79FB;&#x91CF;&#x5C31;&#x53EF;&#x4EE5;&#x5BFB;&#x5740;&#x5230;&#x5B83;&#xFF0C;&#x8FD9;&#x4E2A;&#x4F4D;&#x7F6E;&#x4FDD;&#x6301;&#x4E0D;&#x53D8;&#xFF0C;&#x65E0;&#x8BBA;p&#x6307;&#x9488;&#x6307;&#x5411;&#x54EA;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x90FD;&#x80FD;&#x627E;&#x5230;&#x6B63;&#x786E;&#x7684;z&#x51FD;&#x6570;&#x3002;&#x5982;&#x679C;&#x5B50;&#x7C7B;&#x4E2D;&#x6709;&#x65B0;&#x589E;&#x7684;&#x865A;&#x51FD;&#x6570;&#xFF0C;&#x65B0;&#x589E;&#x7684;&#x865A;&#x51FD;&#x6570;&#x58F0;&#x660E;&#x7684;&#x4F4D;&#x7F6E;&#x63D2;&#x5728;&#x4ECE;&#x57FA;&#x7C7B;&#x4E2D;&#x7EE7;&#x627F;&#x6765;&#x7684;&#x865A;&#x51FD;&#x6570;&#x4E2D;&#x95F4;&#xFF0C;&#x7F16;&#x8BD1;&#x5668;&#x4F1A;&#x505A;&#x8C03;&#x6574;&#xFF0C;&#x628A;&#x5B83;&#x5B89;&#x6392;&#x5728;&#x540E;&#x9762;&#xFF0C;&#x5728;&#x539F;&#x6709;&#x7684;&#x987A;&#x5E8F;&#x4E0A;&#x518D;&#x9012;&#x589E;&#xFF0C;&#x5982;&#x4E0A;&#x4F8B;&#x4E2D;&#x7684;rotate&#x51FD;&#x6570;&#x3002;</p>
+<blockquote>
+<p>&#x5982;&#x679C;&#x60A8;&#x611F;&#x5174;&#x8DA3;&#x8FD9;&#x65B9;&#x9762;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x8BF7;&#x5728;&#x5FAE;&#x4FE1;&#x4E0A;&#x641C;&#x7D22;&#x516C;&#x4F17;&#x53F7;iShare&#x7231;&#x5206;&#x4EAB;&#x5E76;&#x5173;&#x6CE8;&#xFF0C;&#x4EE5;&#x4FBF;&#x5728;&#x5185;&#x5BB9;&#x66F4;&#x65B0;&#x65F6;&#x76F4;&#x63A5;&#x5411;&#x60A8;&#x63A8;&#x9001;&#x3002;</p>
+</blockquote>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/e28eb184170e1e42e46a7955d464bb37.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/C-性能优化-代码规范/" rel="tag"># C++,性能优化,代码规范</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7360894458671661107.html" rel="next" title="理解 Gradle 1 Gradle 简介 2 Grad">
+                <i class="fa fa-chevron-left"></i> 理解 Gradle 1 Gradle 简介 2 Grad
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7360737180392996899.html" rel="prev" title="Nextjs v14 的 cookies()、header">
+                Nextjs v14 的 cookies()、header <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">399</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#成员函数种类"><span class="nav-number">1.</span> <span class="nav-text">成员函数种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#虚函数的实现"><span class="nav-number">2.</span> <span class="nav-text">虚函数的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单一继承下的虚函数"><span class="nav-number">3.</span> <span class="nav-text">单一继承下的虚函数</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="前端,JavaScript,Webpack,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;@JSerFeng  &amp;#x524D;&amp;#x8A00;&amp;#x5728;&amp;#x5F53;&amp;#x524D;&amp;#x4E3B;&amp;#x6D41;&amp;#x7684; Bundler&amp;#xFF08;&amp;#x6253;&amp;#x5305;&amp;#x5DE5;&amp;#x5177;&amp;#xFF09;&amp;#x4E2D;&amp;#xFF0C;Webpack&amp;#xFF0C;Rollup&amp;#xFF0C">
+<meta name="keywords" content="前端,JavaScript,Webpack">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解 Webpack Chunk Graph 策略">
+<meta property="og:url" content="https://dev.newban.cn/7360700937965174838.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;@JSerFeng  &amp;#x524D;&amp;#x8A00;&amp;#x5728;&amp;#x5F53;&amp;#x524D;&amp;#x4E3B;&amp;#x6D41;&amp;#x7684; Bundler&amp;#xFF08;&amp;#x6253;&amp;#x5305;&amp;#x5DE5;&amp;#x5177;&amp;#xFF09;&amp;#x4E2D;&amp;#xFF0C;Webpack&amp;#xFF0C;Rollup&amp;#xFF0C">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/d46e34e49fcb29fe4dd220103b226c01cc6e87f5ed74761f689c714888d2de10">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/f158887e00b5513bf2d7a79e5ff5587f8ebb8f7567dc7d054dca4344bb03baa7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/ec00d93fc109707af3d3d2b8d7da57daa8a5daefa19dd2ecea7b7f81ea14ddef">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/01a04b5086841f0cd61d84ebcbbb56919cc618949d21cbeaae06fdc4e85537d7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/ba6f2b235f68868233da42f104f022dd0c99e7094a1e20d6724c9b6f51e203e1">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bf3d2f38c5f7c22bb726874c61c72c33606437c96089ccabf9c0f6a5f74e8a38">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/055ee518fc867506528be94b2d01bc717ed9e9022ba694f80c1c51363347f61e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/85baaf7976447ba26b0465479f6d0b7f5db24588f8ced994d0835cf18453d998">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/4eb5df8233ebc4dd47e115a9700ebe5a5b123fd0c9fa6bb3b72b0c0e0c4abab9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7dfbdb784ce20ddfad57e63598ba766e76948413d3ae8acf296fd12eaaccf27c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7714859bf57d7eedd2067a0249c88ceabbd6c752754c7da8d5ba50955fb21fb9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/65eff26bd563ce52a2ee55be00816707ba5b117df4b4ea68c27cbdb96848b5ee">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/260ca7e88a801f56fde1bfe5ae33d6e81d77ad24f841ff50044fa36c4ad2ae8f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/dfa6fb5d4bf3bd0a99b5956f6852590a54afac3915f178c2d090264e350d2b6d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/ed7a4876e599cca9ad029978f7246f15a9032d9fa03d17b3504231b783501bd7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/f84dc5dbbf2956cb9470a441cfc7556a7d5e2c281d81f9662acb09f30f4a9fb9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/a19fcc8c6d7eef95c3246a7b839fe94c429b120eb45e19f10197b5c0b94f04ef">
+<meta property="og:updated_time" content="2024-04-24T04:28:05.284Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解 Webpack Chunk Graph 策略">
+<meta name="twitter:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#xFF1A;@JSerFeng  &amp;#x524D;&amp;#x8A00;&amp;#x5728;&amp;#x5F53;&amp;#x524D;&amp;#x4E3B;&amp;#x6D41;&amp;#x7684; Bundler&amp;#xFF08;&amp;#x6253;&amp;#x5305;&amp;#x5DE5;&amp;#x5177;&amp;#xFF09;&amp;#x4E2D;&amp;#xFF0C;Webpack&amp;#xFF0C;Rollup&amp;#xFF0C">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/d46e34e49fcb29fe4dd220103b226c01cc6e87f5ed74761f689c714888d2de10">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7360700937965174838.html">
+
+
+
+
+
+  <title>深入理解 Webpack Chunk Graph 策略 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深入理解 Webpack Chunk Graph 策略</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-04-23T13:23:55+08:00">
+                2024-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x4F5C;&#x8005;&#xFF1A;<a href="/external_links/d8806353c85c7fa01d32ada0a878babc.html" target="blank" rel="noopener">@JSerFeng</a></p>
+</blockquote>
+<h2 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h2><p>&#x5728;&#x5F53;&#x524D;&#x4E3B;&#x6D41;&#x7684; Bundler&#xFF08;&#x6253;&#x5305;&#x5DE5;&#x5177;&#xFF09;&#x4E2D;&#xFF0C;Webpack&#xFF0C;Rollup&#xFF0C;&#x4EE5;&#x53CA;&#x57FA;&#x4E8E; native &#x8BED;&#x8A00;&#x7684; <a href="/external_links/00fa3acb68dfcff392d9df349ae5e288.html" target="blank" rel="noopener">Rspack</a>&#xFF0C;esbuild&#xFF0C;farm &#x7B49;&#xFF0C;&#x5B83;&#x4EEC;&#x7684; chunk &#x5206;&#x5272;&#x7B56;&#x7565;&#x5404;&#x4E0D;&#x76F8;&#x540C;&#x3002;</p>
+<p>&#x8FD9;&#x91CC;&#x6211;&#x4E3B;&#x8981;&#x4ECB;&#x7ECD;&#x6211;&#x6BD4;&#x8F83;&#x719F;&#x6089;&#x7684; Webpack&#xFF0C;&#x5B83;&#x7684; chunk &#x7B56;&#x7565;&#x5230;&#x5E95;&#x662F;&#x600E;&#x6837;&#x7684;&#xFF0C;&#x901A;&#x8FC7;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#xFF0C;&#x4F60;&#x53EF;&#x4EE5;&#x5B8C;&#x5168;&#x7406;&#x89E3;&#x4EE3;&#x7801;&#x4E2D;&#xFF0C;&#x5230;&#x5E95;&#x600E;&#x6837;&#x4F1A;&#x4EA7;&#x751F; chunk&#xFF0C;&#x600E;&#x6837;&#x51CF;&#x5C11; chunk &#x4F53;&#x79EF;&#x7B49;&#x3002;</p>
+<p>&#x4E3A;&#x4E86;&#x7B80;&#x4FBF;&#x8D77;&#x89C1;&#xFF0C;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x5C06;&#x6982;&#x5FF5;&#x505A;&#x9002;&#x5F53;&#x7B80;&#x5316;&#xFF0C;&#x6BD4;&#x5982; <strong>module &#x5373;&#x4E3A;&#x4F60;&#x7684;&#x6587;&#x4EF6;&#xFF0C;chunk &#x5373;&#x4E3A;&#x4E00;&#x5806; module &#x805A;&#x5408;&#x7684;&#x5927;&#x6587;&#x4EF6;</strong>&#x3002;</p>
+<p>&#x540C;&#x65F6; webpack &#x4E2D; chunk &#x662F;&#x6CA1;&#x6709;&#x7236;&#x5B50;&#x5173;&#x7CFB;&#x7684;&#xFF0C;&#x4F46;&#x662F; chunk group &#x6709;&#x7236;&#x5B50;&#x5173;&#x7CFB;&#xFF0C;&#x7531;&#x4E8E; chunk group &#x6982;&#x5FF5;&#x7275;&#x626F;&#x5230; splitChunks&#xFF0C;&#x8FD9;&#x91CC;&#x6682;&#x4E14;&#x4E0D;&#x8BF4;&#xFF0C;&#x6211;&#x4EEC;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x8BF4;&#x7684; chunk &#x7236;&#x5B50;&#x5173;&#x7CFB;&#x5C31;&#x662F; chunk group &#x7236;&#x5B50;&#x5173;&#x7CFB;&#xFF0C;&#x65B9;&#x4FBF;&#x8BFB;&#x8005;&#x4EEC;&#x7406;&#x89E3;&#x3002;</p>
+<h2 id="Webpack-&#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;"><a href="#Webpack-&#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;" class="headerlink" title="Webpack &#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;"></a>Webpack &#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;</h2><p>Webpack &#x6709;&#x4E00;&#x5957;&#x5F88;&#x7C7B;&#x4F3C; commonjs &#x7684;&#x8FD0;&#x884C;&#x65F6;&#x4EE3;&#x7801;&#xFF0C;&#x4F60;&#x7684; module &#x4EE3;&#x7801;&#x90FD;&#x4F1A;&#x653E;&#x5728;&#x4E00;&#x4E2A; map &#x4E2D;&#xFF0C;&#x7B80;&#x5316;&#x5199;&#x6CD5;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const __webpack_modules__ = {</span><br><span class="line">    &quot;./src/index.js&quot;: function(module, exports, require) { /*index.js &#x7684;&#x4EE3;&#x7801;*/ },</span><br><span class="line">    &quot;./src/foo.js&quot;: function(module, exports, require) { /*foo.js &#x7684;&#x4EE3;&#x7801;*/ },</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x5165;&#x53E3; chunk &#x4E2D;&#xFF0C;&#x53EA;&#x6709;&#x4ECE;&#x5165;&#x53E3; module &#x9759;&#x6001; import &#x5230;&#x7684; module &#x624D;&#x4F1A;&#x5728;&#x8FD9;&#x4E2A; map&#x3002;<br>&#x6A21;&#x5757;&#x7684;&#x6267;&#x884C;&#x7C7B;&#x4F3C;&#x4E8E; commonjs require&#xFF0C;&#x4E0D;&#x8FC7;&#x540D;&#x5B57;&#x53EB;&#x505A; <strong>webpack_require</strong>&#xFF0C;&#x7B80;&#x5316;&#x5199;&#x6CD5;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const cache = {}</span><br><span class="line">function __webpack_require__(moduleId) {</span><br><span class="line">    if (moduleId in cache) {</span><br><span class="line">        return cache[moduleId]</span><br><span class="line">    }</span><br><span class="line">    const module = { exports: {} }</span><br><span class="line">    cache[moduleId] = module.exports;</span><br><span class="line">    __webpack_modules__[moduleId](module, module.exports, __webpack_require__)</span><br><span class="line">    return module.exports</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x6267;&#x884C;&#x5165;&#x53E3;</span><br><span class="line">__webpack_require__(&apos;./src/index.js&apos;)</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F53;&#x4EE3;&#x7801;&#x4E2D;&#x542B;&#x6709;&#x52A8;&#x6001; import &#x8BED;&#x53E5;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4F1A;&#x53BB;&#x505A; chunk &#x7684;&#x52A0;&#x8F7D;&#xFF0C;&#x5728;&#x52A0;&#x8F7D;&#x540E;&#xFF0C;&#x7EE7;&#x7EED;&#x4F7F;&#x7528; <strong>webpack_require</strong> &#x53BB;&#x6267;&#x884C;<br>&#x4F8B;&#x5982;&#x6211;&#x4EEC;&#x6709;&#x4E00;&#x4E2A; bar.js module &#x5728; bar-chunk &#x8FD9;&#x4E2A; chunk &#x4E2D;&#xFF0C;&#x6B64;&#x65F6;&#x6211;&#x4EEC;&#x52A8;&#x6001;&#x52A0;&#x8F7D; bar.js&#xFF0C;&#x6E90;&#x7801;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;import(&apos;./src/bar.js&apos;)</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F1A;&#x88AB;&#x8F6C;&#x6362;&#x6210;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;__ensure_chunk__(&apos;./bar-chunk.js&apos;)</span><br><span class="line">    .then(() =&gt; __webpack_require__(&apos;./src/bar.js&apos;))</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x91CC;&#x7684; <strong>ensure_chunk</strong> &#x4F1A;&#x53BB;&#x52A0;&#x8F7D; bar-chunk.js&#xFF0C;&#x4E00;&#x822C;&#x6765;&#x8BF4;&#x6D4F;&#x89C8;&#x5668;&#x7AEF;&#x5C31;&#x662F;&#x7ED9; html body &#x63D2;&#x4E00;&#x4E2A; script&#xFF0C;src &#x653E;&#x4E0A; bar-chunk &#x7684; url&#xFF0C;&#x5F53;&#x52A0;&#x8F7D; chunk &#x540E;&#xFF0C;&#x8BE5; chunk &#x7684;&#x6240;&#x6709; modules &#x4E5F;&#x4F1A;&#x88AB;&#x52A0;&#x5230; <strong>webpack_modules</strong> &#x4E2D;&#x53BB;&#xFF0C;&#x7136;&#x540E;&#x8C03;&#x7528; <strong>webpack_require</strong> &#x6267;&#x884C;&#x3002;</p>
+<p>&#x56E0;&#x6B64;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#xFF0C;module &#x6267;&#x884C;&#x987A;&#x5E8F;&#x548C; chunk &#x52A0;&#x8F7D;&#x987A;&#x5E8F;&#x5E76;&#x6CA1;&#x6709;&#x5173;&#x7CFB;&#xFF0C;&#x53EA;&#x9700;&#x8981;&#x4FDD;&#x8BC1;&#x6267;&#x884C;&#x4E4B;&#x524D;&#x5BF9;&#x5E94;&#x7684; chunk &#x5DF2;&#x7ECF;&#x5B58;&#x5728;&#x5373;&#x53EF;&#xFF0C;<br>&#x5E76;&#x4E14; module &#x5982;&#x679C;&#x5728;&#x591A;&#x4E2A; chunk &#x4E5F;&#x6CA1;&#x6709;&#x5173;&#x7CFB;&#xFF0C;&#x56E0;&#x4E3A;&#x540C;&#x4E00;&#x4E2A; module &#x53EA;&#x4F1A;&#x6267;&#x884C;&#x4E00;&#x6B21;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x4E0A;&#x9762;&#x7B80;&#x5316;&#x4EE3;&#x7801;&#x4E2D;&#x7684; cache&#x3002;</p>
+<h2 id="Rollup-&#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;"><a href="#Rollup-&#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;" class="headerlink" title="Rollup &#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;"></a>Rollup &#x600E;&#x6837;&#x6267;&#x884C;&#x4EA7;&#x7269;</h2><p>&#x6211;&#x4EEC;&#x518D;&#x770B; Rollup&#xFF0C;Rollup &#x51E0;&#x4E4E;&#x6CA1;&#x6709;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x4EA7;&#x7269;&#x5C31;&#x662F; module &#x7684;&#x4EE3;&#x7801;&#x5185;&#x5BB9;&#x505A;&#x4E00;&#x4E9B;&#x8F6C;&#x6362;&#x540E;&#x62FC;&#x63A5;&#x6210;&#x4E00;&#x4E2A;&#x5927;&#x6587;&#x4EF6;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;// ./src/foo.js</span><br><span class="line">console.log(&apos;foo.js &#x4E2D;&#x7684;&#x4EE3;&#x7801;&apos;)</span><br><span class="line"></span><br><span class="line">// ./src/index.js</span><br><span class="line">import(&apos;./bar-chunk.js&apos;)</span><br></pre></td></tr></table></figure>
+
+<p>&#x5176;&#x4E2D;&#x9047;&#x5230;&#x52A8;&#x6001; import &#x8BED;&#x53E5;&#x540E;&#xFF0C;&#x662F;&#x76F4;&#x63A5;&#x4F7F;&#x7528; esm &#x7684; import() &#x8BED;&#x6CD5;&#x52A0;&#x8F7D;(&#x53D6;&#x51B3;&#x4E8E;&#x4F60;&#x7684; output format)&#x3002;</p>
+<h3 id="Rollup-&#x4EA7;&#x7269;&#x7684;&#x4EE3;&#x4EF7;"><a href="#Rollup-&#x4EA7;&#x7269;&#x7684;&#x4EE3;&#x4EF7;" class="headerlink" title="Rollup &#x4EA7;&#x7269;&#x7684;&#x4EE3;&#x4EF7;"></a>Rollup &#x4EA7;&#x7269;&#x7684;&#x4EE3;&#x4EF7;</h3><p>&#x521D;&#x770B;&#x8FD9;&#x79CD;&#x4EA7;&#x7269;&#x4F1A;&#x89C9;&#x5F97;&#x5F88;&#x76F4;&#x89C2;&#xFF0C;&#x4F46;&#x5176;&#x5B9E;&#x6709;&#x95EE;&#x9898;&#xFF0C;&#x5728; import &#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x6267;&#x884C; module &#x4E2D;&#x7684;&#x4EE3;&#x7801;&#xFF1A;</p>
+<ol>
+<li>Module &#x5982;&#x679C;&#x91CD;&#x590D;&#x51FA;&#x73B0;&#x5728;&#x591A;&#x4E2A; chunk &#x4E2D;&#x53EF;&#x80FD;&#x4F1A;&#x6267;&#x884C;&#x591A;&#x6B21;&#xFF0C;&#x5982;&#x679C; module &#x6709;&#x4E00;&#x4E9B;&#x5168;&#x5C40;&#x526F;&#x4F5C;&#x7528;&#x5927;&#x90E8;&#x5206;&#x60C5;&#x51B5;&#x4E0B;&#x90FD;&#x4F1A;&#x51FA;&#x73B0;&#x9519;&#x8BEF;</li>
+<li>Module &#x987A;&#x5E8F;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#xFF1F;&#x5047;&#x5982;&#x4ECE;&#x4E00;&#x6761;&#x5F15;&#x7528;&#x94FE;&#x4E2D; module &#x7684;&#x6267;&#x884C;&#x987A;&#x5E8F;&#x662F; A -&gt; B -&gt; C&#xFF0C;&#x4F46;&#x53E6;&#x4E00;&#x6761;&#x5F15;&#x7528;&#x94FE;&#x4E2D;&#x51FA;&#x73B0;&#x4E86; D -&gt; C -&gt; B&#xFF0C;&#x8BE5;&#x600E;&#x6837;&#x4FDD;&#x8BC1; B &#x548C; C &#x5728;&#x4E0D;&#x540C;&#x7684;&#x5F15;&#x7528;&#x94FE;&#x4E2D;&#x6267;&#x884C;&#x987A;&#x5E8F;&#x6B63;&#x786E;</li>
+</ol>
+<p>&#x5176;&#x4E2D;&#x7B2C; 1 &#x70B9;&#xFF0C;&#x5BF9;&#x4E8E;&#x91CD;&#x590D; module&#xFF0C;&#x5927;&#x90E8;&#x5206;&#x60C5;&#x51B5;&#x4E0B; Rollup &#x53EF;&#x4EE5;&#x628A;&#x91CD;&#x590D; module &#x63D0;&#x51FA;&#x53BB;&#xFF0C;&#x53D8;&#x6210;&#x5355;&#x72EC;&#x7684; Chunk&#xFF0C;&#x662F;&#x89E3;&#x51B3;&#x4E86;&#x95EE;&#x9898;&#xFF0C;&#x4F46;&#x662F;&#x5F15;&#x51FA;&#x4E86;&#x65B0;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x5C0F; Chunk &#x53EF;&#x80FD;&#x4F1A;&#x975E;&#x5E38;&#x591A;&#xFF0C;&#x56E0;&#x4E3A;&#x54EA;&#x6015;&#x662F;&#x5F88;&#x5C0F;&#x7684;&#x4E00;&#x4E2A; module&#xFF0C;&#x53EA;&#x8981;&#x51FA;&#x73B0;&#x5728;&#x591A;&#x4E2A; Chunk &#x4E2D;&#x90FD;&#x4E0D;&#x5F97;&#x4E0D;&#x5C06; module &#x79FB;&#x51FA;&#x6210;&#x5355;&#x72EC; Chunk&#x3002;&#x800C;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x5728;&#x4E1A;&#x52A1;&#x5F00;&#x53D1;&#x4E2D;&#x975E;&#x5E38;&#x5E38;&#x89C1;&#x3002;</p>
+<p>&#x4E3E;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;&#x5927;&#x5BB6;&#x5199; React &#x901A;&#x5E38;&#x4F1A;&#x4F7F;&#x7528; <code>import(&apos;./Home.tsx&apos;)</code> &#x6765;&#x505A;&#x8DEF;&#x7531;&#x7684;&#x61D2;&#x52A0;&#x8F7D;&#xFF0C;&#x7136;&#x540E;&#x5E38;&#x89C1;&#x7684;&#x5927;&#x5BB6;&#x4F1A;&#x5728;&#x4EE3;&#x7801;&#x4E2D;&#x5199;&#x4E00;&#x4E9B;&#x901A;&#x7528;&#x7684;&#x5DE5;&#x5177; utils&#xFF0C;&#x5728;&#x591A;&#x4E2A;&#x9875;&#x9762;&#x4E2D;&#x5171;&#x7528; utils&#xFF0C;&#x90A3;&#x4E48; utils &#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x91CD;&#x590D; module&#xFF0C;&#x4F1A;&#x88AB;&#x5355;&#x72EC;&#x63D0;&#x51FA;&#x6210; Chunk&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x7684; utils &#x5F88;&#x5C0F;&#xFF0C;&#x5982;&#x679C;&#x662F; 10 k&#xFF0C;&#x4F60;&#x9700;&#x8981;&#x4E3A;&#x8FD9; 10 kb &#x800C;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x7F51;&#x7EDC;&#x8BF7;&#x6C42;&#xFF0C;&#x6211;&#x4EEC;&#x8BF4;&#x7684;&#x662F;&#x8FD9;&#x4E00;&#x4E2A; utils&#xFF0C;&#x8FD8;&#x6709;&#x975E;&#x5E38;&#x591A;&#x7684;&#x5730;&#x65B9;&#x4F1A;&#x9020;&#x6210;&#x5C0F;module &#x5728; Chunk &#x4E2D;&#x590D;&#x7528;&#x591A;&#x6B21;&#x7684;&#x60C5;&#x51B5;&#x3002;</p>
+<p>&#x4F60;&#x53EF;&#x80FD;&#x4F1A;&#x60F3;&#xFF0C;&#x6211;&#x5C06;&#x591A;&#x4E2A;&#x91CD;&#x590D;&#x7684; module &#x6253;&#x5230;&#x4E00;&#x4E2A; chunk &#x4E2D;&#x662F;&#x4E0D;&#x662F;&#x5C31;&#x80FD;&#x89E3;&#x51B3;&#x95EE;&#x9898;&#x5462;&#xFF1F;<br>&#x5E76;&#x4E0D;&#x80FD;&#xFF0C;&#x4F60;&#x9A6C;&#x4E0A;&#x5C31;&#x4F1A;&#x9047;&#x5230; module &#x6267;&#x884C;&#x987A;&#x5E8F;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x4F1A;&#x63D0;&#x5230;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E;&#x7B2C; 2 &#x70B9;&#xFF0C;&#x73B0;&#x5728;&#x7684; Rollup &#x5E76;&#x4E0D;&#x80FD;&#x505A;&#x5230;&#x4FDD;&#x8BC1; module &#x6267;&#x884C;&#x987A;&#x5E8F;&#x7684;&#x4E00;&#x81F4;&#x6027;&#xFF0C;&#x8BF7;&#x770B; playground&#xFF0C;&#x8FD9;&#x91CC;&#x6709; 2 &#x4E2A;&#x5165;&#x53E3;&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x5F15;&#x5165;&#x987A;&#x5E8F;&#x4E3A; <code>a</code> <code>b</code>&#xFF0C;&#x7B2C;&#x4E8C;&#x4E2A;&#x5F15;&#x5165;&#x987A;&#x5E8F;&#x4E3A; <code>b</code> <code>a</code>&#xFF0C;&#x5982;&#x679C;&#x6211;&#x53EA;&#x60F3;&#x6267;&#x884C; home &#x5165;&#x53E3;&#xFF0C;&#x4ECD;&#x7136;&#x53EA;&#x4F1A;&#x8F93;&#x51FA; <code>a</code> <code>b</code>:</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/d46e34e49fcb29fe4dd220103b226c01cc6e87f5ed74761f689c714888d2de10" alt="image.png"></p>
+<p>&#x89E3;&#x51B3;&#x65B9;&#x6848;&#x4E5F;&#x6709;&#xFF0C;&#x62C6;&#x6210;&#x66F4;&#x5C0F;&#x7684; module&#xFF0C;&#x4F8B;&#x5982; <code>a</code> &#x548C; <code>b</code> &#x5355;&#x72EC;&#x62C6;&#x51FA;&#xFF0C;&#x90A3;&#x4E0A;&#x9762;&#x8BF4;&#x7684;&#x5C0F; chunk &#x592A;&#x591A;&#x7684;&#x95EE;&#x9898;&#x5C31;&#x4F1A;&#x66F4;&#x52A0;&#x4E25;&#x91CD;&#x3002;&#x800C;&#x4E14;&#x8FD9;&#x79CD;&#x987A;&#x5E8F;&#x7684;&#x68C0;&#x6D4B;&#x5BF9;&#x6027;&#x80FD;&#x53EF;&#x80FD;&#x4E5F;&#x4F1A;&#x6709;&#x5F88;&#x5927;&#x7684;&#x5F71;&#x54CD;&#x3002;</p>
+<h2 id="Webpack-&#x5230;&#x5E95;&#x600E;&#x6837;&#x751F;&#x6210;-Chunk"><a href="#Webpack-&#x5230;&#x5E95;&#x600E;&#x6837;&#x751F;&#x6210;-Chunk" class="headerlink" title="Webpack &#x5230;&#x5E95;&#x600E;&#x6837;&#x751F;&#x6210; Chunk"></a>Webpack &#x5230;&#x5E95;&#x600E;&#x6837;&#x751F;&#x6210; Chunk</h2><p>&#x5728; Webpack module &#x53EF;&#x4EE5;&#x91CD;&#x590D;&#x51FA;&#x73B0;&#xFF0C;&#x5E76;&#x4E14; Chunk &#x4E2D;&#x7684; module &#x987A;&#x5E8F;&#x53EF;&#x4EE5;&#x4E0D;&#x7528;&#x5173;&#x5FC3;&#xFF0C;&#x90A3;&#x4E48;&#x6784;&#x5EFA; Chunk Graph &#x7684;&#x8FC7;&#x7A0B;&#x5C31;&#x53D8;&#x5F97;&#x975E;&#x5E38;&#x7B80;&#x5355;&#x4E86;&#x3002;<br>&#x4E00;&#x822C;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x4E0D;&#x8003;&#x8651;&#x5404;&#x79CD; Worker&#xFF0C;Module Federation&#xFF0C;new URL &#x7B49;&#xFF0C;&#x62C6;&#x5206; chunk &#x7684;&#x60C5;&#x51B5;&#x5C31;&#x662F; esm &#x7684;&#x52A8;&#x6001;&#x5BFC;&#x5165;&#x8BED;&#x53E5;&#x4E86;&#xFF0C;&#x4E5F;&#x5C31;&#x662F; <code>import(&quot;./path&quot;)</code>&#x3002;</p>
+<h3 id="Chunk-Graph-&#x751F;&#x6210;&#x6D41;&#x7A0B;"><a href="#Chunk-Graph-&#x751F;&#x6210;&#x6D41;&#x7A0B;" class="headerlink" title="Chunk Graph &#x751F;&#x6210;&#x6D41;&#x7A0B;"></a>Chunk Graph &#x751F;&#x6210;&#x6D41;&#x7A0B;</h3><p>&#x6784;&#x5EFA; Chunk &#x56FE;&#x7684;&#x903B;&#x8F91;&#x5176;&#x5B9E;&#x5F88;&#x7B80;&#x5355;&#xFF0C;</p>
+<ol>
+<li>&#x904D;&#x5386;&#x5F53;&#x524D;&#x6A21;&#x5757;&#x7684;&#x5BFC;&#x5165;&#x8BED;&#x53E5;</li>
+<li>&#x9047;&#x5230;&#x9759;&#x6001; import&#xFF0C;&#x5C31;&#x5C06;&#x5F15;&#x5165;&#x7684; module &#x653E;&#x5230;&#x5F53;&#x524D; Chunk &#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x7EE7;&#x7EED;&#x904D;&#x5386;&#x8BE5; module &#x7684;&#x6240;&#x6709;&#x5BFC;&#x5165;</li>
+<li>&#x9047;&#x5230;&#x52A8;&#x6001; import&#xFF0C;&#x5C31;&#x65B0;&#x521B;&#x5EFA;&#x4E00;&#x4E2A; Chunk&#xFF0C;&#x5C06;&#x5F15;&#x5165;&#x7684; module &#x653E;&#x5230;&#x65B0; Chunk &#x4E2D;&#xFF0C;&#x65B0; Chunk &#x53D8;&#x6210;&#x5F53;&#x524D; Chunk&#xFF0C;&#x7EE7;&#x7EED;&#x904D;&#x5386; module &#x5373;&#x53EF;</li>
+</ol>
+<p>&#x8003;&#x8651;&#x5982;&#x4E0B;&#x6A21;&#x5757;&#x56FE;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/f158887e00b5513bf2d7a79e5ff5587f8ebb8f7567dc7d054dca4344bb03baa7" alt><br>&#x5176;&#x4E2D;&#xFF0C;&#x5B9E;&#x7EBF;&#x4EE3;&#x8868;&#x9759;&#x6001;&#x7684; esm import &#x8BED;&#x53E5;&#x4EA7;&#x751F;&#x7684;&#x5F15;&#x5165;&#xFF0C;&#x865A;&#x7EBF;&#x4EE3;&#x8868;&#x52A8;&#x6001; import() &#x4EA7;&#x751F;&#x7684;&#x5F15;&#x5165;<br>&#x9996;&#x5148;&#x4F1A;&#x6709;&#x4E00;&#x4E2A;&#x5165;&#x53E3; chunk&#xFF0C;&#x7531;&#x5165;&#x53E3; module &#x5F00;&#x59CB;&#xFF0C;&#x5F15;&#x5165; <code>a</code> &#x4F1A;&#x5C06; <code>a</code> &#x653E;&#x5165;&#x5230;&#x5165;&#x53E3; chunk&#xFF0C;&#x8FD9;&#x91CC;&#x5916;&#x5C42;&#x5757;&#x4EE3;&#x8868; chunk&#xFF0C;&#x5185;&#x5C42;&#x7684;&#x6BCF;&#x4E00;&#x4E2A;&#x5757;&#x4EE3;&#x8868; module&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/ec00d93fc109707af3d3d2b8d7da57daa8a5daefa19dd2ecea7b7f81ea14ddef" alt><br>&#x5728; <code>a</code> &#x53D1;&#x73B0;&#x4E86;&#x52A8;&#x6001; import(&#x201C;./shared&#x201D;)&#xFF0C;&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x7684; chunk&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x53EB;&#x8BE5; chunk &#x4E3A; shared-chunk-1&#xFF0C;&#x540E;&#x9762;&#x4F1A;&#x89E3;&#x91CA;&#x4E3A;&#x4EC0;&#x4E48;&#x6709;&#x4E2A;&#x540E;&#x7F00; <code>1</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/01a04b5086841f0cd61d84ebcbbb56919cc618949d21cbeaae06fdc4e85537d7" alt><br>&#x7136;&#x540E;&#x56DE;&#x5230; index &#x4E2D;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x5F15;&#x5165; <code>b</code>&#xFF0C;&#x5C06; <code>b</code> &#x52A0;&#x5230;&#x5165;&#x53E3; chunk</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/ba6f2b235f68868233da42f104f022dd0c99e7094a1e20d6724c9b6f51e203e1" alt><br>&#x4ECE; <code>b</code> &#x51FA;&#x53D1;&#xFF0C;&#x53D1;&#x73B0;&#x52A8;&#x6001; <code>import(&apos;./shared&apos;)</code>&#xFF0C;&#x6B64;&#x65F6;&#x7531;&#x4E8E;&#x8BE5; <code>import(&quot;./shared&quot;)</code> &#x8BED;&#x53E5;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x548C;&#x4E4B;&#x524D;&#x7684; <code>import(&quot;./shared&quot;)</code> &#x4F4D;&#x7F6E;&#x4E0D;&#x540C;&#xFF0C;&#x8BE5; <code>import(&quot;./shared&quot;)</code> &#x662F;&#x4ECE; <code>b</code> module &#x89E6;&#x53D1;&#x7684;&#xFF0C;&#x800C;&#x4E4B;&#x524D;&#x7684;&#x662F;&#x4ECE; <code>a</code> module &#x89E6;&#x53D1;&#xFF0C;&#x6B64;&#x65F6;&#x4E0D;&#x4F1A;&#x590D;&#x7528; <code>shared-chunk-1</code>&#xFF0C;&#x800C;&#x662F;&#x4F1A;&#x65B0;&#x521B;&#x5EFA; <code>shared-chunk-2</code>&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bf3d2f38c5f7c22bb726874c61c72c33606437c96089ccabf9c0f6a5f74e8a38" alt><br>&#x4F46;&#x662F;&#x8FD9;&#x91CC;&#x5176;&#x5B9E;&#x53EF;&#x4EE5;&#x4F7F;&#x7528; webpack &#x4E2D;&#x7684; magic &#x6CE8;&#x91CA;&#x6765;&#x5F3A;&#x5236;&#x590D;&#x7528; chunk&#xFF0C;&#x505A;&#x6CD5;&#x662F;&#x5C06;&#x4E24;&#x5904;&#x7684; <code>import(&apos;./shared&apos;)</code> &#x90FD;&#x5199;&#x6210; <code>import(/* webpackChunkName: &quot;shared&quot; */ &apos;./shared&apos;)</code>&#xFF0C;&#x8FD9;&#x6837;&#x505A;&#x7684;&#x8BDD;&#xFF0C;shared chunk &#x53EA;&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x3002;</p>
+<p>&#x6B64;&#x65F6; Chunk &#x521B;&#x5EFA;&#x5B8C;&#x6BD5;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x4F60;&#x4F1A;&#x53D1;&#x73B0;&#x6709;&#x4E24;&#x4E2A;&#x4E00;&#x6A21;&#x4E00;&#x6837;&#x7684; chunk&#xFF0C;shared-chunk-1 &#x548C; shared-chunk-2&#xFF0C;&#x65E9;&#x671F;&#x7684; webpack &#x4E2D;&#x5C31;&#x52A0;&#x5165;&#x4E86; <a href="/external_links/8329c5b1cf6e1250c4dedb1ea4d142b9.html" target="blank" rel="noopener">mergeDuplicateChunk</a> &#x6765;&#x5BF9; chunk &#x8FDB;&#x884C;&#x53BB;&#x91CD;&#xFF0C;&#x53BB;&#x91CD;&#x540E;&#x5C31;&#x53EA;&#x5269;&#x4E0B;&#x4E00;&#x4E2A; shared chunk &#x4E86;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/055ee518fc867506528be94b2d01bc717ed9e9022ba694f80c1c51363347f61e" alt><br>&#x4F60;&#x53EF;&#x80FD;&#x4F1A;&#x89C9;&#x5F97;&#x8FD9;&#x6837;&#x505A;&#x5E76;&#x4E0D;&#x5408;&#x7406;&#xFF0C;&#x4E3A;&#x4F55;&#x8981;&#x521B;&#x5EFA;&#x91CD;&#x590D; chunk &#x518D;&#x8FDB;&#x884C;&#x53BB;&#x91CD;&#xFF0C;&#x8FD9;&#x4E0D;&#x662F;&#x591A;&#x6B64;&#x4E00;&#x4E3E;&#x5417;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8003;&#x8651;&#x4E00;&#x79CD;&#x60C5;&#x51B5;&#xFF0C;&#x591A;&#x5165;&#x53E3;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x5C06;&#x6A21;&#x5757;&#x62D3;&#x6251;&#x56FE;&#x53D8;&#x4E00;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/85baaf7976447ba26b0465479f6d0b7f5db24588f8ced994d0835cf18453d998" alt><br>&#x5176;&#x4E2D; <code>index</code> &#x548C; <code>home</code> &#x5206;&#x522B;&#x4E3A;&#x4E24;&#x4E2A;&#x5165;&#x53E3;&#xFF0C;&#x4ED6;&#x4EEC;&#x90FD;&#x5171;&#x540C;&#x52A8;&#x6001;&#x5F15;&#x5165;&#x4E86; <code>shared</code> &#x6A21;&#x5757;&#x3002;&#x540C;&#x65F6; <code>shared</code> &#x6A21;&#x5757;&#x4E0E;&#x5165;&#x53E3; index &#x90FD;&#x9759;&#x6001;&#x5F15;&#x5165;&#x4E86; <code>m</code> &#x6A21;&#x5757;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x6765;&#x5206;&#x6790;&#x7531; <code>index</code> &#x5F00;&#x59CB;&#xFF0C;&#x5165;&#x53E3; chunk &#x4E2D;&#x5E94;&#x8BE5;&#x4F1A;&#x6709; <code>index</code> &#x548C; <code>m</code> &#x4E24;&#x4E2A; module&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/4eb5df8233ebc4dd47e115a9700ebe5a5b123fd0c9fa6bb3b72b0c0e0c4abab9" alt><br>&#x7136;&#x540E; <code>index</code> &#x52A8;&#x6001;&#x5F15;&#x5165; <code>shared</code>&#xFF0C;&#x56E0;&#x6B64;&#x4F1A;&#x4EA7;&#x751F; <code>shared-chunk-1</code>&#xFF0C;&#x5E76;&#x4E14; <code>shared</code> module &#x4E2D;&#x5F15;&#x5165;&#x4E86; <code>m</code>&#xFF0C;<code>shared-chunk-1</code> &#x4E2D;&#x4F1A;&#x542B;&#x6709; <code>m</code>&#xFF0C;&#x5982;&#x56FE;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7dfbdb784ce20ddfad57e63598ba766e76948413d3ae8acf296fd12eaaccf27c" alt><br>&#x6B64;&#x65F6;&#x5728;&#x770B;&#x7B2C;&#x4E8C;&#x4E2A; entry&#xFF1A;<code>home</code>&#xFF0C;<code>home</code> &#x81EA;&#x5DF1;&#x662F;&#x5165;&#x53E3; chunk &#x4E2D;&#xFF0C;&#x5E76;&#x4E14; <code>home</code> module &#x4E5F;&#x52A8;&#x6001;&#x5F15;&#x5165;&#x4E86; <code>shared</code>&#xFF0C;&#x56E0;&#x6B64;&#x6700;&#x7EC8; chunk &#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/7714859bf57d7eedd2067a0249c88ceabbd6c752754c7da8d5ba50955fb21fb9" alt><br>&#x6B64;&#x65F6; removeAvailableModules &#x4F18;&#x5316;&#x5C31;&#x6D3E;&#x4E0A;&#x7528;&#x573A;&#x4E86;&#xFF0C;&#x4F60;&#x4F1A;&#x53D1;&#x73B0;&#xFF0C;<code>shared</code> chunk 1 &#x4EE5;&#x53CA;&#x4ED6;&#x7684;&#x7236; chunk &#x90FD;&#x5305;&#x542B;&#x4E86; <code>m</code> module&#xFF0C;&#x800C; <code>shared</code> chunk 1 &#x5FC5;&#x5B9A;&#x662F;&#x5728;&#x4ED6;&#x7236;&#x4EB2;&#x52A0;&#x8F7D;&#x540E;&#x8FDB;&#x884C;&#x52A0;&#x8F7D;&#x7684;&#xFF0C;&#x90A3;&#x6B64;&#x65F6; <code>m</code> module &#x5FC5;&#x5B9A;&#x5DF2;&#x7ECF;&#x7531;&#x7236; chunk &#x52A0;&#x8F7D;&#x8FC7;&#x4E86;&#xFF0C;&#x56E0;&#x6B64;&#x53EF;&#x4EE5;&#x5B89;&#x5168;&#x7684;&#x5C06; <code>m</code> &#x4ECE; <code>shared chunk 1</code> &#x4E2D;&#x5220;&#x9664;&#x4E86;&#xFF0C;&#x5220;&#x9664;&#x540E;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/65eff26bd563ce52a2ee55be00816707ba5b117df4b4ea68c27cbdb96848b5ee" alt><br>&#x4F60;&#x4F1A;&#x53D1;&#x73B0;&#x73B0;&#x5728;&#x4E24;&#x4E2A; entry &#x4E4B;&#x95F4;&#x7684; chunk &#x6CA1;&#x6709;&#x4EA4;&#x96C6;&#xFF0C;&#x4E0D;&#x540C;&#x5165;&#x53E3;&#x52A0;&#x8F7D;&#x7684;&#x65F6;&#x5019;&#x53EA;&#x52A0;&#x8F7D;&#x5F53;&#x524D;&#x6240;&#x9700;&#x8981;&#x7684; chunk&#xFF0C;&#x5047;&#x8BBE;&#x4E24;&#x4E2A;&#x5165;&#x53E3;&#x52A0;&#x8F7D; <code>shared</code> &#x7684;&#x65B9;&#x5F0F;&#x662F;&#x7528;&#x6237;&#x70B9;&#x51FB;&#x67D0;&#x4E2A;&#x6309;&#x94AE;&#x540E;&#x8FDB;&#x884C;&#x52A0;&#x8F7D;&#xFF0C;&#x90A3;&#x4E48;&#x5BF9;&#x4E8E; <code>home</code> &#x7684;&#x9996;&#x5C4F;&#x6765;&#x8BF4;&#x5C31;&#x4E0D;&#x9700;&#x8981;&#x52A0;&#x8F7D; <code>m</code>&#xFF0C;&#x800C;&#x5BF9;&#x4E8E; <code>index</code> &#x6765;&#x8BF4;&#x52A0;&#x8F7D; <code>shared</code> &#x7684;&#x65F6;&#x5019;&#x4E0D;&#x9700;&#x8981;&#x52A0;&#x8F7D; <code>m</code>&#x3002;</p>
+<h3 id="Rollup-&#x4EE5;&#x53CA;-esbuild"><a href="#Rollup-&#x4EE5;&#x53CA;-esbuild" class="headerlink" title="Rollup &#x4EE5;&#x53CA; esbuild"></a>Rollup &#x4EE5;&#x53CA; esbuild</h3><p>&#x5982;&#x679C;&#x4F60;&#x7528;&#x8FC7; Rollup&#xFF0C;esbuild&#xFF0C;&#x4ED6;&#x4EEC;&#x90FD;&#x4F1A;&#x5C3D;&#x91CF;&#x4FDD;&#x8BC1; 0 &#x91CD;&#x590D; module&#xFF0C;&#x5BF9;&#x4E8E; <code>import(&quot;./shared&quot;)</code> &#x53EA;&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A; chunk&#xFF0C;&#x4F7F;&#x7528; Rollup &#x6765;&#x6253;&#x5305;&#xFF0C;&#x6211;&#x4EEC;&#x4F1A;&#x53D1;&#x73B0;&#x6700;&#x7EC8;&#x7684; chunk &#x5982;&#x4E0B;<br>&#xFF08;&#x5047;&#x8BBE;&#x6211;&#x4EEC;&#x7684; m module &#x662F;&#x4E00;&#x4E2A;&#x53EA;&#x5305;&#x542B;&#x4E00;&#x884C; <code>console.log(42)</code> &#x5C0F;&#x6A21;&#x5757;&#xFF09;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/260ca7e88a801f56fde1bfe5ae33d6e81d77ad24f841ff50044fa36c4ad2ae8f" alt><br>&#x521D;&#x770B;&#x5F88;&#x597D;&#xFF0C;0 &#x91CD;&#x590D; module&#xFF0C;chunk &#x5173;&#x7CFB;&#x975E;&#x5E38;&#x6E05;&#x6670;&#x3002;</p>
+<p>&#x4F46;&#x4E3A;&#x4EC0;&#x4E48;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x5C0F;&#x7684; <code>m</code> module &#x9700;&#x8981;&#x653E;&#x5230;&#x4E00;&#x4E2A;&#x5355;&#x72EC;&#x7684; chunk &#x5462;&#xFF1F;</p>
+<p>&#x56E0;&#x4E3A;&#x91CD;&#x590D; module &#x662F; Rollup &#x7B49;&#x7684;&#x5927;&#x5FCC;&#x3002;&#x5176;&#x5B9E;&#x73B0;&#x4EE3; Webpack &#x9ED8;&#x8BA4;&#x4E5F;&#x662F;&#x751F;&#x6210;&#x8FD9;&#x79CD;&#x5F62;&#x5F0F;&#xFF0C;&#x53EA;&#x662F;&#x5F53; <code>m</code> &#x4F53;&#x79EF;&#x591F;&#x5927;&#x624D;&#x4F1A;&#x662F;&#x4E0A;&#x9762;&#x7684;&#x7ED3;&#x6784;&#xFF0C;&#x5982;&#x679C; <code>m</code> &#x662F;&#x4E2A;&#x975E;&#x5E38;&#x5C0F;&#x7684; module &#x7684;&#x65F6;&#x5019; webpack &#x5C31;&#x4E0D;&#x4F1A;&#x5355;&#x72EC;&#x62C6;&#x51FA; chunk</p>
+<h3 id="splitChunks"><a href="#splitChunks" class="headerlink" title="splitChunks"></a>splitChunks</h3><p><a href="/external_links/8329c5b1cf6e1250c4dedb1ea4d142b9.html" target="blank" rel="noopener">splitChunks</a> &#x53EF;&#x4EE5;&#x7CBE;&#x786E;&#x63A7;&#x5236; module &#x5206;&#x914D;&#x5230; chunk &#x7684;&#x7B56;&#x7565;&#xFF0C;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x60F3;&#x8981;&#x5B9E;&#x73B0;&#x7C7B;&#x4F3C; Rollup &#x6548;&#x679C;&#x7684;&#x7B56;&#x7565;&#xFF0C;&#x53EA;&#x9700;&#x8981;&#x6253;&#x5F00;&#x9ED8;&#x8BA4;&#x7684; splitChunks &#x89C4;&#x5219;&#xFF0C;&#x7A0D;&#x4F5C;&#x4FEE;&#x6539;&#x5373;&#x53EF;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;module.exports = {</span><br><span class="line">    optimization: {</span><br><span class="line">        splitChunks: {</span><br><span class="line">            chunks: &apos;all&apos;,</span><br><span class="line">            minSize: 0 //&#x771F;&#x5B9E;&#x9879;&#x76EE;&#x4E0D;&#x7528;&#x7BA1;&#x8FD9;&#x4E2A;&#x9009;&#x9879;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x91CC; <code>chunks: &apos;all&apos;</code> &#x8868;&#x793A;&#x5BF9;&#x6240;&#x6709;&#x7684; chunk &#x90FD;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x62C6;&#x5206;&#xFF0C;&#x662F;&#x53EF;&#x4EE5;&#x62C6;&#x5206;&#xFF0C;&#x4E0D;&#x662F;&#x5F3A;&#x5236;&#x62C6;&#x5206;&#x3002;</p>
+<p><code>minSize: 0</code> &#x5728;&#x4F60;&#x4EEC;&#x7684;&#x771F;&#x5B9E;&#x9879;&#x76EE;&#x5E76;&#x4E0D;&#x7528;&#x5F00;&#x542F;&#xFF0C;&#x8FD9;&#x91CC;&#x5F00;&#x542F;&#x53EA;&#x662F;&#x56E0;&#x4E3A;&#x5BF9;&#x4E8E;&#x7279;&#x522B;&#x5C0F;&#x7684; module&#xFF0C;webpack &#x5E76;&#x4E0D;&#x4F1A;&#x62C6;&#x5206;&#x51FA;&#x53BB;&#xFF0C;&#x62C6;&#x5206;&#x53CD;&#x800C;&#x5F71;&#x54CD;&#x52A0;&#x8F7D;&#x6027;&#x80FD;&#xFF0C;&#x6709;&#x4E00;&#x4E2A;&#x9ED8;&#x8BA4;&#x7684;&#x62C6;&#x5206;&#x4F53;&#x79EF;&#x9608;&#x503C;&#xFF0C;&#x8FD9;&#x91CC;&#x6539;&#x6210; 0 &#x53EA;&#x662F;&#x4E3A;&#x4E86;&#x6F14;&#x793A;&#x3002;</p>
+<p>&#x8FD9;&#x6837;&#x64CD;&#x4F5C;&#x540E;&#xFF0C;&#x5BF9;&#x4E8E;&#x4EFB;&#x610F;&#x7684; module&#xFF0C;&#x53EA;&#x8981;&#x4ED6;&#x540C;&#x65F6;&#x51FA;&#x73B0;&#x5728; 2 &#x4E2A;&#x6216;&#x4EE5;&#x4E0A; chunk &#x4E2D;&#xFF0C;&#x5C31;&#x4F1A;&#x88AB;&#x62BD;&#x79BB;&#x6210;&#x5355;&#x72EC;&#x7684; chunk&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x770B;&#x7ECF;&#x8FC7; split &#x524D;&#x7684; chunk graph&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/dfa6fb5d4bf3bd0a99b5956f6852590a54afac3915f178c2d090264e350d2b6d" alt><br>&#x5176;&#x4E2D;&#x91CD;&#x590D; module &#x6709; m &#x548C; shared&#xFF0C;&#x4ED6;&#x4EEC;&#x4F1A;&#x88AB;&#x62BD;&#x79BB;&#x51FA;&#x53BB;&#x6210;&#x5355;&#x72EC;&#x7684; chunk&#xFF0C;&#x62BD;&#x79BB;&#x540E;&#x7684;&#x5173;&#x7CFB;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/ed7a4876e599cca9ad029978f7246f15a9032d9fa03d17b3504231b783501bd7" alt><br>shared chunk 1 &#x4EE5;&#x53CA; shared chunk 2 &#x53D8;&#x6210;&#x4E86;&#x7A7A; chunk&#xFF0C;&#x5728;&#x540E;&#x9762;&#x6784;&#x5EFA;&#x9636;&#x6BB5;&#x4E2D;&#xFF0C;webpack &#x4F1A;&#x79FB;&#x9664;&#x7A7A; chunk&#xFF0C;&#x6700;&#x7EC8;&#x5F62;&#x6210;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/f84dc5dbbf2956cb9470a441cfc7556a7d5e2c281d81f9662acb09f30f4a9fb9" alt><br>&#x4F46; webpack &#x5374;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0; Rollup &#x90A3;&#x6837;&#x7684; module &#x6267;&#x884C;&#x987A;&#x5E8F;&#x95EE;&#x9898;&#xFF0C;webpack &#x7684; chunk &#x53EA;&#x662F;&#x76F8;&#x5F53;&#x4E8E;&#x4E00;&#x4E2A; module map&#xFF0C;&#x771F;&#x6B63;&#x7684; module &#x6267;&#x884C;&#x987A;&#x5E8F;&#x4F9D;&#x8D56;&#x7684;&#x662F;&#x6E90;&#x7801;&#x4E2D;&#x7684; import &#x987A;&#x5E8F;&#xFF0C;&#x7ECF;&#x8FC7;&#x4EFB;&#x610F;&#x62C6;&#x5206;&#x90FD;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x4FDD;&#x8BC1;&#x6B63;&#x786E;&#x7684;&#x6267;&#x884C;&#x987A;&#x5E8F;&#x3002;</p>
+<p>&#x540C;&#x65F6;&#x7531;&#x4E8E;&#x5B58;&#x5728; splitChunks&#xFF0C;&#x5728;&#x914D;&#x7F6E; <code>chunks: &apos;all&apos;</code> &#x4E4B;&#x540E;&#xFF0C;&#x5176;&#x5B9E;&#x53EF;&#x4EE5;&#x5173;&#x95ED; `mergeDuplicateModules &#x4F18;&#x5316;&#xFF0C;splitChunks &#x7684;&#x529F;&#x80FD;&#x53EF;&#x4EE5;&#x5B8C;&#x5168; cover &#x4F4F; mergeDuplicateModules&#xFF0C;&#x800C;&#x4E14; mergeDuplicateModules &#x5176;&#x5B9E;&#x633A;&#x5403;&#x6027;&#x80FD;&#x7684;&#xFF0C;&#x7B97;&#x6CD5;&#x590D;&#x6742;&#x5EA6;&#x5E76;&#x4E0D;&#x4F4E;</p>
+<p>&#x53E6;&#x5916; <a href="/external_links/8329c5b1cf6e1250c4dedb1ea4d142b9.html" target="blank" rel="noopener">removeAvailableModules</a> &#x4F18;&#x5316;&#x540C;&#x6837;&#x53EF;&#x4EE5;&#x5173;&#x95ED;&#x4EE5;&#x63D0;&#x9AD8;&#x7F16;&#x8BD1;&#x6027;&#x80FD;&#xFF0C;&#x4E00;&#x65B9;&#x9762; splitChunks &#x62BD;&#x79BB;&#x540C;&#x6837; module&#xFF0C;&#x4E5F;&#x76F8;&#x5F53;&#x4E8E;&#x5220;&#x9664;&#x4E86;&#x591A;&#x4F59; module&#x3002;&#x53E6;&#x4E00;&#x65B9;&#x9762;&#x8FD9;&#x4E2A;&#x914D;&#x7F6E;&#x5176;&#x5B9E;&#x5E76;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x4F5C;&#x7528;&#xFF0C;&#x65E9;&#x671F;&#x8BE5;&#x914D;&#x7F6E;&#x662F;&#x63A7;&#x5236;&#x662F;&#x5426;&#x6DFB;&#x52A0; webpack &#x7684;&#x5185;&#x7F6E;&#x63D2;&#x4EF6; RemoveParentModulesPlugin &#x7684;&#xFF0C;&#x4F46;&#x540E;&#x6765; webpack &#x7684; code splitting &#x5B9E;&#x73B0;&#x4E86;&#x4E00;&#x6837;&#x7684;&#x529F;&#x80FD;&#xFF0C;&#x5E76;&#x4E14;&#x6027;&#x80FD;&#x66F4;&#x597D;&#x597D;&#xFF0C;&#x800C;&#x4E14; code splitting &#x8BE5;&#x884C;&#x4E3A;&#x4E5F;&#x5173;&#x95ED;&#x4E0D;&#x4E86;&#xFF0C;&#x5728;&#x6784;&#x5EFA; chunk &#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#x5C31;&#x5C06;&#x53EF;&#x5220;&#x9664;&#x7684; module &#x5168;&#x90E8;&#x5220;&#x9664;&#x4E86;</p>
+<h3 id="concatenateModules"><a href="#concatenateModules" class="headerlink" title="concatenateModules"></a>concatenateModules</h3><p>&#x4E5F;&#x6709;&#x4EBA;&#x79F0;&#x4F5C; scope hoisting&#xFF0C;&#x76F4;&#x8BD1;&#x8FC7;&#x6765;&#x662F;&#x8FDE;&#x63A5; module&#xFF0C;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#x5F88;&#x591A;&#x65F6;&#x5019;&#x5927;&#x5BB6;&#x89C9;&#x5F97; webpack &#x4E0D;&#x591F;&#x597D;&#x7684;&#x539F;&#x56E0;&#x4E00;&#x822C;&#x6709;3&#x70B9;</p>
+<ol>
+<li>&#x4EA7;&#x7269;&#x592A;&#x96BE;&#x770B;&#x4E86;&#xFF0C;&#x7B2C;&#x4E00;&#x6B21;&#x770B; webpack &#x4EA7;&#x7269;&#x4F1A;&#x53D1;&#x73B0;&#x5145;&#x6EE1;&#x4E86;&#x610F;&#x4E49;&#x4E0D;&#x660E;&#x7684;&#x6CE8;&#x91CA;&#x4F5C;&#x4E3A;&#x7F29;&#x8FDB;&#xFF0C;&#x4EE5;&#x53CA;&#x4E00;&#x5806; webpack &#x7279;&#x6709;&#x7684; runtime &#x51FD;&#x6570;&#xFF0C;&#x5E76;&#x4E14;&#x6BCF;&#x4E2A;&#x6A21;&#x5757;&#x5305;&#x5728;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x4E2D;&#xFF0C;&#x8C03;&#x7528;&#x8D77;&#x6765;&#x50CF;&#x662F;&#x8DD1; cjs &#x4E00;&#x6837;&#xFF0C;&#x603B;&#x611F;&#x89C9;&#x6027;&#x80FD;&#x4E5F;&#x4E0D;&#x4F1A;&#x597D;</li>
+<li>&#x6784;&#x5EFA;&#x6027;&#x80FD;&#x592A;&#x5DEE;&#x4E86;&#xFF0C;&#x5927;&#x9879;&#x76EE;&#x6253;&#x5305;&#x65F6;&#x95F4;10&#x5206;&#x949F;&#x5F80;&#x4E0A;&#x7684;&#x4E5F;&#x4E0D;&#x5C11;</li>
+<li>&#x914D;&#x7F6E;&#x9879;&#x592A;&#x7EC6;&#x8282;&#x592A;&#x591A;&#xFF08;&#x4F5C;&#x4E3A;&#x5E95;&#x5C42;&#x7684;&#x6784;&#x5EFA;&#x5DE5;&#x5177;&#x4E0D;&#x597D;&#x8BF4;&#x8FD9;&#x5C31;&#x662F;&#x7F3A;&#x70B9;</li>
+</ol>
+<p>&#x8FD9;&#x5176;&#x4E2D;&#x7B2C;&#x4E00;&#x70B9;&#x662F;&#x53EF;&#x4EE5;&#x6539;&#x5584;&#x7684;&#x3002;</p>
+<p>&#x7C7B;&#x4F3C; Rollup esbuild &#x7B49;&#x8F7B;&#x91CF; runtime &#x7684;&#x6253;&#x5305;&#x5DE5;&#x5177;&#xFF0C;chunk &#x5C31;&#x662F; module &#x62FC;&#x63A5;&#x8D77;&#x6765;&#x800C;&#x5DF2;&#xFF0C;&#x56E0;&#x6B64;&#x770B;&#x7740;&#x5E72;&#x51C0;&#xFF0C;&#x5B9E;&#x9645;&#x4E0A; webpack &#x5728;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E5F;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF0C;&#x5BF9;&#x4E8E;&#x7EAF; esm &#x6A21;&#x5757;&#xFF0C;webpack &#x4E5F;&#x4F1A;&#x7B80;&#x5355;&#x7684;&#x5C06; module &#x62FC;&#x63A5;&#x5728;&#x4E00;&#x8D77;&#xFF0C;&#x4EA7;&#x7269;&#x548C; Rollup &#x7B49;&#x5176;&#x5B9E;&#x662F;&#x4E00;&#x6837;&#x7684;&#x3002;&#x800C;&#x5BF9;&#x4E8E; cjs &#x6A21;&#x5757;&#xFF0C;Rollup &#x9700;&#x8981; commonjs &#x63D2;&#x4EF6;&#x63D0;&#x4F9B;&#x5C11;&#x91CF; cjs runtime&#xFF08;&#x5C06; cjs module &#x7528;&#x51FD;&#x6570;&#x5305;&#x4E00;&#x5C42;&#xFF0C;require &#x7684;&#x65F6;&#x5019;&#x5C31;&#x76F8;&#x5F53;&#x4E8E;&#x8C03;&#x7528;&#x8BE5;&#x51FD;&#x6570;&#xFF0C;&#x83B7;&#x53D6;&#x51FD;&#x6570;&#x8FD4;&#x56DE;&#x503C;&#xFF0C;&#x4EE5;&#x53CA;&#x4E00;&#x4E9B; cjs &#x548C; esm &#x4EA4;&#x4E92;&#x7684; runtime&#xFF09;&#xFF0C;esbuild &#x5219;&#x81EA;&#x5E26; cjs runtime</p>
+<p>&#x7ED9;&#x5927;&#x5BB6;&#x770B;&#x4E00;&#x770B;&#x5F00;&#x542F; <a href="/external_links/8329c5b1cf6e1250c4dedb1ea4d142b9.html" target="blank" rel="noopener">concatenateModules</a> &#x914D;&#x7F6E;&#x540E;&#xFF0C;development &#x6A21;&#x5F0F;&#x4E0B;&#x7684;&#x4EA7;&#x7269;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/a19fcc8c6d7eef95c3246a7b839fe94c429b120eb45e19f10197b5c0b94f04ef" alt="image.png"></p>
+<p>&#x5728;&#x7ED3;&#x5408; splitChunks &#x548C; concatenateModules &#x4F18;&#x5316;&#x540E;&#xFF0C;&#x4EA7;&#x7269;&#x57FA;&#x672C;&#x4E0A;&#x548C; Rollup &#x7B49;&#x662F;&#x4E00;&#x6837;&#x5E72;&#x51C0;&#x7684;&#x3002;&#x503C;&#x5F97;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;Rspack &#x4E5F;&#x652F;&#x6301;&#x4E86;&#x76F8;&#x540C;&#x7684; concatenateModule &#x4F18;&#x5316;&#xFF0C;&#x53C2;&#x8003; <a href="/external_links/72c8236930a53b9d529dcd58d005e8fe.html" target="blank" rel="noopener">#5237</a>&#x3002;</p>
+<h2 id="&#x9644;&#x5F55;"><a href="#&#x9644;&#x5F55;" class="headerlink" title="&#x9644;&#x5F55;"></a>&#x9644;&#x5F55;</h2><ul>
+<li>Rspack&#xFF1A;<a href="/external_links/00fa3acb68dfcff392d9df349ae5e288.html" target="blank" rel="noopener">github.com/web-infra-d&#x2026;</a></li>
+<li>&#x753B;&#x56FE;&#x5DE5;&#x5177;&#xFF1A;<a href="/external_links/22ddb4f18e41f813d5457ed2746fe550.html" target="blank" rel="noopener">www.doodleboard.pro/app/RlAuShK&#x2026;</a></li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/af908597e4e5463c119f355bcd6010ed.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/前端-JavaScript-Webpack/" rel="tag"># 前端,JavaScript,Webpack</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7360499370011639871.html" rel="next" title="【Nextjs 14】使用 Docker 进行项目部署 1">
+                <i class="fa fa-chevron-left"></i> 【Nextjs 14】使用 Docker 进行项目部署 1
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7360856203838701619.html" rel="prev" title="Spring Boot集成Quartz快速入门Demo">
+                Spring Boot集成Quartz快速入门Demo <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">399</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webpack-怎样执行产物"><span class="nav-number">2.</span> <span class="nav-text">Webpack 怎样执行产物</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rollup-怎样执行产物"><span class="nav-number">3.</span> <span class="nav-text">Rollup 怎样执行产物</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Rollup-产物的代价"><span class="nav-number">3.1.</span> <span class="nav-text">Rollup 产物的代价</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Webpack-到底怎样生成-Chunk"><span class="nav-number">4.</span> <span class="nav-text">Webpack 到底怎样生成 Chunk</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Chunk-Graph-生成流程"><span class="nav-number">4.1.</span> <span class="nav-text">Chunk Graph 生成流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rollup-以及-esbuild"><span class="nav-number">4.2.</span> <span class="nav-text">Rollup 以及 esbuild</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#splitChunks"><span class="nav-number">4.3.</span> <span class="nav-text">splitChunks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#concatenateModules"><span class="nav-number">4.4.</span> <span class="nav-text">concatenateModules</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录"><span class="nav-number">5.</span> <span class="nav-text">附录</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
