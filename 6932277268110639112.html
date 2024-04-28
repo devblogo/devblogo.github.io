@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="源码,面试,Android,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x516C;&amp;#x4F17;&amp;#x53F7;&amp;#xFF1A;&amp;#x5B57;&amp;#x8282;&amp;#x6570;&amp;#x7EC4; &amp;#x5E0C;&amp;#x671B;&amp;#x5BF9;&amp;#x4F60;&amp;#x6709;&amp;#x6240;&amp;#x5E2E;&amp;#x52A9; &amp;#x1F923;&amp;#x1F923;  SharedPreferences &amp;#x662F;&amp;#x7CFB;&amp;#x7EDF;&amp;#x63D0">
+<meta name="keywords" content="源码,面试,Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一文读懂 SharedPreferences 的缺陷及一点点">
+<meta property="og:url" content="https://dev.newban.cn/6932277268110639112.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x516C;&amp;#x4F17;&amp;#x53F7;&amp;#xFF1A;&amp;#x5B57;&amp;#x8282;&amp;#x6570;&amp;#x7EC4; &amp;#x5E0C;&amp;#x671B;&amp;#x5BF9;&amp;#x4F60;&amp;#x6709;&amp;#x6240;&amp;#x5E2E;&amp;#x52A9; &amp;#x1F923;&amp;#x1F923;  SharedPreferences &amp;#x662F;&amp;#x7CFB;&amp;#x7EDF;&amp;#x63D0">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-27T04:46:59.700Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一文读懂 SharedPreferences 的缺陷及一点点">
+<meta name="twitter:description" content="&amp;#x516C;&amp;#x4F17;&amp;#x53F7;&amp;#xFF1A;&amp;#x5B57;&amp;#x8282;&amp;#x6570;&amp;#x7EC4; &amp;#x5E0C;&amp;#x671B;&amp;#x5BF9;&amp;#x4F60;&amp;#x6709;&amp;#x6240;&amp;#x5E2E;&amp;#x52A9; &amp;#x1F923;&amp;#x1F923;  SharedPreferences &amp;#x662F;&amp;#x7CFB;&amp;#x7EDF;&amp;#x63D0">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6932277268110639112.html">
+
+
+
+
+
+  <title>一文读懂 SharedPreferences 的缺陷及一点点 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">一文读懂 SharedPreferences 的缺陷及一点点</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-23T10:16:42+08:00">
+                2021-02-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x516C;&#x4F17;&#x53F7;&#xFF1A;<a href="/external_links/9203a5a9119089d2ed532f6f87e9f5eb.html" target="blank" rel="noopener">&#x5B57;&#x8282;&#x6570;&#x7EC4;</a></p>
+<p>&#x5E0C;&#x671B;&#x5BF9;&#x4F60;&#x6709;&#x6240;&#x5E2E;&#x52A9; &#x1F923;&#x1F923;</p>
+</blockquote>
+<p>SharedPreferences &#x662F;&#x7CFB;&#x7EDF;&#x63D0;&#x4F9B;&#x7684;&#x4E00;&#x4E2A;&#x9002;&#x5408;&#x7528;&#x4E8E;&#x5B58;&#x50A8;&#x5C11;&#x91CF;&#x952E;&#x503C;&#x5BF9;&#x6570;&#x636E;&#x7684;&#x6301;&#x4E45;&#x5316;&#x5B58;&#x50A8;&#x65B9;&#x6848;&#xFF0C;&#x7ED3;&#x6784;&#x7B80;&#x5355;&#xFF0C;&#x4F7F;&#x7528;&#x65B9;&#x4FBF;&#xFF0C;&#x5F88;&#x591A;&#x5E94;&#x7528;&#x90FD;&#x4F1A;&#x4F7F;&#x7528;&#x5230;&#x3002;&#x53E6;&#x4E00;&#x65B9;&#x9762;&#xFF0C;SharedPreferences &#x5B58;&#x5728;&#x7684;&#x95EE;&#x9898;&#x4E5F;&#x633A;&#x591A;&#x7684;&#xFF0C;&#x5F53;&#x4E2D; ANR &#x95EE;&#x9898;&#x5C31;&#x5C61;&#x89C1;&#x4E0D;&#x9C9C;&#xFF0C;&#x5B57;&#x8282;&#x8DF3;&#x52A8;&#x6280;&#x672F;&#x56E2;&#x961F;&#x5C31;&#x66FE;&#x7ECF;&#x53D1;&#x5E03;&#x8FC7;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x4E13;&#x95E8;&#x6765;&#x9610;&#x8FF0;&#x8BE5;&#x95EE;&#x9898;&#xFF1A;<a href="/external_links/ed552b079e975aee69299a428abf0332.html" target="blank" rel="noopener">&#x5256;&#x6790; SharedPreference apply &#x5F15;&#x8D77;&#x7684; ANR &#x95EE;&#x9898;</a>&#x3002;&#x5230;&#x4E86;&#x73B0;&#x5728;&#xFF0C;Google Jetpack &#x4E5F;&#x63A8;&#x51FA;&#x4E86;&#x4E00;&#x5957;&#x65B0;&#x7684;&#x6301;&#x4E45;&#x5316;&#x5B58;&#x50A8;&#x65B9;&#x6848;&#xFF1A;DataStore&#xFF0C;&#x5927;&#x6709;&#x53D6;&#x4EE3; SharedPreferences &#x7684;&#x8D8B;&#x52BF;</p>
+<p>&#x672C;&#x6587;&#x5C31;&#x7ED3;&#x5408;&#x6E90;&#x7801;&#x6765;&#x5256;&#x6790; SharedPreferences &#x5B58;&#x5728;&#x7684;&#x7F3A;&#x9677;&#x4EE5;&#x53CA;&#x80CC;&#x540E;&#x7684;&#x5177;&#x4F53;&#x539F;&#x56E0;&#xFF0C;&#x57FA;&#x4E8E; SDK 30 &#x8FDB;&#x884C;&#x5206;&#x6790;&#xFF0C;&#x8BA9;&#x8BFB;&#x8005;&#x505A;&#x5230;&#x77E5;&#x5176;&#x7136;&#x4E5F;&#x77E5;&#x5176;&#x6240;&#x4EE5;&#x7136;&#xFF0C;&#x5E76;&#x5728;&#x6700;&#x540E;&#x4ECB;&#x7ECD;&#x4E0B;&#x6211;&#x4E2A;&#x4EBA;&#x7684;&#x4E00;&#x79CD;&#x5B58;&#x50A8;&#x673A;&#x5236;&#x8BBE;&#x8BA1;&#x65B9;&#x6848;&#xFF0C;&#x5E0C;&#x671B;&#x5BF9;&#x4F60;&#x6709;&#x6240;&#x5E2E;&#x52A9; &#x1F923;&#x1F923;</p>
+<h1 id="&#x4E0D;&#x5F97;&#x4E0D;&#x8BF4;&#x7684;&#x5751;"><a href="#&#x4E0D;&#x5F97;&#x4E0D;&#x8BF4;&#x7684;&#x5751;" class="headerlink" title="&#x4E0D;&#x5F97;&#x4E0D;&#x8BF4;&#x7684;&#x5751;"></a>&#x4E0D;&#x5F97;&#x4E0D;&#x8BF4;&#x7684;&#x5751;</h1><h2 id="&#x4F1A;&#x4E00;&#x76F4;&#x5360;&#x7528;&#x5185;&#x5B58;"><a href="#&#x4F1A;&#x4E00;&#x76F4;&#x5360;&#x7528;&#x5185;&#x5B58;" class="headerlink" title="&#x4F1A;&#x4E00;&#x76F4;&#x5360;&#x7528;&#x5185;&#x5B58;"></a>&#x4F1A;&#x4E00;&#x76F4;&#x5360;&#x7528;&#x5185;&#x5B58;</h2><p>SharedPreferences &#x672C;&#x8EAB;&#x662F;&#x4E00;&#x4E2A;&#x63A5;&#x53E3;&#xFF0C;&#x5177;&#x4F53;&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#x662F; SharedPreferencesImpl&#xFF0C;Context &#x4E2D;&#x5404;&#x4E2A;&#x548C; SP &#x76F8;&#x5173;&#x7684;&#x65B9;&#x6CD5;&#x90FD;&#x662F;&#x7531; ContextImpl &#x6765;&#x5B9E;&#x73B0;&#x7684;&#x3002;&#x6211;&#x4EEC;&#x9879;&#x76EE;&#x4E2D;&#x7684;&#x6BCF;&#x4E2A; SP &#x6216;&#x591A;&#x6216;&#x5C11;&#x90FD;&#x662F;&#x4FDD;&#x5B58;&#x7740;&#x4E00;&#x4E9B;&#x952E;&#x503C;&#x5BF9;&#xFF0C;&#x800C;&#x6BCF;&#x5F53;&#x6211;&#x4EEC;&#x83B7;&#x53D6;&#x5230;&#x4E00;&#x4E2A; SP &#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x5176;&#x5BF9;&#x5E94;&#x7684;&#x6570;&#x636E;&#x5C31;&#x4F1A;&#x4E00;&#x76F4;&#x88AB;&#x4FDD;&#x7559;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#xFF0C;&#x76F4;&#x5230;&#x5E94;&#x7528;&#x8FDB;&#x7A0B;&#x88AB;&#x7EC8;&#x7ED3;&#xFF0C;&#x56E0;&#x4E3A;&#x6BCF;&#x4E2A; SP &#x5BF9;&#x8C61;&#x90FD;&#x88AB;&#x7CFB;&#x7EDF;&#x4F5C;&#x4E3A;&#x9759;&#x6001;&#x53D8;&#x91CF;&#x7F13;&#x5B58;&#x8D77;&#x6765;&#x4E86;&#xFF0C;&#x5BF9;&#x5E94; ContextImpl &#x4E2D;&#x7684;&#x9759;&#x6001;&#x53D8;&#x91CF; <code>sSharedPrefsCache</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;class ContextImpl extends Context {</span><br><span class="line">    </span><br><span class="line">    //&#x5148;&#x6839;&#x636E;&#x5E94;&#x7528;&#x5305;&#x540D;&#x7F13;&#x5B58;&#x6240;&#x6709; SharedPreferences</span><br><span class="line">    //&#x518D;&#x6839;&#x636E; xmlFile &#x548C;&#x5177;&#x4F53;&#x7684; SharedPreferencesImpl &#x5BF9;&#x5E94;&#x4E0A;</span><br><span class="line">    private static ArrayMap&lt;String, ArrayMap&lt;File, SharedPreferencesImpl&gt;&gt; sSharedPrefsCache;</span><br><span class="line"></span><br><span class="line">    //&#x6839;&#x636E; fileName &#x62FF;&#x5230;&#x5BF9;&#x5E94;&#x7684; xmlFile</span><br><span class="line">    private ArrayMap&lt;String, File&gt; mSharedPrefsPaths;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6BCF;&#x4E2A; SP &#x90FD;&#x5BF9;&#x5E94;&#x4E00;&#x4E2A;&#x672C;&#x5730;&#x78C1;&#x76D8;&#x4E2D;&#x7684; xmlFile&#xFF0C;fileName &#x5219;&#x662F;&#x7531;&#x5F00;&#x53D1;&#x8005;&#x6765;&#x663E;&#x5F0F;&#x6307;&#x5B9A;&#x7684;&#xFF0C;&#x6BCF;&#x4E2A; xmlFile &#x90FD;&#x5BF9;&#x5E94;&#x4E00;&#x4E2A; SharedPreferencesImpl&#x3002;&#x6240;&#x4EE5; ContextImpl &#x7684;&#x903B;&#x8F91;&#x662F;&#x5148;&#x6839;&#x636E; fileName &#x62FF;&#x5230; xmlFile&#xFF0C;&#x518D;&#x6839;&#x636E; xmlFile &#x62FF;&#x5230; SharedPreferencesImpl&#xFF0C;&#x6700;&#x7EC8;&#x5E94;&#x7528;&#x5185;&#x6240;&#x6709;&#x7684; SharedPreferencesImpl &#x5C31;&#x90FD;&#x4F1A;&#x88AB;&#x7F13;&#x5B58;&#x5728; <code>sSharedPrefsCache</code> &#x8FD9;&#x4E2A;&#x9759;&#x6001;&#x53D8;&#x91CF;&#x4E2D;&#x3002;&#x6B64;&#x5916;&#xFF0C;&#x7531;&#x4E8E; SharedPreferencesImpl &#x5728;&#x521D;&#x59CB;&#x5316;&#x540E;&#x5C31;&#x4F1A;&#x81EA;&#x52A8;&#x53BB;&#x52A0;&#x8F7D; xmlFile &#x4E2D;&#x7684;&#x6240;&#x6709;&#x952E;&#x503C;&#x5BF9;&#x6570;&#x636E;&#xFF0C;&#x800C; ContextImpl &#x5185;&#x90E8;&#x5E76;&#x6CA1;&#x6709;&#x770B;&#x5230;&#x6709;&#x6E05;&#x7406; <code>sSharedPrefsCache</code> &#x7F13;&#x5B58;&#x7684;&#x903B;&#x8F91;&#xFF0C;&#x6240;&#x4EE5; <code>sSharedPrefsCache</code> &#x4F1A;&#x88AB;&#x4E00;&#x76F4;&#x4FDD;&#x7559;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#x76F4;&#x5230;&#x8FDB;&#x7A0B;&#x7EC8;&#x7ED3;&#xFF0C;&#x5176;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x4F1A;&#x968F;&#x7740;&#x6211;&#x4EEC;&#x5F15;&#x7528;&#x5230;&#x7684; SP &#x589E;&#x591A;&#x800C;&#x52A0;&#x5927;&#xFF0C;&#x8FD9;&#x5C31;&#x53EF;&#x80FD;&#x4F1A;&#x6301;&#x7EED;&#x5360;&#x7528;&#x5F88;&#x5927;&#x4E00;&#x5757;&#x5185;&#x5B58;&#x7A7A;&#x95F4;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    @Override</span><br><span class="line">    public SharedPreferences getSharedPreferences(String name, int mode) {</span><br><span class="line">        &#xB7;&#xB7;&#xB7;</span><br><span class="line">        File file;</span><br><span class="line">        synchronized (ContextImpl.class) {</span><br><span class="line">            if (mSharedPrefsPaths == null) {</span><br><span class="line">                mSharedPrefsPaths = new ArrayMap&lt;&gt;();</span><br><span class="line">            }</span><br><span class="line">            file = mSharedPrefsPaths.get(name);</span><br><span class="line">            if (file == null) {</span><br><span class="line">                file = getSharedPreferencesPath(name);</span><br><span class="line">                mSharedPrefsPaths.put(name, file);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        return getSharedPreferences(file, mode);</span><br><span class="line">    }</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public SharedPreferences getSharedPreferences(File file, int mode) {</span><br><span class="line">        SharedPreferencesImpl sp;</span><br><span class="line">        synchronized (ContextImpl.class) {</span><br><span class="line">            final ArrayMap&lt;File, SharedPreferencesImpl&gt; cache = getSharedPreferencesCacheLocked();</span><br><span class="line">            sp = cache.get(file);</span><br><span class="line">            if (sp == null) {</span><br><span class="line">                &#xB7;&#xB7;&#xB7;</span><br><span class="line">                sp = new SharedPreferencesImpl(file, mode);</span><br><span class="line">                cache.put(file, sp);</span><br><span class="line">                return sp;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        &#xB7;&#xB7;&#xB7;</span><br><span class="line">        return sp;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @GuardedBy(&quot;ContextImpl.class&quot;)</span><br><span class="line">    private ArrayMap&lt;File, SharedPreferencesImpl&gt; getSharedPreferencesCacheLocked() {</span><br><span class="line">        if (sSharedPrefsCache == null) {</span><br><span class="line">            sSharedPrefsCache = new ArrayMap&lt;&gt;();</span><br><span class="line">        }</span><br><span class="line">        final String packageName = getPackageName();</span><br><span class="line">        ArrayMap&lt;File, SharedPreferencesImpl&gt; packagePrefs = sSharedPrefsCache.get(packageName);</span><br><span class="line">        if (packagePrefs == null) {</span><br><span class="line">            packagePrefs = new ArrayMap&lt;&gt;();</span><br><span class="line">            sSharedPrefsCache.put(packageName, packagePrefs);</span><br><span class="line">        }</span><br><span class="line">        return packagePrefs;</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<h2 id="getValue-&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x7EBF;&#x7A0B;&#x963B;&#x585E;"><a href="#getValue-&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x7EBF;&#x7A0B;&#x963B;&#x585E;" class="headerlink" title="getValue &#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x7EBF;&#x7A0B;&#x963B;&#x585E;"></a>getValue &#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x7EBF;&#x7A0B;&#x963B;&#x585E;</h2><p>SharedPreferencesImpl &#x5728;&#x6784;&#x9020;&#x51FD;&#x6570;&#x4E2D;&#x76F4;&#x63A5;&#x5C31;&#x542F;&#x52A8;&#x4E86;&#x4E00;&#x4E2A;&#x5B50;&#x7EBF;&#x7A0B;&#x53BB;&#x52A0;&#x8F7D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#xFF0C;&#x8FD9;&#x610F;&#x5473;&#x7740;&#x8BE5;&#x64CD;&#x4F5C;&#x662F;&#x4E00;&#x4E2A;&#x5F02;&#x6B65;&#x64CD;&#x4F5C;&#xFF08;<del>&#x6211;&#x597D;&#x50CF;&#x5728;&#x8BF4;&#x5E9F;&#x8BDD;</del>&#xFF09;&#xFF0C;&#x5982;&#x679C;&#x6587;&#x4EF6;&#x5F88;&#x5927;&#x6216;&#x8005;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x7CFB;&#x7EDF;&#x6CA1;&#x6709;&#x9A6C;&#x4E0A;&#x542F;&#x52A8;&#x8BE5;&#x7EBF;&#x7A0B;&#x7684;&#x8BDD;&#xFF0C;&#x90A3;&#x4E48;&#x8BE5;&#x64CD;&#x4F5C;&#x5C31;&#x9700;&#x8981;&#x4E00;&#x5C0F;&#x6BB5;&#x65F6;&#x95F4;&#x540E;&#x624D;&#x80FD;&#x6267;&#x884C;&#x5B8C;&#x6BD5;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;final class SharedPreferencesImpl implements SharedPreferences {</span><br><span class="line">    </span><br><span class="line">    @UnsupportedAppUsage</span><br><span class="line">    SharedPreferencesImpl(File file, int mode) {</span><br><span class="line">        mFile = file;</span><br><span class="line">        mBackupFile = makeBackupFile(file);</span><br><span class="line">        mMode = mode;</span><br><span class="line">        mLoaded = false;</span><br><span class="line">        mMap = null;</span><br><span class="line">        mThrowable = null;</span><br><span class="line">        startLoadFromDisk();</span><br><span class="line">    }</span><br><span class="line">    </span><br><span class="line">    @UnsupportedAppUsage</span><br><span class="line">    private void startLoadFromDisk() {</span><br><span class="line">        synchronized (mLock) {</span><br><span class="line">            mLoaded = false;</span><br><span class="line">        }</span><br><span class="line">        new Thread(&quot;SharedPreferencesImpl-load&quot;) {</span><br><span class="line">            public void run() {</span><br><span class="line">                //&#x52A0;&#x8F7D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;</span><br><span class="line">                loadFromDisk();</span><br><span class="line">            }</span><br><span class="line">        }.start();</span><br><span class="line">    }</span><br><span class="line">    </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x800C;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x5728;&#x521D;&#x59CB;&#x5316; SharedPreferencesImpl &#x540E;&#x7D27;&#x63A5;&#x7740;&#x5C31;&#x53BB; getValue &#x7684;&#x8BDD;&#xFF0C;&#x52BF;&#x5FC5;&#x4E5F;&#x9700;&#x8981;&#x786E;&#x4FDD;&#x5B50;&#x7EBF;&#x7A0B;&#x5DF2;&#x7ECF;&#x52A0;&#x8F7D;&#x5B8C;&#x6210;&#x540E;&#x624D;&#x53BB;&#x8FDB;&#x884C;&#x53D6;&#x503C;&#x64CD;&#x4F5C;&#xFF0C;&#x6240;&#x4EE5; SharedPreferencesImpl &#x5C31;&#x901A;&#x8FC7;&#x5728;&#x6BCF;&#x4E2A; getValue &#x65B9;&#x6CD5;&#x4E2D;&#x8C03;&#x7528; <code>awaitLoadedLocked()</code>&#x65B9;&#x6CD5;&#x6765;&#x5224;&#x65AD;&#x662F;&#x5426;&#x9700;&#x8981;&#x963B;&#x585E;&#x5916;&#x90E8;&#x7EBF;&#x7A0B;&#xFF0C;&#x786E;&#x4FDD;&#x53D6;&#x503C;&#x64CD;&#x4F5C;&#x4E00;&#x5B9A;&#x4F1A;&#x5728;&#x5B50;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x5B8C;&#x6BD5;&#x540E;&#x624D;&#x6267;&#x884C;&#x3002;<code>loadFromDisk()</code>&#x65B9;&#x6CD5;&#x4F1A;&#x5728;&#x4EFB;&#x52A1;&#x6267;&#x884C;&#x5B8C;&#x6BD5;&#x540E;&#x8C03;&#x7528; <code>mLock.notifyAll()</code>&#x5524;&#x9192;&#x6240;&#x6709;&#x88AB;&#x963B;&#x585E;&#x7684;&#x7EBF;&#x7A0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    @Override</span><br><span class="line">    @Nullable</span><br><span class="line">    public String getString(String key, @Nullable String defValue) {</span><br><span class="line">        synchronized (mLock) {</span><br><span class="line">            //&#x5224;&#x65AD;&#x662F;&#x5426;&#x9700;&#x8981;&#x8BA9;&#x5916;&#x90E8;&#x7EBF;&#x7A0B;&#x7B49;&#x5F85;</span><br><span class="line">            awaitLoadedLocked();</span><br><span class="line">            String v = (String)mMap.get(key);</span><br><span class="line">            return v != null ? v : defValue;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @GuardedBy(&quot;mLock&quot;)</span><br><span class="line">    private void awaitLoadedLocked() {</span><br><span class="line">        if (!mLoaded) {</span><br><span class="line">            BlockGuard.getThreadPolicy().onReadFromDisk();</span><br><span class="line">        }</span><br><span class="line">        while (!mLoaded) {</span><br><span class="line">            try {</span><br><span class="line">                //&#x8FD8;&#x672A;&#x52A0;&#x8F7D;&#x7EBF;&#x7A0B;&#xFF0C;&#x8BA9;&#x5916;&#x90E8;&#x7EBF;&#x7A0B;&#x6682;&#x505C;&#x7B49;&#x5F85;</span><br><span class="line">                mLock.wait();</span><br><span class="line">            } catch (InterruptedException unused) {</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        if (mThrowable != null) {</span><br><span class="line">            throw new IllegalStateException(mThrowable);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private void loadFromDisk() {</span><br><span class="line">        &#xB7;&#xB7;&#xB7;</span><br><span class="line">        synchronized (mLock) {</span><br><span class="line">            mLoaded = true;</span><br><span class="line">            mThrowable = thrown;</span><br><span class="line">            try {</span><br><span class="line">                if (thrown == null) {</span><br><span class="line">                    if (map != null) {</span><br><span class="line">                        mMap = map;</span><br><span class="line">                        mStatTimestamp = stat.st_mtim;</span><br><span class="line">                        mStatSize = stat.st_size;</span><br><span class="line">                    } else {</span><br><span class="line">                        mMap = new HashMap&lt;&gt;();</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">            } catch (Throwable t) {</span><br><span class="line">                mThrowable = t;</span><br><span class="line">            } finally {</span><br><span class="line">                //&#x5524;&#x9192;&#x6240;&#x6709;&#x88AB;&#x963B;&#x585E;&#x7684;&#x7EBF;&#x7A0B;</span><br><span class="line">                mLock.notifyAll();</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x6240;&#x4EE5;&#x8BF4;&#xFF0C;&#x5982;&#x679C; SP &#x5B58;&#x50A8;&#x7684;&#x6570;&#x636E;&#x91CF;&#x5F88;&#x5927;&#x7684;&#x8BDD;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x6709;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x5916;&#x90E8;&#x7684;&#x8C03;&#x7528;&#x8005;&#x7EBF;&#x7A0B;&#x88AB;&#x963B;&#x585E;&#xFF0C;&#x4E25;&#x91CD;&#x65F6;&#x751A;&#x81F3;&#x53EF;&#x80FD;&#x5BFC;&#x81F4; ANR&#x3002;&#x5F53;&#x7136;&#xFF0C;&#x8FD9;&#x79CD;&#x53EF;&#x80FD;&#x6027;&#x4E5F;&#x53EA;&#x662F;&#x53D1;&#x751F;&#x5728;&#x52A0;&#x8F7D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x5B8C;&#x6210;&#x4E4B;&#x524D;&#xFF0C;&#x5F53;&#x52A0;&#x8F7D;&#x5B8C;&#x6210;&#x540E; <code>awaitLoadedLocked()</code>&#x65B9;&#x6CD5;&#x81EA;&#x7136;&#x4E0D;&#x4F1A;&#x963B;&#x585E;&#x7EBF;&#x7A0B;</p>
+<h2 id="getValue-&#x4E0D;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x5B89;&#x5168;"><a href="#getValue-&#x4E0D;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x5B89;&#x5168;" class="headerlink" title="getValue &#x4E0D;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x5B89;&#x5168;"></a>getValue &#x4E0D;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x5B89;&#x5168;</h2><p>&#x4EE5;&#x4E0B;&#x4EE3;&#x7801;&#x5728;&#x7F16;&#x8BD1;&#x9636;&#x6BB5;&#x662F;&#x5B8C;&#x5168;&#x6B63;&#x5E38;&#x7684;&#xFF0C;&#x4F46;&#x5728;&#x8FD0;&#x884C;&#x65F6;&#x5C31;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;&#xFF1A;<code>java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.String</code>&#x3002;&#x5F88;&#x660E;&#x663E;&#xFF0C;&#x8FD9;&#x662F;&#x7531;&#x4E8E;&#x540C;&#x4E2A; key &#x5148;&#x540E;&#x5BF9;&#x5E94;&#x4E86;&#x4E0D;&#x540C;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x5BFC;&#x81F4;&#x7684;&#xFF0C;SharedPreferences &#x6CA1;&#x6709;&#x529E;&#x6CD5;&#x5BF9;&#x8FD9;&#x79CD;&#x64CD;&#x4F5C;&#x505A;&#x51FA;&#x9650;&#x5236;&#xFF0C;&#x5B8C;&#x5168;&#x9700;&#x8981;&#x4F9D;&#x8D56;&#x4E8E;&#x5F00;&#x53D1;&#x8005;&#x81EA;&#x5DF1;&#x7684;&#x4EE3;&#x7801;&#x89C4;&#x8303;&#x6765;&#x8FDB;&#x884C;&#x9650;&#x5236;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;val sharedPreferences: SharedPreferences = getSharedPreferences(&quot;UserInfo&quot;, Context.MODE_PRIVATE)</span><br><span class="line">val key = &quot;userName&quot;</span><br><span class="line">val edit = sharedPreferences.edit()</span><br><span class="line">edit.putInt(key, 11)</span><br><span class="line">edit.apply()</span><br><span class="line">val name = sharedPreferences.getString(key, &quot;&quot;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x4E0D;&#x652F;&#x6301;&#x591A;&#x8FDB;&#x7A0B;&#x6570;&#x636E;&#x5171;&#x4EAB;"><a href="#&#x4E0D;&#x652F;&#x6301;&#x591A;&#x8FDB;&#x7A0B;&#x6570;&#x636E;&#x5171;&#x4EAB;" class="headerlink" title="&#x4E0D;&#x652F;&#x6301;&#x591A;&#x8FDB;&#x7A0B;&#x6570;&#x636E;&#x5171;&#x4EAB;"></a>&#x4E0D;&#x652F;&#x6301;&#x591A;&#x8FDB;&#x7A0B;&#x6570;&#x636E;&#x5171;&#x4EAB;</h2><p>&#x5728;&#x83B7;&#x53D6; SP &#x5B9E;&#x4F8B;&#x7684;&#x65F6;&#x5019;&#x9700;&#x8981;&#x4F20;&#x5165;&#x4E00;&#x4E2A; int &#x7C7B;&#x578B;&#x7684; mode &#x6807;&#x8BB0;&#x4F4D;&#x53C2;&#x6570;&#xFF0C;&#x5B58;&#x5728;&#x4E00;&#x4E2A;&#x548C;&#x591A;&#x8FDB;&#x7A0B;&#x76F8;&#x5173;&#x7684;&#x6807;&#x8BB0;&#x4F4D; MODE_MULTI_PROCESS&#xFF0C;&#x8BE5;&#x6807;&#x8BB0;&#x4F4D;&#x80FD;&#x8D77;&#x5230;&#x4E00;&#x5B9A;&#x7A0B;&#x5EA6;&#x7684;&#x591A;&#x8FDB;&#x7A0B;&#x6570;&#x636E;&#x540C;&#x6B65;&#x7684;&#x4FDD;&#x969C;&#xFF0C;&#x4F46;&#x4F5C;&#x7528;&#x4E0D;&#x5927;&#xFF0C;&#x4E14;&#x5E76;&#x4E0D;&#x4FDD;&#x8BC1;&#x591A;&#x8FDB;&#x7A0B;&#x5E76;&#x53D1;&#x5B89;&#x5168;&#x6027;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;val sharedPreferences: SharedPreferences = getSharedPreferences(&quot;UserInfo&quot;, Context.MODE_MULTI_PROCESS)</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x6587;&#x6709;&#x8BB2;&#x5230;&#xFF0C;SharedPreferencesImpl &#x5728;&#x88AB;&#x52A0;&#x8F7D;&#x540E;&#x5C31;&#x4F1A;&#x4E00;&#x76F4;&#x4FDD;&#x7559;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#xFF0C;&#x4E4B;&#x540E;&#x6BCF;&#x6B21;&#x83B7;&#x53D6;&#x90FD;&#x662F;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x7F13;&#x5B58;&#x6570;&#x636E;&#xFF0C;&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#x4E5F;&#x4E0D;&#x4F1A;&#x518D;&#x6B21;&#x53BB;&#x52A0;&#x8F7D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x3002;&#x800C; MODE_MULTI_PROCESS &#x8D77;&#x5230;&#x7684;&#x4F5C;&#x7528;&#x5C31;&#x662F;&#x6BCF;&#x5F53;&#x518D;&#x4E00;&#x6B21;&#x53BB;&#x83B7;&#x53D6; SP &#x5B9E;&#x4F8B;&#x65F6;&#xFF0C;&#x4F1A;&#x5224;&#x65AD;&#x5F53;&#x524D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x76F8;&#x5BF9;&#x6700;&#x540E;&#x4E00;&#x6B21;&#x5185;&#x5B58;&#x4FEE;&#x6539;&#x662F;&#x5426;&#x88AB;&#x6539;&#x52A8;&#x8FC7;&#x4E86;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x7684;&#x8BDD;&#x5C31;&#x4E3B;&#x52A8;&#x53BB;&#x91CD;&#x65B0;&#x52A0;&#x8F7D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#xFF0C;&#x4ECE;&#x800C;&#x53EF;&#x4EE5;&#x505A;&#x5230;&#x5728;&#x591A;&#x8FDB;&#x7A0B;&#x73AF;&#x5883;&#x4E0B;&#x4E00;&#x5B9A;&#x7684;&#x6570;&#x636E;&#x540C;&#x6B65;</p>
+<p>&#x4F46;&#x662F;&#xFF0C;&#x8FD9;&#x79CD;&#x540C;&#x6B65;&#x672C;&#x8EAB;&#x4F5C;&#x7528;&#x4E0D;&#x5927;&#xFF0C;&#x56E0;&#x4E3A;&#x5373;&#x4F7F;&#x6B64;&#x65F6;&#x91CD;&#x65B0;&#x52A0;&#x8F7D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x4E86;&#xFF0C;&#x540E;&#x7EED;&#x4FEE;&#x6539; SP &#x503C;&#x65F6;&#x4E0D;&#x540C;&#x8FDB;&#x7A0B;&#x4E2D;&#x7684;&#x5185;&#x5B58;&#x6570;&#x636E;&#x4E5F;&#x4E0D;&#x4F1A;&#x5B9E;&#x65F6;&#x540C;&#x6B65;&#xFF0C;&#x4E14;&#x591A;&#x8FDB;&#x7A0B;&#x540C;&#x65F6;&#x4FEE;&#x6539; SP &#x503C;&#x4E5F;&#x5B58;&#x5728;&#x6570;&#x636E;&#x4E22;&#x5931;&#x548C;&#x6570;&#x636E;&#x8986;&#x76D6;&#x7684;&#x53EF;&#x80FD;&#x3002;&#x6240;&#x4EE5;&#x8BF4;&#xFF0C;SP &#x5E76;&#x4E0D;&#x652F;&#x6301;&#x591A;&#x8FDB;&#x7A0B;&#x6570;&#x636E;&#x5171;&#x4EAB;&#xFF0C;MODE_MULTI_PROCESS &#x4E5F;&#x5DF2;&#x7ECF;&#x88AB;&#x5E9F;&#x5F03;&#x4E86;&#xFF0C;&#x5176;&#x6CE8;&#x91CA;&#x4E5F;&#x63A8;&#x8350;&#x4F7F;&#x7528; ContentProvider &#x6765;&#x5B9E;&#x73B0;&#x8DE8;&#x8FDB;&#x7A0B;&#x901A;&#x4FE1;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;class ContextImpl extends Context {</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public SharedPreferences getSharedPreferences(File file, int mode) {</span><br><span class="line">        SharedPreferencesImpl sp;</span><br><span class="line">        synchronized (ContextImpl.class) {</span><br><span class="line">            &#xB7;&#xB7;&#xB7;</span><br><span class="line">        }</span><br><span class="line">        if ((mode &amp; Context.MODE_MULTI_PROCESS) != 0 ||</span><br><span class="line">            getApplicationInfo().targetSdkVersion &lt; android.os.Build.VERSION_CODES.HONEYCOMB) {</span><br><span class="line">            //&#x91CD;&#x65B0;&#x53BB;&#x52A0;&#x8F7D;&#x78C1;&#x76D8;&#x6587;&#x4EF6;</span><br><span class="line">            sp.startReloadIfChangedUnexpectedly();</span><br><span class="line">        }</span><br><span class="line">        return sp;</span><br><span class="line">    }</span><br><span class="line">    </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x4E0D;&#x652F;&#x6301;&#x589E;&#x91CF;&#x66F4;&#x65B0;"><a href="#&#x4E0D;&#x652F;&#x6301;&#x589E;&#x91CF;&#x66F4;&#x65B0;" class="headerlink" title="&#x4E0D;&#x652F;&#x6301;&#x589E;&#x91CF;&#x66F4;&#x65B0;"></a>&#x4E0D;&#x652F;&#x6301;&#x589E;&#x91CF;&#x66F4;&#x65B0;</h2><p>&#x6211;&#x4EEC;&#x77E5;&#x9053;&#xFF0C;SP &#x63D0;&#x4EA4;&#x6570;&#x636E;&#x7684;&#x65B9;&#x6CD5;&#x6709;&#x4E24;&#x4E2A;&#xFF1A;<code>commit()</code> &#x548C; <code>apply()</code>&#xFF0C;&#x5206;&#x522B;&#x5BF9;&#x5E94;&#x7740;&#x540C;&#x6B65;&#x4FEE;&#x6539;&#x548C;&#x5F02;&#x6B65;&#x4FEE;&#x6539;&#xFF0C;&#x800C;&#x8FD9;&#x4E24;&#x79CD;&#x65B9;&#x5F0F;&#x5BF9;&#x5E94;&#x7684;&#x90FD;&#x662F;&#x5168;&#x91CF;&#x66F4;&#x65B0;&#xFF0C;SP &#x4EE5;&#x6587;&#x4EF6;&#x4E3A;&#x6700;&#x5C0F;&#x5355;&#x4F4D;&#x8FDB;&#x884C;&#x4FEE;&#x6539;&#xFF0C;&#x5373;&#x4F7F;&#x6211;&#x4EEC;&#x53EA;&#x4FEE;&#x6539;&#x4E86;&#x4E00;&#x4E2A;&#x952E;&#x503C;&#x5BF9;&#xFF0C;&#x8FD9;&#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#x4E5F;&#x4F1A;&#x5C06;&#x6240;&#x6709;&#x952E;&#x503C;&#x5BF9;&#x6570;&#x636E;&#x91CD;&#x65B0;&#x5199;&#x5165;&#x5230;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x5373; SP &#x53EA;&#x652F;&#x6301;&#x5168;&#x91CF;&#x66F4;&#x65B0;</p>
+<p>&#x6211;&#x4EEC;&#x5E73;&#x65F6;&#x83B7;&#x53D6;&#x5230;&#x7684; Editor &#x5BF9;&#x8C61;&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x90FD;&#x662F; SharedPreferencesImpl &#x7684;&#x5185;&#x90E8;&#x7C7B; EditorImpl&#x3002;EditorImpl &#x7684;&#x6BCF;&#x4E2A; putValue &#x65B9;&#x6CD5;&#x90FD;&#x4F1A;&#x5C06;&#x4F20;&#x8FDB;&#x6765;&#x7684; key-value &#x4FDD;&#x5B58;&#x5728; <code>mModified</code> &#x4E2D;&#xFF0C;&#x6682;&#x65F6;&#x8FD8;&#x6CA1;&#x6709;&#x6D89;&#x53CA;&#x4EFB;&#x4F55;&#x6587;&#x4EF6;&#x6539;&#x52A8;&#x3002;&#x6BD4;&#x8F83;&#x7279;&#x6B8A;&#x7684;&#x662F; <code>remove</code> &#x548C; <code>clear</code> &#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;<code>remove</code> &#x65B9;&#x6CD5;&#x4F1A;&#x5C06; this &#x4F5C;&#x4E3A;&#x952E;&#x503C;&#x5BF9;&#x7684; value&#xFF0C;&#x540E;&#x7EED;&#x5C31;&#x901A;&#x8FC7;&#x5BF9;&#x6BD4; value &#x7684;&#x76F8;&#x7B49;&#x6027;&#x6765;&#x77E5;&#x9053;&#x662F;&#x8981;&#x79FB;&#x9664;&#x952E;&#x503C;&#x5BF9;&#x8FD8;&#x662F;&#x4FEE;&#x6539;&#x952E;&#x503C;&#x5BF9;&#xFF0C;<code>clear</code> &#x65B9;&#x6CD5;&#x5219;&#x53EA;&#x662F;&#x5C06; mClear &#x6807;&#x8BB0;&#x4F4D;&#x7F6E;&#x4E3A; true</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public final class EditorImpl implements Editor {</span><br><span class="line">    </span><br><span class="line">        private final Object mEditorLock = new Object();</span><br><span class="line"></span><br><span class="line">        @GuardedBy(&quot;mEditorLock&quot;)</span><br><span class="line">        private final Map&lt;String, Object&gt; mModified = new HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        @GuardedBy(&quot;mEditorLock&quot;)</span><br><span class="line">        private boolean mClear = false;</span><br><span class="line">    </span><br><span class="line">    	@Override</span><br><span class="line">        public Editor putString(String key, @Nullable String value) {</span><br><span class="line">            synchronized (mEditorLock) {</span><br><span class="line">                mModified.put(key, value);</span><br><span class="line">                return this;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    </span><br><span class="line">        @Override</span><br><span class="line">        public Editor remove(String key) {</span><br><span class="line">            synchronized (mEditorLock) {</span><br><span class="line">                //&#x5B58;&#x5165;&#x5F53;&#x524D;&#x7684; EditorImpl &#x5BF9;&#x8C61;</span><br><span class="line">                mModified.put(key, this);</span><br><span class="line">                return this;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public Editor clear() {</span><br><span class="line">            synchronized (mEditorLock) {</span><br><span class="line">                mClear = true;</span><br><span class="line">                return this;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    </span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><code>commit()</code> &#x548C;<code>apply()</code>&#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#x90FD;&#x4F1A;&#x901A;&#x8FC7;&#x8C03;&#x7528; <code>commitToMemory()</code>&#x65B9;&#x6CD5;&#x62FF;&#x5230;&#x4FEE;&#x6539;&#x540E;&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;</p>
+<p><code>commitToMemory()</code>&#x91C7;&#x7528;&#x4E86; diff &#x7B97;&#x6CD5;&#xFF0C;SP &#x5305;&#x542B;&#x7684;&#x6240;&#x6709;&#x952E;&#x503C;&#x5BF9;&#x6570;&#x636E;&#x90FD;&#x5B58;&#x50A8;&#x5728; mapToWriteToDisk &#x4E2D;&#xFF0C;Editor &#x6539;&#x52A8;&#x5230;&#x7684;&#x6240;&#x6709;&#x952E;&#x503C;&#x5BF9;&#x6570;&#x636E;&#x90FD;&#x5B58;&#x50A8;&#x5728; mModified &#x4E2D;&#x3002;&#x5982;&#x679C; mClear &#x4E3A; true&#xFF0C;&#x5219;&#x4F1A;&#x5148;&#x6E05;&#x7A7A; mapToWriteToDisk&#xFF0C;&#x7136;&#x540E;&#x518D;&#x904D;&#x5386; mModified&#xFF0C;&#x5C06; mModified &#x4E2D;&#x7684;&#x6240;&#x6709;&#x6539;&#x52A8;&#x90FD;&#x540C;&#x6B65;&#x7ED9; mapToWriteToDisk&#x3002;&#x6700;&#x7EC8; mapToWriteToDisk &#x5C31;&#x4FDD;&#x5B58;&#x4E86;&#x8981;&#x91CD;&#x65B0;&#x5199;&#x5165;&#x5230;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x4E2D;&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;&#xFF0C;SP &#x4F1A;&#x6839;&#x636E; mapToWriteToDisk &#x5B8C;&#x5168;&#x8986;&#x76D6;&#x6389;&#x65E7;&#x7684; xml &#x6587;&#x4EF6;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;        // Returns true if any changes were made</span><br><span class="line">        private MemoryCommitResult commitToMemory() {</span><br><span class="line">            long memoryStateGeneration;</span><br><span class="line">            boolean keysCleared = false;</span><br><span class="line">            List&lt;String&gt; keysModified = null;</span><br><span class="line">            Set&lt;OnSharedPreferenceChangeListener&gt; listeners = null;</span><br><span class="line">            Map&lt;String, Object&gt; mapToWriteToDisk;</span><br><span class="line">            synchronized (SharedPreferencesImpl.this.mLock) {</span><br><span class="line">                // We optimistically don&apos;t make a deep copy until</span><br><span class="line">                // a memory commit comes in when we&apos;re already</span><br><span class="line">                // writing to disk.</span><br><span class="line">                if (mDiskWritesInFlight &gt; 0) {</span><br><span class="line">                    // We can&apos;t modify our mMap as a currently</span><br><span class="line">                    // in-flight write owns it.  Clone it before</span><br><span class="line">                    // modifying it.</span><br><span class="line">                    // noinspection unchecked</span><br><span class="line">                    mMap = new HashMap&lt;String, Object&gt;(mMap);</span><br><span class="line">                }</span><br><span class="line">                //&#x62FF;&#x5230;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;</span><br><span class="line">                mapToWriteToDisk = mMap;</span><br><span class="line">                mDiskWritesInFlight++;</span><br><span class="line">                boolean hasListeners = mListeners.size() &gt; 0;</span><br><span class="line">                if (hasListeners) {</span><br><span class="line">                    keysModified = new ArrayList&lt;String&gt;();</span><br><span class="line">                    listeners = new HashSet&lt;OnSharedPreferenceChangeListener&gt;(mListeners.keySet());</span><br><span class="line">                }</span><br><span class="line">                synchronized (mEditorLock) {</span><br><span class="line">                    //&#x7528;&#x4E8E;&#x6807;&#x8BB0;&#x6700;&#x7EC8;&#x662F;&#x5426;&#x6539;&#x52A8;&#x5230;&#x4E86; mapToWriteToDisk</span><br><span class="line">                    boolean changesMade = false;</span><br><span class="line">                    if (mClear) {</span><br><span class="line">                        if (!mapToWriteToDisk.isEmpty()) {</span><br><span class="line">                            changesMade = true;</span><br><span class="line">                            //&#x6E05;&#x7A7A;&#x6240;&#x6709;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x6570;&#x636E;</span><br><span class="line">                            mapToWriteToDisk.clear();</span><br><span class="line">                        }</span><br><span class="line">                        keysCleared = true;</span><br><span class="line">                        //&#x6062;&#x590D;&#x72B6;&#x6001;&#xFF0C;&#x907F;&#x514D;&#x4E8C;&#x6B21;&#x4FEE;&#x6539;&#x65F6;&#x72B6;&#x6001;&#x9519;&#x4F4D;</span><br><span class="line">                        mClear = false;</span><br><span class="line">                    }</span><br><span class="line">                    for (Map.Entry&lt;String, Object&gt; e : mModified.entrySet()) {</span><br><span class="line">                        String k = e.getKey();</span><br><span class="line">                        Object v = e.getValue();</span><br><span class="line">                        // &quot;this&quot; is the magic value for a removal mutation. In addition,</span><br><span class="line">                        // setting a value to &quot;null&quot; for a given key is specified to be</span><br><span class="line">                        // equivalent to calling remove on that key.</span><br><span class="line">                        if (v == this || v == null) { //&#x610F;&#x5473;&#x7740;&#x8981;&#x79FB;&#x9664;&#x8BE5;&#x952E;&#x503C;&#x5BF9;</span><br><span class="line">                            if (!mapToWriteToDisk.containsKey(k)) {</span><br><span class="line">                                continue;</span><br><span class="line">                            }</span><br><span class="line">                            mapToWriteToDisk.remove(k);</span><br><span class="line">                        } else { //&#x5BF9;&#x5E94;&#x4FEE;&#x6539;&#x952E;&#x503C;&#x5BF9;&#x503C;&#x7684;&#x60C5;&#x51B5;</span><br><span class="line">                            if (mapToWriteToDisk.containsKey(k)) {</span><br><span class="line">                                Object existingValue = mapToWriteToDisk.get(k);</span><br><span class="line">                                if (existingValue != null &amp;&amp; existingValue.equals(v)) {</span><br><span class="line">                                    continue;</span><br><span class="line">                                }</span><br><span class="line">                            }</span><br><span class="line">                            //&#x53EA;&#x6709;&#x5728;&#x7684;&#x786E;&#x662F;&#x4FEE;&#x6539;&#x4E86;&#x6216;&#x65B0;&#x63D2;&#x5165;&#x952E;&#x503C;&#x5BF9;&#x7684;&#x60C5;&#x51B5;&#x624D;&#x9700;&#x8981;&#x4FDD;&#x5B58;&#x503C;</span><br><span class="line">                            mapToWriteToDisk.put(k, v);</span><br><span class="line">                        }</span><br><span class="line">                        changesMade = true;</span><br><span class="line">                        if (hasListeners) {</span><br><span class="line">                            keysModified.add(k);</span><br><span class="line">                        }</span><br><span class="line">                    }</span><br><span class="line">                    //&#x6062;&#x590D;&#x72B6;&#x6001;&#xFF0C;&#x907F;&#x514D;&#x4E8C;&#x6B21;&#x4FEE;&#x6539;&#x65F6;&#x72B6;&#x6001;&#x9519;&#x4F4D;</span><br><span class="line">                    mModified.clear();</span><br><span class="line">                    if (changesMade) {</span><br><span class="line">                        mCurrentMemoryStateGeneration++;</span><br><span class="line">                    }</span><br><span class="line">                    memoryStateGeneration = mCurrentMemoryStateGeneration;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            return new MemoryCommitResult(memoryStateGeneration, keysCleared, keysModified,</span><br><span class="line">                    listeners, mapToWriteToDisk);</span><br><span class="line">        }</span><br></pre></td></tr></table></figure>
+
+<h2 id="clear-&#x7684;&#x53CD;&#x76F4;&#x89C9;&#x7528;&#x6CD5;"><a href="#clear-&#x7684;&#x53CD;&#x76F4;&#x89C9;&#x7528;&#x6CD5;" class="headerlink" title="clear &#x7684;&#x53CD;&#x76F4;&#x89C9;&#x7528;&#x6CD5;"></a>clear &#x7684;&#x53CD;&#x76F4;&#x89C9;&#x7528;&#x6CD5;</h2><p>&#x770B;&#x4EE5;&#x4E0B;&#x4F8B;&#x5B50;&#x3002;&#x6309;&#x7167;&#x8BED;&#x4E49;&#x5206;&#x6790;&#x7684;&#x8BDD;&#xFF0C;&#x6700;&#x7EC8; SP &#x4E2D;&#x5E94;&#x8BE5;&#x662F;&#x53EA;&#x5269;&#x4E0B; blog &#x4E00;&#x4E2A;&#x952E;&#x503C;&#x5BF9;&#x624D;&#x7B26;&#x5408;&#x76F4;&#x89C9;&#xFF0C;&#x800C;&#x5B9E;&#x9645;&#x4E0A;&#x6700;&#x7EC8;&#x4E24;&#x4E2A;&#x952E;&#x503C;&#x5BF9;&#x90FD;&#x4F1A;&#x88AB;&#x4FDD;&#x7559;&#xFF0C;&#x4E14;&#x53EA;&#x6709;&#x8FD9;&#x4E24;&#x4E2A;&#x952E;&#x503C;&#x5BF9;&#x88AB;&#x4FDD;&#x7559;&#x4E0B;&#x6765;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;val sharedPreferences: SharedPreferences = getSharedPreferences(&quot;UserInfo&quot;, Context.MODE_PRIVATE)</span><br><span class="line">val edit = sharedPreferences.edit()</span><br><span class="line">edit.putString(&quot;name&quot;, &quot;&#x4E1A;&#x5FD7;&#x9648;&quot;).clear().putString(&quot;blog&quot;, &quot;https://juejin.cn/user/923245496518439&quot;)</span><br><span class="line">edit.apply()</span><br></pre></td></tr></table></figure>
+
+<p>&#x9020;&#x6210;&#x8BE5;&#x95EE;&#x9898;&#x7684;&#x539F;&#x56E0;&#x8FD8;&#x9700;&#x8981;&#x770B;<code>commitToMemory()</code>&#x65B9;&#x6CD5;&#x3002;<code>clear()</code>&#x4F1A;&#x5C06; mClear &#x7F6E;&#x4E3A; true&#xFF0C;&#x6240;&#x4EE5;&#x5728;&#x6267;&#x884C;&#x5230;&#x7B2C;&#x4E00;&#x6B65;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x5C06;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x952E;&#x503C;&#x5BF9;&#x6570;&#x636E; mapToWriteToDisk &#x6E05;&#x7A7A;&#x3002;&#x5F53;&#x6267;&#x884C;&#x5230;&#x7B2C;&#x4E8C;&#x6B65;&#x7684;&#x65F6;&#x5019;&#xFF0C;mModified &#x4E2D;&#x7684;&#x6240;&#x6709;&#x6570;&#x636E;&#x5C31;&#x90FD;&#x4F1A;&#x540C;&#x6B65;&#x5230; mapToWriteToDisk &#x4E2D;&#xFF0C;&#x4ECE;&#x800C;&#x5BFC;&#x81F4;&#x6700;&#x7EC8; name &#x548C; blog &#x4E24;&#x4E2A;&#x952E;&#x503C;&#x5BF9;&#x90FD;&#x4F1A;&#x88AB;&#x4FDD;&#x7559;&#x4E0B;&#x6765;&#xFF0C;&#x5176;&#x5B83;&#x952E;&#x503C;&#x5BF9;&#x90FD;&#x88AB;&#x79FB;&#x9664;&#x4E86;</p>
+<p>&#x6240;&#x4EE5;&#x8BF4;&#xFF0C;<code>Editor.clear()</code> &#x4E4B;&#x524D;&#x4E0D;&#x5E94;&#x8BE5;&#x8FDE;&#x8D2F;&#x8C03;&#x7528; putValue &#x8BED;&#x53E5;&#xFF0C;&#x8FD9;&#x4F1A;&#x9020;&#x6210;&#x7406;&#x89E3;&#x548C;&#x5B9E;&#x9645;&#x6548;&#x679C;&#x4E4B;&#x95F4;&#x7684;&#x504F;&#x5DEE;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;        // Returns true if any changes were made</span><br><span class="line">        private MemoryCommitResult commitToMemory() {</span><br><span class="line">            long memoryStateGeneration;</span><br><span class="line">            boolean keysCleared = false;</span><br><span class="line">            List&lt;String&gt; keysModified = null;</span><br><span class="line">            Set&lt;OnSharedPreferenceChangeListener&gt; listeners = null;</span><br><span class="line">            Map&lt;String, Object&gt; mapToWriteToDisk;</span><br><span class="line">            synchronized (SharedPreferencesImpl.this.mLock) {</span><br><span class="line">                // We optimistically don&apos;t make a deep copy until</span><br><span class="line">                // a memory commit comes in when we&apos;re already</span><br><span class="line">                // writing to disk.</span><br><span class="line">                if (mDiskWritesInFlight &gt; 0) {</span><br><span class="line">                    // We can&apos;t modify our mMap as a currently</span><br><span class="line">                    // in-flight write owns it.  Clone it before</span><br><span class="line">                    // modifying it.</span><br><span class="line">                    // noinspection unchecked</span><br><span class="line">                    mMap = new HashMap&lt;String, Object&gt;(mMap);</span><br><span class="line">                }</span><br><span class="line">                //&#x62FF;&#x5230;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;</span><br><span class="line">                mapToWriteToDisk = mMap;</span><br><span class="line">                mDiskWritesInFlight++;</span><br><span class="line">                boolean hasListeners = mListeners.size() &gt; 0;</span><br><span class="line">                if (hasListeners) {</span><br><span class="line">                    keysModified = new ArrayList&lt;String&gt;();</span><br><span class="line">                    listeners = new HashSet&lt;OnSharedPreferenceChangeListener&gt;(mListeners.keySet());</span><br><span class="line">                }</span><br><span class="line">                synchronized (mEditorLock) {</span><br><span class="line">                    boolean changesMade = false;</span><br><span class="line">                    if (mClear) { //&#x7B2C;&#x4E00;&#x6B65;</span><br><span class="line">                        if (!mapToWriteToDisk.isEmpty()) {</span><br><span class="line">                            changesMade = true;</span><br><span class="line">                            //&#x6E05;&#x7A7A;&#x6240;&#x6709;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#x7684;&#x6570;&#x636E;</span><br><span class="line">                            mapToWriteToDisk.clear();</span><br><span class="line">                        }</span><br><span class="line">                        keysCleared = true;</span><br><span class="line">                        //&#x6062;&#x590D;&#x72B6;&#x6001;&#xFF0C;&#x907F;&#x514D;&#x4E8C;&#x6B21;&#x4FEE;&#x6539;&#x65F6;&#x72B6;&#x6001;&#x9519;&#x4F4D;</span><br><span class="line">                        mClear = false;</span><br><span class="line">                    }</span><br><span class="line">                    for (Map.Entry&lt;String, Object&gt; e : mModified.entrySet()) { //&#x7B2C;&#x4E8C;&#x6B65;</span><br><span class="line">                        String k = e.getKey();</span><br><span class="line">                        Object v = e.getValue();</span><br><span class="line">                        // &quot;this&quot; is the magic value for a removal mutation. In addition,</span><br><span class="line">                        // setting a value to &quot;null&quot; for a given key is specified to be</span><br><span class="line">                        // equivalent to calling remove on that key.</span><br><span class="line">                        if (v == this || v == null) { //&#x610F;&#x5473;&#x7740;&#x8981;&#x79FB;&#x9664;&#x8BE5;&#x952E;&#x503C;&#x5BF9;</span><br><span class="line">                            if (!mapToWriteToDisk.containsKey(k)) {</span><br><span class="line">                                continue;</span><br><span class="line">                            }</span><br><span class="line">                            mapToWriteToDisk.remove(k);</span><br><span class="line">                        } else { //&#x5BF9;&#x5E94;&#x4FEE;&#x6539;&#x952E;&#x503C;&#x5BF9;&#x503C;&#x7684;&#x60C5;&#x51B5;</span><br><span class="line">                            if (mapToWriteToDisk.containsKey(k)) {</span><br><span class="line">                                Object existingValue = mapToWriteToDisk.get(k);</span><br><span class="line">                                if (existingValue != null &amp;&amp; existingValue.equals(v)) {</span><br><span class="line">                                    continue;</span><br><span class="line">                                }</span><br><span class="line">                            }</span><br><span class="line">                            //&#x53EA;&#x6709;&#x5728;&#x7684;&#x786E;&#x662F;&#x4FEE;&#x6539;&#x4E86;&#x6216;&#x65B0;&#x63D2;&#x5165;&#x952E;&#x503C;&#x5BF9;&#x7684;&#x60C5;&#x51B5;&#x624D;&#x9700;&#x8981;&#x4FDD;&#x5B58;&#x503C;</span><br><span class="line">                            mapToWriteToDisk.put(k, v);</span><br><span class="line">                        }</span><br><span class="line">                        changesMade = true;</span><br><span class="line">                        if (hasListeners) {</span><br><span class="line">                            keysModified.add(k);</span><br><span class="line">                        }</span><br><span class="line">                    }</span><br><span class="line">                    //&#x6062;&#x590D;&#x72B6;&#x6001;&#xFF0C;&#x907F;&#x514D;&#x4E8C;&#x6B21;&#x4FEE;&#x6539;&#x65F6;&#x72B6;&#x6001;&#x9519;&#x4F4D;</span><br><span class="line">                    mModified.clear();</span><br><span class="line">                    if (changesMade) {</span><br><span class="line">                        mCurrentMemoryStateGeneration++;</span><br><span class="line">                    }</span><br><span class="line">                    memoryStateGeneration = mCurrentMemoryStateGeneration;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            return new MemoryCommitResult(memoryStateGeneration, keysCleared, keysModified,</span><br><span class="line">                    listeners, mapToWriteToDisk);</span><br><span class="line">        }</span><br></pre></td></tr></table></figure>
+
+<h2 id="commit&#x3001;applay-&#x53EF;&#x80FD;&#x5BFC;&#x81F4;-ANR"><a href="#commit&#x3001;applay-&#x53EF;&#x80FD;&#x5BFC;&#x81F4;-ANR" class="headerlink" title="commit&#x3001;applay &#x53EF;&#x80FD;&#x5BFC;&#x81F4; ANR"></a>commit&#x3001;applay &#x53EF;&#x80FD;&#x5BFC;&#x81F4; ANR</h2><p><code>commit()</code> &#x65B9;&#x6CD5;&#x4F1A;&#x901A;&#x8FC7; <code>commitToMemory()</code> &#x65B9;&#x6CD5;&#x62FF;&#x5230;&#x672C;&#x6B21;&#x4FEE;&#x6539;&#x540E;&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;&#xFF0C;&#x5373; MemoryCommitResult&#xFF0C;&#x7136;&#x540E;&#x5411; <code>enqueueDiskWrite</code> &#x65B9;&#x6CD5;&#x63D0;&#x4EA4;&#x5C06;&#x5168;&#x91CF;&#x6570;&#x636E;&#x5199;&#x5165;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x7684;&#x4EFB;&#x52A1;&#xFF0C;&#x5728;&#x5199;&#x5165;&#x5B8C;&#x6210;&#x524D;&#x8C03;&#x7528;&#x8005;&#x7EBF;&#x7A0B;&#x90FD;&#x4F1A;&#x7531;&#x4E8E; CountDownLatch &#x4E00;&#x76F4;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x7740;&#xFF0C;&#x65B9;&#x6CD5;&#x8FD4;&#x56DE;&#x503C;&#x5373;&#x672C;&#x6B21;&#x4FEE;&#x6539;&#x64CD;&#x4F5C;&#x7684;&#x6210;&#x529F;&#x72B6;&#x6001;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;        @Override</span><br><span class="line">        public boolean commit() {</span><br><span class="line">            long startTime = 0;</span><br><span class="line">            if (DEBUG) {</span><br><span class="line">                startTime = System.currentTimeMillis();</span><br><span class="line">            }</span><br><span class="line">		   //&#x62FF;&#x5230;&#x4FEE;&#x6539;&#x540E;&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;</span><br><span class="line">            MemoryCommitResult mcr = commitToMemory();</span><br><span class="line">		   //&#x63D0;&#x4EA4;&#x5199;&#x5165;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x7684;&#x4EFB;&#x52A1;</span><br><span class="line">            SharedPreferencesImpl.this.enqueueDiskWrite(</span><br><span class="line">                mcr, null /* sync write on this thread okay */);</span><br><span class="line">            try {</span><br><span class="line">                //&#x963B;&#x585E;&#x7B49;&#x5F85;&#xFF0C;&#x76F4;&#x5230; xml &#x6587;&#x4EF6;&#x5199;&#x5165;&#x5B8C;&#x6210;&#xFF08;&#x4E0D;&#x7BA1;&#x6210;&#x529F;&#x4E0E;&#x5426;&#xFF09;</span><br><span class="line">                mcr.writtenToDiskLatch.await();</span><br><span class="line">            } catch (InterruptedException e) {</span><br><span class="line">                return false;</span><br><span class="line">            } finally {</span><br><span class="line">                if (DEBUG) {</span><br><span class="line">                    Log.d(TAG, mFile.getName() + &quot;:&quot; + mcr.memoryStateGeneration</span><br><span class="line">                            + &quot; committed after &quot; + (System.currentTimeMillis() - startTime)</span><br><span class="line">                            + &quot; ms&quot;);</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            notifyListeners(mcr);</span><br><span class="line">            return mcr.writeToDiskResult;</span><br><span class="line">        }</span><br></pre></td></tr></table></figure>
+
+<p><code>enqueueDiskWrite</code> &#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x5305;&#x542B;&#x4E86;&#x5177;&#x4F53;&#x7684;&#x78C1;&#x76D8;&#x5199;&#x5165;&#x903B;&#x8F91;&#x7684;&#x5730;&#x65B9;&#x4E86;&#xFF0C;&#x7531;&#x4E8E;&#x5916;&#x90E8;&#x53EF;&#x80FD;&#x5B58;&#x5728;&#x591A;&#x4E2A;&#x7EBF;&#x7A0B;&#x5728;&#x540C;&#x65F6;&#x6267;&#x884C; <code>apply()</code> &#x548C; <code>commit()</code> &#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x800C;&#x5BF9;&#x5E94;&#x7684;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#xFF0C;&#x6240;&#x4EE5; <code>enqueueDiskWrite</code> &#x65B9;&#x6CD5;&#x5C31;&#x5FC5;&#x987B;&#x4FDD;&#x8BC1;&#x5199;&#x5165;&#x64CD;&#x4F5C;&#x7684;&#x6709;&#x5E8F;&#x6027;&#xFF0C;&#x907F;&#x514D;&#x6570;&#x636E;&#x4E22;&#x5931;&#x6216;&#x8005;&#x8986;&#x76D6;&#xFF0C;&#x751A;&#x81F3;&#x662F;&#x6587;&#x4EF6;&#x635F;&#x574F;</p>
+<p><code>enqueueDiskWrite</code> &#x65B9;&#x6CD5;&#x7684;&#x5177;&#x4F53;&#x903B;&#x8F91;&#xFF1A;</p>
+<ol>
+<li>writeToDiskRunnable &#x4F7F;&#x7528;&#x5230;&#x4E86;&#x5185;&#x90E8;&#x9501; mWritingToDiskLock &#x6765;&#x4FDD;&#x8BC1; writeToFile &#x64CD;&#x4F5C;&#x7684;&#x6709;&#x5E8F;&#x6027;&#xFF0C;&#x907F;&#x514D;&#x591A;&#x7EBF;&#x7A0B;&#x7ADE;&#x4E89;</li>
+<li>&#x5BF9;&#x4E8E; commit &#x64CD;&#x4F5C;&#xFF0C;&#x5982;&#x679C;&#x5F53;&#x524D;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5728;&#x6267;&#x884C;&#x63D0;&#x4EA4;&#x4FEE;&#x6539;&#x7684;&#x64CD;&#x4F5C;&#x7684;&#x8BDD;&#xFF0C;&#x90A3;&#x4E48;&#x76F4;&#x63A5;&#x5728;&#x8BE5;&#x7EBF;&#x7A0B;&#x4E0A;&#x6267;&#x884C; writeToDiskRunnable&#xFF0C;&#x6D41;&#x7A0B;&#x7ED3;&#x675F;</li>
+<li>&#x5BF9;&#x4E8E;&#x5176;&#x4ED6;&#x60C5;&#x51B5;&#xFF08;apply &#x64CD;&#x4F5C;&#x3001;&#x591A;&#x7EBF;&#x7A0B;&#x540C;&#x65F6; commit &#x6216;&#x8005; apply&#xFF09;&#xFF0C;&#x90FD;&#x4F1A;&#x5C06; writeToDiskRunnable &#x63D0;&#x4EA4;&#x7ED9; QueuedWork &#x6267;&#x884C;</li>
+<li>QueuedWork &#x5185;&#x90E8;&#x4F7F;&#x7528;&#x5230;&#x4E86; HandlerThread &#x6765;&#x6267;&#x884C; writeToDiskRunnable&#xFF0C;HandlerThread &#x672C;&#x8EAB;&#x4E5F;&#x53EF;&#x4EE5;&#x4FDD;&#x8BC1;&#x591A;&#x4E2A;&#x4EFB;&#x52A1;&#x6267;&#x884C;&#x65F6;&#x7684;&#x6709;&#x5E8F;&#x6027;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    private void enqueueDiskWrite(final MemoryCommitResult mcr,</span><br><span class="line">                                  final Runnable postWriteRunnable) {</span><br><span class="line">        final boolean isFromSyncCommit = (postWriteRunnable == null);</span><br><span class="line">        final Runnable writeToDiskRunnable = new Runnable() {</span><br><span class="line">                @Override</span><br><span class="line">                public void run() {</span><br><span class="line">                    synchronized (mWritingToDiskLock) {</span><br><span class="line">                        //&#x5199;&#x5165;&#x78C1;&#x76D8;&#x6587;&#x4EF6;</span><br><span class="line">                        writeToFile(mcr, isFromSyncCommit);</span><br><span class="line">                    }</span><br><span class="line">                    synchronized (mLock) {</span><br><span class="line">                        mDiskWritesInFlight--;</span><br><span class="line">                    }</span><br><span class="line">                    if (postWriteRunnable != null) {</span><br><span class="line">                        postWriteRunnable.run();</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">            };</span><br><span class="line">        // Typical #commit() path with fewer allocations, doing a write on</span><br><span class="line">        // the current thread.</span><br><span class="line">        if (isFromSyncCommit) { //commit() &#x65B9;&#x6CD5;&#x4F1A;&#x8D70;&#x8FDB;&#x8FD9;&#x91CC;&#x9762;</span><br><span class="line">            boolean wasEmpty = false;</span><br><span class="line">            synchronized (mLock) {</span><br><span class="line">                wasEmpty = mDiskWritesInFlight == 1;</span><br><span class="line">            }</span><br><span class="line">            if (wasEmpty) {</span><br><span class="line">                //wasEmpty &#x4E3A; true &#x8BF4;&#x660E;&#x5F53;&#x524D;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5728;&#x6267;&#x884C;&#x63D0;&#x4EA4;&#x64CD;&#x4F5C;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x76F4;&#x63A5;&#x5728;&#x6B64;&#x7EBF;&#x7A0B;&#x4E0A;&#x5B8C;&#x6210;&#x4EFB;&#x52A1;</span><br><span class="line">                writeToDiskRunnable.run();</span><br><span class="line">                return;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        QueuedWork.queue(writeToDiskRunnable, !isFromSyncCommit);</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x6B64;&#x5916;&#xFF0C;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x6BD4;&#x8F83;&#x91CD;&#x8981;&#x7684;&#x77E5;&#x8BC6;&#x70B9;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x4E0B;&#x3002;&#x5728; writeToFile &#x65B9;&#x6CD5;&#x4E2D;&#x4F1A;&#x5BF9;&#x672C;&#x6B21;&#x4EFB;&#x52A1;&#x8FDB;&#x884C;&#x6821;&#x9A8C;&#xFF0C;&#x907F;&#x514D;&#x8FDE;&#x7EED;&#x591A;&#x6B21;&#x6267;&#x884C;&#x65E0;&#x6548;&#x7684;&#x78C1;&#x76D8;&#x4EFB;&#x52A1;&#x3002;&#x5F53;&#x4E2D;&#xFF0C;mDiskStateGeneration &#x4EE3;&#x8868;&#x7684;&#x662F;&#x6700;&#x540E;&#x4E00;&#x6B21;&#x6210;&#x529F;&#x5199;&#x5165;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x65F6;&#x7684;&#x4EFB;&#x52A1;&#x7248;&#x672C;&#x53F7;&#xFF0C;mCurrentMemoryStateGeneration &#x662F;&#x5F53;&#x524D;&#x5185;&#x5B58;&#x4E2D;&#x6700;&#x65B0;&#x7684;&#x4FEE;&#x6539;&#x8BB0;&#x5F55;&#x7248;&#x672C;&#x53F7;&#xFF0C;mcr.memoryStateGeneration &#x662F;&#x672C;&#x6B21;&#x8981;&#x6267;&#x884C;&#x7684;&#x4EFB;&#x52A1;&#x7684;&#x7248;&#x672C;&#x53F7;&#x3002;&#x901A;&#x8FC7;&#x4E24;&#x6B21;&#x7248;&#x672C;&#x53F7;&#x7684;&#x5BF9;&#x6BD4;&#xFF0C;&#x5C31;&#x907F;&#x514D;&#x4E86;&#x5728;&#x8FDE;&#x7EED;&#x591A;&#x6B21; commit &#x6216;&#x8005; apply &#x65F6;&#x9020;&#x6210;&#x91CD;&#x590D;&#x6267;&#x884C; I/O &#x64CD;&#x4F5C;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x800C;&#x662F;&#x53EA;&#x4F1A;&#x6267;&#x884C;&#x6700;&#x540E;&#x4E00;&#x6B21;&#xFF0C;&#x907F;&#x514D;&#x4E86;&#x65E0;&#x6548;&#x7684; I/O &#x4EFB;&#x52A1;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    @GuardedBy(&quot;mWritingToDiskLock&quot;)</span><br><span class="line">    private void writeToFile(MemoryCommitResult mcr, boolean isFromSyncCommit) {</span><br><span class="line">        &#xB7;&#xB7;&#xB7;</span><br><span class="line">        if (fileExists) {</span><br><span class="line">            boolean needsWrite = false;</span><br><span class="line"></span><br><span class="line">            // Only need to write if the disk state is older than this commit</span><br><span class="line">            //&#x5224;&#x65AD;&#x7248;&#x672C;&#x53F7;</span><br><span class="line">            if (mDiskStateGeneration &lt; mcr.memoryStateGeneration) {</span><br><span class="line">                if (isFromSyncCommit) {</span><br><span class="line">                    needsWrite = true;</span><br><span class="line">                } else {</span><br><span class="line">                    synchronized (mLock) {</span><br><span class="line">                        // No need to persist intermediate states. Just wait for the latest state to</span><br><span class="line">                        // be persisted.</span><br><span class="line">                        //&#x5224;&#x65AD;&#x7248;&#x672C;&#x53F7;</span><br><span class="line">                        if (mCurrentMemoryStateGeneration == mcr.memoryStateGeneration) {</span><br><span class="line">                            needsWrite = true;</span><br><span class="line">                        }</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">			</span><br><span class="line">            if (!needsWrite) {</span><br><span class="line">                //&#x5F53;&#x524D;&#x7248;&#x672C;&#x53F7;&#x5E76;&#x975E;&#x6700;&#x65B0;&#xFF0C;&#x65E0;&#x9700;&#x6267;&#x884C;&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#x5373;&#x53EF;</span><br><span class="line">                mcr.setDiskWriteResult(false, true);</span><br><span class="line">                return;</span><br><span class="line">            }</span><br><span class="line">        &#xB7;&#xB7;&#xB7;</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x518D;&#x56DE;&#x8FC7;&#x5934;&#x770B; <code>commit()</code> &#x65B9;&#x6CD5;&#x3002;&#x4E0D;&#x7BA1;&#x8BE5;&#x65B9;&#x6CD5;&#x5173;&#x8054;&#x7684; writeToDiskRunnable &#x6700;&#x7EC8;&#x662F;&#x5728;&#x672C;&#x7EBF;&#x7A0B;&#x8FD8;&#x662F; HandlerThread &#x4E2D;&#x6267;&#x884C;&#xFF0C;<code>await()</code>&#x65B9;&#x6CD5;&#x90FD;&#x4F1A;&#x4F7F;&#x5F97;&#x672C;&#x7EBF;&#x7A0B;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x76F4;&#x5230; writeToDiskRunnable &#x6267;&#x884C;&#x5B8C;&#x6BD5;&#xFF0C;&#x4ECE;&#x800C;&#x5B9E;&#x73B0;&#x4E86; <code>commit()</code>&#x540C;&#x6B65;&#x63D0;&#x4EA4;&#x7684;&#x6548;&#x679C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;        @Override</span><br><span class="line">        public boolean commit() {</span><br><span class="line">            long startTime = 0;</span><br><span class="line">            if (DEBUG) {</span><br><span class="line">                startTime = System.currentTimeMillis();</span><br><span class="line">            }</span><br><span class="line">		   //&#x62FF;&#x5230;&#x4FEE;&#x6539;&#x540E;&#x7684;&#x5168;&#x91CF;&#x6570;&#x636E;</span><br><span class="line">            MemoryCommitResult mcr = commitToMemory();</span><br><span class="line">		   //&#x63D0;&#x4EA4;&#x5199;&#x5165;&#x78C1;&#x76D8;&#x6587;&#x4EF6;&#x7684;&#x4EFB;&#x52A1;</span><br><span class="line">            SharedPreferencesImpl.this.enqueueDiskWrite(</span><br><span class="line">                mcr, null /* sync write on this thread okay */);</span><br><span class="line">            try {</span><br><span class="line">                //&#x963B;&#x585E;&#x7B49;&#x5F85;&#xFF0C;&#x76F4;&#x5230; xml &#x6587;&#x4EF6;&#x5199;&#x5165;&#x5B8C;&#x6210;&#xFF08;&#x4E0D;&#x7BA1;&#x6210;&#x529F;&#x4E0E;&#x5426;&#xFF09;</span><br><span class="line">                mcr.writtenToDiskLatch.await();</span><br><span class="line">            } catch (InterruptedException e) {</span><br><span class="line">                return false;</span><br><span class="line">            } finally {</span><br><span class="line">                if (DEBUG) {</span><br><span class="line">                    Log.d(TAG, mFile.getName() + &quot;:&quot; + mcr.memoryStateGeneration</span><br><span class="line">                            + &quot; committed after &quot; + (System.currentTimeMillis() - startTime)</span><br><span class="line">                            + &quot; ms&quot;);</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            notifyListeners(mcr);</span><br><span class="line">            return mcr.writeToDiskResult;</span><br><span class="line">        }</span><br></pre></td></tr></table></figure>
+
+<p>&#x800C;&#x5BF9;&#x4E8E; <code>apply()</code> &#x65B9;&#x6CD5;&#xFF0C;&#x5176;&#x672C;&#x8EAB;&#x5177;&#x6709;&#x5F02;&#x6B65;&#x63D0;&#x4EA4;&#x7684;&#x542B;&#x4E49;&#xFF0C;I/O &#x64CD;&#x4F5C;&#x5E94;&#x8BE5;&#x90FD;&#x662F;&#x4EA4;&#x7531;&#x7ED9;&#x4E86;&#x5B50;&#x7EBF;&#x7A0B;&#x6765;&#x6267;&#x884C;&#x624D;&#x5BF9;&#xFF0C;&#x6309;&#x9053;&#x7406;&#x6765;&#x8BF4;&#x53EA;&#x9700;&#x8981;&#x8C03;&#x7528; <code>enqueueDiskWrite</code> &#x65B9;&#x6CD5;&#x63D0;&#x4EA4;&#x4EFB;&#x52A1;&#x4E14;&#x4E0D;&#x7B49;&#x5F85;&#x4EFB;&#x52A1;&#x5B8C;&#x6210;&#x5373;&#x53EF;&#xFF0C;&#x53EF;&#x5B9E;&#x9645;&#x4E0A;<code>apply()</code>&#x65B9;&#x6CD5;&#x53CD;&#x800C;&#x8981;&#x6BD4;<code>commit()</code>&#x65B9;&#x6CD5;&#x590D;&#x6742;&#x5F97;&#x591A;</p>
+<p><code>apply()</code>&#x65B9;&#x6CD5;&#x5305;&#x542B;&#x4E00;&#x4E2A; awaitCommit &#x4EFB;&#x52A1;&#xFF0C;&#x7528;&#x4E8E;&#x963B;&#x585E;&#x5176;&#x6267;&#x884C;&#x7EBF;&#x7A0B;&#x76F4;&#x5230;&#x78C1;&#x76D8;&#x4EFB;&#x52A1;&#x6267;&#x884C;&#x5B8C;&#x6BD5;&#xFF0C;&#x800C; awaitCommit &#x53C8;&#x88AB;&#x5305;&#x88F9;&#x5728; postWriteRunnable &#x4E2D;&#x4E00;&#x8D77;&#x63D0;&#x4EA4;&#x7ED9;&#x4E86; <code>enqueueDiskWrite</code> &#x65B9;&#x6CD5;&#xFF0C;<code>enqueueDiskWrite</code> &#x65B9;&#x6CD5;&#x53C8;&#x4F1A;&#x5728; writeToDiskRunnable &#x6267;&#x884C;&#x5B8C;&#x6BD5;&#x540E;&#x6267;&#x884C; enqueueDiskWrite</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;        @Override</span><br><span class="line">        public void apply() {</span><br><span class="line">            final long startTime = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">            final MemoryCommitResult mcr = commitToMemory();</span><br><span class="line">            final Runnable awaitCommit = new Runnable() {</span><br><span class="line">                    @Override</span><br><span class="line">                    public void run() {</span><br><span class="line">                        try {</span><br><span class="line">                            //&#x963B;&#x585E;&#x7EBF;&#x7A0B;&#x76F4;&#x5230;&#x78C1;&#x76D8;&#x4EFB;&#x52A1;&#x6267;&#x884C;&#x5B8C;&#x6BD5;</span><br><span class="line">                            mcr.writtenToDiskLatch.await();</span><br><span class="line">                        } catch (InterruptedException ignored) {</span><br><span class="line">                        }</span><br><span class="line"></span><br><span class="line">                        if (DEBUG &amp;&amp; mcr.wasWritten) {</span><br><span class="line">                            Log.d(TAG, mFile.getName() + &quot;:&quot; + mcr.memoryStateGeneration</span><br><span class="line">                                    + &quot; applied after &quot; + (System.currentTimeMillis() - startTime)</span><br><span class="line">                                    + &quot; ms&quot;);</span><br><span class="line">                        }</span><br><span class="line">                    }</span><br><span class="line">                };</span><br><span class="line"></span><br><span class="line">            QueuedWork.addFinisher(awaitCommit);</span><br><span class="line"></span><br><span class="line">            Runnable postWriteRunnable = new Runnable() {</span><br><span class="line">                    @Override</span><br><span class="line">                    public void run() {</span><br><span class="line">                        awaitCommit.run();</span><br><span class="line">                        QueuedWork.removeFinisher(awaitCommit);</span><br><span class="line">                    }</span><br><span class="line">                };</span><br><span class="line"></span><br><span class="line">            //&#x63D0;&#x4EA4;&#x4EFB;&#x52A1;</span><br><span class="line">            SharedPreferencesImpl.this.enqueueDiskWrite(mcr, postWriteRunnable);</span><br><span class="line"></span><br><span class="line">            // Okay to notify the listeners before it&apos;s hit disk</span><br><span class="line">            // because the listeners should always get the same</span><br><span class="line">            // SharedPreferences instance back, which has the</span><br><span class="line">            // changes reflected in memory.</span><br><span class="line">            notifyListeners(mcr);</span><br><span class="line">        }</span><br></pre></td></tr></table></figure>
+
+<p>&#x5355;&#x72EC;&#x770B;&#x4EE5;&#x4E0A;&#x903B;&#x8F91;&#x4F1A;&#x663E;&#x5F97;&#x5341;&#x5206;&#x5947;&#x602A;&#xFF0C;&#x4ECE;&#x4E0A;&#x6587;&#x5C31;&#x53EF;&#x4EE5;&#x5F97;&#x77E5; writeToDiskRunnable &#x6700;&#x7EC8;&#x662F;&#x4F1A;&#x4EA4;&#x7531; HandlerThread &#x6765;&#x6267;&#x884C;&#x7684;&#xFF0C;&#x90A3;&#x6309;&#x7167;&#x6D41;&#x7A0B;&#x770B; awaitCommit &#x6700;&#x7EC8;&#x4E5F;&#x662F;&#x4F1A;&#x7531; HandlerThread &#x8C03;&#x7528;&#xFF0C;&#x90A3;&#x4E48; awaitCommit &#x7684;&#x7B49;&#x5F85;&#x64CD;&#x4F5C;&#x5C31;&#x663E;&#x5F97;&#x5341;&#x5206;&#x5947;&#x602A;&#x4E86;&#xFF0C;&#x56E0;&#x4E3A; awaitCommit &#x80AF;&#x5B9A;&#x662F;&#x4F1A;&#x5728;&#x78C1;&#x76D8;&#x4EFB;&#x52A1;&#x6267;&#x884C;&#x5B8C;&#x6BD5;&#x624D;&#x88AB;&#x8C03;&#x7528;&#xFF0C;&#x5C31;&#x76F8;&#x5F53;&#x4E8E; HandlerThread &#x5728;&#x81EA;&#x5DF1;&#x7B49;&#x5F85;&#x81EA;&#x5DF1;&#x6267;&#x884C;&#x5B8C;&#x6BD5;&#x3002;&#x6B64;&#x5916;&#xFF0C;HandlerThread &#x5C5E;&#x4E8E;&#x5B50;&#x7EBF;&#x7A0B;&#xFF0C;&#x6309;&#x9053;&#x7406;&#x6765;&#x8BF4;&#x5B50;&#x7EBF;&#x7A0B;&#x5373;&#x4F7F;&#x6267;&#x884C;&#x4E86;&#x8017;&#x65F6;&#x64CD;&#x4F5C;&#x4E5F;&#x4E0D;&#x4F1A;&#x5BFC;&#x81F4;&#x4E3B;&#x7EBF;&#x7A0B; ANR &#x624D;&#x5BF9;</p>
+<p>&#x8981;&#x7406;&#x89E3;&#x4EE5;&#x4E0A;&#x64CD;&#x4F5C;&#xFF0C;&#x8FD8;&#x9700;&#x8981;&#x518D;&#x770B;&#x770B; ActivityThread &#x8FD9;&#x4E2A;&#x7C7B;&#x3002;&#x5F53; Service &#x548C; Activity &#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#x5904;&#x4E8E; <code>handleStopService()</code> &#x3001;<code>handlePauseActivity()</code> &#x3001;<code>handleStopActivity()</code> &#x7684;&#x65F6;&#x5019;&#xFF0C;ActivityThread &#x4F1A;&#x8C03;&#x7528; <code>QueuedWork.waitToFinish()</code> &#x65B9;&#x6CD5;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    private void handleStopService(IBinder token) {</span><br><span class="line">        Service s = mServices.remove(token);</span><br><span class="line">        if (s != null) {</span><br><span class="line">            try {</span><br><span class="line">                &#xB7;&#xB7;&#xB7;</span><br><span class="line">                //&#x91CD;&#x70B9;</span><br><span class="line">                QueuedWork.waitToFinish();</span><br><span class="line">                &#xB7;&#xB7;&#xB7;</span><br><span class="line">            } catch (Exception e) {</span><br><span class="line">                &#xB7;&#xB7;&#xB7;</span><br><span class="line">            }</span><br><span class="line">        } else {</span><br><span class="line">            Slog.i(TAG, &quot;handleStopService: token=&quot; + token + &quot; not found.&quot;);</span><br><span class="line">        }</span><br><span class="line">        //Slog.i(TAG, &quot;Running services: &quot; + mServices);</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p><code>QueuedWork.waitToFinish()</code> &#x65B9;&#x6CD5;&#x4F1A;&#x4E3B;&#x52A8;&#x53BB;&#x6267;&#x884C;&#x6240;&#x6709;&#x7684;&#x78C1;&#x76D8;&#x5199;&#x5165;&#x4EFB;&#x52A1;&#xFF0C;&#x5E76;&#x6267;&#x884C;&#x6240;&#x6709;&#x7684; postWriteRunnable&#xFF0C;&#x8FD9;&#x5C31;&#x9020;&#x6210;&#x4E86; Activity &#x6216; Service &#x5728;&#x5207;&#x6362;&#x751F;&#x547D;&#x5468;&#x671F;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#x6709;&#x53EF;&#x80FD;&#x56E0;&#x4E3A;&#x5B58;&#x5728;&#x5927;&#x91CF;&#x7684;&#x78C1;&#x76D8;&#x5199;&#x5165;&#x4EFB;&#x52A1;&#x800C;&#x88AB;&#x963B;&#x585E;&#x4F4F;&#xFF0C;&#x6700;&#x7EC8;&#x5BFC;&#x81F4; ANR</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    public static void waitToFinish() {</span><br><span class="line">        long startTime = System.currentTimeMillis();</span><br><span class="line">        boolean hadMessages = false;</span><br><span class="line">        Handler handler = getHandler();</span><br><span class="line">        synchronized (sLock) {</span><br><span class="line">            if (handler.hasMessages(QueuedWorkHandler.MSG_RUN)) {</span><br><span class="line">                // Delayed work will be processed at processPendingWork() below</span><br><span class="line">                handler.removeMessages(QueuedWorkHandler.MSG_RUN);</span><br><span class="line">                if (DEBUG) {</span><br><span class="line">                    hadMessages = true;</span><br><span class="line">                    Log.d(LOG_TAG, &quot;waiting&quot;);</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            // We should not delay any work as this might delay the finishers</span><br><span class="line">            sCanDelay = false;</span><br><span class="line">        }</span><br><span class="line">        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();</span><br><span class="line">        try {</span><br><span class="line">            //&#x6267;&#x884C;&#x6240;&#x6709;&#x7684;&#x78C1;&#x76D8;&#x5199;&#x5165;&#x4EFB;&#x52A1;</span><br><span class="line">            processPendingWork();</span><br><span class="line">        } finally {</span><br><span class="line">            StrictMode.setThreadPolicy(oldPolicy);</span><br><span class="line">        }</span><br><span class="line">        try {</span><br><span class="line">            //&#x6267;&#x884C;&#x6240;&#x6709;&#x7684; postWriteRunnable</span><br><span class="line">            while (true) {</span><br><span class="line">                Runnable finisher;</span><br><span class="line">                synchronized (sLock) {</span><br><span class="line">                    finisher = sFinishers.poll();</span><br><span class="line">                }</span><br><span class="line">                if (finisher == null) {</span><br><span class="line">                    break;</span><br><span class="line">                }</span><br><span class="line">                finisher.run();</span><br><span class="line">            }</span><br><span class="line">        } finally {</span><br><span class="line">            sCanDelay = true;</span><br><span class="line">        }</span><br><span class="line">        synchronized (sLock) {</span><br><span class="line">            long waitTime = System.currentTimeMillis() - startTime;</span><br><span class="line">            if (waitTime &gt; 0 || hadMessages) {</span><br><span class="line">                mWaitTimes.add(Long.valueOf(waitTime).intValue());</span><br><span class="line">                mNumWaits++;</span><br><span class="line">                if (DEBUG || mNumWaits % 1024 == 0 || waitTime &gt; MAX_WAIT_TIME_MILLIS) {</span><br><span class="line">                    mWaitTimes.log(LOG_TAG, &quot;waited: &quot;);</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>ActivityThread &#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x4E3B;&#x52A8;&#x53BB;&#x89E6;&#x53D1;&#x6267;&#x884C;&#x6240;&#x6709;&#x7684;&#x78C1;&#x76D8;&#x5199;&#x5165;&#x4EFB;&#x52A1;&#x6211;&#x65E0;&#x4ECE;&#x5F97;&#x77E5;&#xFF0C;&#x5B57;&#x8282;&#x6280;&#x672F;&#x8DF3;&#x52A8;&#x56E2;&#x961F;&#x7ED9;&#x51FA;&#x7684;&#x731C;&#x6D4B;&#x662F;&#xFF1A;<strong>Google &#x5728; Activity &#x548C; Service &#x8C03;&#x7528; onStop &#x4E4B;&#x524D;&#x963B;&#x585E;&#x4E3B;&#x7EBF;&#x7A0B;&#x6765;&#x5904;&#x7406; SP&#xFF0C;&#x6211;&#x4EEC;&#x80FD;&#x731C;&#x5230;&#x7684;&#x552F;&#x4E00;&#x539F;&#x56E0;&#x662F;&#x5C3D;&#x53EF;&#x80FD;&#x7684;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7684;&#x6301;&#x4E45;&#x5316;&#x3002;&#x56E0;&#x4E3A;&#x5982;&#x679C;&#x5728;&#x8FD0;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#x4EA7;&#x751F;&#x4E86; crash&#xFF0C;&#x4E5F;&#x4F1A;&#x5BFC;&#x81F4; SP &#x672A;&#x6301;&#x4E45;&#x5316;&#xFF0C;&#x6301;&#x4E45;&#x5316;&#x672C;&#x8EAB;&#x662F; IO &#x64CD;&#x4F5C;&#xFF0C;&#x4E5F;&#x4F1A;&#x5931;&#x8D25;</strong></p>
+<p>&#x7EFC;&#x4E0A;&#x6240;&#x8FF0;&#xFF0C;&#x7531;&#x4E8E; SP &#x672C;&#x8EAB;&#x53EA;&#x652F;&#x6301;&#x5168;&#x91CF;&#x66F4;&#x65B0;&#xFF0C;&#x5982;&#x679C; SP &#x6587;&#x4EF6;&#x5F88;&#x5927;&#xFF0C;&#x5373;&#x4F7F;&#x662F;&#x5C0F;&#x6570;&#x636E;&#x91CF;&#x7684; <code>apply/commit</code> &#x64CD;&#x4F5C;&#x4E5F;&#x6709;&#x53EF;&#x80FD;&#x5BFC;&#x81F4; ANR</p>
+<h1 id="&#x6B63;&#x53CD;&#x9762;"><a href="#&#x6B63;&#x53CD;&#x9762;" class="headerlink" title="&#x6B63;&#x53CD;&#x9762;"></a>&#x6B63;&#x53CD;&#x9762;</h1><p>SharedPreferencesImpl &#x5728;&#x4E0D;&#x540C;&#x7684;&#x7CFB;&#x7EDF;&#x7248;&#x672C;&#x4E2D;&#x6709;&#x7740;&#x6BD4;&#x8F83;&#x5927;&#x7684;&#x5DEE;&#x522B;&#xFF0C;&#x4F8B;&#x5982; writeToFile &#x65B9;&#x6CD5;&#x5BF9;&#x4E8E;&#x4EFB;&#x52A1;&#x7248;&#x672C;&#x53F7;&#x7684;&#x6821;&#x9A8C;&#x4E5F;&#x662F;&#x4ECE; 8.0 &#x7CFB;&#x7EDF;&#x5F00;&#x59CB;&#x7684;&#xFF0C;&#x5728; 8.0 &#x7CFB;&#x7EDF;&#x4E4B;&#x524D;&#x5BF9;&#x4E8E;&#x8FDE;&#x7EED;&#x7684; commit &#x548C; apply &#x6BCF;&#x6B21;&#x90FD;&#x4F1A;&#x89E6;&#x53D1; I/O &#x64CD;&#x4F5C;&#xFF0C;&#x6240;&#x4EE5;&#x5728; 8.0 &#x7CFB;&#x7EDF;&#x4E4B;&#x524D; ANR &#x95EE;&#x9898;&#x4F1A;&#x66F4;&#x52A0;&#x5BB9;&#x6613;&#x590D;&#x73B0;&#x3002;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x6839;&#x636E;&#x7CFB;&#x7EDF;&#x7248;&#x672C;&#x6765;&#x770B;&#x5F85;&#x4EE5;&#x4E0A;&#x5217;&#x4E3E;&#x51FA;&#x6765;&#x7684;&#x5404;&#x4E2A;&#x7F3A;&#x9677;</p>
+<p>&#x9700;&#x8981;&#x5F3A;&#x8C03;&#x7684;&#x662F;&#xFF0C;SP &#x672C;&#x8EAB;&#x7684;&#x5B9A;&#x4F4D;&#x662F;<strong>&#x8F7B;&#x91CF;&#x7EA7;&#x6570;&#x636E;&#x5B58;&#x50A8;</strong>&#xFF0C;&#x8BBE;&#x8BA1;&#x521D;&#x8877;&#x662F;&#x7528;&#x4E8E;&#x5B58;&#x50A8;<strong>&#x7B80;&#x5355;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;</strong>&#xFF08;&#x57FA;&#x672C;&#x6570;&#x636E;&#x7C7B;&#x578B;&#xFF09;&#xFF0C;&#x4E14;&#x63D0;&#x4F9B;&#x4E86;&#x6309;&#x6A21;&#x5757;&#x5206;&#x533A;&#x5B58;&#x50A8;&#x7684;&#x529F;&#x80FD;&#x3002;&#x5982;&#x679C;&#x5F00;&#x53D1;&#x8005;&#x80FD;&#x591F;&#x4E25;&#x683C;&#x9075;&#x5B88;&#x8FD9;&#x4E00;&#x4E2A;&#x89C4;&#x8303;&#x7684;&#x8BDD;&#xFF0C;&#x90A3;&#x4E48;&#x5176;&#x5B9E;&#x4EE5;&#x4E0A;&#x6240;&#x8FF0;&#x7684;&#x5F88;&#x591A;&#x201C;&#x7F3A;&#x9677;&#x201D;&#x90FD;&#x662F;&#x53EF;&#x4EE5;&#x907F;&#x514D;&#x7684;&#x3002;&#x800C; SP &#x4E4B;&#x6240;&#x4EE5;&#x73B0;&#x5728;&#x770B;&#x8D77;&#x6765;&#x95EE;&#x9898;&#x5F88;&#x591A;&#xFF0C;&#x4E5F;&#x662F;&#x56E0;&#x4E3A;&#x5982;&#x4ECA;&#x5927;&#x90E8;&#x5206;&#x5E94;&#x7528;&#x7684;&#x4E1A;&#x52A1;&#x6BD4;&#x4EE5;&#x524D;&#x590D;&#x6742;&#x592A;&#x591A;&#x4E86;&#xFF0C;&#x6709;&#x4E9B;&#x65F6;&#x5019;&#x4E3A;&#x4E86;&#x65B9;&#x4FBF;&#x5C31;&#x76F4;&#x63A5;&#x7528;&#x6765;&#x5B58;&#x50A8;&#x975E;&#x5E38;&#x590D;&#x6742;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;&#x6216;&#x8005;&#x662F;&#x6CA1;&#x6709;&#x505A;&#x597D;&#x6570;&#x636E;&#x5206;&#x533A;&#x5B58;&#x50A8;&#xFF0C;&#x5BFC;&#x81F4;&#x5355;&#x4E2A;&#x6587;&#x4EF6;&#x8FC7;&#x5927;&#xFF0C;&#x8FD9;&#x624D;&#x662F;&#x9020;&#x6210;&#x95EE;&#x9898;&#x7684;&#x4E3B;&#x8981;&#x539F;&#x56E0;</p>
+<h1 id="&#x5982;&#x4F55;&#x505A;&#x597D;&#x6301;&#x4E45;&#x5316;"><a href="#&#x5982;&#x4F55;&#x505A;&#x597D;&#x6301;&#x4E45;&#x5316;" class="headerlink" title="&#x5982;&#x4F55;&#x505A;&#x597D;&#x6301;&#x4E45;&#x5316;"></a>&#x5982;&#x4F55;&#x505A;&#x597D;&#x6301;&#x4E45;&#x5316;</h1><p>&#x4EE5;&#x4E0B;&#x7684;&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#x4F30;&#x8BA1;&#x662F;&#x5F88;&#x591A;&#x5F00;&#x53D1;&#x8005;&#x7684;&#x5669;&#x68A6;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;val sharedPreference = getSharedPreferences(&quot;user_preference&quot;, Context.MODE_PRIVATE)</span><br><span class="line">val name = sharedPreference.getString(&quot;name&quot;, &quot;&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#x4EE3;&#x7801;&#x5B58;&#x5728;&#x4EC0;&#x4E48;&#x95EE;&#x9898;&#x5462;&#xFF1F;&#x6211;&#x89C9;&#x5F97;&#x81F3;&#x5C11;&#x6709;&#x4E94;&#x70B9;&#xFF1A;</p>
+<ul>
+<li>&#x5F3A;&#x5F15;&#x7528;&#x5230;&#x4E86; SP&#xFF0C;&#x5BFC;&#x81F4;&#x540E;&#x7EED;&#x9700;&#x8981;&#x5207;&#x6362;&#x5B58;&#x50A8;&#x5E93;&#x65F6;&#x9700;&#x8981;&#x5168;&#x5C40;&#x641C;&#x7D22;&#x66FF;&#x6362;&#xFF0C;&#x5DE5;&#x4F5C;&#x91CF;&#x975E;&#x5E38;&#x5927;</li>
+<li>key &#x503C;&#x96BE;&#x7EF4;&#x62A4;&#xFF0C;&#x6BCF;&#x6B21;&#x83B7;&#x53D6; value &#x65F6;&#x90FD;&#x9700;&#x8981;&#x663E;&#x5F0F;&#x58F0;&#x660E; key &#x503C;</li>
+<li>&#x53EF;&#x8BFB;&#x6027;&#x5DEE;&#xFF0C;&#x952E;&#x503C;&#x5BF9;&#x7684;&#x542B;&#x4E49;&#x57FA;&#x672C;&#x53EA;&#x80FD;&#x9760; key &#x503C;&#x8FDB;&#x884C;&#x8868;&#x793A;</li>
+<li>&#x53EA;&#x652F;&#x6301;&#x57FA;&#x672C;&#x6570;&#x636E;&#x7C7B;&#x578B;&#xFF0C;&#x5728;&#x5B58;&#x53D6;&#x81EA;&#x5B9A;&#x4E49;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x65F6;&#x5B58;&#x5728;&#x5F88;&#x591A;&#x91CD;&#x590D;&#x5DE5;&#x4F5C;&#x3002;&#x8981;&#x5411; SP &#x5B58;&#x5165;&#x81EA;&#x5B9A;&#x4E49;&#x7684; JavaBean &#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x53EA;&#x80FD;&#x5C06; Bean &#x5BF9;&#x8C61;&#x8F6C;&#x4E3A; Json &#x5B57;&#x7B26;&#x4E32;&#x540E;&#x5B58;&#x5165; SP&#xFF0C;&#x5728;&#x53D6;&#x503C;&#x65F6;&#x518D;&#x624B;&#x52A8;&#x53CD;&#x5E8F;&#x5217;&#x5316;</li>
+<li>&#x6570;&#x636E;&#x7C7B;&#x578B;&#x4E0D;&#x660E;&#x786E;&#xFF0C;&#x57FA;&#x672C;&#x53EA;&#x80FD;&#x9760;&#x6CE8;&#x91CA;&#x6765;&#x5F15;&#x5BFC;&#x5F00;&#x53D1;&#x8005;&#x4F7F;&#x7528;&#x6B63;&#x786E;&#x7684;&#x6570;&#x636E;&#x7C7B;&#x578B;</li>
+</ul>
+<p>&#x5F00;&#x53D1;&#x8005;&#x5F80;&#x5F80;&#x662F;&#x4F1A;&#x58F0;&#x660E;&#x51FA;&#x5404;&#x79CD; SpUtils &#x7C7B;&#x8FDB;&#x884C;&#x591A;&#x4E00;&#x5C42;&#x5C01;&#x88C5;&#xFF0C;&#x4F46;&#x4E5F;&#x6CA1;&#x6CD5;&#x5F7B;&#x5E95;&#x89E3;&#x51B3;&#x4EE5;&#x4E0A;&#x95EE;&#x9898;&#x3002;SP &#x7684;&#x786E;&#x662F;&#x5B58;&#x5728;&#x7740;&#x4E00;&#x4E9B;&#x8BBE;&#x8BA1;&#x7F3A;&#x9677;&#xFF0C;&#x4F46;&#x5BF9;&#x4E8E;&#x5927;&#x90E8;&#x5206;&#x5E94;&#x7528;&#x5F00;&#x53D1;&#x8005;&#x6765;&#x8BF4;&#x5176;&#x5B9E;&#x5E76;&#x6CA1;&#x6709;&#x591A;&#x5C11;&#x9009;&#x62E9;&#xFF0C;&#x6211;&#x4EEC;&#x53EA;&#x80FD;&#x9009;&#x62E9;&#x7528;&#x6216;&#x8005;&#x4E0D;&#x7528;&#xFF0C;&#x5E76;&#x6CA1;&#x6709;&#x591A;&#x5C11;&#x4F59;&#x5730;&#x53EF;&#x4EE5;&#x6765;&#x89E3;&#x51B3;&#x6216;&#x8005;&#x907F;&#x514D;&#x5176;&#x5B58;&#x5728;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x6211;&#x4EEC;&#x5F80;&#x5F80;&#x53EA;&#x80FD;&#x5728;&#x9047;&#x5230;&#x95EE;&#x9898;&#x540E;&#x5207;&#x6362;&#x5230;&#x5176;&#x5B83;&#x7684;&#x6301;&#x4E45;&#x5316;&#x5B58;&#x50A8;&#x65B9;&#x6848;</p>
+<p>&#x76EE;&#x524D;&#x6709;&#x4E24;&#x4E2A;&#x6BD4;&#x8F83;&#x77E5;&#x540D;&#x7684;&#x6301;&#x4E45;&#x5316;&#x5B58;&#x50A8;&#x65B9;&#x6848;&#xFF1A;Jetpack DataStore &#x548C;&#x817E;&#x8BAF;&#x7684; MMKV&#xFF0C;&#x6211;&#x4EEC;&#x5F53;&#x7136;&#x53EF;&#x4EE5;&#x9009;&#x62E9;&#x5C06;&#x9879;&#x76EE;&#x4E2D;&#x7684; SP &#x5207;&#x6362;&#x4E3A;&#x8FD9;&#x4E24;&#x4E2A;&#x5E93;&#x4E4B;&#x4E00;&#xFF0C;&#x4F46;&#x8FD9;&#x4E5F;&#x4E0D;&#x7981;&#x8BA9;&#x4EBA;&#x60F3;&#x5230;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x5982;&#x679C;&#x4EE5;&#x540E;&#x8FD9;&#x4E24;&#x4E2A;&#x5E93;&#x4E5F;&#x9047;&#x5230;&#x4E86;&#x95EE;&#x9898;&#x751A;&#x81F3;&#x662F;&#x76F4;&#x63A5;&#x88AB;&#x5E9F;&#x5F03;&#x4E86;&#xFF0C;&#x96BE;&#x9053;&#x6211;&#x4EEC;&#x53C8;&#x9700;&#x8981;&#x518D;&#x6765;&#x5168;&#x5C40;&#x66FF;&#x6362;&#x4E00;&#x904D;&#x5417;&#xFF1F;&#x6211;&#x4EEC;&#x5E94;&#x8BE5;&#x5982;&#x4F55;&#x8BBE;&#x8BA1;&#x624D;&#x80FD;&#x4F7F;&#x5F97;&#x6BCF;&#x6B21;&#x7684;&#x66FF;&#x6362;&#x6210;&#x672C;&#x964D;&#x5230;&#x6700;&#x4F4E;&#x5462;&#xFF1F;</p>
+<p>&#x5728;&#x6211;&#x770B;&#x6765;&#xFF0C;&#x5F00;&#x53D1;&#x8005;&#x5728;&#x4E3A;&#x9879;&#x76EE;&#x5F15;&#x5165;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x4F9D;&#x8D56;&#x5E93;&#x4E4B;&#x524D;&#x5C31;&#x5E94;&#x8BE5;&#x4E3A;&#x4EE5;&#x540E;&#x79FB;&#x9664;&#x8BE5;&#x5E93;&#x505A;&#x597D;&#x51C6;&#x5907;&#xFF0C;&#x505A;&#x597D;&#x63A5;&#x53E3;&#x9694;&#x79BB;&#xFF0C;&#x5C4F;&#x853D;&#x5177;&#x4F53;&#x7684;&#x5E95;&#x5C42;&#x903B;&#x8F91;&#xFF08;&#x5F53;&#x7136;&#xFF0C;&#x4E5F;&#x4E0D;&#x662F;&#x6BCF;&#x4E2A;&#x4F9D;&#x8D56;&#x5E93;&#x90FD;&#x53EF;&#x4EE5;&#x505A;&#x5230;&#xFF09;&#x3002;&#x7B14;&#x8005;&#x7684;&#x9879;&#x76EE;&#x4E4B;&#x524D;&#x4E5F;&#x662F;&#x4F7F;&#x7528; SP &#x6765;&#x5B58;&#x50A8;&#x914D;&#x7F6E;&#x4FE1;&#x606F;&#xFF0C;&#x540E;&#x6765;&#x6211;&#x4E5F;&#x5C06;&#x5176;&#x5207;&#x6362;&#x5230;&#x4E86; MMKV&#xFF0C;&#x4E0B;&#x9762;&#x5C31;&#x6765;&#x4ECB;&#x7ECD;&#x4E0B;&#x7B14;&#x8005;&#x5F53;&#x65F6;&#x662F;&#x5982;&#x4F55;&#x8BBE;&#x8BA1;&#x5B58;&#x50A8;&#x7ED3;&#x6784;&#x907F;&#x514D;&#x786C;&#x7F16;&#x7801;&#x7684;</p>
+<h2 id="&#x76EE;&#x524D;&#x7684;&#x6548;&#x679C;"><a href="#&#x76EE;&#x524D;&#x7684;&#x6548;&#x679C;" class="headerlink" title="&#x76EE;&#x524D;&#x7684;&#x6548;&#x679C;"></a>&#x76EE;&#x524D;&#x7684;&#x6548;&#x679C;</h2><p>&#x6211;&#x5C06;&#x5E94;&#x7528;&#x5185;&#x6240;&#x6709;&#x9700;&#x8981;&#x5B58;&#x50A8;&#x7684;&#x952E;&#x503C;&#x5BF9;&#x6570;&#x636E;&#x5206;&#x4E3A;&#x4E86;&#x4E09;&#x7C7B;&#xFF1A;<strong>&#x7528;&#x6237;&#x5F3A;&#x5173;&#x8054;&#x6570;&#x636E;&#x3001;&#x5E94;&#x7528;&#x914D;&#x7F6E;&#x6570;&#x636E;&#x3001;&#x4E0D;&#x53EF;&#x4E8C;&#x6B21;&#x53D8;&#x66F4;&#x7684;&#x6570;&#x636E;</strong>&#x3002;&#x6BCF;&#x4E00;&#x7C7B;&#x6570;&#x636E;&#x7684;&#x5B58;&#x50A8;&#x533A;&#x57DF;&#x5404;&#x4E0D;&#x76F8;&#x540C;&#xFF0C;&#x4E92;&#x4E0D;&#x5F71;&#x54CD;&#x3002;&#x8FDB;&#x884C;&#x6570;&#x636E;&#x5206;&#x7EC4;&#x7684;&#x597D;&#x5904;&#x5C31;&#x5728;&#x4E8E;&#x53EF;&#x4EE5;&#x6839;&#x636E;&#x9700;&#x8981;&#x6765;&#x6E05;&#x9664;&#x7279;&#x5B9A;&#x6570;&#x636E;&#xFF0C;&#x4F8B;&#x5982;&#x5F53;&#x7528;&#x6237;&#x9000;&#x767B;&#x540E;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x53EA;&#x6E05;&#x9664; UserKVHolder&#xFF0C;&#x800C; PreferenceKVHolder &#x548C; FinalKVHolder &#x5219;&#x53EF;&#x4EE5;&#x4E00;&#x76F4;&#x4FDD;&#x7559;</p>
+<p>IKVHolder &#x63A5;&#x53E3;&#x5B9A;&#x4E49;&#x4E86;&#x57FA;&#x672C;&#x7684;&#x5B58;&#x53D6;&#x65B9;&#x6CD5;&#xFF0C;MMKVKVHolder &#x901A;&#x8FC7; MMKV &#x5B9E;&#x73B0;&#x4E86;&#x5177;&#x4F53;&#x7684;&#x5B58;&#x50A8;&#x903B;&#x8F91;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x548C;&#x7528;&#x6237;&#x5F3A;&#x7ED1;&#x5B9A;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x5728;&#x9000;&#x51FA;&#x767B;&#x5F55;&#x65F6;&#x9700;&#x8981;&#x5168;&#x90E8;&#x6E05;&#x9664;&#xFF0C;&#x4F8B;&#x5982; UserBean</span><br><span class="line">//&#x8BBE;&#x7F6E; encryptKey &#x4EE5;&#x4FBF;&#x52A0;&#x5BC6;&#x5B58;&#x50A8;</span><br><span class="line">private val UserKVHolder: IKVHolder = MMKVKVHolder(&quot;user&quot;, &quot;&#x52A0;&#x5BC6;key&quot;)</span><br><span class="line"></span><br><span class="line">//&#x548C;&#x7528;&#x6237;&#x4E0D;&#x5F3A;&#x5173;&#x8054;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x5728;&#x9000;&#x51FA;&#x767B;&#x5F55;&#x65F6;&#x65E0;&#x9700;&#x6E05;&#x9664;&#xFF0C;&#x4F8B;&#x5982;&#x591C;&#x95F4;&#x6A21;&#x5F0F;&#x3001;&#x5B57;&#x4F53;&#x5927;&#x5C0F;&#x7B49;</span><br><span class="line">private val PreferenceKVHolder: IKVHolder = MMKVKVHolder(&quot;preference&quot;)</span><br><span class="line"></span><br><span class="line">//&#x7528;&#x4E8E;&#x5B58;&#x50A8;&#x4E0D;&#x4F1A;&#x4E8C;&#x6B21;&#x53D8;&#x66F4;&#x53EA;&#x7528;&#x4E8E;&#x5386;&#x53F2;&#x6EAF;&#x6E90;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x4F8B;&#x5982;&#x5E94;&#x7528;&#x9996;&#x6B21;&#x5B89;&#x88C5;&#x7684;&#x65F6;&#x95F4;&#x3001;&#x7248;&#x672C;&#x53F7;&#x3001;&#x7248;&#x672C;&#x540D;&#x7B49;</span><br><span class="line">private val FinalKVHolder: IKVHolder = MMKVKVFinalHolder(&quot;final&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E4B;&#x540E;&#x6211;&#x4EEC;&#x5C31;&#x53EF;&#x4EE5;&#x5229;&#x7528; Kotlin &#x5F3A;&#x5927;&#x7684;&#x8BED;&#x6CD5;&#x7279;&#x6027;&#x6765;&#x5B9A;&#x4E49;&#x952E;&#x503C;&#x5BF9;&#x4E86;</p>
+<p>&#x4F8B;&#x5982;&#xFF0C;&#x5BF9;&#x4E8E;&#x548C;&#x7528;&#x6237;&#x5F3A;&#x5173;&#x8054;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x6BCF;&#x4E2A;&#x952E;&#x503C;&#x5BF9;&#x90FD;&#x5B9A;&#x4E49;&#x4E3A; UserKV &#x7684;&#x4E00;&#x4E2A;&#x5C5E;&#x6027;&#x5B57;&#x6BB5;&#xFF0C;&#x952E;&#x503C;&#x5BF9;&#x7684;&#x542B;&#x4E49;&#x548C;&#x4F5C;&#x7528;&#x901A;&#x8FC7;&#x5C5E;&#x6027;&#x540D;&#x6765;&#x8FDB;&#x884C;&#x6807;&#x8BC6;&#xFF0C;&#x4E14;&#x952E;&#x503C;&#x5BF9;&#x7684; key &#x5FC5;&#x987B;&#x548C;&#x5C5E;&#x6027;&#x540D;&#x4FDD;&#x6301;&#x4E00;&#x81F4;&#xFF0C;&#x8FD9;&#x6837;&#x53EF;&#x4EE5;&#x907F;&#x514D; key &#x503C;&#x91CD;&#x590D;&#x3002;&#x6BCF;&#x4E2A; getValue &#x64CD;&#x4F5C;&#x4E5F;&#x90FD;&#x652F;&#x6301;&#x8BBE;&#x7F6E;&#x9ED8;&#x8BA4;&#x503C;&#x3002;IKVHolder &#x5185;&#x90E8;&#x901A;&#x8FC7; Gson &#x6765;&#x5B9E;&#x73B0;&#x5E8F;&#x5217;&#x5316;&#x548C;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#xFF0C;&#x8FD9;&#x6837; UserKV &#x5C31;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x5B58;&#x50A8; JavaBean&#x3001;JavaBeanList&#xFF0C;Map &#x7B49;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x4E86;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;object UserKV : IKVHolder by UserKVHolder {</span><br><span class="line"></span><br><span class="line">    var name: String</span><br><span class="line">        get() = get(&quot;name&quot;, &quot;&quot;)</span><br><span class="line">        set(value) = set(&quot;name&quot;, value)</span><br><span class="line"></span><br><span class="line">    var blog: String</span><br><span class="line">        get() = get(&quot;blog&quot;, &quot;&quot;)</span><br><span class="line">        set(value) = set(&quot;blog&quot;, value)</span><br><span class="line"></span><br><span class="line">    var userBean: UserBean?</span><br><span class="line">        get() = getBeanOrNull(&quot;userBean&quot;)</span><br><span class="line">        set(value) = set(&quot;userBean&quot;, value)</span><br><span class="line"></span><br><span class="line">    var userBeanOfDefault: UserBean</span><br><span class="line">        get() = getBeanOrDefault(</span><br><span class="line">            &quot;userBeanOfDefault&quot;,</span><br><span class="line">            UserBean(&quot;&#x4E1A;&#x5FD7;&#x9648;&quot;, &quot;https://juejin.cn/user/923245496518439&quot;)</span><br><span class="line">        )</span><br><span class="line">        set(value) = set(&quot;userBeanOfDefault&quot;, value)</span><br><span class="line"></span><br><span class="line">    var userBeanList: List&lt;UserBean&gt;</span><br><span class="line">        get() = getBean(&quot;userBeanList&quot;)</span><br><span class="line">        set(value) = set(&quot;userBeanList&quot;, value)</span><br><span class="line"></span><br><span class="line">    var map: Map&lt;Int, String&gt;</span><br><span class="line">        get() = getBean(&quot;map&quot;)</span><br><span class="line">        set(value) = set(&quot;map&quot;, value)</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6B64;&#x5916;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x5728; setValue &#x65B9;&#x6CD5;&#x4E2D;&#x5BF9; value &#x8FDB;&#x884C;&#x6821;&#x9A8C;&#xFF0C;&#x907F;&#x514D;&#x65E0;&#x6548;&#x503C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;object UserKV : IKVHolder by UserKVHolder {</span><br><span class="line"></span><br><span class="line">    var age: Int</span><br><span class="line">        get() = get(&quot;age&quot;, 0)</span><br><span class="line">        set(value) {</span><br><span class="line">            if (value &lt;= 0) {</span><br><span class="line">                return</span><br><span class="line">            }</span><br><span class="line">            set(&quot;age&quot;, value)</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E4B;&#x540E;&#x6211;&#x4EEC;&#x5728;&#x5B58;&#x53D6;&#x503C;&#x65F6;&#xFF0C;&#x5C31;&#x76F8;&#x5F53;&#x4E8E;&#x5728;&#x76F4;&#x63A5;&#x8BFB;&#x5199; UserKV &#x7684;&#x5C5E;&#x6027;&#x503C;&#xFF0C;&#x4E5F;&#x652F;&#x6301;&#x52A8;&#x6001;&#x6307;&#x5B9A; Key &#x8FDB;&#x884C;&#x8D4B;&#x503C;&#x53D6;&#x503C;&#xFF0C;&#x5728;&#x6613;&#x7528;&#x6027;&#x548C;&#x53EF;&#x8BFB;&#x6027;&#x4E0A;&#x76F8;&#x6BD4; SharedPreferences &#x90FD;&#x6709;&#x5F88;&#x5927;&#x7684;&#x63D0;&#x5347;&#xFF0C;&#x4E14;&#x5BF9;&#x4E8E;&#x5916;&#x90E8;&#x6765;&#x8BF4;&#x5B8C;&#x5168;&#x5C4F;&#x853D;&#x4E86;&#x5177;&#x4F53;&#x7684;&#x5B58;&#x50A8;&#x5B9E;&#x73B0;&#x903B;&#x8F91;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x5B58;&#x503C;</span><br><span class="line">UserKV.name = &quot;&#x4E1A;&#x5FD7;&#x9648;&quot;</span><br><span class="line">UserKV.blog = &quot;https://juejin.cn/user/923245496518439&quot;</span><br><span class="line"></span><br><span class="line">//&#x53D6;&#x503C;</span><br><span class="line">val name = UserKV.name</span><br><span class="line">val blog = UserKV.blog</span><br><span class="line"></span><br><span class="line">//&#x52A8;&#x6001;&#x6307;&#x5B9A; Key &#x8FDB;&#x884C;&#x8D4B;&#x503C;&#x548C;&#x53D6;&#x503C;</span><br><span class="line">UserKV.set(&quot;name&quot;, &quot;&#x4E1A;&#x5FD7;&#x9648;&quot;)</span><br><span class="line">val name = UserKV.get(&quot;name&quot;, &quot;&quot;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x5982;&#x4F55;&#x8BBE;&#x8BA1;&#x7684;"><a href="#&#x5982;&#x4F55;&#x8BBE;&#x8BA1;&#x7684;" class="headerlink" title="&#x5982;&#x4F55;&#x8BBE;&#x8BA1;&#x7684;"></a>&#x5982;&#x4F55;&#x8BBE;&#x8BA1;&#x7684;</h2><p>&#x9996;&#x5148;&#xFF0C;IKVHolder &#x5B9A;&#x4E49;&#x4E86;&#x57FA;&#x672C;&#x7684;&#x5B58;&#x53D6;&#x65B9;&#x6CD5;&#xFF0C;&#x9664;&#x4E86;&#x9700;&#x8981;&#x652F;&#x6301;&#x57FA;&#x672C;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x5916;&#xFF0C;&#x8FD8;&#x9700;&#x8981;&#x652F;&#x6301;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x6570;&#x636E;&#x7C7B;&#x578B;&#x3002;&#x4F9D;&#x9760; Kotlin &#x7684; <strong>&#x6269;&#x5C55;&#x51FD;&#x6570;</strong> &#x548C; <strong>&#x5185;&#x8054;&#x51FD;&#x6570;</strong> &#x8FD9;&#x4E24;&#x4E2A;&#x8BED;&#x6CD5;&#x7279;&#x6027;&#xFF0C;&#x6211;&#x4EEC;&#x5728;&#x5B58;&#x53D6;&#x81EA;&#x5B9A;&#x4E49;&#x7C7B;&#x578B;&#x65F6;&#x90FD;&#x65E0;&#x9700;&#x58F0;&#x660E;&#x6CDB;&#x578B;&#x7C7B;&#x578B;&#xFF0C;&#x4F7F;&#x7528;&#x4E0A;&#x5341;&#x5206;&#x7B80;&#x6D01;&#x3002;JsonHolder &#x5219;&#x662F;&#x901A;&#x8FC7; Gson &#x5B9E;&#x73B0;&#x4E86;&#x57FA;&#x672C;&#x7684;&#x5E8F;&#x5217;&#x5316;&#x548C;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x65B9;&#x6CD5;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;interface IKVHolder {</span><br><span class="line"></span><br><span class="line">    companion object {</span><br><span class="line"></span><br><span class="line">        inline fun &lt;reified T&gt; IKVHolder.getBean(key: String): T {</span><br><span class="line">            return JsonHolder.toBean(get(key, &quot;&quot;))</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        inline fun &lt;reified T&gt; IKVHolder.getBeanOrNull(key: String): T? {</span><br><span class="line">            return JsonHolder.toBeanOrNull(get(key, &quot;&quot;))</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        inline fun &lt;reified T&gt; IKVHolder.getBeanOrDefault(key: String, defaultValue: T): T {</span><br><span class="line">            return JsonHolder.toBeanOrDefault(get(key, &quot;&quot;), defaultValue)</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        fun toJson(ob: Any?): String {</span><br><span class="line">            return JsonHolder.toJson(ob)</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    //&#x6570;&#x636E;&#x5206;&#x7EC4;&#xFF0C;&#x7528;&#x4E8E;&#x6807;&#x660E;&#x4E0D;&#x540C;&#x8303;&#x56F4;&#x5185;&#x7684;&#x6570;&#x636E;&#x7F13;&#x5B58;</span><br><span class="line">    val keyGroup: String</span><br><span class="line"></span><br><span class="line">    fun verifyBeforePut(key: String, value: Any?): Boolean</span><br><span class="line"></span><br><span class="line">    fun get(key: String, default: Int): Int</span><br><span class="line"></span><br><span class="line">    fun set(key: String, value: Int)</span><br><span class="line"></span><br><span class="line">    fun &lt;T&gt; set(key: String, value: T?)</span><br><span class="line"></span><br><span class="line">    fun containsKey(key: String): Boolean</span><br><span class="line"></span><br><span class="line">    fun removeKey(vararg keys: String)</span><br><span class="line"></span><br><span class="line">    fun allKeyValue(): Map&lt;String, Any?&gt;</span><br><span class="line"></span><br><span class="line">    fun clear()</span><br><span class="line">    </span><br><span class="line">    &#xB7;&#xB7;&#xB7;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>BaseMMKVKVHolder &#x5B9E;&#x73B0;&#x4E86; IKVHolder &#x63A5;&#x53E3;&#xFF0C;&#x5185;&#x90E8;&#x5F15;&#x5165;&#x4E86; MMKV &#x4F5C;&#x4E3A;&#x5177;&#x4F53;&#x7684;&#x6301;&#x4E45;&#x5316;&#x5B58;&#x50A8;&#x65B9;&#x6848;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * @param selfGroup &#x7528;&#x4E8E;&#x6307;&#x5B9A;&#x6570;&#x636E;&#x5206;&#x7EC4;&#xFF0C;&#x4E0D;&#x540C;&#x5206;&#x7EC4;&#x4E0B;&#x7684;&#x6570;&#x636E;&#x4E92;&#x4E0D;&#x5173;&#x8054;</span><br><span class="line"> * @param encryptKey &#x52A0;&#x5BC6; key&#xFF0C;&#x5982;&#x679C;&#x4E3A;&#x7A7A;&#x5219;&#x8868;&#x793A;&#x4E0D;&#x8FDB;&#x884C;&#x52A0;&#x5BC6;</span><br><span class="line"> */</span><br><span class="line">sealed class BaseMMKVKVHolder constructor(</span><br><span class="line">    selfGroup: String,</span><br><span class="line">    encryptKey: String</span><br><span class="line">) : IKVHolder {</span><br><span class="line"></span><br><span class="line">    final override val keyGroup: String = selfGroup</span><br><span class="line"></span><br><span class="line">    override fun verifyBeforePut(key: String, value: Any?): Boolean {</span><br><span class="line">        return true</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private val kv: MMKV? = if (encryptKey.isBlank()) MMKV.mmkvWithID(</span><br><span class="line">        keyGroup,</span><br><span class="line">        MMKV.MULTI_PROCESS_MODE</span><br><span class="line">    ) else MMKV.mmkvWithID(keyGroup, MMKV.MULTI_PROCESS_MODE, encryptKey)</span><br><span class="line"></span><br><span class="line">    override fun set(key: String, value: Int) {</span><br><span class="line">        if (verifyBeforePut(key, value)) {</span><br><span class="line">            kv?.putInt(key, value)</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun &lt;T&gt; set(key: String, value: T?) {</span><br><span class="line">        if (verifyBeforePut(key, value)) {</span><br><span class="line">            if (value == null) {</span><br><span class="line">                removeKey(key)</span><br><span class="line">            } else {</span><br><span class="line">                set(key, toJson(value))</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun get(key: String, default: Int): Int {</span><br><span class="line">        return kv?.getInt(key, default) ?: default</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun containsKey(key: String): Boolean {</span><br><span class="line">        return kv?.containsKey(key) ?: false</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun removeKey(vararg keys: String) {</span><br><span class="line">        kv?.removeValuesForKeys(keys)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun allKeyValue(): Map&lt;String, Any?&gt; {</span><br><span class="line">        val map = mutableMapOf&lt;String, Any?&gt;()</span><br><span class="line">        kv?.allKeys()?.forEach {</span><br><span class="line">            map[it] = getObjectValue(kv, it)</span><br><span class="line">        }</span><br><span class="line">        return map</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun clear() {</span><br><span class="line">        kv?.clearAll()</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">	&#xB7;&#xB7;&#xB7;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>BaseMMKVKVHolder &#x6709;&#x4E24;&#x4E2A;&#x5B50;&#x7C7B;&#xFF0C;&#x5176;&#x533A;&#x522B;&#x53EA;&#x5728;&#x4E8E; MMKVKVFinalHolder &#x4FDD;&#x5B58;&#x952E;&#x503C;&#x5BF9;&#x540E;&#x65E0;&#x6CD5;&#x518D;&#x6B21;&#x66F4;&#x6539;&#x503C;&#xFF0C;&#x7528;&#x4E8E;&#x5B58;&#x50A8;&#x4E0D;&#x4F1A;&#x4E8C;&#x6B21;&#x53D8;&#x66F4;&#x53EA;&#x7528;&#x4E8E;&#x5386;&#x53F2;&#x6EAF;&#x6E90;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x4F8B;&#x5982;&#x5E94;&#x7528;&#x9996;&#x6B21;&#x5B89;&#x88C5;&#x65F6;&#x7684;&#x65F6;&#x95F4;&#x6233;&#x3001;&#x7248;&#x672C;&#x53F7;&#x3001;&#x7248;&#x672C;&#x540D;&#x7B49;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">kotlin&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * @param selfGroup &#x7528;&#x4E8E;&#x6307;&#x5B9A;&#x6570;&#x636E;&#x5206;&#x7EC4;&#xFF0C;&#x4E0D;&#x540C;&#x5206;&#x7EC4;&#x4E0B;&#x7684;&#x6570;&#x636E;&#x4E92;&#x4E0D;&#x5173;&#x8054;</span><br><span class="line"> * @param encryptKey &#x52A0;&#x5BC6; key&#xFF0C;&#x5982;&#x679C;&#x4E3A;&#x7A7A;&#x5219;&#x8868;&#x793A;&#x4E0D;&#x8FDB;&#x884C;&#x52A0;&#x5BC6;</span><br><span class="line"> */</span><br><span class="line">class MMKVKVHolder constructor(selfGroup: String, encryptKey: String = &quot;&quot;) :</span><br><span class="line">    BaseMMKVKVHolder(selfGroup, encryptKey)</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * &#x5B58;&#x50A8;&#x540E;&#x503C;&#x65E0;&#x6CD5;&#x4E8C;&#x6B21;&#x53D8;&#x66F4;</span><br><span class="line"> * @param selfGroup &#x7528;&#x4E8E;&#x6307;&#x5B9A;&#x6570;&#x636E;&#x5206;&#x7EC4;&#xFF0C;&#x4E0D;&#x540C;&#x5206;&#x7EC4;&#x4E0B;&#x7684;&#x6570;&#x636E;&#x4E92;&#x4E0D;&#x5173;&#x8054;</span><br><span class="line"> * @param encryptKey &#x52A0;&#x5BC6; key&#xFF0C;&#x5982;&#x679C;&#x4E3A;&#x7A7A;&#x5219;&#x8868;&#x793A;&#x4E0D;&#x8FDB;&#x884C;&#x52A0;&#x5BC6;</span><br><span class="line"> */</span><br><span class="line">class MMKVKVFinalHolder constructor(selfGroup: String, encryptKey: String = &quot;&quot;) :</span><br><span class="line">    BaseMMKVKVHolder(selfGroup, encryptKey) {</span><br><span class="line"></span><br><span class="line">    override fun verifyBeforePut(key: String, value: Any?): Boolean {</span><br><span class="line">        return !containsKey(key)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x63A5;&#x53E3;&#x9694;&#x79BB;&#xFF0C;UserKV &#x5C31;&#x5B8C;&#x5168;&#x4E0D;&#x4F1A;&#x63A5;&#x89E6;&#x5230;&#x5177;&#x4F53;&#x7684;&#x5B58;&#x50A8;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x4E86;&#xFF0C;&#x5BF9;&#x4E8E;&#x5F00;&#x53D1;&#x8005;&#x6765;&#x8BF4;&#x4E5F;&#x53EA;&#x662F;&#x5728;&#x8BFB;&#x5199; UserKV &#x7684;&#x4E00;&#x4E2A;&#x5C5E;&#x6027;&#x5B57;&#x6BB5;&#x800C;&#x5DF2;&#xFF0C;&#x5F53;&#x540E;&#x7EED;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x66FF;&#x6362;&#x5B58;&#x50A8;&#x65B9;&#x6848;&#x65F6;&#xFF0C;&#x4E5F;&#x53EA;&#x9700;&#x8981;&#x53BB;&#x6539;&#x52A8; MMKVKVHolder &#x7684;&#x5185;&#x90E8;&#x5B9E;&#x73B0;&#x5373;&#x53EF;&#xFF0C;&#x4E0A;&#x5C42;&#x5E94;&#x7528;&#x5B8C;&#x5168;&#x4E0D;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x4EFB;&#x4F55;&#x6539;&#x52A8;</p>
+<h2 id="KVHolder"><a href="#KVHolder" class="headerlink" title="KVHolder"></a>KVHolder</h2><p>KVHolder &#x7684;&#x5B9E;&#x73B0;&#x601D;&#x8DEF;&#x8FD8;&#x662F;&#x5341;&#x5206;&#x7B80;&#x5355;&#x7684;&#xFF0C;&#x518D;&#x52A0;&#x4E0A; Kotlin &#x672C;&#x8EAB;&#x5F3A;&#x5927;&#x7684;&#x8BED;&#x6CD5;&#x7279;&#x6027;&#x5C31;&#x8FDB;&#x4E00;&#x6B65;&#x63D0;&#x9AD8;&#x4E86;&#x6613;&#x7528;&#x6027;&#x548C;&#x53EF;&#x8BFB;&#x6027; &#x1F607;&#x1F607; &#x6211;&#x4E5F;&#x5C06;&#x5176;&#x53D1;&#x5E03;&#x4E3A;&#x5F00;&#x6E90;&#x5E93;&#xFF0C;&#x611F;&#x5174;&#x8DA3;&#x7684;&#x8BFB;&#x8005;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8FDC;&#x7A0B;&#x5BFC;&#x5165;&#x4F9D;&#x8D56;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">groovy&#x590D;&#x5236;&#x4EE3;&#x7801;allprojects {</span><br><span class="line">    repositories {</span><br><span class="line">        maven { url &quot;https://jitpack.io&quot; }</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">dependencies {</span><br><span class="line">    implementation &apos;com.github.leavesCZY:KVHolder:latest_version&apos;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>GitHub &#x70B9;&#x51FB;&#x8FD9;&#x91CC;&#xFF1A;<a href="/external_links/74d0e6ae6b65ce7e2fd3f4cdd9537c75.html" target="blank" rel="noopener">KVHolder</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/c89397d14d9892a125593bfccd517153.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/源码-面试-Android/" rel="tag"># 源码,面试,Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6930648501311242248.html" rel="next" title="Gradle 系列（9）代码混淆到底做了什么？ 前言 目录">
+                <i class="fa fa-chevron-left"></i> Gradle 系列（9）代码混淆到底做了什么？ 前言 目录
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6933241413341708296.html" rel="prev" title="数据结构与算法">
+                数据结构与算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">1775</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">725</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#不得不说的坑"><span class="nav-number">1.</span> <span class="nav-text">不得不说的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#会一直占用内存"><span class="nav-number">1.1.</span> <span class="nav-text">会一直占用内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getValue-可能导致线程阻塞"><span class="nav-number">1.2.</span> <span class="nav-text">getValue 可能导致线程阻塞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getValue-不保证数据类型安全"><span class="nav-number">1.3.</span> <span class="nav-text">getValue 不保证数据类型安全</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不支持多进程数据共享"><span class="nav-number">1.4.</span> <span class="nav-text">不支持多进程数据共享</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不支持增量更新"><span class="nav-number">1.5.</span> <span class="nav-text">不支持增量更新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#clear-的反直觉用法"><span class="nav-number">1.6.</span> <span class="nav-text">clear 的反直觉用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#commit、applay-可能导致-ANR"><span class="nav-number">1.7.</span> <span class="nav-text">commit、applay 可能导致 ANR</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#正反面"><span class="nav-number">2.</span> <span class="nav-text">正反面</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何做好持久化"><span class="nav-number">3.</span> <span class="nav-text">如何做好持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目前的效果"><span class="nav-number">3.1.</span> <span class="nav-text">目前的效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何设计的"><span class="nav-number">3.2.</span> <span class="nav-text">如何设计的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KVHolder"><span class="nav-number">3.3.</span> <span class="nav-text">KVHolder</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

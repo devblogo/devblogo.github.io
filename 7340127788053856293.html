@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x1F448;&amp;#x1F448;&amp;#x1F448; &amp;#x6B22;&amp;#x8FCE;&amp;#x70B9;&amp;#x8D5E;&amp;#x6536;&amp;#x85CF;&amp;#x5173;&amp;#x6CE8;&amp;#x54DF;  &amp;#x672C;&amp;#x6587;&amp;#x662F;Java&amp;#x6545;&amp;#x969C;&amp;#x6848;&amp;#x4F8B;&amp;#x5206;&amp;#x6790;&amp;#x7684;&amp;#x7B2C;&amp;#x4">
+<meta name="keywords" content="Java,后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="工作三年，为什么你还不会排查堆外内存泄漏？（下） 一 排查">
+<meta property="og:url" content="https://dev.newban.cn/7340127788053856293.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x1F448;&amp;#x1F448;&amp;#x1F448; &amp;#x6B22;&amp;#x8FCE;&amp;#x70B9;&amp;#x8D5E;&amp;#x6536;&amp;#x85CF;&amp;#x5173;&amp;#x6CE8;&amp;#x54DF;  &amp;#x672C;&amp;#x6587;&amp;#x662F;Java&amp;#x6545;&amp;#x969C;&amp;#x6848;&amp;#x4F8B;&amp;#x5206;&amp;#x6790;&amp;#x7684;&amp;#x7B2C;&amp;#x4">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2c38644c865fe641756f5619d34aecf0c274f90550996002372cae349c7aec77">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/a2452e898a7444bae0d1cedf5bca73aee387f5f0df1b5dce359653149e5b842e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/cf76f0c2cc3bf24e85e5fcf498d05371f1d3665914d615de71aa78d401dc1b9b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/98904bcae8a8f5de1e121d4907b671655c3bd0efe99941714c14f1258ad64575">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e63c8d333cca6c938782a21c1da6637e91bca9391b3f88fdd47418d91ba1d460">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/777653dc016f46713a655175fa2eb7eeb5fc0d7902f8bf5e8965f569e74e88d6">
+<meta property="og:updated_time" content="2024-04-27T07:38:58.649Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="工作三年，为什么你还不会排查堆外内存泄漏？（下） 一 排查">
+<meta name="twitter:description" content="&amp;#x1F448;&amp;#x1F448;&amp;#x1F448; &amp;#x6B22;&amp;#x8FCE;&amp;#x70B9;&amp;#x8D5E;&amp;#x6536;&amp;#x85CF;&amp;#x5173;&amp;#x6CE8;&amp;#x54DF;  &amp;#x672C;&amp;#x6587;&amp;#x662F;Java&amp;#x6545;&amp;#x969C;&amp;#x6848;&amp;#x4F8B;&amp;#x5206;&amp;#x6790;&amp;#x7684;&amp;#x7B2C;&amp;#x4">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2c38644c865fe641756f5619d34aecf0c274f90550996002372cae349c7aec77">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7340127788053856293.html">
+
+
+
+
+
+  <title>工作三年，为什么你还不会排查堆外内存泄漏？（下） 一 排查 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">工作三年，为什么你还不会排查堆外内存泄漏？（下） 一 排查</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-02-28T08:11:09+08:00">
+                2024-02-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2c38644c865fe641756f5619d34aecf0c274f90550996002372cae349c7aec77" alt="image.png"></p>
+<blockquote>
+<p>&#x1F448;&#x1F448;&#x1F448; <strong>&#x6B22;&#x8FCE;&#x70B9;&#x8D5E;&#x6536;&#x85CF;&#x5173;&#x6CE8;&#x54DF;</strong></p>
+</blockquote>
+<p>&#x672C;&#x6587;&#x662F;<a href="/external_links/b865190bf577074c796a70b00086c411.html" target="blank" rel="noopener">Java&#x6545;&#x969C;&#x6848;&#x4F8B;&#x5206;&#x6790;</a>&#x7684;&#x7B2C;&#x4E09;&#x7BC7;, &#x4E0A;&#x4E00;&#x7BC7;&#x4E2D;&#x6211;&#x4EEC;&#x5206;&#x6790;&#x4E86;&#x4E00;&#x4E2A;&#x5806;&#x5916;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x95EE;&#x9898;: <a href="https://dev.newban.cn/7338388292969283584">&#x5DE5;&#x4F5C;&#x4E09;&#x5E74;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x4F60;&#x8FD8;&#x4E0D;&#x4F1A;&#x6392;&#x67E5;&#x5806;&#x5916;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#xFF1F;(&#x4E0A;)&#xFF08;&#x6587;&#x672B;&#x9644;&#x8D60;&#x4E00;&#x4E2A;&#x6CC4;&#x6F0F;&#x6392;&#x67E5;&#x5DE5;&#x5177;&#xFF09; - &#x6398;&#x91D1; (juejin.cn)</a>(&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x91CC;&#x662F;&#x4F7F;&#x7528;NMT+PMAP&#x89E3;&#x51B3;&#x7684;&#x975E;Netty&#x9020;&#x6210;&#x7684;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;), &#x800C;&#x4ECA;&#x5929;&#x6211;&#x4EEC;&#x8981;&#x804A;&#x7684;&#x662F;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x4EE4;&#x4EBA;&#x5934;&#x75BC;&#x7684;&#x95EE;&#x9898;&#x2014;&#x2014;<strong>Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;</strong>&#x3002;&#x672C;&#x6587;&#x5C06;&#x5E26;&#x9886;&#x5927;&#x5BB6;&#x8DDF;&#x6211;&#x4E00;&#x8D77;&#x6392;&#x67E5;&#x7EBF;&#x4E0A;&#x4E00;&#x4E2A;&#x771F;&#x5B9E;&#x6848;&#x4F8B;, &#x5E76;&#x4E14;&#x6DF1;&#x5165;&#x4E86;&#x89E3;Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x7684;&#x6839;&#x672C;&#x539F;&#x56E0;&#xFF0C;&#x6700;&#x540E;&#x63D0;&#x4F9B;&#x4E86;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x7684;<strong>&#x4E09;&#x4E2A;&#x5173;&#x952E;&#x6B65;&#x9AA4;</strong>&#x3002;&#x901A;&#x8FC7;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#xFF0C;&#x4F60;&#x5C06;&#x83B7;&#x5F97;&#x5BF9;&#x5806;&#x5916;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x6392;&#x67E5;&#x7684;&#x6DF1;&#x523B;&#x7406;&#x89E3;&#xFF0C;&#x5E76;&#x5B66;&#x4F1A;&#x5982;&#x4F55;&#x6709;&#x6548;&#x5730;&#x9884;&#x9632;&#x548C;&#x89E3;&#x51B3;&#x53EF;&#x80FD;&#x7684;&#x6CC4;&#x6F0F;&#x95EE;&#x9898;.</p>
+<p>&#x7ED3;&#x5408;&#x4E0A;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;, &#x5982;&#x679C;&#x9762;&#x8BD5;&#x5B98;&#x518D;&#x95EE;&#x4F60;&#x5806;&#x5916;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x6392;&#x67E5;&#x601D;&#x8DEF;&#x4F60;&#x5E94;&#x8BE5;&#x77E5;&#x9053;&#x600E;&#x4E48;&#x56DE;&#x7B54;&#x4E86;&#x5427;&#x1F60C;&#x3002;</p>
+<blockquote>
+<p>&#x5982;&#x679C;&#x4E0D;&#x60F3;&#x770B;&#x5168;&#x6587;&#x4E5F;&#x6CA1;&#x5173;&#x7CFB;&#x54E6;, &#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8DF3;&#x5230;&#x7ED3;&#x5C3E;&#x90E8;&#x5206;, &#x6211;&#x5E2E;&#x4F60;&#x603B;&#x7ED3;&#x597D;&#x4E86;&#x1F576;.</p>
+</blockquote>
+<h1 id="&#x4E00;-&#x6392;&#x67E5;&#x8FC7;&#x7A0B;"><a href="#&#x4E00;-&#x6392;&#x67E5;&#x8FC7;&#x7A0B;" class="headerlink" title="&#x4E00;. &#x6392;&#x67E5;&#x8FC7;&#x7A0B;"></a>&#x4E00;. &#x6392;&#x67E5;&#x8FC7;&#x7A0B;</h1><p>&#x8D77;&#x56E0;&#x662F;&#x534A;&#x591C;&#x63A5;&#x5230;&#x673A;&#x5668;&#x5185;&#x5B58;&#x4E0D;&#x8DB3;&#x544A;&#x8B66;&#x7535;&#x8BDD;, &#x673A;&#x5668;&#x5B95;&#x673A;&#x1F623;&#xFF0C;&#x4E8E;&#x662F;&#x722C;&#x8D77;&#x6765;&#x89E3;&#x51B3;&#x95EE;&#x9898;&#xFF0C;&#x4E0B;&#x9762;&#x662F;&#x6392;&#x67E5;&#x8FC7;&#x7A0B;.</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/a2452e898a7444bae0d1cedf5bca73aee387f5f0df1b5dce359653149e5b842e" alt="image.png"></p>
+<h2 id="1-1-&#x521D;&#x6B65;&#x5B9A;&#x4F4D;"><a href="#1-1-&#x521D;&#x6B65;&#x5B9A;&#x4F4D;" class="headerlink" title="1.1 &#x521D;&#x6B65;&#x5B9A;&#x4F4D;"></a>1.1 &#x521D;&#x6B65;&#x5B9A;&#x4F4D;</h2><p>&#x521D;&#x6B65;&#x53D1;&#x73B0;&#x662F;&#x6211;&#x4EEC;&#x76D1;&#x63A7;&#x7CFB;&#x7EDF;&#x6240;&#x5728;&#x673A;&#x5668;&#x5185;&#x5B58;&#x4E0D;&#x8DB3;&#xFF0C;&#x4E0A;&#x673A;&#x5668;&#x6392;&#x67E5;&#xFF0C;&#x53D1;&#x73B0;&#x65E5;&#x5FD7;&#x4E2D;&#x6709;&#x5927;&#x91CF;Netty&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vbnet&#x590D;&#x5236;&#x4EE3;&#x7801;LEAK: ByteBuf.release() was not called before it&apos;s garbage-collected. Enable advanced leak reporting to find out where the leak occurred. To enable advanced leak reporting, specify the JVM option &apos;-Dio.netty.leakDetectionLevel=advanced&apos; or call ResourceLeakDetector.setLevel()</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x67E5;&#x9605;&#x76F8;&#x5173;&#x6587;&#x6863;&#x548C;&#x6E90;&#x7801;&#xFF0C;&#x5F53;Netty&#x5206;&#x914D;&#x7684;<code>ByteBuf</code>&#x5728;GC&#x524D;&#x6CA1;&#x6709;&#x8C03;&#x7528;<code>release</code>&#x65B9;&#x6CD5;&#x5C31;&#x4F1A;&#x8BB0;&#x5F55;&#x8FD9;&#x6761;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#xFF0C;&#x8BF4;&#x660E;&#x662F;&#x5728;&#x54EA;&#x91CC;&#x6CA1;&#x6709;&#x91CA;&#x653E;&#xFF0C;&#x4F46;&#x662F;&#x5355;&#x51ED;&#x8FD9;&#x6761;&#x8BB0;&#x5F55;&#x6211;&#x4EEC;&#x65E0;&#x6CD5;&#x5224;&#x65AD;&#x662F;&#x54EA;&#x91CC;&#x51FA;&#x4E86;&#x95EE;&#x9898;&#xFF0C;&#x6211;&#x4EEC;&#x8981;&#x786E;&#x5B9A;&#x4E24;&#x4E2A;&#x95EE;&#x9898;&#x1F914;&#xFF1A;</p>
+<p>1&#x3001;&#x8FD9;&#x4E9B;&#x6CC4;&#x6F0F;&#x7684;Buffer&#x662F;&#x4EC0;&#x4E48;&#xFF0C;&#x662F;&#x5728;&#x54EA;&#x91CC;&#x5206;&#x914D;&#x7684;&#xFF1F;</p>
+<p>2&#x3001;&#x8FD9;&#x4E2A;Buffer&#x6700;&#x540E;&#x662F;&#x8C01;&#x6301;&#x6709;&#x7684;&#xFF1F;</p>
+<p>&#x6309;&#x7167;&#x4E0A;&#x9762;Netty&#x7ED9;&#x6211;&#x4EEC;&#x7684;&#x63D0;&#x793A;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8BBE;&#x7F6E;<code>-Dio.netty.leakDetectionLevel=advanced</code>&#x53C2;&#x6570;&#xFF0C;Netty&#x9ED8;&#x8BA4;&#x7684;<code>io.netty.leakDetectionLevel</code>&#x53C2;&#x6570;&#x662F;<code>simple</code>&#xFF0C;&#x53EA;&#x80FD;&#x8F93;&#x51FA;&#x4E00;&#x6761;&#x7B80;&#x5355;&#x7684;&#x6CC4;&#x6F0F;&#x8BB0;&#x5F55;&#xFF0C;&#x800C;&#x8981;&#x8F93;&#x51FA;&#x66F4;&#x52A0;&#x8BE6;&#x7EC6;&#x7684;&#xFF0C;&#x9700;&#x8981;&#x8C03;&#x6574;level&#x53C2;&#x6570;&#xFF0C;&#x56E0;&#x6B64;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x6309;&#x7167;&#x63D0;&#x793A;&#x8BBE;&#x7F6E;&#x4E3A;<code>advanced</code>&#x4E0A;&#x7EBF;&#x540E;&#x540C;&#x65F6;&#x914D;&#x7F6E;&#x544A;&#x8B66;&#x7EE7;&#x7EED;&#x89C2;&#x5BDF;&#x3002;</p>
+<h2 id="1-2-&#x6CC4;&#x6F0F;&#x5806;&#x6808;&#x5206;&#x6790;"><a href="#1-2-&#x6CC4;&#x6F0F;&#x5806;&#x6808;&#x5206;&#x6790;" class="headerlink" title="1.2 &#x6CC4;&#x6F0F;&#x5806;&#x6808;&#x5206;&#x6790;"></a>1.2 &#x6CC4;&#x6F0F;&#x5806;&#x6808;&#x5206;&#x6790;</h2><p>&#x679C;&#x4E0D;&#x5176;&#x7136;&#xFF0C;&#x8FC7;&#x4E86;&#x4E00;&#x6BB5;&#x65F6;&#x95F4;&#x540E;&#xFF0C;&#x65E5;&#x5FD7;&#x91CC;&#x53C8;&#x51FA;&#x73B0;&#x4E86;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#xFF0C;&#x800C;&#x4E14;&#x8FD9;&#x6B21;&#x66F4;&#x52A0;&#x8BE6;&#x7EC6;&#xFF0C;&#x5305;&#x542B;&#x4E86;&#x5806;&#x6808;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">less&#x590D;&#x5236;&#x4EE3;&#x7801;[ERROR] epollEventLoopGroup-3-20 - io.netty.util.ResourceLeakDetector : LEAK: ByteBuf.release() was not called before it&apos;s garbage-collected. See https://netty.io/wiki/reference-counted-objects.html for more information.</span><br><span class="line">Recent access records:</span><br><span class="line">#1:</span><br><span class="line">        io.netty.buffer.AdvancedLeakAwareByteBuf.readByte(AdvancedLeakAwareByteBuf.java:401)</span><br><span class="line">        com.dianping.cat.message.spi.codec.PlainTextMessageCodec$BufferHelper.read(PlainTextMessageCodec.java:485)</span><br><span class="line">        com.dianping.cat.message.spi.codec.PlainTextMessageCodec.decodeLine(PlainTextMessageCodec.java:184)</span><br><span class="line">        // ..&#x7701;&#x7565;&#x90E8;&#x5206;&#x8F93;&#x51FA;</span><br><span class="line">        io.netty.channel.epoll.EpollEventLoop.processReady(EpollEventLoop.java:480)</span><br><span class="line">        io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:378)</span><br><span class="line">        io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:986)</span><br><span class="line">        io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)</span><br><span class="line">        io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)</span><br><span class="line">        java.lang.Thread.run(Thread.java:745)</span><br><span class="line">#2:</span><br><span class="line">        io.netty.buffer.AdvancedLeakAwareByteBuf.readByte(AdvancedLeakAwareByteBuf.java:401)</span><br><span class="line">        // ..&#x7701;&#x7565;&#x90E8;&#x5206;&#x8F93;&#x51FA;</span><br><span class="line">Created at:</span><br><span class="line">        io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:402)</span><br><span class="line">        io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)</span><br><span class="line">        io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:124)</span><br><span class="line">        io.netty.buffer.AbstractByteBuf.readBytes(AbstractByteBuf.java:871)</span><br><span class="line">        com.dianping.cat.analysis.TcpSocketReceiver$MessageDecoder.decode(TcpSocketReceiver.java:155)</span><br><span class="line">        io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:507)</span><br><span class="line">        io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:446)</span><br><span class="line">        io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:276)</span><br><span class="line">		// ..&#x7701;&#x7565;&#x90E8;&#x5206;&#x8F93;&#x51FA;</span><br><span class="line">        io.netty.channel.epoll.EpollEventLoop.processReady(EpollEventLoop.java:480)</span><br><span class="line">        io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:378)</span><br><span class="line">        io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:986)</span><br><span class="line">        io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)</span><br><span class="line">        io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)</span><br><span class="line">        java.lang.Thread.run(Thread.java:745)</span><br><span class="line">: 3 leak records were discarded because they were duplicates</span><br><span class="line">: 337 leak records were discarded because the leak record count is targeted to 4. Use system property io.netty.leakDetection.targetRecords to increase the limit.</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8FD9;&#x4E9B;&#x5806;&#x6808;&#x9664;&#x4E86;&#x6700;&#x8FD1;&#x7684;&#x8BBF;&#x95EE;&#x8BB0;&#x5F55;&#xFF0C;&#x8FD8;&#x6709;&#x5728;&#x54EA;&#x91CC;&#x521B;&#x5EFA;&#x7684;&#xFF0C;&#x901A;&#x8FC7;&#x5206;&#x6790;&#x8FD9;&#x4E0B;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#x4E86;&#xFF1A;</p>
+<p>1&#x3001;&#x8FD9;&#x4E9B;Buffer&#x662F;&#x7528;&#x6237;Java&#x5E94;&#x7528;&#x4E0A;&#x62A5;&#x7684;&#x57CB;&#x70B9;&#x6D88;&#x606F;&#x3002;</p>
+<p>2&#x3001;&#x6700;&#x540E;&#x4E00;&#x6B21;&#x8BBF;&#x95EE;Buffer&#x662F;&#x5728;&#x53CD;&#x5E8F;&#x5217;&#x5316;Buffer&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x3002;</p>
+<p>&#x8FD9;&#x91CC;&#x7B80;&#x5355;&#x4ECB;&#x7ECD;&#x4E0B;&#x6211;&#x4EEC;&#x7684;&#x76D1;&#x63A7;&#x7CFB;&#x7EDF;&#x5904;&#x7406;&#x7528;&#x6237;&#x57CB;&#x70B9;&#x7684;&#x5927;&#x81F4;&#x6D41;&#x7A0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/cf76f0c2cc3bf24e85e5fcf498d05371f1d3665914d615de71aa78d401dc1b9b" alt="image.png"></p>
+<p>Netty&#x8BB0;&#x5F55;&#x7684;&#x201C;&#x6CC4;&#x6F0F;&#x8BB0;&#x5F55;&#x201D;&#x662F;&#x6211;&#x4EEC;&#x901A;&#x8FC7;ByteBuf&#x7684;read/write&#x7B49;&#x64CD;&#x4F5C;&#x8BB0;&#x5F55;&#x7684;, &#x6BD4;&#x5982;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Override</span><br><span class="line">public ByteBuf readBytes(ByteBuf dst, int dstIndex, int length) {</span><br><span class="line">    recordLeakNonRefCountingOperation(leak); // &#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x8BB0;&#x5F55;&#x5F53;&#x524D;&#x5806;&#x6808;</span><br><span class="line">    return super.readBytes(dst, dstIndex, length);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public ByteBuf readBytes(byte[] dst) {</span><br><span class="line">    recordLeakNonRefCountingOperation(leak);</span><br><span class="line">    return super.readBytes(dst);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public ByteBuf readBytes(byte[] dst, int dstIndex, int length) {</span><br><span class="line">    recordLeakNonRefCountingOperation(leak);</span><br><span class="line">    return super.readBytes(dst, dstIndex, length);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public ByteBuf readBytes(ByteBuffer dst) {</span><br><span class="line">    recordLeakNonRefCountingOperation(leak);</span><br><span class="line">    return super.readBytes(dst);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F46;&#x662F;&#x6839;&#x636E;&#x6211;&#x4EEC;&#x7684;&#x4E0A;&#x8FF0;&#x7684;&#x6D41;&#x7A0B;&#xFF0C;&#x89E3;&#x6790;ByteBuf&#x4E4B;&#x540E;&#x6211;&#x4EEC;&#x4F1A;&#x9001;&#x5230;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5F02;&#x6B65;&#x5B58;&#x50A8;&#xFF0C;&#x4F46;&#x662F;Netty&#x544A;&#x8BC9;&#x6211;&#x4EEC;&#x6700;&#x540E;&#x4E00;&#x6B21;&#x8BBF;&#x95EE;&#x8FD8;&#x662F;&#x5728;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x7684;&#x65F6;&#x5019;&#xFF01;&#x6240;&#x4EE5;&#x6CC4;&#x6F0F;<strong>&#x4E00;&#x5B9A;&#x53D1;&#x751F;&#x5728;&#x5B58;&#x50A8;&#x4E4B;&#x524D;&#xFF0C;&#x53CD;&#x5E8F;&#x5217;&#x5316;&#x4E4B;&#x540E;</strong>&#xFF01;&#xFF08;&#x53EF;&#x80FD;&#x662F;&#x5728;&#x5F02;&#x6B65;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x53D1;&#x751F;&#x4E86;&#x67D0;&#x4E9B;&#x5F02;&#x5E38;&#x6CA1;&#x6709;<em>catch</em>&#x5BFC;&#x81F4;<em>ByteBuf</em>&#x6CA1;&#x6709;&#x88AB;&#x91CA;&#x653E;&#xFF09;.</p>
+<p>&#x597D;&#xFF0C;&#x7F29;&#x5C0F;&#x8303;&#x56F4;&#x4E4B;&#x540E;&#x8BE5;&#x600E;&#x4E48;&#x786E;&#x5B9A;&#x7CBE;&#x786E;&#x4F4D;&#x7F6E;&#x8FDB;&#x884C;&#x6392;&#x67E5;&#x5462;&#xFF1F;</p>
+<h2 id="1-3-&#x7CBE;&#x51C6;&#x5B9A;&#x4F4D;&#x6280;&#x5DE7;&#xFF1A;ByteBuf-touch"><a href="#1-3-&#x7CBE;&#x51C6;&#x5B9A;&#x4F4D;&#x6280;&#x5DE7;&#xFF1A;ByteBuf-touch" class="headerlink" title="1.3 &#x7CBE;&#x51C6;&#x5B9A;&#x4F4D;&#x6280;&#x5DE7;&#xFF1A;ByteBuf.touch()"></a>1.3 &#x7CBE;&#x51C6;&#x5B9A;&#x4F4D;&#x6280;&#x5DE7;&#xFF1A;ByteBuf.touch()</h2><p>&#x8FD9;&#x5C31;&#x6709;&#x8BF7;ByteBuf&#x63D0;&#x4F9B;&#x7684;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x65B9;&#x6CD5;&#xFF1A;<code>touch()</code>&#x4E86;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public abstract ByteBuf touch();</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;<code>touch</code>&#x4E2D;Netty&#x4E5F;&#x4F1A;&#x548C;read/write&#x4E00;&#x6837;&#x8BB0;&#x5F55;&#x5F53;&#x524D;&#x7684;&#x5806;&#x6808;&#xFF0C;&#x6211;&#x4EEC;&#x53EA;&#x9700;&#x8981;&#x5728;&#x53EF;&#x80FD;&#x53D1;&#x751F;&#x6CC4;&#x6F0F;&#x7684;&#x5730;&#x65B9;&#x52A0;&#x5165;<code>touch</code>&#x5C31;&#x80FD;&#x5728;Netty&#x7684;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#x4E2D;&#x770B;&#x5230;&#x8FD9;&#x4E2A;ByteBuf&#x6700;&#x540E;&#x662F;&#x5728;&#x54EA;&#x91CC;&#x5F15;&#x7528;&#x7684;, &#x5C31;&#x80FD;&#x89E3;&#x51B3;&#x4E86;&#xFF01;&#x95EE;&#x9898;&#x89E3;&#x51B3;&#x4E86;&#x5417;&#xFF1F; &#x5982;&#x89E3;&#xFF01;</p>
+<p>&#x5B9E;&#x9645;&#x5206;&#x6790;&#x4EE3;&#x7801;&#x8DEF;&#x5F84;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x53D1;&#x73B0;&#x4E00;&#x4E2A;&#x65B9;&#x6CD5;&#x5F88;&#x53EF;&#x7591;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#xFF08;&#x65B9;&#x6CD5;&#x540D;&#x5C31;&#x53EB;<em>method</em>&#x5427;&#xFF09;&#x6BD4;&#x8F83;&#x590D;&#x6742;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x52A0;&#x5165;&#x591A;&#x4E2A;<code>touch</code>&#xFF0C;&#x4F46;&#x8FD9;&#x6837;&#x5C31;&#x51FA;&#x73B0;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#xFF1A;&#x6700;&#x7EC8;&#x5728;Netty&#x65E5;&#x5FD7;&#x91CC;&#x663E;&#x793A;&#x7684;&#x5806;&#x6808;&#x9876;&#x5C42;&#x90FD;&#x662F;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x6211;&#x4EEC;&#x65E0;&#x6CD5;&#x77E5;&#x9053;&#x662F;&#x5728;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x7684;&#x54EA;&#x4E00;&#x4E2A;<code>touch</code>&#x8F93;&#x51FA;&#x7684;&#xFF0C;&#x8BE5;&#x600E;&#x4E48;&#x533A;&#x5206;&#x5462;&#xFF1F;</p>
+<p>&#x53D1;&#x73B0;<em>Netty</em>&#x8FD8;&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x4E2A;&#x53EF;&#x4EE5;&#x5E26;&#x53C2;&#x6570;&#x7684;<em>API</em>&#xFF0C;&#x8FD9;&#x4E2A;<em>API</em>&#x662F;&#x4EC0;&#x4E48;&#x5462;&#xFF1F;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public abstract ByteBuf touch(Object hint);</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x67E5;&#x9605;&#x6587;&#x6863;&#x548C;&#x6E90;&#x7801;&#xFF1A;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x5C31;&#x80FD;&#x5728;Netty&#x8F93;&#x51FA;&#x7684;&#x65E5;&#x5FD7;&#x4E2D;&#x5E26;&#x4E0A;&#x8FD9;&#x4E2A;<code>hint.toString()</code>&#x8FD4;&#x56DE;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;&#x6BD4;&#x5982;&#x6211;&#x4EEC;&#x8C03;&#x7528;<code>buffer.touch(-5)</code>, &#x90A3;&#x4E48;Netty&#x8F93;&#x51FA;&#x7684;&#x65E5;&#x5FD7;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/98904bcae8a8f5de1e121d4907b671655c3bd0efe99941714c14f1258ad64575" alt="image.png"></p>
+<p>&#x6211;&#x4EEC;&#x5728;method&#x65B9;&#x6CD5;&#x91CC;&#x7684;&#x5173;&#x952E;&#x5730;&#x65B9;&#x90FD;&#x52A0;&#x4E0A;<code>touch</code>&#x8C03;&#x7528;&#xFF0C;&#x5E76;&#x4E14;&#x6BCF;&#x4E2A;&#x5730;&#x65B9;&#x7684;<code>hint</code>&#x90FD;&#x4E0D;&#x4E00;&#x6837;&#xFF0C;&#x6700;&#x540E;&#x7EC8;&#x4E8E;&#x5B9A;&#x4F4D;&#x5230;&#x4E86;&#x539F;&#x56E0;&#xFF01;</p>
+<p>&#x4E0B;&#x9762;&#x662F;&#x539F;&#x56E0;&#x7684;&#x5927;&#x81F4;&#x63CF;&#x8FF0;&#xFF1A;</p>
+<blockquote>
+<p>&#x76D1;&#x63A7;&#x7CFB;&#x7EDF;&#x6BCF;&#x4E2A;&#x5C0F;&#x65F6;&#x4F1A;&#x505C;&#x6B62;&#x5F02;&#x6B65;&#x7EBF;&#x7A0B;&#xFF08;&#x901A;&#x8FC7;&#x8BBE;&#x7F6E;&#x7EBF;&#x7A0B;&#x76F8;&#x5173;&#x72B6;&#x6001;&#x4E3A;disable&#xFF09;&#x548C;&#x961F;&#x5217;&#xFF0C;&#x521B;&#x5EFA;&#x65B0;&#x7684;&#x5F02;&#x6B65;&#x7EBF;&#x7A0B;&#x548C;&#x961F;&#x5217;&#xFF0C;&#x4F46;&#x7531;&#x4E8E;&#x6211;&#x4EEC;&#x5728;&#x653E;&#x5165;&#x961F;&#x5217;&#x65F6;<strong>&#x6CA1;&#x6709;&#x5224;&#x65AD;&#x5F02;&#x6B65;&#x4EFB;&#x52A1;&#x7EBF;&#x7A0B;&#x72B6;&#x6001;</strong>&#xFF0C;&#x6BCF;&#x4E2A;&#x5C0F;&#x65F6;&#x521D;&#x653E;&#x5165;&#x961F;&#x5217;&#x7684;ByteBuf&#x6CA1;&#x6709;&#x88AB;&#x5F02;&#x6B65;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#xFF0C;&#x6700;&#x540E;&#x9020;&#x6210;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#xFF01;</p>
+</blockquote>
+<p>&#x8FD9;&#x6B21;&#x7ED9;&#x4E86;&#x6211;&#x4EEC;&#x4E00;&#x4E2A;&#x4E0D;&#x5C0F;&#x7684;&#x6559;&#x8BAD;, &#x90A3;&#x4E48;&#x4E3A;&#x4E86;&#x9632;&#x6B62;&#x4E0B;&#x6B21;&#x518D;&#x51FA;&#x73B0;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;, &#x6211;&#x540E;&#x9762;&#x7ED9;&#x51FA;&#x4E86;&#x4E00;&#x4E9B;&#x5EFA;&#x8BAE;&#x548C;&#x6700;&#x4F73;&#x5B9E;&#x8DF5;.</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e63c8d333cca6c938782a21c1da6637e91bca9391b3f88fdd47418d91ba1d460" alt="image.png"></p>
+<h1 id="&#x4E8C;-&#x5982;&#x4F55;&#x66F4;&#x597D;&#x7684;&#x907F;&#x514D;Netty&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#xFF1F;"><a href="#&#x4E8C;-&#x5982;&#x4F55;&#x66F4;&#x597D;&#x7684;&#x907F;&#x514D;Netty&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#xFF1F;" class="headerlink" title="&#x4E8C;. &#x5982;&#x4F55;&#x66F4;&#x597D;&#x7684;&#x907F;&#x514D;Netty&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#xFF1F;"></a>&#x4E8C;. &#x5982;&#x4F55;&#x66F4;&#x597D;&#x7684;&#x907F;&#x514D;Netty&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#xFF1F;</h1><p>&#x8FD9;&#x4E00;&#x8282;&#x6211;&#x4EEC;&#x4E3B;&#x8981;&#x8BB2;&#x5982;&#x4F55;&#x901A;&#x8FC7;&#x6B63;&#x786E;&#x7684;&#x7F16;&#x7801;&#x907F;&#x514D;Netty&#x5185;&#x5B58;&#x6CC4;&#x6F0F;, &#x4F46;&#x6211;&#x4EEC;&#x9996;&#x5148;&#x8981;&#x5F04;&#x6E05;&#x695A;Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x6CC4;&#x6F0F;, &#x4E86;&#x89E3;&#x5B83;&#x7684;&#x5E95;&#x5C42;&#x539F;&#x7406;, &#x7136;&#x540E;&#x901A;&#x8FC7;&#x4E00;&#x4E9B;&#x5DE5;&#x7A0B;&#x4E2D;&#x7684;&#x6700;&#x4F73;&#x5B9E;&#x8DF5;&#x6765;&#x964D;&#x4F4E;&#x6CC4;&#x6F0F;&#x7684;&#x53EF;&#x80FD;&#x6027;.</p>
+<h2 id="2-1-Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x6CC4;&#x6F0F;&#xFF1F;"><a href="#2-1-Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x6CC4;&#x6F0F;&#xFF1F;" class="headerlink" title="2.1 Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x6CC4;&#x6F0F;&#xFF1F;"></a>2.1 Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x6CC4;&#x6F0F;&#xFF1F;</h2><p>Netty&#x521B;&#x5EFA;&#x7684;&#x5806;&#x5916;&#x5185;&#x5B58;&#x57FA;&#x4E8E;JDK&#x539F;&#x751F;&#x7684;<code>DirectByteBuffer</code>&#x5B9E;&#x73B0;&#xFF0C;&#x5728;&#x521B;&#x5EFA;<code>DirectByteBuffer</code>&#x65F6;&#x80FD;&#x591F;&#x6307;&#x5B9A;&#x662F;&#x5426;&#x4F7F;&#x7528;&#x5E26;<code>Cleaner</code>&#x7684;&#x6784;&#x9020;&#x5668;&#xFF0C;&#x6307;&#x5B9A;<code>Cleaner</code>&#x7684;&#x8BDD;&#x80FD;&#x5728;&#x81EA;&#x8EAB;&#x88AB;&#x56DE;&#x6536;&#x65F6;&#x91CA;&#x653E;&#x5185;&#x5B58;&#xFF0C;&#x56E0;&#x4E3A;&#x5176;&#x5728;&#x521B;&#x5EFA;&#x8FC7;&#x7A0B;&#x4E2D;&#x901A;&#x8FC7;&#x521B;&#x5EFA;<code>Cleaner</code>&#x5BF9;&#x8C61;&#x2014;&#x2014;&#x4E00;&#x4E2A;&#x865A;&#x5F15;&#x7528;&#x5BF9;&#x8C61;<code>PhantomReference</code>&#xFF0C;&#x5728;<code>DirectByteBuffer</code>&#x88AB;GC&#x65F6;&#xFF0C;<code>ReferenceHandler</code>&#x7EBF;&#x7A0B;&#x4F1A;&#x5BF9;<code>jdk.internal.ref.Cleaner</code>&#x5BF9;&#x8C61;&#x4E13;&#x95E8;&#x5904;&#x7406;&#xFF0C;&#x8C03;&#x7528;&#x5B83;&#x7684;clean&#x65B9;&#x6CD5;&#x91CA;&#x653E;&#x5185;&#x5B58;&#x3002;</p>
+<p>&#x4F46;&#x662F;Netty&#x521B;&#x5EFA;&#x7684;&#x5806;&#x5916;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x7684;&#x662F;<code>noCleaner</code>&#x7B56;&#x7565;&#xFF0C;&#x5373;&#x521B;&#x5EFA;<code>DirectByteBuffer</code>&#x901A;&#x8FC7;&#x53CD;&#x5C04;&#x8C03;&#x7528;&#x4E0D;&#x542B;<code>Cleaner</code>&#x7684;&#x6784;&#x9020;&#x5668;&#xFF0C;&#x8FD9;&#x4E48;&#x505A;&#x7684;&#x4E3B;&#x8981;&#x539F;&#x56E0;&#x662F;&#xFF1A;</p>
+<ul>
+<li>&#x8981;&#x89E6;&#x53D1;Cleaner&#x7684;&#x89E6;&#x53D1;&#x5FC5;&#x987B;&#x8981;&#x7B49;Buffer&#x88AB;GC,&#x8FD9;&#x4E2A;&#x662F;&#x4E0D;&#x53EF;&#x63A7;&#x7684;.</li>
+<li>&#x5728;&#x4F7F;&#x7528;Cleaner&#x7684;&#x6784;&#x9020;&#x5668;&#x91CC;,&#x5982;&#x679C;&#x5185;&#x5B58;&#x4E0D;&#x8DB3;,&#x4F1A;&#x8C03;&#x7528;<code>System.gc()</code>&#x65B9;&#x6CD5;&#x4E3B;&#x52A8;&#x89E6;&#x53D1;GC,&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x4F1A;&#x9020;&#x6210;&#x6027;&#x80FD;&#x95EE;&#x9898;.</li>
+</ul>
+<p>&#x56E0;&#x6B64;&#x5728;&#x5927;&#x90E8;&#x5206;&#x60C5;&#x51B5;&#x4E0B;(&#x81F3;&#x5C11;&#x5728;OpenJDK&#x91CC;)Netty&#x4F1A;&#x4F7F;&#x7528;noCleaner&#x7B56;&#x7565;&#x521B;&#x5EFA;<code>DirectByteBuffer</code>, &#x6240;&#x4EE5;Netty&#x56DE;&#x6536;Buffer&#x7684;&#x65B9;&#x5F0F;&#x662F;&#x901A;&#x8FC7;&#x4E3B;&#x52A8;release&#x91CA;&#x653E;&#x7684;, &#x800C;<strong>&#x5982;&#x679C;&#x6CA1;&#x6709;&#x6B63;&#x786E;release&#x5C31;&#x4F1A;&#x9020;&#x6210;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;</strong>. &#x4F46;&#x5E76;&#x4E0D;&#x662F;&#x6BCF;&#x6B21;release&#x90FD;&#x4F1A;&#x771F;&#x6B63;&#x91CA;&#x653E;, &#x5177;&#x4F53;&#x91CA;&#x653E;&#x7684;&#x65F6;&#x673A;&#x548C;&#x5F15;&#x7528;&#x5B83;&#x7684;&#x8BA1;&#x6570;&#x6709;&#x5173;, &#x56E0;&#x4E3A;<strong>Netty&#x662F;&#x4F7F;&#x7528;&#x5BF9;&#x8C61;&#x7684;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x6765;&#x7BA1;&#x7406;&#x5BF9;&#x8C61;&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;</strong>, &#x800C;&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x5C31;&#x6765;&#x63A2;&#x8BA8;&#x5F15;&#x7528;&#x8BA1;&#x6570;.</p>
+<h2 id="2-2-ByteBuf&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#x7BA1;&#x7406;&#x2013;&#x5F15;&#x7528;&#x8BA1;&#x6570;"><a href="#2-2-ByteBuf&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#x7BA1;&#x7406;&#x2013;&#x5F15;&#x7528;&#x8BA1;&#x6570;" class="headerlink" title="2.2 ByteBuf&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#x7BA1;&#x7406;&#x2013;&#x5F15;&#x7528;&#x8BA1;&#x6570;"></a>2.2 ByteBuf&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#x7BA1;&#x7406;&#x2013;&#x5F15;&#x7528;&#x8BA1;&#x6570;</h2><p>Netty&#x4F7F;&#x7528;&#x5BF9;&#x8C61;&#x7684;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x6765;&#x7BA1;&#x7406;&#x5BF9;&#x8C61;&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#xFF0C;&#x5F53;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x4F7F;&#x7528;&#x5B8C;&#x6210;&#x4E86;&#x4E4B;&#x540E;&#x8981;&#x628A;&#x5B83;&#x5F52;&#x8FD8;&#x7ED9;&#x6C60;&#x5B50;&#xFF08;&#x6216;&#x8005;allocator&#xFF09;&#x3002;ByteBuf&#x5C31;&#x662F;&#x4F7F;&#x7528;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x6700;&#x597D;&#x7684;&#x4F8B;&#x5B50;&#x3002;</p>
+<p>&#x521D;&#x59CB;&#x5206;&#x914D;&#x7684;&#x5BF9;&#x8C61;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x4E3A;1&#xFF0C;&#x5F53;&#x8C03;&#x7528;<code>release</code>&#x65B9;&#x6CD5;&#x65F6;&#xFF0C;&#x8BA1;&#x6570;&#x51CF;&#x4E00;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x521D;&#x59CB;&#x5206;&#x914D;&#x7684;&#x5BF9;&#x8C61;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x4E3A;1</span><br><span class="line">ByteBuf buf = ctx.alloc().directBuffer();</span><br><span class="line">assert buf.refCnt() == 1;</span><br><span class="line"></span><br><span class="line">// &#x5F53;&#x8C03;&#x7528;release&#x65B9;&#x6CD5;&#x65F6;&#xFF0C;&#x8BA1;&#x6570;&#x51CF;&#x4E00;</span><br><span class="line">boolean destroyed = buf.release();</span><br><span class="line">assert destroyed;</span><br><span class="line">assert buf.refCnt() == 0;</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x5F53;&#x8BA1;&#x6570;&#x5230;0&#x65F6;&#xFF0C;<code>release</code>&#x65B9;&#x6CD5;&#x4F1A;&#x8FD4;&#x56DE;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x4F1A;&#x88AB;&#x91CA;&#x653E;</strong>&#x3002;</p>
+<p>&#x5982;&#x679C;&#x5C1D;&#x8BD5;&#x8BFB;&#x53D6;&#x8BA1;&#x6570;&#x4E3A;0&#x7684;&#x5BF9;&#x8C61;, &#x4F1A;&#x62A5;&#x51FA;<code>IllegalReferenceCountExeception</code> &#x5F02;&#x5E38;, &#x5FC5;&#x987B;&#x6CE8;&#x610F;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;assert buf.refCnt() == 0;</span><br><span class="line">try {</span><br><span class="line">  buf.writeLong(0xdeadbeef);</span><br><span class="line">  throw new Error(&quot;should not reach here&quot;);</span><br><span class="line">} catch (IllegalReferenceCountExeception e) {</span><br><span class="line">  // Expected</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E5F;&#x80FD;&#x901A;&#x8FC7;<code>retain</code>&#x589E;&#x52A0;&#x8BA1;&#x6570;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;ByteBuf buf = ctx.alloc().directBuffer();</span><br><span class="line">assert buf.refCnt() == 1;</span><br><span class="line"></span><br><span class="line">buf.retain();</span><br><span class="line">assert buf.refCnt() == 2;</span><br><span class="line"></span><br><span class="line">boolean destroyed = buf.release();</span><br><span class="line">assert !destroyed;</span><br><span class="line">assert buf.refCnt() == 1;</span><br></pre></td></tr></table></figure>
+
+<p>&#x770B;&#x8D77;&#x6765;&#x5F88;&#x7B80;&#x5355;, &#x4F46;&#x662F;&#x4E00;&#x65E6;<code>ByteBuf</code> &#x5728;<strong>&#x7EBF;&#x7A0B;&#x95F4;&#x4F20;&#x9012;</strong>&#x65F6;&#x5C31;&#x4E0D;&#x662F;&#x90A3;&#x4E48;&#x7B80;&#x5355;&#x4E86;, &#x56E0;&#x4E3A;&#x65E0;&#x6CD5;&#x5F88;&#x597D;&#x786E;&#x5B9A;&#x54EA;&#x4E2A;&#x7EBF;&#x7A0B;&#x8D1F;&#x8D23;&#x91CA;&#x653E;, &#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x7ED9;&#x51FA;&#x4E00;&#x4E9B;&#x53EF;&#x4EE5;&#x9075;&#x5FAA;&#x7684;&#x89C4;&#x8303;, &#x80FD;&#x5728;&#x6700;&#x5927;&#x7A0B;&#x5EA6;&#x4E0A;&#x907F;&#x514D;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;.</p>
+<h2 id="2-3-&#x6700;&#x4F73;&#x5B9E;&#x8DF5;-&#x91CA;&#x653E;&#x7684;&#x65F6;&#x673A;"><a href="#2-3-&#x6700;&#x4F73;&#x5B9E;&#x8DF5;-&#x91CA;&#x653E;&#x7684;&#x65F6;&#x673A;" class="headerlink" title="2.3 &#x6700;&#x4F73;&#x5B9E;&#x8DF5;: &#x91CA;&#x653E;&#x7684;&#x65F6;&#x673A;"></a>2.3 &#x6700;&#x4F73;&#x5B9E;&#x8DF5;: &#x91CA;&#x653E;&#x7684;&#x65F6;&#x673A;</h2><p>&#x4E86;&#x89E3;&#x4E86;Netty&#x7684;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x673A;&#x5236;&#x540E;, &#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x7ED9;&#x51FA;&#x4E00;&#x4E9B;&#x6700;&#x4F73;&#x5B9E;&#x8DF5;, &#x5728;&#x5DE5;&#x7A0B;&#x4E2D;&#x5408;&#x7406;&#x8FD0;&#x7528;&#x53EF;&#x4EE5;&#x907F;&#x514D;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x7684;&#x53D1;&#x751F;:</p>
+<ul>
+<li>&#x5982;&#x679C;&#x4E00;&#x4E2A;&#x7EC4;&#x4EF6;(&#x201C;&#x7EC4;&#x4EF6;&#x201D;&#x53EF;&#x4EE5;&#x662F;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x6216;&#x7EBF;&#x7A0B;)A&#x4F20;&#x9012;&#x7ED9;&#x7EC4;&#x4EF6;B&#x4E00;&#x4E2A;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x5BF9;&#x8C61;, &#x901A;&#x5E38;&#x7EC4;&#x4EF6;A&#x4E0D;&#x9700;&#x8981;&#x91CA;&#x653E;, &#x800C;&#x662F;&#x7531;B&#x51B3;&#x5B9A;&#x8981;&#x4E0D;&#x8981;&#x91CA;&#x653E;.</li>
+<li>&#x5982;&#x679C;&#x4E00;&#x4E2A;&#x7EC4;&#x4EF6;&#x6D88;&#x8D39;&#x4E86;&#x8FD9;&#x4E2A;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x5BF9;&#x8C61;&#x800C;&#x4E14;&#x5B83;&#x4E0D;&#x4F1A;&#x518D;&#x4F20;&#x9012;&#x7ED9;&#x5176;&#x4ED6;&#x7EC4;&#x4EF6;&#x90A3;&#x4E48;&#x7531;&#x8FD9;&#x4E2A;&#x7EC4;&#x4EF6;&#x6765;&#x91CA;&#x653E;.</li>
+</ul>
+<p>&#x4E0B;&#x9762;&#x662F;&#x4E00;&#x4E2A;&#x4F8B;&#x5B50;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public ByteBuf a(ByteBuf input) {</span><br><span class="line">    input.writeByte(42);</span><br><span class="line">    return input;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">public ByteBuf b(ByteBuf input) {</span><br><span class="line">    try {</span><br><span class="line">        output = input.alloc().directBuffer(input.readableBytes() + 1);</span><br><span class="line">        output.writeBytes(input);</span><br><span class="line">        output.writeByte(42);</span><br><span class="line">        return output;</span><br><span class="line">    } finally {</span><br><span class="line">        input.release();</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">public void c(ByteBuf input) {</span><br><span class="line">    System.out.println(input);</span><br><span class="line">    input.release();</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">public void main() {</span><br><span class="line">    ...</span><br><span class="line">    ByteBuf buf = ...;</span><br><span class="line">    // This will print buf to System.out and destroy it.</span><br><span class="line">    c(b(a(buf)));</span><br><span class="line">    assert buf.refCnt() == 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>&#x8C01;&#x5E94;&#x8BE5;&#x91CA;&#x653E;?</th>
+<th>&#x8C01;&#x771F;&#x6B63;&#x91CA;&#x653E;&#x4E86;?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>main()</code> &#x521B;&#x5EFA;&#x4E86; <code>buf</code></td>
+<td><code>buf</code>&#x2192;<code>main()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>main()</code> &#x8C03;&#x7528;&#x4E86; <code>a()</code> &#x4F20;&#x5165;&#x4E86; <code>buf</code></td>
+<td><code>buf</code>&#x2192;<code>a()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>a()</code> &#x8FD4;&#x56DE;&#x4E86; <code>buf</code> .</td>
+<td><code>buf</code>&#x2192;<code>main()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>main()</code> &#x8C03;&#x7528;&#x4E86;<code>b()</code> &#x4F20;&#x5165;&#x4E86;buf</td>
+<td><code>buf</code>&#x2192;<code>b()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>b()</code> &#x8FD4;&#x56DE;&#x4E86;&#x4E00;&#x4E2A; <code>buf</code>&#x7684;copy</td>
+<td><code>buf</code>&#x2192;<code>b()</code>, <code>copy</code>&#x2192;<code>main()</code></td>
+<td><code>b()</code> &#x91CA;&#x653E;&#x4E86;<code>buf</code></td>
+</tr>
+<tr>
+<td><code>main()</code> &#x8C03;&#x7528;&#x4E86;<code>c()</code> &#x4F20;&#x5165;&#x4E86;copy</td>
+<td><code>copy</code>&#x2192;<code>c()</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>c()</code> &#x5403;&#x6389;&#x4E86; <code>copy</code></td>
+<td><code>copy</code>&#x2192;<code>c()</code></td>
+<td><code>c()</code> &#x91CA;&#x653E;&#x4E86;<code>copy</code></td>
+</tr>
+</tbody></table>
+<p>&#x53C2;&#x8003;: <a href="/external_links/bc956cde3c9b8e0296fbee94923840da.html" target="blank" rel="noopener">netty.io/wiki/refere&#x2026;</a></p>
+<hr>
+<h1 id="&#x56DB;-Tips"><a href="#&#x56DB;-Tips" class="headerlink" title="&#x56DB;. Tips"></a>&#x56DB;. Tips</h1><p>1&#x3001;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x201C;<code>map -histo:live pid</code>&#x201D;&#x624B;&#x52A8;&#x89E6;&#x53D1;FullGC&#xFF0C;&#x53EF;&#x4EE5;&#x8BA9;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#x66F4;&#x5FEB;&#x6253;&#x5370;&#x51FA;&#x6765;&#x5426;&#x5219;&#x8981;&#x7B49;&#x5230;&#x5BF9;&#x5E94;region&#x56DE;&#x6536;&#x7684;&#x65F6;&#x5019;&#x624D;&#x80FD;&#x611F;&#x77E5;&#x5230;&#x3002;&#xFF08;Netty&#x7684;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#x662F;&#x7528;WeakReference&#x7684;&#x539F;&#x7406;&#x89E6;&#x53D1;&#x7684;&#xFF09;</p>
+<p>2&#x3001;<code>simple</code>&#x548C;<code>advanced</code>&#x7EA7;&#x522B;&#x4E0B;&#x7684;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#x90FD;&#x662F;&#x91C7;&#x6837;&#x89E6;&#x53D1;&#x7684;&#xFF0C;&#x91C7;&#x6837;&#x9891;&#x7387;&#x662F;1/128&#xFF0C;&#x4F46;&#x662F;<code>advanced</code>&#x7EA7;&#x522B;&#x7684;&#x6700;&#x8FD1;&#x4E00;&#x6761;&#x662F;&#x4E00;&#x5B9A;&#x8BB0;&#x5F55;&#x7684;&#x3002;</p>
+<hr>
+<h1 id="&#x4E94;-Netty&#x76F8;&#x5173;&#x53C2;&#x6570;&#x8BF4;&#x660E;"><a href="#&#x4E94;-Netty&#x76F8;&#x5173;&#x53C2;&#x6570;&#x8BF4;&#x660E;" class="headerlink" title="&#x4E94;. Netty&#x76F8;&#x5173;&#x53C2;&#x6570;&#x8BF4;&#x660E;"></a>&#x4E94;. Netty&#x76F8;&#x5173;&#x53C2;&#x6570;&#x8BF4;&#x660E;</h1><table>
+<thead>
+<tr>
+<th>&#x53C2;&#x6570;&#x540D;&#x79F0;</th>
+<th>&#x542B;&#x4E49;</th>
+<th>&#x5907;&#x6CE8;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>io.netty.leakDetectionLevel</code> &#x6216; <code>io.netty.leakDetection.level</code></td>
+<td>&#x914D;&#x7F6E;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x68C0;&#x6D4B;&#x7EA7;&#x522B;&#x7684;&#x53C2;&#x6570;, &#x9ED8;&#x8BA4;<code>simple</code></td>
+<td><code>io.netty.leakDetectionLevel</code>&#x662F;&#x8001;&#x7248;&#x672C;&#x7684;,&#x63A8;&#x8350;&#x7528;<code>io.netty.leakDetection.level</code></td>
+</tr>
+<tr>
+<td><code>io.netty.leakDetection.targetRecords</code></td>
+<td>&#x5982;&#x679C;&#x5F53;&#x524D;&#x4FDD;&#x5B58;&#x7684;&#x8C03;&#x7528;&#x8F68;&#x8FF9;&#x8BB0;&#x5F55;&#x6570;Record&#x5927;&#x4E8E;&#x53C2;&#x6570;<code>io.netty.leakDetection.targetRecords</code>&#x914D;&#x7F6E;&#x7684;&#x503C;&#xFF0C;&#x90A3;&#x4E48;&#x4F1A;&#x4EE5;&#x4E00;&#x5B9A;&#x7684;&#x6982;&#x7387;&#xFF08;1/2^n&#xFF09;&#x5220;&#x9664;&#x5934;&#x7ED3;&#x70B9;&#x4E4B;&#x540E;&#x518D;&#x52A0;&#x5165;&#x65B0;&#x7684;&#x8BB0;&#x5F55;&#xFF0C;&#x5F53;&#x7136;&#x4E5F;&#x6709;&#x53EF;&#x80FD;&#x4E0D;&#x5220;&#x9664;&#x5934;&#x7ED3;&#x70B9;&#x76F4;&#x63A5;&#x65B0;&#x589E;&#x65B0;&#x7684;, &#x9ED8;&#x8BA4;4</td>
+<td></td>
+</tr>
+<tr>
+<td><code>io.netty.leakDetection.acquireAndReleaseOnly</code></td>
+<td>&#x63A7;&#x5236;&#x662F;&#x5426;&#x53EA;&#x662F;&#x5728;&#x8C03;&#x7528;&#x589E;&#x52A0;&#x6216;&#x51CF;&#x5C11;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x5668;&#x7684;&#x65B9;&#x6CD5;&#x65F6;&#x624D;&#x8C03;&#x7528;<code>record</code>&#x65B9;&#x6CD5;&#x8BB0;&#x5F55;&#x8C03;&#x7528;&#x8F68;&#x8FF9;, &#x9ED8;&#x8BA4;<code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>io.netty.leakDetection.samplingInterval</code></td>
+<td>&#x7EA7;&#x522B;<code>simple</code>&#x548C;<code>advanced</code>&#x4E0B;&#x91C7;&#x6837;&#x9891;&#x7387;, &#x9ED8;&#x8BA4;128</td>
+<td></td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="&#x516D;-&#x603B;&#x7ED3;"><a href="#&#x516D;-&#x603B;&#x7ED3;" class="headerlink" title="&#x516D;. &#x603B;&#x7ED3;"></a>&#x516D;. &#x603B;&#x7ED3;</h1><p>&#x5728;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x4E00;&#x8D77;&#x6DF1;&#x5165;&#x63A2;&#x8BA8;&#x4E86;Netty&#x5806;&#x5916;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x7684;&#x6839;&#x672C;&#x539F;&#x56E0;&#x4EE5;&#x53CA;&#x89E3;&#x51B3;&#x65B9;&#x6CD5;&#x3002;&#x901A;&#x8FC7;&#x4E86;&#x89E3;Netty&#x7684;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x673A;&#x5236;&#xFF0C;&#x6211;&#x4EEC;&#x53D1;&#x73B0;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x7684;&#x53D1;&#x751F;&#x5E76;&#x975E;&#x795E;&#x79D8;&#x83AB;&#x6D4B;&#xFF0C;&#x800C;&#x662F;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5408;&#x7406;&#x7684;&#x7BA1;&#x7406;&#x548C;&#x91CA;&#x653E;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x6765;&#x907F;&#x514D;&#x3002;</p>
+<p>&#x7136;&#x800C;&#xFF0C;&#x9884;&#x9632;&#x80DC;&#x4E8E;&#x6CBB;&#x7597;&#x3002;&#x5728;&#x6587;&#x7AE0;&#x672B;&#x5C3E;&#xFF0C;&#x6211;&#x4EEC;&#x5F3A;&#x8C03;&#x4E86;&#x4E00;&#x4E9B;&#x6700;&#x4F73;&#x5B9E;&#x8DF5;&#x548C;&#x9884;&#x9632;&#x63AA;&#x65BD;&#xFF0C;&#x5E0C;&#x671B;&#x8BFB;&#x8005;&#x5728;&#x5B9E;&#x9645;&#x5F00;&#x53D1;&#x4E2D;&#x80FD;&#x591F;&#x66F4;&#x52A0;&#x6CE8;&#x91CD;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#xFF0C;&#x907F;&#x514D;&#x6F5C;&#x5728;&#x7684;&#x95EE;&#x9898;&#x3002;</p>
+<p>&#x6700;&#x540E;&#x6211;&#x4EEC;&#x6765;&#x603B;&#x7ED3;&#x4E0B;Netty&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x7684;&#x7684;&#x6392;&#x67E5;&#x65B9;&#x6CD5;, &#x5206;&#x4E3A;&#x4E09;&#x6B65;&#xFF1A;</p>
+<p>1&#x3001;&#x63D0;&#x5347;&#x6CC4;&#x6F0F;&#x65E5;&#x5FD7;&#x8F93;&#x51FA;&#x7EA7;&#x522B;&#x4E3A;<code>advanced</code>&#xFF1A;<code>java -Dio.netty.leakDetection.level=advanced ...</code></p>
+<p>2&#x3001;&#x5982;&#x679C;&#x8FD8;&#x4E0D;&#x80FD;&#x5B9A;&#x4F4D;&#xFF0C;&#x5728;&#x5173;&#x952E;&#x4F4D;&#x7F6E;&#x52A0;&#x5165;<code>hint</code>&#x7684;&#x8C03;&#x7528;</p>
+<p>3&#x3001;&#x5982;&#x679C;&#x4E00;&#x4E2A;&#x65B9;&#x6CD5;&#x5185;&#x9700;&#x8981;&#x5B9A;&#x4F4D;&#x7684;&#x5730;&#x65B9;&#x6709;&#x591A;&#x4E2A;&#xFF0C;&#x52A0;&#x5165;<code>hint(&#x4EFB;&#x610F;&#x5B57;&#x7B26;&#x4E32;)</code></p>
+<hr>
+<p>&#x1F525;&#x5982;&#x679C;&#x611F;&#x89C9;&#x535A;&#x4E3B;&#x7684;&#x6587;&#x7AE0;&#x8FD8;&#x4E0D;&#x9519;&#x7684;&#x8BDD;&#xFF0C;&#x8BF7;&#x1F44D;&#x4E09;&#x8FDE;&#x652F;&#x6301;&#x1F44D;&#x4E00;&#x4E0B;&#x535A;&#x4E3B;&#x54E6;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/777653dc016f46713a655175fa2eb7eeb5fc0d7902f8bf5e8965f569e74e88d6" alt="image.png"></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/b1e333a96ea731ebe438ed1a8d3a5052.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java-后端/" rel="tag"># Java,后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7339827208086896676.html" rel="next" title="【Android 13源码分析】WindowContaine">
+                <i class="fa fa-chevron-left"></i> 【Android 13源码分析】WindowContaine
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7340197367515414538.html" rel="prev" title="零基础入门AI：一键本地运行各种开源大语言模型 - Olla">
+                零基础入门AI：一键本地运行各种开源大语言模型 - Olla <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">1775</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">725</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一-排查过程"><span class="nav-number">1.</span> <span class="nav-text">一. 排查过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-初步定位"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 初步定位</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-泄漏堆栈分析"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 泄漏堆栈分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-精准定位技巧：ByteBuf-touch"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 精准定位技巧：ByteBuf.touch()</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二-如何更好的避免Netty内存泄漏？"><span class="nav-number">2.</span> <span class="nav-text">二. 如何更好的避免Netty内存泄漏？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Netty堆外内存为什么会泄漏？"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Netty堆外内存为什么会泄漏？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-ByteBuf的生命周期管理–引用计数"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 ByteBuf的生命周期管理–引用计数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-最佳实践-释放的时机"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 最佳实践: 释放的时机</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四-Tips"><span class="nav-number">3.</span> <span class="nav-text">四. Tips</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五-Netty相关参数说明"><span class="nav-number">4.</span> <span class="nav-text">五. Netty相关参数说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#六-总结"><span class="nav-number">5.</span> <span class="nav-text">六. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

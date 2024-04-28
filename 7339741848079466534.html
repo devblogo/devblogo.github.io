@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="面试,Redis,Lua,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4F60;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x733F;java&amp;#x3002; Redis &amp;#x548C; Lua&amp;#xFF0C;&amp;#x4E24;&amp;#x4E2A;&amp;#x770B;&amp;#x4F3C;&amp;#x98CE;&amp;#x6D41;&amp;#x9A6C;&amp;#x4E0D;&amp;#x76F8;&amp;#x53CA;&amp;#x7684;&amp;#x6280;&amp;#x672F;&amp;#x70B9;&amp;">
+<meta name="keywords" content="面试,Redis,Lua">
+<meta property="og:type" content="article">
+<meta property="og:title" content="阿里 P7二面：Redis 执行 Lua，能保证原子性吗？">
+<meta property="og:url" content="https://dev.newban.cn/7339741848079466534.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4F60;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x733F;java&amp;#x3002; Redis &amp;#x548C; Lua&amp;#xFF0C;&amp;#x4E24;&amp;#x4E2A;&amp;#x770B;&amp;#x4F3C;&amp;#x98CE;&amp;#x6D41;&amp;#x9A6C;&amp;#x4E0D;&amp;#x76F8;&amp;#x53CA;&amp;#x7684;&amp;#x6280;&amp;#x672F;&amp;#x70B9;&amp;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/86202c298fdf2fb097455b85e2820bd160c2a463a74196ee661c55067e4af827">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/78758d65a66c0106f262939bf0c30209139c149865ec8b0fa6936b0ea856e29b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/bc087cd20fc6d8bcc9406c8958d4265f2ff33847c2acf7699a763b31bd9ffeb3">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/eaf3d9830fab2a70cc55b5be910c3d55db0b287b4f3e1e813d331ba9bc93c2aa">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/a1f68d019bbf0e0e690985dce37a01f1fcf9bb0ba08a07e6ee4b1505b08932ba">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/7082db3b93f8bc2b899fc4104461f7efa3089a2804355e1678a8232877d3c6ed">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e077829459af9f64ae55c2db2e2d7e112c79c2c5ee032c522222c950b4da0a67">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/eafc161c01842e0ed4af4a1e68b105ceb4c4c0bc7f50fa0c3656bbe30f3df6ff">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3202803f628c364ac5854bf0f96b1884f9b95ab71718c009c85ee83a3474db74">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/25cfaeaa6f099aa117bddc0d1b5edf1de8db7614a953a14631f2cea81d0e3927">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/804c600427fa1189c09fe8193d0f8da5fd8fd97127970a9a2a93826513692caa">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/c118a2841ea254280cfbfeb457e3a6e5887780e3243f58285fbf7293660f362a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/8350bf3de88b45afe662d7110475922b8c89561966a8619726985f83e4c3665c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e526a0b8dff16487a9a8fc76f263797c988cd7ad2e687c774f16dd5596ff3b8d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/b63acbaefafc8c9c362fd222f37ed3bc0f0c2c8e406c4cec38d43fdf1c037148">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/60af1d806ff7fad1bdf627dd3dab341edd7b0007a45877414aea708b68ae05eb">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/cfa169c73a632f41ed8803069310e28d55cde0c6db850e2c6ac7defbdc93a579">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/58369f4c4548637d4ce3cdc48931de743f04b3dc9d5388462d4e426cfca8aa3e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/a855d0a1f1b23895889e00b51173370d3f21c28522df5800a121e6d0684d123c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/377f39667c64a83e273a7f7acee52c0980d98fb877a033a2101d2c339525fb8b">
+<meta property="og:updated_time" content="2024-04-27T08:05:59.126Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="阿里 P7二面：Redis 执行 Lua，能保证原子性吗？">
+<meta name="twitter:description" content="&amp;#x4F60;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x733F;java&amp;#x3002; Redis &amp;#x548C; Lua&amp;#xFF0C;&amp;#x4E24;&amp;#x4E2A;&amp;#x770B;&amp;#x4F3C;&amp;#x98CE;&amp;#x6D41;&amp;#x9A6C;&amp;#x4E0D;&amp;#x76F8;&amp;#x53CA;&amp;#x7684;&amp;#x6280;&amp;#x672F;&amp;#x70B9;&amp;">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/86202c298fdf2fb097455b85e2820bd160c2a463a74196ee661c55067e4af827">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7339741848079466534.html">
+
+
+
+
+
+  <title>阿里 P7二面：Redis 执行 Lua，能保证原子性吗？ | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">阿里 P7二面：Redis 执行 Lua，能保证原子性吗？</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-02-26T21:30:08+08:00">
+                2024-02-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x4F60;&#x597D;&#xFF0C;&#x6211;&#x662F;<strong>&#x733F;java</strong>&#x3002;</p>
+<p>Redis &#x548C; Lua&#xFF0C;&#x4E24;&#x4E2A;&#x770B;&#x4F3C;&#x98CE;&#x6D41;&#x9A6C;&#x4E0D;&#x76F8;&#x53CA;&#x7684;&#x6280;&#x672F;&#x70B9;&#xFF0C;&#x4E3A;&#x4F55;&#x80FD;&#x4EA7;&#x751F;&#x201C;&#x7231;&#x201D;&#x7684;&#x706B;&#x82B1;&#xFF0C;&#x6210;&#x4E3A;&#x5DE5;&#x4F5C;&#x5F00;&#x53D1;&#x4E2D;&#x7684;&#x9EC4;&#x91D1;&#x642D;&#x6863;&#xFF1F;&#x6280;&#x672F;&#x9762;&#x8BD5;&#x4E2D;&#x66F4;&#x662F;&#x9AD8;&#x9891;&#x51FA;&#x73B0;&#xFF0C;Redis &#x6267;&#x884C; Lua &#x5230;&#x5E95;&#x80FD;&#x4E0D;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1F;&#x4ECA;&#x5929;&#x5C31;&#x6765;&#x804A;&#x4E00;&#x804A;&#x3002; </p>
+<p>&#x8981;&#x60F3;&#x5F04;&#x6E05;&#x695A;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x9700;&#x8981;&#x5BF9;&#x201C;&#x539F;&#x5B50;&#x6027;&#x201D;&#x8FD9;&#x4E2A;&#x6982;&#x5FF5;&#x6709;&#x4E00;&#x4E2A;&#x6E05;&#x6670;&#x7684;&#x8BA4;&#x8BC6;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x9996;&#x5148;&#x8981;&#x5206;&#x6790;&#x7684;&#x662F;&#x539F;&#x5B50;&#x6027;&#x7684;&#x6982;&#x5FF5;&#x3002;</p>
+<h1 id="&#x4E00;&#x3001;&#x539F;&#x5B50;&#x6027;"><a href="#&#x4E00;&#x3001;&#x539F;&#x5B50;&#x6027;" class="headerlink" title="&#x4E00;&#x3001;&#x539F;&#x5B50;&#x6027;"></a>&#x4E00;&#x3001;&#x539F;&#x5B50;&#x6027;</h1><h2 id="&#x901A;&#x5E38;&#x610F;&#x4E49;&#x7684;&#x539F;&#x5B50;&#x6027;"><a href="#&#x901A;&#x5E38;&#x610F;&#x4E49;&#x7684;&#x539F;&#x5B50;&#x6027;" class="headerlink" title="&#x901A;&#x5E38;&#x610F;&#x4E49;&#x7684;&#x539F;&#x5B50;&#x6027;"></a>&#x901A;&#x5E38;&#x610F;&#x4E49;&#x7684;&#x539F;&#x5B50;&#x6027;</h2><p>&#x901A;&#x5E38;&#x610F;&#x4E49;&#x4E0A;&#xFF0C;&#x6211;&#x4EEC;&#x8BF4;&#x7684;&#x539F;&#x5B50;&#x6027;&#x662F;&#x6307;&#x5173;&#x7CFB;&#x578B;&#x6570;&#x636E;&#x5E93; RDBMS&#xFF08;&#x6BD4;&#x5982; MySQL&#xFF09;&#x7684;&#x539F;&#x5B50;&#x6027;&#xFF0C;&#x4E5F;&#x5C31;&#x662F; ACID&#xFF08;Atomicity&#x3001;Consistency&#x3001;Isolation&#x3001;Durability&#xFF09;&#x4E2D; Atomicity&#x8FD9;&#x4E00;&#x9879;&#x7279;&#x6027;&#x3002;</p>
+<p>ACID &#x4E2D;&#x7684;&#x539F;&#x5B50;&#x6027;&#x6307;&#xFF1A;&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x64CD;&#x4F5C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x6267;&#x884C;&#xFF0C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x4E0D;&#x6267;&#x884C;&#x3002;</p>
+<p>&#x8FD9;&#x91CC;&#x4EE5;&#x94F6;&#x884C;&#x8F6C;&#x8D26;&#xFF0C;&#x8D26;&#x6237;A &#x7ED9;&#x8D26;&#x6237;B &#x8F6C;&#x8D26;100&#x5143;&#x4E3A;&#x4F8B;&#x6765;&#x89E3;&#x91CA;&#x539F;&#x5B50;&#x6027;&#xFF1A;</p>
+<ol>
+<li>&#x8D26;&#x6237;A &#x51CF;&#x53BB;100&#x5143;&#xFF1B;</li>
+<li>&#x8D26;&#x6237;B &#x589E;&#x52A0;100&#x5143;&#xFF1B;</li>
+</ol>
+<p>&#x539F;&#x5B50;&#x6027;&#x662F;&#x6307;&#x4E0A;&#x9762;&#x4E24;&#x4E2A;&#x8FC7;&#x7A0B;&#xFF0C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x6267;&#x884C;&#xFF0C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x4E0D;&#x6267;&#x884C;&#x3002;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#xFF0C;&#x8D26;&#x6237;A &#x51CF;&#x53BB; 100&#x5143;&#x7684;&#x540C;&#x65F6;&#xFF0C;&#x8D26;&#x6237;B &#x5FC5;&#x987B;&#x589E;&#x52A0;100&#x5143;&#xFF0C;&#x5426;&#x5219;&#xFF0C;&#x8BE5;&#x64CD;&#x4F5C;&#x5C31;&#x4E0D;&#x5177;&#x5907;&#x539F;&#x5B50;&#x6027;&#x3002;Java&#x4EE3;&#x7801;&#x7B80;&#x8981;&#x5B9E;&#x73B0;&#x5982;&#x4E0B;&#x56FE;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/86202c298fdf2fb097455b85e2820bd160c2a463a74196ee661c55067e4af827" alt="&#x56FE;&#x7247;"></p>
+<h2 id="Lua-&#x539F;&#x5B50;&#x6027;"><a href="#Lua-&#x539F;&#x5B50;&#x6027;" class="headerlink" title="Lua &#x539F;&#x5B50;&#x6027;"></a>Lua &#x539F;&#x5B50;&#x6027;</h2><p>&#x5728;&#x5206;&#x6790; Lua&#x7684;&#x539F;&#x5B50;&#x6027;&#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x4EEC;&#x5148;&#x770B;&#x770B; Lua&#x662F;&#x4EC0;&#x4E48;&#xFF0C;&#x4E0B;&#x56FE;&#x6458;&#x81EA; Lua&#x5B98;&#x65B9;&#x63CF;&#x8FF0;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/78758d65a66c0106f262939bf0c30209139c149865ec8b0fa6936b0ea856e29b" alt="image.png"></p>
+<p>&#x4ECE;&#x5B98;&#x65B9;&#x63CF;&#x8FF0;&#x53EF;&#x4EE5;&#x5F97;&#x77E5;&#xFF1A;Lua &#x662F;&#x4E00;&#x79CD;&#x529F;&#x80FD;&#x5F3A;&#x5927;&#x3001;&#x9AD8;&#x6548;&#x3001;&#x8F7B;&#x91CF;&#x7EA7;&#x3001;&#x53EF;&#x5D4C;&#x5165;&#x7684;&#x811A;&#x672C;&#x8BED;&#x8A00;&#x3002;&#x5B83;&#x652F;&#x6301;&#x8FC7;&#x7A0B;&#x7F16;&#x7A0B;&#x3001;&#x9762;&#x5411;&#x5BF9;&#x8C61;&#x7F16;&#x7A0B;&#x3001;&#x51FD;&#x6570;&#x5F0F;&#x7F16;&#x7A0B;&#x3001;&#x6570;&#x636E;&#x9A71;&#x52A8;&#x7F16;&#x7A0B;&#x548C;&#x6570;&#x636E;&#x63CF;&#x8FF0;&#x3002; Lua &#x5C06;&#x7B80;&#x5355;&#x7684;&#x8FC7;&#x7A0B;&#x8BED;&#x6CD5;&#x4E0E;&#x57FA;&#x4E8E;&#x5173;&#x8054;&#x6570;&#x7EC4;&#x548C;&#x53EF;&#x6269;&#x5C55;&#x8BED;&#x4E49;&#x7684;&#x5F3A;&#x5927;&#x6570;&#x636E;&#x63CF;&#x8FF0;&#x7ED3;&#x6784;&#x76F8;&#x7ED3;&#x5408;&#x3002;Lua &#x662F;&#x52A8;&#x6001;&#x7C7B;&#x578B;&#x7684;&#xFF0C;&#x901A;&#x8FC7;&#x4F7F;&#x7528;&#x57FA;&#x4E8E;&#x5BC4;&#x5B58;&#x5668;&#x7684;&#x865A;&#x62DF;&#x673A;&#x89E3;&#x91CA;&#x5B57;&#x8282;&#x7801;&#x6765;&#x8FD0;&#x884C;&#xFF0C;&#x5E76;&#x5177;&#x6709;&#x81EA;&#x52A8;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x548C;&#x589E;&#x91CF;&#x5783;&#x573E;&#x56DE;&#x6536;&#x529F;&#x80FD;&#xFF0C;&#x4F7F;&#x5176;&#x6210;&#x4E3A;&#x914D;&#x7F6E;&#x3001;&#x811A;&#x672C;&#x7F16;&#x5199;&#x548C;&#x5FEB;&#x901F;&#x539F;&#x578B;&#x8BBE;&#x8BA1;&#x7684;&#x7406;&#x60F3;&#x9009;&#x62E9;&#x3002;</p>
+<p>Lua &#x672C;&#x8EAB;&#x5E76;&#x6CA1;&#x6709;&#x63D0;&#x4F9B;&#x5BF9;&#x4E8E;&#x539F;&#x5B50;&#x6027;&#x7684;&#x76F4;&#x63A5;&#x652F;&#x6301;&#xFF0C;&#x5B83;&#x53EA;&#x662F;&#x4E00;&#x79CD;&#x811A;&#x672C;&#x8BED;&#x8A00;&#xFF0C;&#x901A;&#x5E38;&#x662F;&#x5D4C;&#x5165;&#x5230;&#x5176;&#x4ED6;&#x5BBF;&#x4E3B;&#x7A0B;&#x5E8F;&#x4E2D;&#x8FD0;&#x884C;&#xFF0C;&#x6BD4;&#x5982; Redis&#x3002;</p>
+<p>&#x5728; Redis&#x4E2D;&#x6267;&#x884C; Lua&#x7684;&#x539F;&#x5B50;&#x6027;&#x662F;&#x6307;&#xFF1A;&#x6574;&#x4E2A; Lua&#x811A;&#x672C;&#x5728;&#x6267;&#x884C;&#x671F;&#x95F4;&#xFF0C;&#x4F1A;&#x88AB;&#x5F53;&#x4F5C;&#x4E00;&#x4E2A;&#x6574;&#x4F53;&#xFF0C;&#x4E0D;&#x4F1A;&#x88AB;&#x5176;&#x4ED6;&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x547D;&#x4EE4;&#x6253;&#x65AD;&#x3002;</p>
+<p>&#x4E3A;&#x4E86;&#x5BF9; Redis&#x6267;&#x884C; Lua&#x7684;&#x539F;&#x5B50;&#x6027;&#x6709;&#x4E00;&#x4E2A;&#x611F;&#x5B98;&#x4E0A;&#x7684;&#x8BA4;&#x8BC6;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5; Lua&#x811A;&#x672C;&#x4E2D;&#x9700;&#x8981;&#x5B8C;&#x6210; <code>SET key1 value1</code> &#x548C; <code>INCRBY key2 value2</code> &#x548C; <code>SET key3 value3</code> &#x4E09;&#x4E2A;&#x547D;&#x4EE4;&#x4E3A;&#x4F8B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/bc087cd20fc6d8bcc9406c8958d4265f2ff33847c2acf7699a763b31bd9ffeb3" alt="&#x56FE;&#x7247;"></p>
+<p>&#x4E0A;&#x8FF0;&#x4F8B;&#x5B50;&#xFF0C;&#x6574;&#x4E2A; luaScript &#x5B57;&#x7B26;&#x4E32;&#x811A;&#x672C;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x6574;&#x4F53;&#x88AB;&#x6267;&#x884C;&#x4E14;&#x4E0D;&#x88AB;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x6253;&#x65AD;&#xFF0C;&#x8FD9;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x539F;&#x5B50;&#x6027;&#x7684;&#x64CD;&#x4F5C;&#x3002;</p>
+<p>&#x597D;&#x4E86;&#xFF0C;&#x603B;&#x7ED3;&#x4E0B; ACID&#x7684;&#x539F;&#x5B50;&#x6027;&#x548C; Redis&#x6267;&#x884C; Lua&#x811A;&#x672C;&#x539F;&#x5B50;&#x6027;&#x5728;&#x6982;&#x5FF5;&#x4E0A;&#x7684;&#x5DEE;&#x5F02;&#xFF1A;</p>
+<ul>
+<li>ACID&#x7684;&#x539F;&#x5B50;&#x6027;&#x662F;&#x6307;&#xFF1A;&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x547D;&#x4EE4;&#x8981;&#x4E48;&#x5168;&#x6267;&#x884C;&#xFF0C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x4E0D;&#x6267;&#x884C;&#xFF1B;</li>
+<li>Redis&#x4E2D;&#x6267;&#x884C; Lua&#x811A;&#x672C;&#x539F;&#x5B50;&#x6027;&#x662F;&#x6307;&#xFF1A;Lua&#x811A;&#x672C;&#x4F1A;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x6574;&#x4F53;&#x6267;&#x884C;&#x4E14;&#x4E0D;&#x88AB;&#x5176;&#x4ED6;&#x5BA2;&#x6237;&#x7AEF;&#x6253;&#x65AD;&#xFF0C;&#x81F3;&#x4E8E; Lua&#x811A;&#x672C;&#x91CC;&#x9762;&#x7684;&#x547D;&#x4EE4;&#x662F;&#x5426;&#x5FC5;&#x987B;&#x5168;&#x90E8;&#x6210;&#x529F;&#xFF0C;&#x6216;&#x8005;&#x5168;&#x90E8;&#x5931;&#x8D25;&#xFF0C;&#x5E76;&#x4E0D;&#x8981;&#x6C42;&#x3002;&#x5173;&#x4E8E;&#x8FD9;&#x4E00;&#x70B9;&#xFF0C;&#x5728;&#x63A5;&#x4E0B;&#x6765;&#x7684;&#x5185;&#x5BB9;&#x4E5F;&#x4F1A;&#x8BE6;&#x7EC6;&#x89E3;&#x91CA;&#xFF1B;</li>
+</ul>
+<p>&#x5728;&#x5206;&#x6790;&#x539F;&#x5B50;&#x6027;&#x6982;&#x5FF5;&#x65F6;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#x201C;&#x539F;&#x5B50;&#x6027;&#x201D;&#x5176;&#x5B9E;&#x662F;&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x4E00;&#x9879;&#x7279;&#x6027;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x5206;&#x6790; Redis&#x7684;&#x4E8B;&#x52A1;&#x3002;</p>
+<h2 id="&#x4E8C;&#x3001;Redis-&#x4E8B;&#x52A1;"><a href="#&#x4E8C;&#x3001;Redis-&#x4E8B;&#x52A1;" class="headerlink" title="&#x4E8C;&#x3001;Redis &#x4E8B;&#x52A1;"></a>&#x4E8C;&#x3001;Redis &#x4E8B;&#x52A1;</h2><p>&#x4E0B;&#x56FE;&#x662F; Redis&#x5B98;&#x65B9;&#x5BF9;&#x4E8B;&#x52A1;&#x63CF;&#x8FF0;&#x7684;&#x6458;&#x8981;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/eaf3d9830fab2a70cc55b5be910c3d55db0b287b4f3e1e813d331ba9bc93c2aa" alt="&#x56FE;&#x7247;"></p>
+<p>&#x6587;&#x6863;&#x770B;&#x8D77;&#x6765;&#x5F88;&#x957F;&#xFF0C;&#x603B;&#x7ED3;&#x6210;&#x4E00;&#x53E5;&#x8BDD;&#xFF1A;Redis &#x4E8B;&#x52A1;&#x5141;&#x8BB8;&#x6267;&#x884C;&#x4E00;&#x6279;&#x547D;&#x4EE4;&#xFF0C;&#x901A;&#x8FC7;&#x6267;&#x884C; MULTI&#x547D;&#x4EE4;&#x5F00;&#x542F;&#x4E8B;&#x52A1;&#xFF0C;&#x6267;&#x884C; EXEC&#x547D;&#x4EE4;&#x7ED3;&#x675F;&#x4E8B;&#x52A1;&#xFF0C;WATCH &#x548C; DISCARD &#x914D;&#x5408;&#x4E8B;&#x52A1;&#x4E00;&#x8D77;&#x4F7F;&#x7528;&#xFF0C;&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x79CD; CAS(check-and-set) &#x4E50;&#x89C2;&#x9501;&#x7684;&#x673A;&#x5236;&#x3002;WATCH &#x7528;&#x4E8E;&#x76D1;&#x542C; Key&#xFF0C;&#x5982;&#x679C;&#x88AB;&#x76D1;&#x542C;&#x7684; Key&#x6709;&#x4EFB;&#x4F55;&#x4E00;&#x4E2A;&#x53D1;&#x751F;&#x53D8;&#x5316;&#xFF0C;&#x5219;&#x4E2D;&#x6B62;&#x4E8B;&#x52A1;&#xFF08;&#x88AB;&#x52A8;&#x5173;&#x95ED;&#x4E8B;&#x52A1;&#xFF09;&#xFF0C;&#x800C; DISCARD &#x7528;&#x4E8E;&#x4E3B;&#x52A8;&#x4E2D;&#x6B62;&#x4E8B;&#x52A1;&#x3002;</p>
+<h2 id="MULTI-EXEC"><a href="#MULTI-EXEC" class="headerlink" title="MULTI/EXEC"></a>MULTI/EXEC</h2><p>&#x7528;&#x4E00;&#x4E2A;&#x793A;&#x4F8B;&#x6765;&#x7406;&#x89E3; MULTI/EXEC&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/a1f68d019bbf0e0e690985dce37a01f1fcf9bb0ba08a07e6ee4b1505b08932ba" alt="&#x56FE;&#x7247;"></p>
+<p>&#x901A;&#x8FC7;&#x6267;&#x884C;&#x7684;&#x7ED3;&#x679C;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF1A;Redis&#x7684;&#x4E8B;&#x52A1;&#x662F;&#x4EE5; MULTI&#x547D;&#x4EE4;&#x5F00;&#x542F;&#xFF0C;&#x4EE5; EXEC&#x547D;&#x4EE4;&#x7ED3;&#x675F;&#xFF0C;&#x671F;&#x95F4;&#x6240;&#x6709;&#x7684;&#x547D;&#x4EE4;&#x90FD;&#x662F;&#x5148;&#x8FDB;&#x5165;&#x961F;&#x5217;&#xFF0C;&#x53EA;&#x6709;&#x6267;&#x884C; EXEC&#x547D;&#x4EE4;&#x65F6;&#xFF0C;&#x624D;&#x4F1A;&#x628A;&#x961F;&#x5217;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x547D;&#x4EE4;&#x987A;&#x5E8F;&#x4E32;&#x884C;&#x6267;&#x884C;&#xFF0C;&#x5E76;&#x4E14;&#x8FD4;&#x56DE;&#x4E00;&#x4E2A;&#x6240;&#x6709;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x7ED3;&#x679C;&#x7684;&#x6570;&#x7EC4;&#xFF0C;&#x5305;&#x62EC;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x7684;&#x9519;&#x8BEF;&#x4FE1;&#x606F;&#x3002;</p>
+<p>&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF1A;&#x5728; EXEC &#x6267;&#x884C;&#x540E;&#xFF0C;&#x5373;&#x4F7F;&#x4E8B;&#x52A1;&#x961F;&#x5217;&#x4E2D;&#x6709;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x5931;&#x8D25;&#xFF0C;&#x961F;&#x5217;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x5176;&#x4ED6;&#x547D;&#x4EE4;&#x4E5F;&#x4F1A;&#x88AB;&#x5904;&#x7406;&#xFF0C;Redis &#x4E0D;&#x4F1A;&#x505C;&#x6B62;&#x6267;&#x884C;&#x8FD9;&#x4E9B;&#x547D;&#x4EE4;&#x3002;</p>
+<p>DISCARD &#x548C; WATCH &#x4E5F;&#x662F; Redis &#x4E2D;&#x7528;&#x4E8E;&#x4E8B;&#x52A1;&#x7684;&#x4E24;&#x4E2A;&#x547D;&#x4EE4;&#xFF0C;&#x5B83;&#x4EEC;&#x4E0E; MULTI &#x548C; EXEC &#x4E00;&#x8D77;&#x4F7F;&#x7528;&#xFF0C;&#x63D0;&#x4F9B;&#x66F4;&#x590D;&#x6742;&#x7684;&#x4E8B;&#x52A1;&#x5904;&#x7406;&#x673A;&#x5236;&#x3002;</p>
+<h2 id="WATCH"><a href="#WATCH" class="headerlink" title="WATCH"></a>WATCH</h2><p>WATCH &#x547D;&#x4EE4;&#x7528;&#x4E8E;&#x76D1;&#x542C;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A; Key&#xFF0C;&#x5982;&#x679C;&#x5728;&#x6267;&#x884C;&#x4E8B;&#x52A1;&#x671F;&#x95F4;&#x8FD9;&#x4E9B; Key&#x4E2D;&#x4EFB;&#x4F55;&#x4E00;&#x4E2A;Key&#x7684; value&#x88AB;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x4FEE;&#x6539;&#xFF0C;&#x5F53;&#x524D;&#x6574;&#x4E2A;&#x4E8B;&#x52A1;&#x5C06;&#x4F1A;&#x88AB;&#x4E2D;&#x6B62;&#x3002;&#xFF08;&#x9700;&#x8981;&#x6CE8;&#x610F;&#xFF1A;&#x4F4E;&#x4E8E; 6.0.9 &#x7684; Redis &#x7248;&#x672C;&#xFF0C;Key&#x8FC7;&#x671F;&#x4E0D;&#x4F1A;&#x4E2D;&#x6B62;&#x4E8B;&#x52A1;&#xFF09;</p>
+<p>&#x5982;&#x4E0B;&#x793A;&#x4F8B;&#xFF1A;&#x4E8B;&#x52A1;1 watch key1 key2&#xFF0C;&#x4E8B;&#x52A1;2&#x5728;&#x4E8B;&#x52A1;1&#x6267;&#x884C;&#x671F;&#x95F4;&#x4FEE;&#x6539; key2 = 10&#xFF0C;&#x5F53;&#x4E8B;&#x52A1;1&#x6267;&#x884C; exec&#x547D;&#x4EE4;&#x65F6;&#xFF0C;&#x56E0;&#x4E3A; watch&#x76D1;&#x542C;&#x5230; key2&#x88AB;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#xFF08;&#x4E8B;&#x52A1;2&#xFF09;&#x4FEE;&#x6539;&#x4E86;(value=10) &#xFF0C; &#x56E0;&#x6B64;&#x4E8B;&#x52A1;1&#x88AB;&#x53D6;&#x6D88;&#xFF0C;&#x4E8B;&#x52A1;&#x961F;&#x5217;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x547D;&#x4EE4;&#x88AB;&#x6E05;&#x9664;&#xFF0C;&#x5373; <code>set key1 value1</code> &#x548C; <code>incrby key 2</code>&#x4E24;&#x6761;&#x547D;&#x4EE4;&#x90FD;&#x4E0D;&#x6267;&#x884C;&#xFF0C;key2&#x7684; value&#x8FD8;&#x662F;10&#xFF1B;</p>
+<table>
+<thead>
+<tr>
+<th>&#x4E8B;&#x52A1;1</th>
+<th>&#x4E8B;&#x52A1;2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>watch key1 key2</td>
+<td></td>
+</tr>
+<tr>
+<td>multi</td>
+<td></td>
+</tr>
+<tr>
+<td>set key1 value1</td>
+<td></td>
+</tr>
+<tr>
+<td>incrby key2 2</td>
+<td>set key2 10</td>
+</tr>
+<tr>
+<td>exec</td>
+<td></td>
+</tr>
+<tr>
+<td>keys * // &#x53EA;&#x6709;key2=10</td>
+<td>keys * // &#x53EA;&#x6709;key2=10</td>
+</tr>
+</tbody></table>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/7082db3b93f8bc2b899fc4104461f7efa3089a2804355e1678a8232877d3c6ed" alt="&#x56FE;&#x7247;"></p>
+<h2 id="DISCARD"><a href="#DISCARD" class="headerlink" title="DISCARD"></a>DISCARD</h2><p>DISCARD &#x547D;&#x4EE4;&#x7528;&#x4E8E;&#x4E2D;&#x6B62;&#x4E8B;&#x52A1;&#x3002;</p>
+<p>&#x5982;&#x4E0B;&#x793A;&#x4F8B;&#xFF0C;&#x6267;&#x884C; DISCARD&#x547D;&#x4EE4;&#x540E;&#xFF0C;&#x5F53;&#x524D;&#x4E8B;&#x52A1;&#x88AB;&#x4E2D;&#x6B62;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x6267;&#x884C; EXEC &#x65F6;&#x4F1A;&#x62A5;&#x201C;ERR EXEC without MULTI&#x201D;&#x9519;&#x8BEF;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e077829459af9f64ae55c2db2e2d7e112c79c2c5ee032c522222c950b4da0a67" alt="&#x56FE;&#x7247;"></p>
+<h2 id="&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x9519;&#x8BEF;"><a href="#&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x9519;&#x8BEF;" class="headerlink" title="&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x9519;&#x8BEF;"></a>&#x4E8B;&#x52A1;&#x4E2D;&#x7684;&#x9519;&#x8BEF;</h2><p>&#x4E8B;&#x52A1;&#x4E2D;&#x4E3B;&#x8981;&#x4F1A;&#x51FA;&#x73B0;&#x4E24;&#x79CD;&#x7C7B;&#x578B;&#x7684;&#x9519;&#x8BEF;&#xFF1A;</p>
+<ol>
+<li>&#x4E8B;&#x52A1;&#x547D;&#x4EE4;&#x8FDB;&#x5165;&#x4E8B;&#x52A1;&#x961F;&#x5217;&#x4E4B;&#x524D;&#x51FA;&#x9519;&#x3002;&#x4F8B;&#x5982;&#xFF0C;&#x547D;&#x4EE4;&#x8BED;&#x6CD5;&#x9519;&#x8BEF;&#xFF08;&#x53C2;&#x6570;&#x9519;&#x8BEF;&#x3001;&#x547D;&#x4EE4;&#x540D;&#x79F0;&#x9519;&#x8BEF;&#x7B49;&#xFF09;&#xFF0C;&#x6216;&#x8005;&#x53EF;&#x80FD;&#x5B58;&#x5728;&#x4E00;&#x4E9B;&#x5173;&#x952E;&#x60C5;&#x51B5;&#xFF0C;&#x6BD4;&#x5982;&#x5185;&#x5B58;&#x4E0D;&#x8DB3;&#x3002;&#x5982;&#x4E0B;&#x793A;&#x4F8B;&#xFF0C;&#x547D;&#x4EE4;<code>incr key2 1/0</code> &#x5728;&#x8FDB;&#x5165;&#x4E8B;&#x52A1;&#x961F;&#x5217;&#x4E4B;&#x524D;&#x62A5;&#x9519;&#xFF0C;&#x6240;&#x4EE5;&#xFF0C;&#x5F53;&#x524D;&#x4E8B;&#x52A1;&#x88AB;&#x4E2D;&#x6B62;&#xFF0C;&#x6267;&#x884C; EXEC&#x547D;&#x4EE4;&#x4F1A;&#x62A5;&#x9519;&#xFF1A;</li>
+</ol>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/eafc161c01842e0ed4af4a1e68b105ceb4c4c0bc7f50fa0c3656bbe30f3df6ff" alt="&#x56FE;&#x7247;"><br>2. &#x8C03;&#x7528; EXEC &#x547D;&#x4EE4;&#x540E;&#xFF0C;&#x4E8B;&#x52A1;&#x961F;&#x5217;&#x4E2D;&#x7684;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x5931;&#x8D25;&#x3002;&#x4F8B;&#x5982;&#xFF0C;&#x5BF9;&#x5B57;&#x7B26;&#x4E32;&#x503C;&#x8FDB;&#x884C;&#x52A0;1&#x64CD;&#x4F5C;&#x3002;&#x5982;&#x4E0B;&#x793A;&#x4F8B;&#xFF0C;key&#x7684; value&#x662F;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;&#x5F53;&#x5BF9; key &#x6267;&#x884C;<code>incr key</code> &#x64CD;&#x4F5C;&#x65F6;&#x62A5;&#x9519;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;&#x8BE5;&#x6761;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x5931;&#x8D25;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3202803f628c364ac5854bf0f96b1884f9b95ab71718c009c85ee83a3474db74" alt="&#x56FE;&#x7247;"></p>
+<h2 id="&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;"><a href="#&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;" class="headerlink" title="&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;"></a>&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;</h2><p><strong>Redis&#x7684;&#x4E8B;&#x52A1;&#x4E0D;&#x652F;&#x6301;&#x56DE;&#x6EDA;&#x3002;</strong> &#x5B98;&#x65B9;&#x8BF4;&#x660E;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/25cfaeaa6f099aa117bddc0d1b5edf1de8db7614a953a14631f2cea81d0e3927" alt="&#x56FE;&#x7247;"></p>
+<p>Redis &#x4E0D;&#x652F;&#x6301;&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;&#xFF0C;&#x56E0;&#x4E3A;&#x652F;&#x6301;&#x56DE;&#x6EDA;&#x4F1A;&#x5BF9; Redis &#x7684;&#x7B80;&#x5355;&#x6027;&#x548C;&#x6027;&#x80FD;&#x4EA7;&#x751F;&#x91CD;&#x5927;&#x5F71;&#x54CD;&#x3002;</p>
+<p>&#x5B98;&#x65B9;&#x8BF4;&#x660E;&#x7B80;&#x660E;&#x627C;&#x8981;&#xFF0C;&#x5176;&#x5B9E;&#xFF0C;&#x591A;&#x52A0;&#x601D;&#x8003;&#x4E5F;&#x80FD;&#x7406;&#x89E3;&#xFF1A;&#x201D;Redis&#x201D; &#x662F; &#x201C;REmote DIctionary Server&#x201D; &#x7684;&#x7F29;&#x5199;&#xFF0C;&#x7FFB;&#x8BD1;&#x4E3A;&#x201C;&#x8FDC;&#x7A0B;&#x5B57;&#x5178;&#x670D;&#x52A1;&#x201D;&#xFF0C;&#x8BBE;&#x8BA1;&#x7684;&#x521D;&#x8877;&#x662F;&#x7528;&#x4E8E;&#x7F13;&#x5B58;&#xFF0C;&#x8FFD;&#x6C42;&#x5FEB;&#x901F;&#x9AD8;&#x6548;&#x3002;&#x800C;&#x4E86;&#x89E3;&#x8FC7; ACID&#x4E8B;&#x52A1;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#x5E94;&#x8BE5;&#x80FD;&#x660E;&#x767D;&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;&#x7684;&#x590D;&#x6742;&#x5EA6;&#xFF0C;&#x56E0;&#x6B64;&#xFF0C;Redis&#x4E0D;&#x652F;&#x6301;&#x4E8B;&#x52A1;&#x56DE;&#x6EDA;&#x4F3C;&#x4E4E;&#x4E5F;&#x5408;&#x60C5;&#x5408;&#x7406;&#x3002;</p>
+<p>&#x5230;&#x6B64;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x5BF9; Redis&#x4E8B;&#x52A1;&#x505A;&#x4E2A;&#x5C0F;&#x7ED3;&#xFF1A;Redis&#x7684;&#x4E8B;&#x52A1;&#x7531; MULTI/EXEC &#x4E24;&#x4E2A;&#x547D;&#x4EE4;&#x5B8C;&#x6210;&#xFF0C;WATCH/DISCARD &#x4E24;&#x4E2A;&#x547D;&#x4EE4;&#x7684;&#x52A0;&#x6301;&#xFF0C;&#x7ED9; Redis&#x4E8B;&#x52A1;&#x63D0;&#x4F9B;&#x4E86; CAS &#x4E50;&#x89C2;&#x9501;&#x673A;&#x5236;&#x3002;Redis &#x4E8B;&#x52A1;&#x4E0D;&#x652F;&#x6301;&#x56DE;&#x6EDA;&#xFF0C;&#x5B83;&#x548C;&#x5173;&#x7CFB;&#x578B;&#x6570;&#x636E;&#x5E93;&#xFF08;&#x6BD4;&#x5982; MySQL&#xFF09;&#x7684;&#x4E8B;&#x52A1;&#xFF08;ACID&#xFF09;&#x662F;&#x4E0D;&#x4E00;&#x6837;&#x7684;&#x3002;</p>
+<h2 id="&#x4E09;&#x3001;Redis-&#x5982;&#x4F55;&#x6267;&#x884C;-Lua&#xFF1F;"><a href="#&#x4E09;&#x3001;Redis-&#x5982;&#x4F55;&#x6267;&#x884C;-Lua&#xFF1F;" class="headerlink" title="&#x4E09;&#x3001;Redis &#x5982;&#x4F55;&#x6267;&#x884C; Lua&#xFF1F;"></a>&#x4E09;&#x3001;Redis &#x5982;&#x4F55;&#x6267;&#x884C; Lua&#xFF1F;</h2><p>&#x5206;&#x6790;&#x5B8C;&#x539F;&#x5B50;&#x6027;&#x548C; Redis&#x4E8B;&#x52A1;&#x8FD9;&#x4E9B;&#x7406;&#x8BBA;&#x77E5;&#x8BC6;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x5F97;&#x52A8;&#x624B;&#x5B9E;&#x64CD;&#xFF0C;&#x770B;&#x770B; Redis&#x662F;&#x5982;&#x4F55;&#x6267;&#x884C; Lua&#x7684;&#x3002;</p>
+<p>&#x4E00;&#x822C;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;Redis&#x6267;&#x884C; Lua&#x5E38;&#x7528;&#x7684;&#x65B9;&#x6CD5;&#x6709; 2&#x79CD;&#xFF1A;</p>
+<ol>
+<li>&#x539F;&#x751F;&#x547D;&#x4EE4;&#xFF0C;&#x6BD4;&#x5982; EVAL/EVALSHA&#x547D;&#x4EE4;&#x7B49;&#xFF1B;</li>
+<li>&#x7F16;&#x7A0B;&#x5DE5;&#x5177;&#xFF0C;&#x6BD4;&#x5982;&#x7F16;&#x7A0B;&#x8BED;&#x8A00;&#x4E2D;&#x63D0;&#x4F9B;&#x7684;&#x4E09;&#x65B9;&#x5DE5;&#x5177;&#x5305;&#x6216;&#x7C7B;&#x5E93;&#xFF1B;</li>
+</ol>
+<p>&#x5728;&#x7F16;&#x5199; Lua&#x811A;&#x672C;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x533A;&#x5206; redis.call() &#x548C; redis.pcall() &#x4E24;&#x4E2A;&#x547D;&#x4EE4;&#x7684;&#x4F7F;&#x7528;&#x3002;</p>
+<h2 id="EVAL"><a href="#EVAL" class="headerlink" title="EVAL"></a>EVAL</h2><p>&#x8BED;&#x6CD5;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">css&#x590D;&#x5236;&#x4EE3;&#x7801;EVAL script numkeys [key [key ...]] [arg [arg ...]]</span><br></pre></td></tr></table></figure>
+
+<p>EVAL&#x8BED;&#x6CD5;&#x5F88;&#x7B80;&#x5355;&#xFF0C;EVAL script numkeys &#x662F;&#x5FC5;&#x586B;&#x9879;&#xFF0C;[key [key &#x2026;]] [arg [arg &#x2026;]]&#x662F;&#x9009;&#x586B;&#x9879;&#x3002;</p>
+<p>&#x5982;&#x4E0B;&#x793A;&#x4F8B;&#x622A;&#x56FE;&#xFF0C;&#x5206;&#x522B;&#x5C55;&#x793A;&#x4E86;&#x4E0D;&#x4F20;Key&#xFF0C;&#x4F20; 1&#x4E2A;key &#x548C; 2&#x4E2A; key 3&#x79CD;&#x573A;&#x666F;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/804c600427fa1189c09fe8193d0f8da5fd8fd97127970a9a2a93826513692caa" alt="&#x56FE;&#x7247;"></p>
+<p>&#x4E0B;&#x56FE;&#x793A;&#x4F8B;&#x5C55;&#x793A;&#x4E86; [key [key &#x2026;]] [arg [arg &#x2026;]] &#x548C; numkeys &#x5339;&#x914D;&#x9519;&#x8BEF;&#x65F6;&#x62A5;&#x9519;&#x7684;&#x573A;&#x666F;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/c118a2841ea254280cfbfeb457e3a6e5887780e3243f58285fbf7293660f362a" alt="&#x56FE;&#x7247;"></p>
+<h2 id="redis-call"><a href="#redis-call" class="headerlink" title="redis.call()"></a>redis.call()</h2><p>redis.call() &#x7528;&#x4E8E;&#x6267;&#x884C; Redis&#x7684;&#x547D;&#x4EE4;&#x3002;&#x5F53;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x51FA;&#x9519;&#x65F6;&#xFF0C;&#x4F1A;&#x963B;&#x65AD;&#x6574;&#x4E2A;&#x811A;&#x672C;&#x6267;&#x884C;&#xFF0C;&#x5E76;&#x5C06;&#x9519;&#x8BEF;&#x4FE1;&#x606F;&#x8FD4;&#x56DE;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#x3002;</p>
+<p>&#x5982;&#x4E0B;&#x793A;&#x4F8B;&#xFF1A;&#x5F53;&#x6267;&#x884C;<code>INCRBY key2 1/0</code> &#x5931;&#x8D25;&#x65F6;&#xFF0C;&#x4F1A;&#x629B;&#x5F02;&#x5E38;&#xFF0C;&#x540E;&#x7EED;&#x6D41;&#x7A0B;&#x88AB;&#x963B;&#x65AD;&#xFF0C;&#x5373;<code>SET key3 value3</code>&#x6CA1;&#x6709;&#x88AB;&#x6267;&#x884C;&#x3002;</p>
+<p>Redis&#x539F;&#x751F;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x793A;&#x4F8B;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">less&#x590D;&#x5236;&#x4EE3;&#x7801;EVAL&#xA0;&quot;redis.call(&apos;SET&apos;,&#xA0;&apos;key1&apos;,&#xA0;&apos;value1&apos;);&#xA0;redis.call(&apos;INCRBY&apos;,&#xA0;&apos;key2&apos;,&#xA0;1/0);&#xA0;redis.call(&apos;SET&apos;,&#xA0;&apos;key3&apos;,&#xA0;&apos;value3&apos;)&quot;&#xA0;0</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/8350bf3de88b45afe662d7110475922b8c89561966a8619726985f83e4c3665c" alt="&#x56FE;&#x7247;"></p>
+<p>&#x4F7F;&#x7528; Jedis&#x6846;&#x67B6;&#x6267;&#x884C; Lua&#x793A;&#x4F8B;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e526a0b8dff16487a9a8fc76f263797c988cd7ad2e687c774f16dd5596ff3b8d" alt="&#x56FE;&#x7247;"></p>
+<p>&#x67E5;&#x770B; Lua&#x6267;&#x884C;&#x540E;&#x5404;&#x4E2A;key&#x7684;&#x503C;&#xFF0C;&#x622A;&#x56FE;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/b63acbaefafc8c9c362fd222f37ed3bc0f0c2c8e406c4cec38d43fdf1c037148" alt="&#x56FE;&#x7247;"></p>
+<h2 id="redis-pcall"><a href="#redis-pcall" class="headerlink" title="redis.pcall()"></a>redis.pcall()</h2><p>redis.pcall() &#x4E5F;&#x7528;&#x4E8E;&#x6267;&#x884C; Redis&#x7684;&#x547D;&#x4EE4;&#x3002;&#x5F53;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x51FA;&#x9519;&#x65F6;&#xFF0C;&#x4E0D;&#x4F1A;&#x963B;&#x65AD;&#x811A;&#x672C;&#x7684;&#x6267;&#x884C;&#xFF0C;&#x800C;&#x662F;&#x5185;&#x90E8;&#x6355;&#x83B7;&#x9519;&#x8BEF;&#xFF0C;&#x5E76;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#x540E;&#x7EED;&#x7684;&#x547D;&#x4EE4;&#x3002;</p>
+<p>&#x5982;&#x4E0B;&#x793A;&#x4F8B;&#xFF1A;&#x5F53;&#x6267;&#x884C;<code>INCRBY key2 1/0</code> &#x5931;&#x8D25;&#x65F6;&#xFF0C;&#x4E0D;&#x4F1A;&#x629B;&#x5F02;&#x5E38;&#xFF0C;&#x540E;&#x7EED;&#x6D41;&#x7A0B;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#xFF0C;&#x5373;<code>SET key3 value3</code> &#x4E5F;&#x88AB;&#x6267;&#x884C;&#x3002;</p>
+<p>Redis&#x539F;&#x751F;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x793A;&#x4F8B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">less&#x590D;&#x5236;&#x4EE3;&#x7801;EVAL &quot;redis.pcall(&apos;SET&apos;, &apos;key1&apos;, &apos;value1&apos;); redis.pcall(&apos;INCRBY&apos;, &apos;key2&apos;, 1/0); redis.pcall(&apos;SET&apos;, &apos;key3&apos;, &apos;value3&apos;)&quot; 0</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/60af1d806ff7fad1bdf627dd3dab341edd7b0007a45877414aea708b68ae05eb" alt="&#x56FE;&#x7247;"></p>
+<p>&#x4F7F;&#x7528; Jedis&#x6846;&#x67B6;&#x6267;&#x884C; Lua&#x793A;&#x4F8B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/cfa169c73a632f41ed8803069310e28d55cde0c6db850e2c6ac7defbdc93a579" alt="&#x56FE;&#x7247;"></p>
+<p>&#x5BF9;&#x4E8E; Lua&#x4E2D; redis.call() &#x548C; redis.pcall() &#x5982;&#x4F55;&#x9009;&#x62E9;&#xFF0C;&#x9700;&#x8981;&#x6839;&#x636E;&#x5B9E;&#x9645;&#x4E1A;&#x52A1;&#x6765;&#x5224;&#x65AD;&#xFF0C;&#x6807;&#x51C6;&#x662F;&#xFF1A;&#x5F53; Lua&#x811A;&#x672C;&#x4E2D;&#x67D0;&#x6761;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x51FA;&#x9519;&#x65F6;&#xFF0C;&#x662F;&#x5426;&#x9700;&#x8981;&#x963B;&#x65AD;&#x540E;&#x7EED;&#x7684;&#x547D;&#x4EE4;&#x6267;&#x884C;&#x3002;</p>
+<h2 id="&#x56DB;&#x3001;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1F;"><a href="#&#x56DB;&#x3001;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1F;" class="headerlink" title="&#x56DB;&#x3001;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1F;"></a>&#x56DB;&#x3001;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1F;</h2><p>&#x9996;&#x5148;&#xFF0C;&#x53EF;&#x4EE5;&#x80AF;&#x5B9A;&#x7684;&#x662F;&#xFF1A;<strong>Redis&#x6267;&#x884C; Lua&#x811A;&#x672C;&#x53EF;&#x4EE5;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;</strong>&#xFF0C;&#x4E0D;&#x8FC7;&#x8FD9;&#x548C; Redis Server&#x7684;&#x90E8;&#x7F72;&#x65B9;&#x5F0F;&#x5BC6;&#x4E0D;&#x53EF;&#x5206;&#x3002;</p>
+<p>Redis&#x662F;&#x5178;&#x578B;&#x7684; C/S(Client/Server) &#x6A21;&#x578B;&#xFF0C;&#x5982;&#x4E0B;&#x56FE;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/58369f4c4548637d4ce3cdc48931de743f04b3dc9d5388462d4e426cfca8aa3e" alt="&#x56FE;&#x7247;"></p>
+<p>&#x56E0;&#x6B64;&#xFF0C;Redis &#x901A;&#x5E38;&#x6709; 3&#x79CD;&#x4E0D;&#x540C;&#x7684;&#x90E8;&#x7F72;&#x65B9;&#x5F0F;&#xFF0C;&#x90E8;&#x7F72;&#x65B9;&#x5F0F;&#x4E0D;&#x540C;&#xFF0C;&#x539F;&#x5B50;&#x6027;&#x7684;&#x4FDD;&#x8BC1;&#x4E5F;&#x4E0D;&#x4E00;&#x6837;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/a855d0a1f1b23895889e00b51173370d3f21c28522df5800a121e6d0684d123c" alt="&#x56FE;&#x7247;"></p>
+<h2 id="&#x5355;&#x673A;&#x90E8;&#x7F72;"><a href="#&#x5355;&#x673A;&#x90E8;&#x7F72;" class="headerlink" title="&#x5355;&#x673A;&#x90E8;&#x7F72;"></a>&#x5355;&#x673A;&#x90E8;&#x7F72;</h2><p>&#x4E0D;&#x7BA1; Lua&#x811A;&#x672C;&#x4E2D;&#x64CD;&#x4F5C;&#x7684; key&#x662F;&#x4E0D;&#x662F;&#x540C;&#x4E00;&#x4E2A;&#xFF0C;&#x90FD;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1B;</p>
+<h2 id="&#x4E3B;&#x4ECE;&#x90E8;&#x7F72;"><a href="#&#x4E3B;&#x4ECE;&#x90E8;&#x7F72;" class="headerlink" title="&#x4E3B;&#x4ECE;&#x90E8;&#x7F72;"></a>&#x4E3B;&#x4ECE;&#x90E8;&#x7F72;</h2><p>Redis &#x4E3B;&#x4ECE;&#x590D;&#x5236;&#x662F;&#x7528;&#x4E8E;&#x5C06;&#x4E3B;&#x8282;&#x70B9;&#x7684;&#x6570;&#x636E;&#x540C;&#x6B65;&#x5230;&#x4ECE;&#x8282;&#x70B9;&#xFF0C;&#x4EE5;&#x4FDD;&#x6301;&#x6570;&#x636E;&#x7684;&#x4E00;&#x81F4;&#x6027;&#x3002;&#x800C;Redis&#x7684;&#x6240;&#x6709;&#x5199;&#x64CD;&#x4F5C;&#x90FD;&#x5728;&#x4E3B;&#x8282;&#x70B9;&#x4E0A;&#xFF0C;&#x6240;&#x4EE5;&#xFF0C;&#x4E0D;&#x7BA1; Lua&#x811A;&#x672C;&#x4E2D;&#x64CD;&#x4F5C;&#x7684; key&#x662F;&#x4E0D;&#x662F;&#x540C;&#x4E00;&#x4E2A;&#xFF0C;&#x90FD;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1B;</p>
+<p>&#x9700;&#x8981;&#x6CE8;&#x610F;&#xFF1A;&#x5F53;&#x4E3B;&#x8282;&#x70B9;&#x6267;&#x884C;&#x5199;&#x547D;&#x4EE4;&#x65F6;&#xFF0C;&#x4ECE;&#x8282;&#x70B9;&#x4F1A;&#x5F02;&#x6B65;&#x5730;&#x590D;&#x5236;&#x8FD9;&#x4E9B;&#x5199;&#x64CD;&#x4F5C;&#x3002;&#x5728;&#x8FD9;&#x4E2A;&#x590D;&#x5236;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x4ECE;&#x8282;&#x70B9;&#x7684;&#x6570;&#x636E;&#x53EF;&#x80FD;&#x4E0E;&#x4E3B;&#x8282;&#x70B9;&#x5B58;&#x5728;&#x4E00;&#x5B9A;&#x7684;&#x5EF6;&#x8FDF;&#x3002;&#x56E0;&#x6B64;&#xFF0C;&#x5982;&#x679C;&#x5728; Lua &#x811A;&#x672C;&#x4E2D;&#x5305;&#x542B;&#x8BFB;&#x64CD;&#x4F5C;&#xFF0C;&#x5E76;&#x4E14;&#x8BE5;&#x811A;&#x672C;&#x5728;&#x4E3B;&#x8282;&#x70B9;&#x4E0A;&#x6267;&#x884C;&#xFF0C;&#x53EF;&#x80FD;&#x4F1A;&#x8BFB;&#x5230;&#x6700;&#x65B0;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x4F46;&#x5982;&#x679C;&#x5728;&#x4ECE;&#x8282;&#x70B9;&#x4E0A;&#x6267;&#x884C;&#xFF0C;&#x53EF;&#x80FD;&#x4F1A;&#x8BFB;&#x5230;&#x7A0D;&#x6709;&#x5EF6;&#x8FDF;&#x7684;&#x6570;&#x636E;&#x3002;</p>
+<h2 id="Cluster&#x96C6;&#x7FA4;&#x90E8;&#x7F72;"><a href="#Cluster&#x96C6;&#x7FA4;&#x90E8;&#x7F72;" class="headerlink" title="Cluster&#x96C6;&#x7FA4;&#x90E8;&#x7F72;"></a>Cluster&#x96C6;&#x7FA4;&#x90E8;&#x7F72;</h2><p>&#x5982;&#x679C; Lua&#x811A;&#x672C;&#x64CD;&#x4F5C;&#x7684; key&#x662F;&#x540C;&#x4E00;&#x4E2A;&#xFF0C;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1B;</p>
+<p>&#x5982;&#x679C;&#x64CD;&#x4F5C;&#x7684; Key&#x4E0D;&#x76F8;&#x540C;&#xFF0C;&#x53EF;&#x80FD;&#x88AB; hash &#x5230;&#x4E0D;&#x540C;&#x7684; slot&#xFF0C;&#x4E5F;&#x53EF;&#x80FD; hash &#x5230;&#x76F8;&#x540C;&#x7684; slot&#xFF0C;&#x6240;&#x4EE5;&#x4E0D;&#x4E00;&#x5B9A;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1B;</p>
+<p>&#x56E0;&#x6B64;&#xFF0C;&#x5728; Cluster&#x96C6;&#x7FA4;&#x90E8;&#x7F72;&#x7684;&#x73AF;&#x5883;&#x4E0B;&#x4F7F;&#x7528; Lua&#x811A;&#x672C;&#x65F6;&#x4E00;&#x5B9A;&#x8981;&#x6CE8;&#x610F;&#xFF1A;Lua&#x811A;&#x672C;&#x4E2D;&#x64CD;&#x4F5C;&#x7684;&#x662F;&#x540C;&#x4E00;&#x4E2A; Key&#xFF1B;</p>
+<h2 id="&#x539F;&#x5B50;&#x6027;&#x4FDD;&#x8BC1;"><a href="#&#x539F;&#x5B50;&#x6027;&#x4FDD;&#x8BC1;" class="headerlink" title="&#x539F;&#x5B50;&#x6027;&#x4FDD;&#x8BC1;"></a>&#x539F;&#x5B50;&#x6027;&#x4FDD;&#x8BC1;</h2><p>&#x8FD9;&#x91CC;&#x4EE5; Redis&#x5355;&#x673A;&#x90E8;&#x7F72;&#x4E3A;&#x4F8B;&#xFF1A;&#x5F53;&#x5BA2;&#x6237;&#x7AEF;&#x5411;&#x670D;&#x52A1;&#x5668;&#x53D1;&#x9001;&#x4E00;&#x4E2A;&#x5E26;&#x6709; Lua&#x811A;&#x672C;&#x7684;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;Redis&#x4F1A;&#x628A;&#x8BE5;&#x811A;&#x672C;&#x5F53;&#x4F5C;&#x4E00;&#x4E2A;&#x6574;&#x4F53;&#xFF0C;&#x7136;&#x540E;&#x52A0;&#x8F7D;&#x5230;&#x4E00;&#x4E2A;&#x811A;&#x672C;&#x7F13;&#x5B58;&#x4E2D;&#xFF0C;&#x56E0;&#x4E3A; Redis&#x8BFB;&#x5199;&#x547D;&#x4EE4;&#x662F;&#x5355;&#x7EBF;&#x7A0B;&#x64CD;&#x4F5C;&#xFF08;&#x5173;&#x4E8E; Redis&#x7684;&#x5355;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x548C;&#x591A;&#x8DEF;&#x590D;&#x7528;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x4F1A;&#x5728;&#x5176;&#x4ED6;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#x8BB2;&#x89E3;&#xFF09;&#xFF0C;&#x6700;&#x7EC8;&#xFF0C;Lua&#x811A;&#x672C;&#x7684;&#x8BFB;&#x5199;&#x5728; Redis&#x670D;&#x52A1;&#x5668;&#x4E0A;&#x53EF;&#x4EE5;&#x7B80;&#x5355;&#x5730;&#x62BD;&#x8C61;&#x6210;&#x4E0B;&#x56FE;&#xFF0C;&#x6240;&#x6709;&#x7684; Lua&#x811A;&#x672C;&#x4F1A;&#x6309;&#x7167;&#x8FDB;&#x5165;&#x987A;&#x5E8F;&#x653E;&#x5165;&#x961F;&#x5217;&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x4E32;&#x884C;&#x8FDB;&#x884C;&#x8BFB;&#x5199;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x4FDD;&#x8BC1;&#x6BCF;&#x4E2A; Lua&#x4E0D;&#x4F1A;&#x88AB;&#x5176;&#x4ED6;&#x7684;&#x5BA2;&#x6237;&#x7AEF;&#x6253;&#x65AD;&#xFF0C;&#x4ECE;&#x800C;&#x4FDD;&#x8BC1;&#x4E86;&#x539F;&#x5B50;&#x6027;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/377f39667c64a83e273a7f7acee52c0980d98fb877a033a2101d2c339525fb8b" alt="&#x56FE;&#x7247;"></p>
+<h2 id="&#x4E94;&#x3001;&#x9762;&#x8BD5;&#x8BE5;&#x5982;&#x4F55;&#x56DE;&#x7B54;&#xFF1F;"><a href="#&#x4E94;&#x3001;&#x9762;&#x8BD5;&#x8BE5;&#x5982;&#x4F55;&#x56DE;&#x7B54;&#xFF1F;" class="headerlink" title="&#x4E94;&#x3001;&#x9762;&#x8BD5;&#x8BE5;&#x5982;&#x4F55;&#x56DE;&#x7B54;&#xFF1F;"></a>&#x4E94;&#x3001;&#x9762;&#x8BD5;&#x8BE5;&#x5982;&#x4F55;&#x56DE;&#x7B54;&#xFF1F;</h2><p>&#x5728;&#x9762;&#x8BD5;&#x4E2D;&#xFF0C;Redis &#x6267;&#x884C; Lua&#x811A;&#x672C;&#x65F6;&#xFF0C;&#x80FD;&#x5426;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1F;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x5982;&#x4F55;&#x4F5C;&#x7B54;&#xFF1F;</p>
+<ol>
+<li>&#x7B2C;&#x4E00;&#x6B65;&#xFF0C;&#x9700;&#x8981;&#x89E3;&#x91CA;&#x8FD9;&#x91CC;&#x7684;&#x539F;&#x5B50;&#x6027;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;&#x5B83;&#x548C;&#x5173;&#x7CFB;&#x6570;&#x636E;&#x4E8B;&#x52A1; ACID&#x4E2D;&#x7684;&#x4E00;&#x81F4;&#x6027;&#x7684;&#x5DEE;&#x5F02;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;&#x6D88;&#x9664;&#x539F;&#x5B50;&#x6027;&#x5728;&#x5177;&#x4F53;&#x8F7D;&#x4F53;&#xFF08;RDBMS/NoSQL&#xFF09;&#x4E0A;&#x6982;&#x5FF5;&#x7684;&#x5DEE;&#x5F02;&#xFF1B;</li>
+<li>&#x7B2C;&#x4E8C;&#x6B65;&#xFF0C;&#x9700;&#x8981;&#x89E3;&#x91CA; Redis&#x7684;&#x4E8B;&#x52A1;&#xFF0C;&#x8BF4;&#x660E; RDBMS/NoSQL &#x5728;&#x4E8B;&#x52A1;&#x4E0A;&#x7684;&#x5DEE;&#x5F02;&#x70B9;&#xFF1B;</li>
+<li>&#x7B2C;&#x4E09;&#x6B65;&#xFF0C;&#x9700;&#x8981;&#x89E3;&#x91CA; Redis&#x5728;&#x4E0D;&#x540C;&#x90E8;&#x7F72;&#x65B9;&#x5F0F;&#x4E0B;&#x539F;&#x5B50;&#x6027;&#x80FD;&#x5426;&#x4FDD;&#x8BC1;&#x3002;Redis&#x90E8;&#x7F72;&#x65B9;&#x5F0F;&#x6709;3&#x79CD;&#xFF1A;&#x5355;&#x673A;&#x90E8;&#x7F72;&#xFF0C;&#x4E3B;&#x4ECE;&#x90E8;&#x7F72;&#xFF0C;Cluster&#x96C6;&#x7FA4;&#x90E8;&#x7F72;&#xFF0C;&#x9700;&#x8981;&#x8BF4;&#x660E;&#x5728;&#x54EA;&#x4E9B;&#x90E8;&#x7F72;&#x65B9;&#x5F0F;&#x4E0B;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF0C;&#x54EA;&#x4E9B;&#x4E0D;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1B;</li>
+<li>&#x7B2C;&#x56DB;&#x6B65;&#xFF0C;&#x89E3;&#x91CA; Redis &#x6267;&#x884C; Lua&#x811A;&#x672C;&#x662F;&#x5982;&#x4F55;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF1B;</li>
+<li>&#x7B2C;&#x4E94;&#x6B65;&#xFF0C;&#x5206;&#x6790;&#x4E0B; Redis&#x7684;&#x5355;&#x7EBF;&#x7A0B;&#x6A21;&#x578B; &#x548C; IO&#x591A;&#x8DEF;&#x590D;&#x7528;&#x6A21;&#x578B;&#xFF08;&#x52A0;&#x5206;&#x9879;&#xFF09;&#xFF0C;&#x8FD9;&#x6B65;&#x662F;&#x53EF;&#x9009;&#x9879;&#xFF1B;</li>
+</ol>
+<h2 id="&#x516D;&#x3001;Why-Lua&#xFF1F;"><a href="#&#x516D;&#x3001;Why-Lua&#xFF1F;" class="headerlink" title="&#x516D;&#x3001;Why Lua&#xFF1F;"></a>&#x516D;&#x3001;Why Lua&#xFF1F;</h2><p>&#x65E2;&#x7136; Redis&#x4E8B;&#x52A1;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x8FD8;&#x9700;&#x8981; Lua&#x811A;&#x672C;&#x5462;&#xFF1F;</p>
+<ol>
+<li>Lua &#x662F;&#x4E00;&#x79CD;&#x5D4C;&#x5165;&#x5F0F;&#x8BED;&#x8A00;&#xFF0C;&#x662F; Redis&#x5B98;&#x65B9;&#x63A8;&#x8350;&#x7684;&#x811A;&#x672C;&#x8BED;&#x8A00;&#xFF1B;</li>
+<li>Lua &#x811A;&#x672C;&#x4E00;&#x822C;&#x6BD4; MULTI/EXEC &#x66F4;&#x5FEB;&#x3001;&#x66F4;&#x7B80;&#x5355;&#xFF1B;</li>
+<li>Redis &#x4E8B;&#x52A1;&#x4E2D;&#xFF0C;&#x4E8B;&#x52A1;&#x961F;&#x5217;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x547D;&#x4EE4;&#x90FD;&#x5FC5;&#x987B;&#x5728; EXEC&#x547D;&#x4EE4;&#x6267;&#x884C;&#x624D;&#x4F1A;&#x88AB;&#x6267;&#x884C;&#xFF0C;&#x5BF9;&#x4E8E;&#x591A;&#x4E2A;&#x547D;&#x4EE4;&#x4E4B;&#x95F4;&#x5B58;&#x5728;&#x4F9D;&#x8D56;&#x5173;&#x7CFB;&#xFF0C;&#x6BD4;&#x5982;&#x540E;&#x9762;&#x7684;&#x547D;&#x4EE4;&#x9700;&#x8981;&#x4F9D;&#x8D56;&#x4E0A;&#x4E00;&#x4E2A;&#x547D;&#x4EE4;&#x7ED3;&#x679C;&#x7684;&#x573A;&#x666F;&#xFF0C;Redis&#x4E8B;&#x52A1;&#x65E0;&#x6CD5;&#x6EE1;&#x8DB3;&#xFF0C;&#x56E0;&#x6B64; Lua &#x811A;&#x672C;&#x66F4;&#x9002;&#x5408;&#x590D;&#x6742;&#x7684;&#x573A;&#x666F;&#xFF1B;</li>
+<li>Redis &#x4E8B;&#x52A1;&#x80FD;&#x505A;&#x7684; Lua&#x80FD;&#x505A;&#xFF0C;Redis&#x4E8B;&#x52A1;&#x505A;&#x4E0D;&#x5230;&#x7684; Lua&#x4E5F;&#x80FD;&#x505A;&#xFF1B;</li>
+</ol>
+<h2 id="&#x4E03;&#x3001;Lua&#x6CE8;&#x610F;&#x4E8B;&#x9879;"><a href="#&#x4E03;&#x3001;Lua&#x6CE8;&#x610F;&#x4E8B;&#x9879;" class="headerlink" title="&#x4E03;&#x3001;Lua&#x6CE8;&#x610F;&#x4E8B;&#x9879;"></a>&#x4E03;&#x3001;Lua&#x6CE8;&#x610F;&#x4E8B;&#x9879;</h2><p>Redis&#x6267;&#x884C; Lua&#x811A;&#x672C;&#x65F6;&#xFF0C;Lua&#x7684;&#x7F16;&#x5199;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x4EE5;&#x4E0B;&#x51E0;&#x4E2A;&#x70B9;&#xFF1A;</p>
+<ol>
+<li>&#x4E0D;&#x8981;&#x5728; Lua&#x811A;&#x672C;&#x4E2D;&#x4F7F;&#x7528;&#x963B;&#x585E;&#x547D;&#x4EE4;&#xFF08;&#x5982;BLPOP&#x3001;BRPOP&#x7B49;&#xFF09;&#x3002;&#x56E0;&#x6B64;&#x8FD9;&#x4E9B;&#x547D;&#x4EE4;&#x53EF;&#x80FD;&#x4F1A;&#x5BFC;&#x81F4; Redis&#x670D;&#x52A1;&#x5668;&#x5728;&#x6267;&#x884C;&#x811A;&#x672C;&#x671F;&#x95F4;&#x88AB;&#x963B;&#x585E;&#xFF0C;&#x65E0;&#x6CD5;&#x5904;&#x7406;&#x5176;&#x4ED6;&#x8BF7;&#x6C42;&#xFF1B;</li>
+<li>&#x4E0D;&#x8981;&#x7F16;&#x5199;&#x8FC7;&#x957F;&#x7684; Lua&#x811A;&#x672C;&#x3002;&#x56E0;&#x4E3A; Redis&#x8BFB;&#x5199;&#x547D;&#x4EE4;&#x662F;&#x5355;&#x7EBF;&#x7A0B;&#xFF0C;&#x8FC7;&#x957F;&#x7684;&#x811A;&#x672C;&#xFF0C;&#x52A0;&#x8F7D;&#xFF0C;&#x89E3;&#x6790;&#xFF0C;&#x8FD0;&#x884C;&#x4F1A;&#x6BD4;&#x8F83;&#x8017;&#x65F6;&#xFF0C;&#x5BFC;&#x81F4;&#x5176;&#x4ED6;&#x547D;&#x4EE4;&#x7684;&#x5EF6;&#x8FDF;&#x5EF6;&#x8FDF;&#x589E;&#x52A0;&#xFF1B;</li>
+<li>&#x4E0D;&#x8981;&#x5728; Lua&#x811A;&#x672C;&#x4E2D;&#x8FDB;&#x884C;&#x590D;&#x6742;&#x8017;&#x65F6;&#x7684;&#x903B;&#x8F91;&#xFF1B;&#x56E0;&#x4E3A; Redis&#x8BFB;&#x5199;&#x547D;&#x4EE4;&#x662F;&#x5355;&#x7EBF;&#x7A0B;&#x7684;&#xFF0C;&#x957F;&#x65F6;&#x95F4;&#x8FD0;&#x884C;&#x811A;&#x672C;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x5176;&#x4ED6;&#x547D;&#x4EE4;&#x7684;&#x5EF6;&#x8FDF;&#x589E;&#x52A0;&#xFF1B;</li>
+<li>Lua&#x811A;&#x672C;&#x4E2D;&#xFF0C;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x533A;&#x5206; redis.call() &#x548C; redis.pcall() &#x547D;&#x4EE4;&#xFF1B;</li>
+<li>Lua &#x7D22;&#x5F15;&#x8868;&#x4ECE;&#x7D22;&#x5F15; 1 &#x5F00;&#x59CB;&#xFF0C;&#x800C;&#x4E0D;&#x662F; 0&#xFF1B;</li>
+</ol>
+<h2 id="&#x516B;&#x3001;&#x603B;&#x7ED3;"><a href="#&#x516B;&#x3001;&#x603B;&#x7ED3;" class="headerlink" title="&#x516B;&#x3001;&#x603B;&#x7ED3;"></a>&#x516B;&#x3001;&#x603B;&#x7ED3;</h2><ul>
+<li>&#x539F;&#x5B50;&#x6027;&#x9700;&#x8981;&#x533A;&#x5206;&#x5177;&#x4F53;&#x4F7F;&#x7528;&#x7684;&#x8F7D;&#x4F53;&#xFF0C;&#x5728;&#x5173;&#x7CFB;&#x578B;&#x6570;&#x636E;&#x5E93;&#xFF08;&#x6BD4;&#x5982; MySQL)&#xFF09;&#x548C; No SQL&#xFF08;&#x6BD4;&#x5982;Redis&#xFF09;&#x4E2D;&#xFF0C;&#x539F;&#x5B50;&#x6027;&#x7684;&#x6982;&#x5FF5;&#x662F;&#x4E0D;&#x76F8;&#x540C;&#x7684;&#xFF1B;</li>
+<li>Redis&#x7684;&#x4E8B;&#x52A1;&#xFF08;MULTI/ESXEC&#xFF09;&#x548C;&#x5173;&#x7CFB;&#x578B;&#x6570;&#x636E;&#x5E93;&#xFF08;&#x6BD4;&#x5982; MySQL&#xFF09;&#x7684;&#x4E8B;&#x52A1;&#xFF08;ACID&#xFF09;&#x4E5F;&#x662F;&#x4E0D;&#x76F8;&#x540C;&#x7684;&#xFF1B;</li>
+<li>ACID&#x7684;&#x539F;&#x5B50;&#x6027;&#x6307;&#xFF1A;&#x547D;&#x4EE4;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x6267;&#x884C;&#xFF0C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x4E0D;&#x6267;&#x884C;&#xFF1B;</li>
+<li>Redis&#x6267;&#x884C; Lua&#x811A;&#x672C;&#x7684;&#x539F;&#x5B50;&#x6027;&#x6307;&#xFF1A;Lua&#x811A;&#x672C;&#x4F1A;&#x5F53;&#x4F5C;&#x4E00;&#x4E2A;&#x6574;&#x4F53;&#x88AB;&#x6267;&#x884C;&#x4E14;&#x4E0D;&#x88AB;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x6253;&#x65AD;&#xFF0C;&#x4F46;&#x662F; Lua &#x811A;&#x672C;&#x91CC;&#x9762;&#x7684;&#x547D;&#x4EE4;&#x65E0;&#x6CD5;&#x4FDD;&#x8BC1;&#x201C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x6267;&#x884C;&#xFF0C;&#x8981;&#x4E48;&#x5168;&#x90E8;&#x4E0D;&#x6267;&#x884C;&#x201D;&#xFF1B;</li>
+<li>Lua&#x811A;&#x672C;&#x4F7F;&#x7528; redis.pcall() &#x6267;&#x884C;&#x547D;&#x4EE4;&#x51FA;&#x9519;&#x65F6;&#x4F1A;&#x88AB;catch&#xFF0C;&#x540E;&#x7EED;&#x547D;&#x4EE4;&#x4F1A;&#x6B63;&#x5E38;&#x6267;&#x884C;&#xFF1B;</li>
+<li>Lua&#x811A;&#x672C;&#x4F7F;&#x7528; redis.call() &#x6267;&#x884C;&#x547D;&#x4EE4;&#x51FA;&#x9519;&#x65F6;&#x4F1A;&#x629B;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;&#x540E;&#x7EED;&#x547D;&#x4EE4;&#x4F1A;&#x88AB;&#x963B;&#x65AD;&#xFF1B;</li>
+<li>Lua &#x811A;&#x672C;&#x4E00;&#x822C;&#x6BD4; MULTI/EXEC &#x66F4;&#x5FEB;&#x3001;&#x66F4;&#x7B80;&#x5355;&#xFF1B;</li>
+<li>Redis&#x7684;&#x90E8;&#x7F72;&#x65B9;&#x5F0F;&#x51B3;&#x5B9A;&#x4E86; Redis&#x6267;&#x884C; Lua&#x811A;&#x672C;&#x662F;&#x5426;&#x80FD;&#x4FDD;&#x8BC1;&#x539F;&#x5B50;&#x6027;&#xFF0C;&#x7F16;&#x5199; Lua&#x811A;&#x672C;&#x65F6;&#xFF0C;&#x7279;&#x522B;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x5728;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x4E2D;&#x662F;&#x5426;&#x8981;&#x6C42;&#x64CD;&#x4F5C;&#x540C;&#x4E00;&#x4E2A; key&#xFF1B;</li>
+</ul>
+<h2 id="&#x4E5D;&#x3001;&#x53C2;&#x8003;&#x8D44;&#x6599;"><a href="#&#x4E5D;&#x3001;&#x53C2;&#x8003;&#x8D44;&#x6599;" class="headerlink" title="&#x4E5D;&#x3001;&#x53C2;&#x8003;&#x8D44;&#x6599;"></a>&#x4E5D;&#x3001;&#x53C2;&#x8003;&#x8D44;&#x6599;</h2><p>Scripting with Lua&#xFF1A;<a href="/external_links/da33af706e1e0384cec274f1e840a23f.html" target="blank" rel="noopener">redis.io/docs/intera&#x2026;</a></p>
+<p>Atomicity with Lua&#xFF1A;<a href="/external_links/659f13706ac279684483fbdf518bf089.html" target="blank" rel="noopener">developer.redis.com/develop/jav&#x2026;</a></p>
+<p>Redis Transactions&#xFF1A;<a href="/external_links/43c2e4bdb37bf6c38b713c132ce08293.html" target="blank" rel="noopener">redis.io/docs/intera&#x2026;</a></p>
+<p>The Programming Language Lua&#xFF1A;<a href="/external_links/d4eae30a9ecd0455aeb7074f95c0026c.html" target="blank" rel="noopener">www.lua.org/</a></p>
+<h2 id="&#x5341;&#x3001;&#x6E29;&#x99A8;&#x63D0;&#x793A;"><a href="#&#x5341;&#x3001;&#x6E29;&#x99A8;&#x63D0;&#x793A;" class="headerlink" title="&#x5341;&#x3001;&#x6E29;&#x99A8;&#x63D0;&#x793A;"></a>&#x5341;&#x3001;&#x6E29;&#x99A8;&#x63D0;&#x793A;</h2><ul>
+<li>&#x672C;&#x6587;&#x57FA;&#x4E8E; Redis&#x670D;&#x52A1;&#x5668;&#x7248;&#x672C;&#x4E3A;7.0.4&#xFF0C;&#x4E0D;&#x540C;&#x7684;&#x7248;&#x672C;&#xFF0C;&#x53EF;&#x80FD;&#x7565;&#x6709;&#x5DEE;&#x5F02;&#xFF1B;</li>
+<li>&#x672C;&#x6587;&#x6240;&#x6709;&#x793A;&#x4F8B;&#x90FD;&#x662F;&#x57FA;&#x4E8E;&#x5355;&#x673A;&#x73AF;&#x5883;&#x8FD0;&#x884C;&#xFF1B;</li>
+<li>Redis&#x7684;&#x547D;&#x4EE4;&#x4E0D;&#x533A;&#x5206;&#x5927;&#x5C0F;&#x5199;&#xFF0C;&#x4F46;&#x662F; Key &#x548C; Value &#x533A;&#x5206;&#x5927;&#x5C0F;&#x5199;&#xFF1B;</li>
+</ul>
+<p>&#x5982;&#x679C;&#x4F60;&#x53D1;&#x73B0;&#x6587;&#x7AE0;&#x4E2D;&#x5B58;&#x5728;&#x7F3A;&#x70B9;&#x548C;&#x9519;&#x8BEF;&#xFF0C;&#x6B22;&#x8FCE;&#x6279;&#x8BC4;&#x6307;&#x6B63;&#x3002;&#x5982;&#x679C;&#x4F60;&#x89C9;&#x5F97;&#x6587;&#x7AE0;&#x5BF9;&#x4F60;&#x6709;&#x5E2E;&#x52A9;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;&#xFF0C;&#x70B9;&#x8D5E;&#xFF0C;&#x8BC4;&#x8BBA;&#xFF0C;&#x6216;&#x8005;&#x8F6C;&#x53D1;&#x7ED9;&#x66F4;&#x591A;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#xFF0C;&#x83B7;&#x53D6;&#x66F4;&#x591A;&#x5E72;&#x8D27;&#x8D44;&#x6599;&#x79C1;&#x4FE1;&#x6211;&#x3002;</p>
+<h5 id="&#x539F;&#x521B;&#x597D;&#x6587;&#xFF1A;"><a href="#&#x539F;&#x521B;&#x597D;&#x6587;&#xFF1A;" class="headerlink" title="&#x539F;&#x521B;&#x597D;&#x6587;&#xFF1A;"></a>&#x539F;&#x521B;&#x597D;&#x6587;&#xFF1A;</h5><ul>
+<li><a href="/external_links/d4ed9a63d427c52885152a52d6627010.html" target="blank" rel="noopener">&#x7F8E;&#x56E2;&#x4E00;&#x9762;&#xFF1A;Git &#x662F;&#x5982;&#x4F55;&#x5DE5;&#x4F5C;&#x7684;&#xFF1F;(&#x63A8;&#x8350;&#x9605;&#x8BFB;&#xFF09;</a></li>
+<li><a href="/external_links/41e2b46ff276cec76014cd7cc2469f8f.html" target="blank" rel="noopener">&#x5F53;&#x4E0B;&#x73AF;&#x5883;&#xFF0C;&#x7A0B;&#x5E8F;&#x5458;&#x9700;&#x8981;&#x4FEE;&#x70BC;&#x7684; 3&#x9879;&#x6280;&#x80FD;</a></li>
+<li><a href="/external_links/878269604046ef1921c58cbdd70d4bf7.html" target="blank" rel="noopener">AI&#x662F;&#x6253;&#x5DE5;&#x4EBA;&#x7684;&#x4E0B;&#x4E00;&#x4E2A;&#x5C31;&#x4E1A;&#x98CE;&#x53E3;&#x5417;?</a></li>
+<li><a href="/external_links/8fc88688c3a589e46f39a82386a3b10e.html" target="blank" rel="noopener">&#x548C;&#x65AF;&#x5766;&#x798F;&#x535A;&#x58EB;&#x5199;&#x4EE3;&#x7801;&#x7684;&#x4E00;&#x4E2A;&#x6708;</a></li>
+<li><a href="/external_links/7312650ae8295b9c156ebfd76075e17a.html" target="blank" rel="noopener">&#x809D;&#x4E86;&#x4E00;&#x5468;&#xFF0C;&#x8FD9;&#x4E0B;&#x5F7B;&#x5E95;&#x628A; MySQL&#x7684;&#x9501;&#x641E;&#x61C2;&#x4E86;</a></li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/9969c9554e98948f7ba98137477080b9.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/面试-Redis-Lua/" rel="tag"># 面试,Redis,Lua</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7339709247750242355.html" rel="next" title="一次线上Xxl-Job定时任务调度失败的排查与解决 问题 调">
+                <i class="fa fa-chevron-left"></i> 一次线上Xxl-Job定时任务调度失败的排查与解决 问题 调
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7339827208086896676.html" rel="prev" title="【Android 13源码分析】WindowContaine">
+                【Android 13源码分析】WindowContaine <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">1775</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">725</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、原子性"><span class="nav-number">1.</span> <span class="nav-text">一、原子性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#通常意义的原子性"><span class="nav-number">1.1.</span> <span class="nav-text">通常意义的原子性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lua-原子性"><span class="nav-number">1.2.</span> <span class="nav-text">Lua 原子性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、Redis-事务"><span class="nav-number">1.3.</span> <span class="nav-text">二、Redis 事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MULTI-EXEC"><span class="nav-number">1.4.</span> <span class="nav-text">MULTI/EXEC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WATCH"><span class="nav-number">1.5.</span> <span class="nav-text">WATCH</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DISCARD"><span class="nav-number">1.6.</span> <span class="nav-text">DISCARD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务中的错误"><span class="nav-number">1.7.</span> <span class="nav-text">事务中的错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务回滚"><span class="nav-number">1.8.</span> <span class="nav-text">事务回滚</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Redis-如何执行-Lua？"><span class="nav-number">1.9.</span> <span class="nav-text">三、Redis 如何执行 Lua？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EVAL"><span class="nav-number">1.10.</span> <span class="nav-text">EVAL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis-call"><span class="nav-number">1.11.</span> <span class="nav-text">redis.call()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis-pcall"><span class="nav-number">1.12.</span> <span class="nav-text">redis.pcall()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、如何保证原子性？"><span class="nav-number">1.13.</span> <span class="nav-text">四、如何保证原子性？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单机部署"><span class="nav-number">1.14.</span> <span class="nav-text">单机部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主从部署"><span class="nav-number">1.15.</span> <span class="nav-text">主从部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster集群部署"><span class="nav-number">1.16.</span> <span class="nav-text">Cluster集群部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原子性保证"><span class="nav-number">1.17.</span> <span class="nav-text">原子性保证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、面试该如何回答？"><span class="nav-number">1.18.</span> <span class="nav-text">五、面试该如何回答？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、Why-Lua？"><span class="nav-number">1.19.</span> <span class="nav-text">六、Why Lua？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、Lua注意事项"><span class="nav-number">1.20.</span> <span class="nav-text">七、Lua注意事项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#八、总结"><span class="nav-number">1.21.</span> <span class="nav-text">八、总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#九、参考资料"><span class="nav-number">1.22.</span> <span class="nav-text">九、参考资料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十、温馨提示"><span class="nav-number">1.23.</span> <span class="nav-text">十、温馨提示</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原创好文："><span class="nav-number">1.23.0.0.1.</span> <span class="nav-text">原创好文：</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

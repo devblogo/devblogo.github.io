@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x672C;&amp;#x6587;&amp;#x5206;&amp;#x6790;&amp;#x57FA;&amp;#x4E8E;Android R &amp;#x524D;&amp;#x8A00;&amp;#x5728;Android&amp;#x4E16;&amp;#x754C;&amp;#x4E2D;&amp;#xFF0C;Native&amp;#x5806;&amp;#x5185;&amp;#x5B58;&amp;#x7684;&amp;#x5206;&amp;#x914D;&amp;#x901A;&amp;#x5E38;&amp;#x7531;m">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Native   Scudo内存分配器">
+<meta property="og:url" content="https://dev.newban.cn/6914550038140026887.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x672C;&amp;#x6587;&amp;#x5206;&amp;#x6790;&amp;#x57FA;&amp;#x4E8E;Android R &amp;#x524D;&amp;#x8A00;&amp;#x5728;Android&amp;#x4E16;&amp;#x754C;&amp;#x4E2D;&amp;#xFF0C;Native&amp;#x5806;&amp;#x5185;&amp;#x5B58;&amp;#x7684;&amp;#x5206;&amp;#x914D;&amp;#x901A;&amp;#x5E38;&amp;#x7531;m">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/629adcdf0dc1ce679e52ac379cc1b339a7af9f0ffcd9d70669b20af9b6cd4d97">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/8d17819d4f90e636d37e160bc68fbf8463ce3407e549a14be97b8ba8435f60be">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2c1c4ecadc463e413617ab03a40b63eea5300a9d64b88dea715be6ce4daaa16d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bdbb543cf2d9a68b08d277e07e95a62156de9c0ba4f895ec1148249ec8481b61">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/51b3a084c59033beb6a7b16db68be9970ac78bae96d107328dfc1f7a702082fb">
+<meta property="og:updated_time" content="2024-04-27T00:41:31.370Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Native   Scudo内存分配器">
+<meta name="twitter:description" content="&amp;#x672C;&amp;#x6587;&amp;#x5206;&amp;#x6790;&amp;#x57FA;&amp;#x4E8E;Android R &amp;#x524D;&amp;#x8A00;&amp;#x5728;Android&amp;#x4E16;&amp;#x754C;&amp;#x4E2D;&amp;#xFF0C;Native&amp;#x5806;&amp;#x5185;&amp;#x5B58;&amp;#x7684;&amp;#x5206;&amp;#x914D;&amp;#x901A;&amp;#x5E38;&amp;#x7531;m">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/629adcdf0dc1ce679e52ac379cc1b339a7af9f0ffcd9d70669b20af9b6cd4d97">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6914550038140026887.html">
+
+
+
+
+
+  <title>Android Native   Scudo内存分配器 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android Native   Scudo内存分配器</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-06T15:47:28+08:00">
+                2021-01-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>&#x672C;&#x6587;&#x5206;&#x6790;&#x57FA;&#x4E8E;Android R</code></p>
+<h2 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h2><p>&#x5728;Android&#x4E16;&#x754C;&#x4E2D;&#xFF0C;Native&#x5806;&#x5185;&#x5B58;&#x7684;&#x5206;&#x914D;&#x901A;&#x5E38;&#x7531;malloc&#x8D1F;&#x8D23;&#x3002;&#x5373;&#x4FBF;&#x662F;&#x9762;&#x5411;&#x5BF9;&#x8C61;&#x7684;new&#xFF0C;&#x5176;&#x5E95;&#x5C42;&#x4E5F;&#x662F;malloc&#x3002;&#x90A3;&#x5F53;&#x6211;&#x4EEC;&#x8C03;&#x7528;malloc/free&#x6765;&#x5206;&#x914D;/&#x91CA;&#x653E;&#x5806;&#x5185;&#x5B58;&#x65F6;&#xFF0C;&#x5185;&#x5B58;&#x5230;&#x5E95;&#x4ECE;&#x54EA;&#x91CC;&#x6765;&#xFF0C;&#x53C8;&#x5F52;&#x5230;&#x4F55;&#x5904;&#x53BB;&#xFF1F;&#x4EE5;&#x53CA;&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x662F;&#x5426;&#x4F1A;&#x6D89;&#x53CA;&#x5185;&#x5B58;&#x7684;&#x5206;&#x5272;&#x548C;&#x788E;&#x7247;&#x7684;&#x5408;&#x5E76;&#xFF1F;&#x8D1F;&#x8D23;&#x8FD9;&#x6240;&#x6709;&#x5DE5;&#x4F5C;&#x7684;&#xFF0C;&#x6211;&#x4EEC;&#x79F0;&#x5B83;&#x4E3A; Native Memory Allocator&#x3002;</p>
+<p>&#x65E9;&#x671F;Android&#x4E2D;&#x4F7F;&#x7528;<code>jemalloc</code>&#x4F5C;&#x4E3A;&#x9ED8;&#x8BA4;&#x7684;allocator&#xFF0C;&#x4F46;&#x662F;&#x4ECE;R&#x5F00;&#x59CB;&#xFF0C;<code>Scudo</code>&#x66FF;&#x4EE3;<code>jemalloc</code>&#x6210;&#x4E3A;&#x4E86;non-svelte configuration&#x6A21;&#x5F0F;&#x4E0B;&#x9ED8;&#x8BA4;&#x7684;allocator&#x3002;svelte&#x6A21;&#x5F0F;&#x4E0B;&#x9ED8;&#x8BA4;&#x7684;allocator&#x4F9D;&#x7136;&#x662F;jemalloc&#x3002;</p>
+<p>svelte&#x7684;&#x542B;&#x4E49;&#x4E3A;&#x82D7;&#x6761;&#xFF0C;&#x610F;&#x5473;&#x7740;&#x5185;&#x5B58;&#x66F4;&#x52A0;&#x7D27;&#x51D1;&#xFF08;&#x901A;&#x5E38;&#x662F;RAM&#x8F83;&#x5C0F;&#x7684;&#x8BBE;&#x5907;&#xFF09;&#x3002;&#x800C;<code>Scudo</code>&#x4E0D;&#x5177;&#x6709;&#x5185;&#x5B58;&#x5206;&#x5272;&#x548C;&#x788E;&#x7247;&#x5408;&#x5E76;&#x7684;&#x529F;&#x80FD;&#xFF0C;&#x5BF9;&#x5185;&#x5B58;&#x7684;&#x4F7F;&#x7528;&#x4E5F;&#x66F4;&#x52A0;&#x5BBD;&#x677E;&#xFF0C;&#x56E0;&#x6B64;&#x5728;R&#x4E0A;&#x5E76;&#x6CA1;&#x6709;&#x6210;&#x4E3A;svelte&#x6A21;&#x5F0F;&#x4E0B;&#x9ED8;&#x8BA4;&#x7684;allocator&#x3002;&#x4E0D;&#x8FC7;&#x8C37;&#x6B4C;&#x5728;&#x6E90;&#x7801;&#x4E2D;&#x5DF2;&#x7ECF;&#x589E;&#x52A0;&#x4E86;<code>scudo_svelte</code>&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x9884;&#x8BA1;&#x5728;&#x672A;&#x6765;&#x7684;&#x7248;&#x672C;&#x4E2D;&#x4F1A;&#x5168;&#x9762;&#x66FF;&#x4EE3;<code>jemalloc</code>&#x3002;</p>
+<p>Scudo&#x8FD9;&#x4E2A;&#x540D;&#x5B57;&#x6E90;&#x81EA;Escudo&#xFF0C;&#x540E;&#x8005;&#x5728;&#x897F;&#x73ED;&#x7259;&#x8BED;&#x548C;&#x8461;&#x8404;&#x7259;&#x8BED;&#x4E2D;&#x8868;&#x793A;&#x201D;&#x76FE;&#x724C;&#x201C;&#x3002;&#x8FD9;&#x4E2A;&#x542B;&#x4E49;&#x4E5F;&#x53CD;&#x6620;&#x4E86;Scudo&#x6700;&#x5927;&#x7684;&#x7279;&#x70B9;&#xFF1A;&#x589E;&#x5F3A;&#x5185;&#x5B58;&#x7684;&#x5B89;&#x5168;&#x6027;&#xFF0C;&#x62B5;&#x5FA1;&#x4E00;&#x4E9B;&#x975E;&#x6CD5;&#x653B;&#x51FB;&#x3002;&#x5B83;&#x7684;&#x672C;&#x610F;&#x662F;&#x4E3A;&#x4E86;&#x5B89;&#x5168;&#xFF0C;&#x800C;&#x68C0;&#x6D4B;&#x51FA;&#x5185;&#x5B58;&#x9519;&#x8BEF;&#x53EA;&#x662F;&#x5176;&#x9644;&#x5E26;&#x7684;&#x5C5E;&#x6027;&#xFF0C;&#x5E76;&#x4E0D;&#x662F;&#x5B83;&#x5B9E;&#x73B0;&#x7684;&#x76EE;&#x6807;&#x3002;&#x56E0;&#x6B64;&#x5982;&#x679C;&#x8981;&#x9009;&#x62E9;&#x5185;&#x5B58;&#x9519;&#x8BEF;&#x7684;&#x8C03;&#x8BD5;&#x5DE5;&#x5177;&#xFF0C;&#x9996;&#x9009;&#x8FD8;&#x662F;HWASAN&#x3002;</p>
+<p>&#x4ECE;<code>jemalloc</code>&#x5207;&#x6362;&#x5230;<code>Scudo</code>&#xFF0C;&#x5176;&#x5B9E;&#x662F;&#x786C;&#x4EF6;&#x8D44;&#x6E90;&#x63D0;&#x5347;&#x5E26;&#x6765;&#x7684;&#x798F;&#x5229;&#x3002;&#x968F;&#x7740;64&#x4F4D;&#x673A;&#x5668;&#x548C;&#x5927;RAM&#x7684;&#x666E;&#x53CA;&#xFF0C;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x548C;&#x7269;&#x7406;&#x5185;&#x5B58;&#x7684;&#x74F6;&#x9888;&#x90FD;&#x5728;&#x4E0D;&#x65AD;&#x653E;&#x5BBD;&#xFF0C;&#x56E0;&#x6B64;&#x7ED9;&#x4E86;&#x7CFB;&#x7EDF;&#x66F4;&#x591A;&#x7684;&#x9009;&#x62E9;&#xFF0C;&#x53EF;&#x4EE5;&#x5728;&#x6027;&#x80FD;&#x5408;&#x7406;&#x7684;&#x8303;&#x56F4;&#x5185;&#x517C;&#x987E;&#x5176;&#x4ED6;&#x7279;&#x6027;&#x3002;&#x5728;&#x6240;&#x6709;&#x5B89;&#x5168;&#x6027;&#x95EE;&#x9898;&#x4E2D;&#xFF0C;&#x5185;&#x5B58;&#x6F0F;&#x6D1E;&#x53D1;&#x751F;&#x7684;&#x5165;&#x4FB5;&#x5360;&#x5230;&#x4E86;&#x534A;&#x6570;&#x4EE5;&#x4E0A;&#xFF0C;&#x56E0;&#x6B64;&#x5982;&#x679C;&#x80FD;&#x5728;Allocator&#x4E2D;&#x62B5;&#x5FA1;&#x5165;&#x4FB5;&#xFF0C;&#x90A3;&#x5C06;&#x6781;&#x5927;&#x5730;&#x964D;&#x4F4E;&#x5B89;&#x5168;&#x95EE;&#x9898;&#x7684;&#x6570;&#x91CF;&#x3002;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x5355;&#x4ECE;&#x6027;&#x80FD;&#x89D2;&#x5EA6;&#x5206;&#x6790;<code>Scudo</code>&#x672A;&#x5FC5;&#x8D85;&#x8FC7;<code>jemalloc</code>&#xFF0C;&#x867D;&#x7136;&#x5B83;&#x7684;&#x5206;&#x914D;&#x7B56;&#x7565;&#x66F4;&#x52A0;&#x7B80;&#x5316;&#xFF0C;&#x4F46;&#x4E3A;&#x4E86;&#x5B89;&#x5168;&#x6027;&#x6240;&#x5FC5;&#x987B;&#x5206;&#x914D;&#x7684;chunk header&#x4F1A;&#x4F7F;&#x5176;&#x4E27;&#x5931;&#x4E00;&#x4E9B;&#x6027;&#x80FD;&#x3002;</p>
+<h2 id="&#x76EE;&#x5F55;"><a href="#&#x76EE;&#x5F55;" class="headerlink" title="&#x76EE;&#x5F55;"></a>&#x76EE;&#x5F55;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/629adcdf0dc1ce679e52ac379cc1b339a7af9f0ffcd9d70669b20af9b6cd4d97" alt></p>
+<ol>
+<li>&#x6982;&#x8FF0;</li>
+</ol>
+<hr>
+<p>Android&#x4E2D;&#x6709;&#x8D85;&#x8FC7;&#x534A;&#x6570;&#x7684;&#x6F0F;&#x6D1E;&#x90FD;&#x6765;&#x6E90;&#x4E8E;&#x5185;&#x5B58;&#x9519;&#x8BEF;&#xFF0C;&#x56E0;&#x6B64;&#x51CF;&#x5C11;&#x975E;&#x6CD5;&#x653B;&#x51FB;&#x7684;&#x91CD;&#x70B9;&#x5C31;&#x8981;&#x653E;&#x5728;&#x5BF9;&#x5185;&#x5B58;&#x7684;&#x9632;&#x5FA1;&#x4E0A;&#x3002;&#x5E38;&#x89C1;&#x7684;&#x5185;&#x5B58;&#x9519;&#x8BEF;&#x6709;heap-overflow&#xFF0C;double-free&#xFF0C;use-after-free&#x7B49;&#x3002;&#x9488;&#x5BF9;&#x8FD9;&#x4E9B;&#x9519;&#x8BEF;Scudo&#x4E3B;&#x8981;&#x91C7;&#x7528;&#x4E86;&#x4E24;&#x79CD;&#x624B;&#x6BB5;&#x8FDB;&#x884C;&#x9632;&#x5FA1;&#xFF0C;&#x4E00;&#x79CD;&#x662F;&#x968F;&#x673A;&#x5316;&#xFF0C;&#x8BA9;&#x653B;&#x51FB;&#x8005;&#x65E0;&#x6CD5;&#x5B9A;&#x5411;&#x653B;&#x51FB;&#x67D0;&#x4E9B;&#x5185;&#x5B58;&#x5757;&#xFF1B;&#x53E6;&#x4E00;&#x79CD;&#x662F;&#x7ED9;&#x6BCF;&#x4E2A;&#x5185;&#x5B58;&#x5757;&#x589E;&#x52A0;chunk header&#xFF0C;&#x5728;&#x5206;&#x914D;/&#x91CA;&#x653E;&#x7B49;&#x64CD;&#x4F5C;&#x65F6;&#x68C0;&#x67E5;header&#x7684;&#x6B63;&#x786E;&#x6027;&#xFF0C;&#x9632;&#x6B62;&#x975E;&#x6CD5;&#x7684;&#x5185;&#x5B58;&#x7BE1;&#x6539;&#x3002;Chunk header&#x7684;&#x5927;&#x5C0F;&#x4E3A;8&#x5B57;&#x8282;&#xFF0C;&#x4F46;&#x7531;&#x4E8E;64&#x4F4D;Scudo&#x9700;&#x8981;16&#x5B57;&#x8282;&#x5BF9;&#x9F50;&#xFF0C;&#x6240;&#x4EE5;&#x5B83;&#x5B9E;&#x9645;&#x5360;&#x7528;&#x7684;&#x7A7A;&#x95F4;&#x4E3A;16&#x5B57;&#x8282;&#x3002;</p>
+<p>Scudo&#x4E2D;&#x7684;&#x5206;&#x914D;&#x5668;&#x6709;&#x4E24;&#x79CD;&#x7C7B;&#x578B;&#xFF0C;&#x5F53;&#x9700;&#x6C42;&#x5C0F;&#x4E8E;256K&#x65F6;&#x4F7F;&#x7528;Primary Allocator&#xFF0C;&#x5927;&#x4E8E;256K&#x65F6;&#x4F7F;&#x7528;Secondary Allocator&#x3002;</p>
+<ol start="2">
+<li>&#x5177;&#x4F53;&#x5B9E;&#x73B0;</li>
+</ol>
+<hr>
+<h3 id="2-1-Primary-Allocator"><a href="#2-1-Primary-Allocator" class="headerlink" title="2.1 Primary Allocator"></a>2.1 Primary Allocator</h3><p>Primary Allocator&#x4E2D;&#x5185;&#x5B58;&#x4F1A;&#x5206;&#x6210;&#x4E0D;&#x540C;&#x7684;&#x533A;&#x57DF;&#xFF0C;&#x6BCF;&#x5757;&#x533A;&#x57DF;&#x53EA;&#x80FD;&#x5206;&#x914D;&#x51FA;&#x56FA;&#x5B9A;&#x7A7A;&#x95F4;&#xFF0C;&#x8B6C;&#x5982;&#x533A;&#x57DF;1&#x53EA;&#x80FD;&#x5206;&#x914D;32bytes(&#x5305;&#x542B;header)&#xFF0C;&#x533A;&#x57DF;2&#x53EA;&#x80FD;&#x5206;&#x914D;48bytes&#x3002;&#x5F53;&#x6211;&#x4EEC;&#x5206;&#x914D;&#x5C0F;&#x5185;&#x5B58;&#x65F6;&#xFF0C;&#x9996;&#x5148;&#x4F1A;&#x68C0;&#x67E5;&#x6700;&#x5408;&#x9002;&#x533A;&#x57DF;&#x4E2D;&#x662F;&#x5426;&#x6709;&#x7A7A;&#x95F2;&#x4F4D;&#x7F6E;&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x6709;&#xFF0C;&#x5219;&#x4F1A;&#x53BB;&#x9AD8;&#x4E00;&#x7EA7;&#x533A;&#x57DF;&#x4E2D;&#x5206;&#x914D;&#x3002;&#x5F53;&#x6700;&#x9AD8;&#x4E00;&#x7EA7;(38)&#x533A;&#x57DF;&#x4E2D;&#x4E5F;&#x6CA1;&#x6709;&#x5408;&#x9002;&#x7684;&#x7A7A;&#x95F2;&#x7A7A;&#x95F4;&#x65F6;&#xFF0C;&#x8FD9;&#x65F6;&#x5C06;&#x4F1A;&#x4F7F;&#x7528;Secondary Allocator&#x8FDB;&#x884C;&#x5206;&#x914D;&#x3002;</p>
+<h4 id="2-1-1-&#x5185;&#x5B58;&#x5206;&#x5E03;"><a href="#2-1-1-&#x5185;&#x5B58;&#x5206;&#x5E03;" class="headerlink" title="2.1.1 &#x5185;&#x5B58;&#x5206;&#x5E03;"></a>2.1.1 &#x5185;&#x5B58;&#x5206;&#x5E03;</h4><p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/8d17819d4f90e636d37e160bc68fbf8463ce3407e549a14be97b8ba8435f60be" alt></p>
+<p>&#x5BF9;&#x4E8E;64&#x4F4D;Android R&#x800C;&#x8A00;&#xFF0C;Primary Allocator&#x4F1A;&#x5206;&#x6210;39&#x4E2A;&#x533A;&#x57DF;&#x7B49;&#x7EA7;(Class)&#x3002;Class 0&#x7528;&#x4E8E;&#x5B58;&#x653E;&#x5185;&#x5B58;&#x7BA1;&#x7406;&#x7684;&#x5143;&#x6570;&#x636E;&#xFF0C;Class 1<del>38&#x7528;&#x4E8E;&#x6EE1;&#x8DB3;&#x7528;&#x6237;&#x7A7A;&#x95F4;&#x7684;&#x5206;&#x914D;&#x9700;&#x6C42;&#x3002;&#x6BCF;&#x4E00;&#x5757;&#x533A;&#x57DF;&#x4E3A;256M&#xFF0C;&#x5176;&#x5934;&#x90E8;&#x4F1A;&#x968F;&#x673A;&#x7A7A;&#x7F3A;&#x51FA;0</del>16&#x9875;&#x4EE5;&#x964D;&#x4F4E;&#x5B9A;&#x5411;&#x653B;&#x51FB;&#x7684;&#x98CE;&#x9669;&#x3002;&#x4EE5;&#x4E0B;&#x4E3A;&#x6BCF;&#x5757;&#x533A;&#x57DF;&#x5177;&#x4F53;&#x5206;&#x914D;&#x7684;&#x5927;&#x5C0F;&#x3002;</p>
+<table>
+<thead>
+<tr>
+<th>Class ID</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x539F;&#x59CB;&#x5927;&#x5C0F;(bytes)</td>
+<td>32</td>
+<td>48</td>
+<td>64</td>
+<td>80</td>
+<td>96</td>
+<td>112</td>
+<td>144</td>
+<td>176</td>
+<td>192</td>
+<td>224</td>
+</tr>
+<tr>
+<td>&#x53BB;&#x9664;Chunk Header&#x5927;&#x5C0F;</td>
+<td>16</td>
+<td>32</td>
+<td>48</td>
+<td>64</td>
+<td>80</td>
+<td>96</td>
+<td>128</td>
+<td>160</td>
+<td>176</td>
+<td>208</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>Class ID</th>
+<th>11</th>
+<th>12</th>
+<th>13</th>
+<th>14</th>
+<th>15</th>
+<th>16</th>
+<th>17</th>
+<th>18</th>
+<th>19</th>
+<th>20</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x539F;&#x59CB;&#x5927;&#x5C0F;(bytes)</td>
+<td>288</td>
+<td>352</td>
+<td>448</td>
+<td>592</td>
+<td>800</td>
+<td>1104</td>
+<td>1648</td>
+<td>2096</td>
+<td>2576</td>
+<td>3120</td>
+</tr>
+<tr>
+<td>&#x53BB;&#x9664;Chunk Header&#x5927;&#x5C0F;</td>
+<td>272</td>
+<td>336</td>
+<td>432</td>
+<td>576</td>
+<td>784</td>
+<td>1088</td>
+<td>1632</td>
+<td>2080</td>
+<td>2560</td>
+<td>3104</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>Class ID</th>
+<th>21</th>
+<th>22</th>
+<th>23</th>
+<th>24</th>
+<th>25</th>
+<th>26</th>
+<th>27</th>
+<th>28</th>
+<th>29</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x539F;&#x59CB;&#x5927;&#x5C0F;(bytes)</td>
+<td>4112</td>
+<td>4624</td>
+<td>7120</td>
+<td>8720</td>
+<td>11664</td>
+<td>14224</td>
+<td>16400</td>
+<td>18448</td>
+<td>23056</td>
+</tr>
+<tr>
+<td>&#x53BB;&#x9664;Chunk Header&#x5927;&#x5C0F;</td>
+<td>4096</td>
+<td>4608</td>
+<td>7104</td>
+<td>8704</td>
+<td>11648</td>
+<td>14208</td>
+<td>16K</td>
+<td>18K</td>
+<td>22.5K</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>Class ID</th>
+<th>30</th>
+<th>31</th>
+<th>32</th>
+<th>33</th>
+<th>34</th>
+<th>35</th>
+<th>36</th>
+<th>37</th>
+<th>38</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x539F;&#x59CB;&#x5927;&#x5C0F;(bytes)</td>
+<td>29456</td>
+<td>33296</td>
+<td>65552</td>
+<td>98320</td>
+<td>131088</td>
+<td>163856</td>
+<td>196624</td>
+<td>229392</td>
+<td>262160</td>
+</tr>
+<tr>
+<td>&#x53BB;&#x9664;Chunk Header&#x5927;&#x5C0F;</td>
+<td>28.75K</td>
+<td>32.5K</td>
+<td>64K</td>
+<td>96K</td>
+<td>128K</td>
+<td>160K</td>
+<td>192K</td>
+<td>224K</td>
+<td>256K</td>
+</tr>
+</tbody></table>
+<p>&#x5728;Scudo&#x521D;&#x59CB;&#x5316;&#x9636;&#x6BB5;&#xFF0C;&#x7CFB;&#x7EDF;&#x4F1A;mmap&#x51FA;256M*39&#x5927;&#x5C0F;&#x7684;&#x7A7A;&#x95F4;&#x3002;&#x4F46;&#x7531;&#x4E8E;&#x58F0;&#x660E;&#x4E86;PORT_NONE&#x6743;&#x9650;&#xFF0C;&#x6240;&#x4EE5;&#x6B64;&#x65F6;&#x8FD8;&#x65E0;&#x6CD5;&#x8BBF;&#x95EE;&#x3002;&#x7B49;&#x5230;&#x5177;&#x4F53;&#x5206;&#x914D;&#x4EA7;&#x751F;&#x65F6;&#xFF0C;&#x7CFB;&#x7EDF;&#x624D;&#x4F1A;&#x5C06;&#x90E8;&#x5206;&#x533A;&#x57DF;&#x6539;&#x4E3A;PROT_READ|PROT_WRITE&#x3002;</p>
+<h4 id="2-1-2-&#x5206;&#x914D;&#x7B56;&#x7565;"><a href="#2-1-2-&#x5206;&#x914D;&#x7B56;&#x7565;" class="headerlink" title="2.1.2 &#x5206;&#x914D;&#x7B56;&#x7565;"></a>2.1.2 &#x5206;&#x914D;&#x7B56;&#x7565;</h4><p>&#x5728;&#x5206;&#x914D;&#x8FC7;&#x7A0B;&#x4E2D;&#x9700;&#x8981;&#x91CD;&#x70B9;&#x8003;&#x8651;&#x4E24;&#x4E2A;&#x95EE;&#x9898;&#xFF1A;</p>
+<ol>
+<li>&#x54EA;&#x4E00;&#x4E2A;Class&#x7684;&#x90A3;&#x4E00;&#x5757;&#x5185;&#x5B58;(chunk)&#x53EF;&#x7528;&#x4E8E;&#x5206;&#x914D;&#xFF1F;</li>
+<li>&#x5F53;&#x591A;&#x7EBF;&#x7A0B;&#x5E76;&#x53D1;&#x5206;&#x914D;&#x65F6;&#xFF0C;&#x5982;&#x4F55;&#x5904;&#x7406;&#x7ADE;&#x4E89;&#x5173;&#x7CFB;&#xFF1F;</li>
+</ol>
+<p>&#x4E00;&#x4E2A;Region&#x4E2D;&#x5DF2;&#x5206;&#x914D;&#x548C;&#x672A;&#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#x5757;&#xFF0C;&#x7ECF;&#x8FC7;&#x4E00;&#x6BB5;&#x65F6;&#x95F4;&#x540E;&#x5FC5;&#x5B9A;&#x53C2;&#x5DEE;&#x4EA4;&#x9519;&#x3002;&#x56E0;&#x6B64;&#x4E3A;&#x4E86;&#x8FFD;&#x8E2A;&#x672A;&#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#x5757;&#xFF0C;Allocator&#x4E2D;&#x9700;&#x8981;&#x6709;&#x6307;&#x9488;&#x6765;&#x6307;&#x5411;&#x90A3;&#x4E9B;&#x5185;&#x5B58;&#x5757;&#x3002;&#x8FD9;&#x4E9B;&#x6307;&#x9488;&#x7684;&#x6570;&#x91CF;&#x6700;&#x597D;&#x53EF;&#x4EE5;&#x6309;&#x9700;&#x589E;&#x957F;&#xFF0C;&#x56E0;&#x6B64;&#x53EF;&#x4EE5;&#x628A;&#x5B83;&#x4EEC;&#x8BBE;&#x8BA1;&#x6210;&#x6279;&#x91CF;&#x6A21;&#x5F0F;(&#x4E5F;&#x5373;&#x6E90;&#x7801;&#x4E2D;&#x7684;TransferBatch)&#xFF0C;&#x4E00;&#x4E2A;Batch&#x4E2D;&#x5305;&#x542B;14&#x4E2A;&#x6307;&#x9488;&#xFF0C;&#x4E0D;&#x591F;&#x65F6;&#x518D;&#x521B;&#x5EFA;&#x65B0;&#x7684;Batch&#x5BF9;&#x8C61;&#x3002;&#x8FD9;&#x4E9B;Batch&#x5BF9;&#x8C61;&#x6784;&#x5EFA;&#x6210;&#x5355;&#x5411;&#x94FE;&#x8868;&#xFF0C;&#x4E5F;&#x5373;Region&#x7684;FreeList&#x3002;</p>
+<h5 id="TSD-Thread-Specific-Data-&#x673A;&#x5236;"><a href="#TSD-Thread-Specific-Data-&#x673A;&#x5236;" class="headerlink" title="TSD(Thread Specific Data)&#x673A;&#x5236;"></a>TSD(Thread Specific Data)&#x673A;&#x5236;</h5><p>&#x5982;&#x679C;&#x662F;&#x5355;&#x7EBF;&#x7A0B;&#x8FD0;&#x884C;&#xFF0C;&#x4E0A;&#x9762;&#x7684;&#x8BBE;&#x8BA1;&#x5DF2;&#x7ECF;&#x8DB3;&#x591F;&#x4E86;&#x3002;&#x4F46;&#x5BF9;&#x4E8E;&#x5E76;&#x53D1;&#x5206;&#x914D;&#x800C;&#x8A00;&#xFF0C;&#x5982;&#x4F55;&#x89E3;&#x51B3;&#x7ADE;&#x4E89;&#x95EE;&#x9898;&#x5C06;&#x663E;&#x5F97;&#x5341;&#x5206;&#x91CD;&#x8981;&#x3002;&#x6700;&#x7B80;&#x5355;&#x7684;&#x505A;&#x6CD5;&#x662F;&#x52A0;&#x9501;&#xFF0C;&#x4F46;&#x52A0;&#x9501;&#x4F1A;&#x727A;&#x7272;&#x6027;&#x80FD;&#xFF0C;&#x5BF9;&#x4E8E;&#x201C;&#x5206;&#x914D;&#x201D;&#x8FD9;&#x7C7B;&#x9AD8;&#x9891;&#x64CD;&#x4F5C;&#x663E;&#x7136;&#x4E0D;&#x662F;&#x6700;&#x4F18;&#x89E3;&#x3002;&#x65E2;&#x7136;&#x6BCF;&#x4E2A;Batch&#x5305;&#x542B;&#x7684;&#x6307;&#x9488;&#x4E0D;&#x540C;&#xFF0C;&#x90A3;&#x8BA9;&#x5E76;&#x53D1;&#x7EBF;&#x7A0B;&#x4F7F;&#x7528;&#x4E0D;&#x540C;&#x7684;Batch&#x5BF9;&#x8C61;&#x662F;&#x4E0D;&#x662F;&#x5C31;&#x53EF;&#x4EE5;&#x89E3;&#x51B3;&#x95EE;&#x9898;&#x5462;&#xFF1F;&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x5C31;&#x662F;&#x4E0B;&#x56FE;&#x4E2D;&#x7684;TSD(Thread Specific Data)&#x673A;&#x5236;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2c1c4ecadc463e413617ab03a40b63eea5300a9d64b88dea715be6ce4daaa16d" alt></p>
+<p>&#x4E0D;&#x8FC7;&#x4E3A;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x90FD;&#x5206;&#x914D;&#x4E00;&#x4E2A;&#x4EC5;&#x4F9B;&#x81EA;&#x5DF1;&#x4F7F;&#x7528;&#x7684;Batch&#x662F;&#x4E0D;&#x7ECF;&#x6D4E;&#x7684;&#xFF08;A&#x7EBF;&#x7A0B;Batch&#x4E2D;&#x7A7A;&#x95F4;&#x7684;&#x5185;&#x5B58;&#x65E0;&#x6CD5;&#x88AB;B&#x7EBF;&#x7A0B;&#x4F7F;&#x7528;&#xFF09;&#xFF0C;&#x5C24;&#x5176;&#x662F;&#x6709;&#x4E9B;&#x8FDB;&#x7A0B;&#x521B;&#x5EFA;&#x4E86;&#x4E00;&#x767E;&#x591A;&#x4E2A;&#x7EBF;&#x7A0B;&#x3002;&#x56E0;&#x6B64;&#x4E0A;&#x8FF0;&#x7684;TSD&#x673A;&#x5236;&#x8FD8;&#x589E;&#x52A0;&#x4E86;TSD pool&#x6765;&#x63A7;&#x5236;&#x79C1;&#x6709;Batch&#x7684;&#x6570;&#x91CF;&#xFF0C;&#x5E76;&#x4E14;&#x91C7;&#x7528;&#x8F6E;&#x8BE2;&#x5236;&#x4FDD;&#x8BC1;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x5C3D;&#x5FEB;&#x5730;&#x5B8C;&#x6210;&#x5206;&#x914D;&#x3002;&#x4F46;&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x5728;&#x5E76;&#x53D1;&#x538B;&#x529B;&#x8FC7;&#x5927;&#x65F6;&#x4F9D;&#x7136;&#x514D;&#x4E0D;&#x4E86;&#x7B49;&#x5F85;&#xFF0C;&#x5B83;&#x5176;&#x5B9E;&#x662F;&#x5E73;&#x8861;&#x4E86;&#x6027;&#x80FD;&#x548C;&#x5185;&#x5B58;&#x5360;&#x7528;&#x540E;&#x505A;&#x51FA;&#x7684;&#x9009;&#x62E9;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E;64&#x4F4D;&#x7684;Android R&#x800C;&#x8A00;&#xFF0C;TSD pool&#x4E2D;&#x53EA;&#x6709;&#x4E24;&#x4E2A;TSD&#x5BF9;&#x8C61;&#x3002;&#x6BCF;&#x4E00;&#x4E2A;TSD&#x5BF9;&#x8C61;&#x542B;&#x6709;&#x4E00;&#x4E2A;SizeClassAllocatorLocalCache&#x5BF9;&#x8C61;&#xFF0C;&#x5176;&#x5185;&#x90E8;&#x4E3A;&#x6BCF;&#x4E2A;class region&#x90FD;&#x521B;&#x5EFA;&#x4E86;PerClass&#x5BF9;&#x8C61;&#x3002;&#x901A;&#x8FC7;PerClass&#x7684;chunks&#x6570;&#x7EC4;&#xFF0C;&#x4FBF;&#x53EF;&#x4EE5;&#x627E;&#x5230;&#x7A7A;&#x95F2;chunk&#x7684;&#x5730;&#x5740;&#x3002;</p>
+<p>&#x4E0A;&#x8FF0;&#x7684;Round-robin(&#x8F6E;&#x8BE2;)&#x7B97;&#x6CD5;&#x4E5F;&#x5341;&#x5206;&#x6709;&#x8DA3;&#x3002;&#x5B83;&#x4F1A;&#x5728;&#x6301;&#x6709;TSD&#x5BF9;&#x8C61;&#x65F6;&#x8BB0;&#x5F55;&#x5355;&#x8C03;&#x65F6;&#x95F4;&#xFF0C;&#x5982;&#x679C;&#x5F53;&#x524D;&#x4E24;&#x4E2A;TSD&#x5BF9;&#x8C61;&#x6B63;&#x5728;&#x88AB;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x4F7F;&#x7528;&#xFF0C;&#x8BE5;&#x7EBF;&#x7A0B;&#x4F1A;&#x7B49;&#x5F85;TSD&#x6301;&#x6709;&#x65F6;&#x95F4;&#x66F4;&#x4E45;&#x7684;&#x90A3;&#x4E2A;&#x5BF9;&#x8C61;&#x3002;&#x56E0;&#x4E3A;&#x6301;&#x6709;&#x66F4;&#x4E45;&#xFF0C;&#x4EE3;&#x8868;&#x6709;&#x66F4;&#x5927;&#x53EF;&#x80FD;&#x88AB;&#x63D0;&#x65E9;&#x91CA;&#x653E;&#x3002;</p>
+<h5 id="Cache&#x673A;&#x5236;"><a href="#Cache&#x673A;&#x5236;" class="headerlink" title="Cache&#x673A;&#x5236;"></a>Cache&#x673A;&#x5236;</h5><p>Primary Allocator&#x4E2D;&#x4F7F;&#x7528;&#x4E86;Cache&#x673A;&#x5236;&#x6765;&#x52A0;&#x901F;&#x5206;&#x914D;&#x3002;&#x5F53;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x9700;&#x8981;&#x5206;&#x914D;&#x5185;&#x5B58;&#x65F6;&#xFF0C;&#x5B83;&#x4F1A;&#x901A;&#x8FC7;TSD&#x5BF9;&#x8C61;&#x6307;&#x5411;&#x7684;Chunks&#x6570;&#x7EC4;&#x6765;&#x5BFB;&#x627E;&#x5408;&#x9002;&#x7684;&#x7A7A;&#x95F2;&#x5185;&#x5B58;&#x3002;&#x4F46;Chunks&#x6570;&#x7EC4;&#x7684;&#x5927;&#x5C0F;&#x662F;&#x6709;&#x9650;&#x7684;(28)&#xFF0C;&#x5F53;&#x5B83;&#x4EEC;&#x7528;&#x5B8C;&#x65F6;&#x5C31;&#x9700;&#x8981;&#x8865;&#x5145;&#x5F39;&#x836F;&#x4E86;&#x3002;&#x8865;&#x5145;&#x5F39;&#x836F;&#x4E0D;&#x9700;&#x8981;&#x64CD;&#x4F5C;class region&#x6765;&#x6269;&#x5F20;&#x7A7A;&#x95F2;&#x533A;&#x57DF;&#xFF0C;&#x800C;&#x662F;&#x4ECE;region&#x7684;FreeList&#xFF08;FreeList&#x7684;&#x8BE6;&#x7EC6;&#x6570;&#x636E;&#x5B58;&#x653E;&#x4E8E;class 0 region&#xFF09;&#x4E2D;&#x76F4;&#x63A5;&#x83B7;&#x53D6;&#x3002;&#x5F53;FreeList&#x4E2D;&#x7684;&#x7A7A;&#x95F2;&#x5BF9;&#x8C61;&#x4E0D;&#x591F;&#x65F6;&#xFF0C;&#x624D;&#x4F1A;&#x6700;&#x7EC8;&#x6269;&#x5F20;class region&#x7684;&#x7A7A;&#x95F2;&#x533A;&#x57DF;&#x3002;</p>
+<p>&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x6709;&#x70B9;&#x50CF;CPU&#x7684;&#x591A;&#x7EA7;&#x7F13;&#x5B58;&#xFF0C;&#x8BE6;&#x89C1;&#x4E0B;&#x56FE;&#x3002;<br><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/bdbb543cf2d9a68b08d277e07e95a62156de9c0ba4f895ec1148249ec8481b61" alt></p>
+<h4 id="2-1-3-&#x91CA;&#x653E;&#x7B56;&#x7565;"><a href="#2-1-3-&#x91CA;&#x653E;&#x7B56;&#x7565;" class="headerlink" title="2.1.3 &#x91CA;&#x653E;&#x7B56;&#x7565;"></a>2.1.3 &#x91CA;&#x653E;&#x7B56;&#x7565;</h4><p>&#x5F53;PerClass&#x4E2D;&#x7684;Chunks&#x6570;&#x7EC4;&#x5168;&#x90FD;&#x662F;&#x7A7A;&#x95F2;&#x6307;&#x9488;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x5C06;&#x5176;&#x4E2D;&#x4E00;&#x534A;(14)&#x6307;&#x9488;&#x9000;&#x8FD8;&#x7ED9;region&#x7684;FreeList&#x3002;&#x5F53;region&#x7684;FreeList&#x4E2D;TransferBatch&#x8FC7;&#x591A;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x5C06;&#x7A7A;&#x95F2;&#x7684;&#x9875;&#x89E3;&#x9664;&#x7269;&#x7406;&#x6620;&#x5C04;&#x3002;&#x4F46;&#x5BF9;&#x4E8E;&#x5206;&#x914D;&#x5185;&#x5B58;&#x8F83;&#x5C0F;&#x7684;region(&#x8B6C;&#x5982;class 1~6)&#xFF0C;&#x7531;&#x4E8E;&#x4E00;&#x9875;&#x4E2D;chunk&#x6570;&#x91CF;&#x8FC7;&#x591A;&#xFF0C;&#x5F88;&#x96BE;&#x51D1;&#x9F50;&#x4E00;&#x9875;&#x4E2D;&#x5168;&#x662F;free chunk&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x56E0;&#x6B64;&#x5E72;&#x8106;&#x4E0D;&#x8FDB;&#x884C;&#x7269;&#x7406;&#x6620;&#x5C04;&#x89E3;&#x9664;&#x7684;&#x52A8;&#x4F5C;&#x3002;</p>
+<p>&#x5BF9;&#x9700;&#x8981;&#x89E3;&#x9664;&#x7269;&#x7406;&#x6620;&#x5C04;&#x7684;region&#xFF0C;&#x5176;&#x91C7;&#x7528;&#x7684;&#x662F;madvise&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x3002;</p>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/linux.cpp</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;86 void releasePagesToOS(uptr BaseAddress, uptr Offset, uptr Size,</span><br><span class="line">87                       UNUSED MapPlatformData *Data) {</span><br><span class="line">88   void *Addr = reinterpret_cast&lt;void *&gt;(BaseAddress + Offset);</span><br><span class="line">89   while (madvise(Addr, Size, MADV_DONTNEED) == -1 &amp;&amp; errno == EAGAIN) {</span><br><span class="line">90   }</span><br><span class="line">91 }</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;MADV_DONTNEED&#x53C2;&#x6570;&#x544A;&#x77E5;&#x7CFB;&#x7EDF;&#x8FD9;&#x4E9B;&#x7269;&#x7406;&#x9875;&#x53EF;&#x4EE5;&#x88AB;&#x56DE;&#x6536;&#x3002;</p>
+<blockquote>
+<p>MADV_DONTNEED</p>
+<p>Do not expect access in the near future. (For the time being, the application is finished with the given range, so the kernel can free resources associated with it.)</p>
+</blockquote>
+<h3 id="2-2-Secondary-Allocator"><a href="#2-2-Secondary-Allocator" class="headerlink" title="2.2 Secondary Allocator"></a>2.2 Secondary Allocator</h3><p>Secondary Allocator&#x4E3B;&#x8981;&#x7528;&#x4E8E;&#x5927;&#x5185;&#x5B58;&#x7684;&#x5206;&#x914D;(&gt;256K)&#xFF0C;&#x76F4;&#x63A5;&#x91C7;&#x7528;mmap&#x5206;&#x914D;&#x51FA;&#x4E00;&#x5757;&#x65B0;&#x7684;VMA(Virtual Memory Area)&#x3002;&#x4F46;&#x662F;&#x4E3A;&#x4E86;&#x6548;&#x7387;&#xFF0C;&#x5B83;&#x4E5F;&#x8BBE;&#x8BA1;&#x4E86;&#x4E00;&#x4E2A;Cache&#x3002;&#x5176;&#x5185;&#x90E8;&#x6700;&#x591A;&#x53EF;&#x4EE5;&#x7F13;&#x5B58;32&#x4E2A;&#x4E0D;&#x8D85;&#x8FC7;2M&#x7684;VMA&#x3002;</p>
+<p>&#x6CA1;&#x6709;&#x653E;&#x8FDB;&#x7F13;&#x5B58;&#x7684;VMA&#x5728;&#x91CA;&#x653E;&#x65F6;&#x76F4;&#x63A5;&#x91C7;&#x7528;unmap&#x7684;&#x65B9;&#x5F0F;&#x3002;</p>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/secondary.h</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;164  void empty() {</span><br><span class="line">165    struct {</span><br><span class="line">166      void *MapBase;</span><br><span class="line">167      uptr MapSize;</span><br><span class="line">168      MapPlatformData Data;</span><br><span class="line">169    } MapInfo[MaxEntriesCount];</span><br><span class="line">170    uptr N = 0;</span><br><span class="line">171    {</span><br><span class="line">172      ScopedLock L(Mutex);</span><br><span class="line">173      for (uptr I = 0; I &lt; MaxEntriesCount; I++) {</span><br><span class="line">174        if (!Entries[I].Block)</span><br><span class="line">175          continue;</span><br><span class="line">176        MapInfo[N].MapBase = reinterpret_cast&lt;void *&gt;(Entries[I].MapBase);</span><br><span class="line">177        MapInfo[N].MapSize = Entries[I].MapSize;</span><br><span class="line">178        MapInfo[N].Data = Entries[I].Data;</span><br><span class="line">179        Entries[I].Block = 0;</span><br><span class="line">180        N++;</span><br><span class="line">181      }</span><br><span class="line">182      EntriesCount = 0;</span><br><span class="line">183      IsFullEvents = 0;</span><br><span class="line">184    }</span><br><span class="line">185    for (uptr I = 0; I &lt; N; I++)</span><br><span class="line">186      unmap(MapInfo[I].MapBase, MapInfo[I].MapSize, UNMAP_ALL,</span><br><span class="line">187            &amp;MapInfo[I].Data);</span><br><span class="line">188  }</span><br></pre></td></tr></table></figure>
+
+<p>&#x597D;&#x5947;&#x7684;&#x670B;&#x53CB;&#x53EF;&#x80FD;&#x4F1A;&#x95EE;&#x9053;&#xFF1A;&#x4E3A;&#x4EC0;&#x4E48;Primary Allocator&#x5728;&#x91CA;&#x653E;&#x7269;&#x7406;&#x5185;&#x5B58;&#x65F6;&#x91C7;&#x7528;&#x7684;&#x662F;madvise&#xFF0C;&#x800C;&#x8FD9;&#x91CC;&#x91C7;&#x7528;&#x7684;&#x662F;unmap&#xFF1F;</p>
+<p>&#x8FD9;&#x662F;&#x56E0;&#x4E3A;madvise&#x53EA;&#x89E3;&#x9664;&#x4E86;&#x865A;&#x62DF;&#x5730;&#x5740;&#x548C;&#x7269;&#x7406;&#x7A7A;&#x95F4;&#x7684;&#x6620;&#x5C04;&#x5173;&#x7CFB;&#xFF0C;&#x4F46;&#x5E76;&#x6CA1;&#x6709;&#x91CA;&#x653E;&#x865A;&#x62DF;&#x7A7A;&#x95F4;&#xFF08;&#x865A;&#x62DF;&#x5730;&#x5740;&#x65E0;&#x6CD5;&#x88AB;&#x5176;&#x4ED6;&#x4EBA;&#x4F7F;&#x7528;&#xFF09;&#x3002;&#x800C;unmap&#x4E0D;&#x4EC5;&#x89E3;&#x9664;&#x4E86;&#x6620;&#x5C04;&#x5173;&#x7CFB;&#xFF0C;&#x4E5F;&#x91CA;&#x653E;&#x4E86;&#x865A;&#x62DF;&#x7A7A;&#x95F4;&#x3002;&#x5F53;madvise&#x89E3;&#x9664;&#x6620;&#x5C04;&#x5173;&#x7CFB;&#x4EE5;&#x540E;&#xFF0C;&#x8FD9;&#x5757;&#x5185;&#x5B58;&#x4F9D;&#x65E7;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#xFF0C;&#x4F46;&#x83B7;&#x53D6;&#x5230;&#x7684;&#x5C06;&#x662F;&#x4E00;&#x9875;&#x65B0;&#x7684;&#x7269;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x800C;unmap&#x7684;&#x533A;&#x57DF;&#x518D;&#x6B21;&#x8BBF;&#x95EE;&#x65F6;&#x5C06;&#x4F1A;&#x51FA;&#x9519;&#x3002;Primary Allocator&#x662F;&#x5728;&#x4E00;&#x6574;&#x5757;VMA&#x4E0A;&#x81EA;&#x884C;&#x8FDB;&#x884C;&#x7BA1;&#x7406;&#xFF0C;&#x56E0;&#x6B64;&#x65E0;&#x9700;&#x91CA;&#x653E;&#x865A;&#x62DF;&#x7A7A;&#x95F4;&#xFF0C;&#x800C;Secondary Allocator&#x5219;&#x662F;&#x4E3A;&#x6BCF;&#x4E00;&#x6B21;&#x5206;&#x914D;&#x90FD;&#x5355;&#x72EC;&#x521B;&#x5EFA;VMA&#xFF0C;&#x4E0D;&#x505A;&#x7BA1;&#x7406;&#x3002;</p>
+<h3 id="2-3-&#x68C0;&#x6D4B;&#x673A;&#x5236;"><a href="#2-3-&#x68C0;&#x6D4B;&#x673A;&#x5236;" class="headerlink" title="2.3 &#x68C0;&#x6D4B;&#x673A;&#x5236;"></a>2.3 &#x68C0;&#x6D4B;&#x673A;&#x5236;</h3><p>&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;&#x6BCF;&#x4E00;&#x4E2A;chunk&#x533A;&#x57DF;&#x7684;&#x5B8C;&#x6574;&#x6027;&#xFF0C;Scudo&#x589E;&#x52A0;&#x4E86;header&#x68C0;&#x6D4B;&#x673A;&#x5236;&#xFF0C;&#x4E00;&#x65B9;&#x9762;&#x53EF;&#x4EE5;&#x68C0;&#x6D4B;&#x5185;&#x5B58;&#x8E29;&#x8E0F;&#x548C;&#x591A;&#x6B21;&#x91CA;&#x653E;&#xFF0C;&#x53E6;&#x4E00;&#x65B9;&#x9762;&#x4E5F;&#x963B;&#x6B62;&#x4E86;&#x91CE;&#x6307;&#x9488;&#x7684;&#x8BBF;&#x95EE;&#x3002;</p>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/chunk.h</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;65 struct UnpackedHeader {</span><br><span class="line">66   uptr ClassId : 8;</span><br><span class="line">67   u8 State : 2;  // Available = 0, Allocated = 1, Quarantined = 2 </span><br><span class="line">68   u8 Origin : 2;  // Origin&#x8868;&#x793A;&#x901A;&#x8FC7;&#x54EA;&#x79CD;&#x65B9;&#x5F0F;&#x53D1;&#x751F;&#x7684;&#x5206;&#x914D;&#xFF0C;&#x8B6C;&#x5982;&#x662F;new,malloc&#x8FD8;&#x662F;realloc</span><br><span class="line">69   uptr SizeOrUnusedBytes : 20;  //&#x8FD9;&#x4E2A;chunk&#x4E2D;&#x5B9E;&#x9645;&#x88AB;&#x4F7F;&#x7528;&#x7684;&#x5927;&#x5C0F;</span><br><span class="line">70   uptr Offset : 16;</span><br><span class="line">71   uptr Checksum : 16;  //&#x7528;&#x4E8E;&#x68C0;&#x6D4B;header&#x662F;&#x5426;&#x88AB;&#x7834;&#x574F;</span><br><span class="line">72 };</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x9762;&#x662F;Chunk header&#x7684;&#x8BE6;&#x7EC6;&#x4FE1;&#x606F;&#xFF0C;&#x540E;&#x9762;&#x7684;&#x6570;&#x5B57;&#x4EE3;&#x8868;&#x6BCF;&#x4E2A;&#x5B57;&#x6BB5;&#x6240;&#x5360;&#x7528;&#x7684;bit&#xFF0C;&#x52A0;&#x8D77;&#x6765;&#x4E3A;64bits&#xFF0C;&#x4E5F;&#x5373;8&#x5B57;&#x8282;&#x3002;Checksum&#x5B57;&#x6BB5;&#x7528;&#x4E8E;&#x68C0;&#x6D4B;chunk&#x7684;&#x5B8C;&#x6574;&#x6027;&#xFF0C;&#x5176;&#x751F;&#x6210;&#x8FC7;&#x7A0B;&#x5982;&#x4E0B;&#x6240;&#x793A;&#x3002;&#x5176;&#x4E2D;&#x6821;&#x9A8C;&#x548C;&#x7528;&#x7684;&#x662F;&#x8F83;&#x4E3A;&#x7B80;&#x5355;&#x7684;CRC&#x7B97;&#x6CD5;&#xFF0C;&#x8FD9;&#x4E3B;&#x8981;&#x662F;&#x57FA;&#x4E8E;&#x6027;&#x80FD;&#x7684;&#x8003;&#x8651;&#x3002;&#x4F46;&#x662F;&#x76EE;&#x524D;&#x8FD9;&#x79CD;&#x6821;&#x9A8C;&#x65B9;&#x5F0F;&#x5DF2;&#x7ECF;&#x6709;&#x4E86;&#x7834;&#x89E3;&#x624B;&#x6BB5;&#xFF0C;&#x4F30;&#x8BA1;&#x8C37;&#x6B4C;&#x540E;&#x7EED;&#x4F1A;&#x5347;&#x7EA7;&#x8FD9;&#x5757;&#x7684;&#x7B97;&#x6CD5;&#x5427;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/51b3a084c59033beb6a7b16db68be9970ac78bae96d107328dfc1f7a702082fb" alt></p>
+<p>&#x5728;&#x4E00;&#x4E2A;chunk&#x91CA;&#x653E;&#x65F6;&#xFF0C;&#x8BE5;&#x5730;&#x5740;&#x9700;&#x8981;&#x7ECF;&#x8FC7;&#x91CD;&#x91CD;&#x68C0;&#x6D4B;&#xFF0C;&#x4EE5;&#x4FDD;&#x8BC1;&#x5B83;&#x5728;&#x4F7F;&#x7528;&#x8FC7;&#x7A0B;&#x4E2D;&#x662F;&#x672A;&#x7ECF;&#x7834;&#x574F;&#x7684;&#x3002;&#x4E0B;&#x9762;&#x6309;&#x65F6;&#x95F4;&#x987A;&#x5E8F;&#x5217;&#x4E3E;&#x51FA;&#x4E00;&#x4E2A;chunk&#x9700;&#x8981;&#x7ECF;&#x8FC7;&#x7684;&#x68C0;&#x6D4B;&#x3002;</p>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/combined.h</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;423     if (UNLIKELY(!isAligned(reinterpret_cast&lt;uptr&gt;(Ptr), MinAlignment)))</span><br><span class="line">424       reportMisalignedPointer(AllocatorAction::Deallocating, Ptr);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x5730;&#x5740;&#x5FC5;&#x987B;16&#x5B57;&#x8282;&#x5BF9;&#x9F50;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x4E00;&#x4E2A;&#x672A;&#x7ECF;&#x5BF9;&#x9F50;&#x7684;long&#x578B;&#x6570;&#x5B57;&#x88AB;&#x9519;&#x8BEF;&#x5F53;&#x6210;&#x4E86;&#x6307;&#x9488;&#xFF0C;&#x8FD9;&#x91CC;&#x5C31;&#x53EF;&#x4EE5;&#x68C0;&#x6D4B;&#x51FA;&#x6765;&#x3002;</li>
+</ul>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/chunk.h</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;124   if (UNLIKELY(NewUnpackedHeader-&gt;Checksum !=</span><br><span class="line">125                computeHeaderChecksum(Cookie, Ptr, NewUnpackedHeader)))</span><br><span class="line">126     reportHeaderCorruption(const_cast&lt;void *&gt;(Ptr));</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Checksum&#x6570;&#x5B57;&#x5728;deallocate&#x65F6;&#x4F1A;&#x518D;&#x8BA1;&#x7B97;&#x4E00;&#x904D;&#xFF0C;&#x548C;Header&#x4E2D;&#x4FDD;&#x5B58;&#x7684;checksum&#x8FDB;&#x884C;&#x6BD4;&#x8F83;&#x3002;&#x5982;&#x679C;&#x4E8C;&#x8005;&#x4E0D;&#x76F8;&#x7B49;&#xFF0C;&#x5219;&#x610F;&#x5473;&#x7740;header&#x88AB;&#x7834;&#x574F;&#xFF0C;&#x6216;&#x8005;&#x5B83;&#x6839;&#x672C;&#x4E0D;&#x662F;&#x4E00;&#x4E2A;header&#x3002;</li>
+</ul>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/combined.h</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;431     if (UNLIKELY(Header.State != Chunk::State::Allocated))</span><br><span class="line">432       reportInvalidChunkState(AllocatorAction::Deallocating, Ptr);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x5982;&#x679C;header&#x7684;state&#x4E0D;&#x4E3A;Allocated&#xFF0C;&#x8868;&#x660E;&#x6B64;&#x65F6;&#x4E0D;&#x5E94;&#x8BE5;&#x91CA;&#x653E;&#x8FD9;&#x5757;&#x5185;&#x5B58;&#xFF0C;&#x8FD9;&#x5F88;&#x6709;&#x53EF;&#x80FD;&#x662F;&#x4E00;&#x4E2A;double-free&#x7684;&#x9519;&#x8BEF;&#x3002;</li>
+</ul>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/combined.h</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;433     if (Options.DeallocTypeMismatch) {</span><br><span class="line">434       if (Header.Origin != Origin) {</span><br><span class="line">435         // With the exception of memalign&apos;d chunks, that can be still be free&apos;d.</span><br><span class="line">436         if (UNLIKELY(Header.Origin != Chunk::Origin::Memalign ||</span><br><span class="line">437                      Origin != Chunk::Origin::Malloc))</span><br><span class="line">438           reportDeallocTypeMismatch(AllocatorAction::Deallocating, Ptr,</span><br><span class="line">439                                     Header.Origin, Origin);</span><br><span class="line">440       }</span><br><span class="line">441     }</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x5982;&#x679C;allocate&#x65F6;&#x7684;&#x65B9;&#x6CD5;&#x548C;deallocate&#x7684;&#x65B9;&#x6CD5;&#x4E0D;&#x5339;&#x914D;&#xFF0C;&#x4E5F;&#x4F1A;&#x62A5;&#x9519;(&#x524D;&#x63D0;&#x662F;&#x6253;&#x5F00;DeallocTypeMismatch&#x9009;&#x9879;)&#x3002;&#x8B6C;&#x5982;&#x4E00;&#x5757;&#x5185;&#x5B58;&#x901A;&#x8FC7;new&#x7533;&#x8BF7;&#xFF0C;&#x5374;&#x4F7F;&#x7528;free&#x53BB;&#x91CA;&#x653E;(&#x5E94;&#x8BE5;&#x4F7F;&#x7528;delete)&#x3002;</li>
+</ul>
+<p><a href="/external_links/1bcee6bcd89ef9d9d7a0d4aceeb8ec29.html" target="blank" rel="noopener">external/scudo/standalone/combined.h</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">C++&#x590D;&#x5236;&#x4EE3;&#x7801;444     if (DeleteSize &amp;&amp; Options.DeleteSizeMismatch) {</span><br><span class="line">445       if (UNLIKELY(DeleteSize != Size))</span><br><span class="line">446         reportDeleteSizeMismatch(Ptr, DeleteSize, Size);</span><br><span class="line">447     }</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x5982;&#x679C;deallocate&#x65F6;&#x7684;size&#x548C;chunk&#x4E2D;&#x7684;size&#x4E0D;&#x76F8;&#x7B49;&#xFF0C;&#x62A5;&#x9519;&#x3002;</li>
+</ul>
+<p>&#x4EE5;&#x4E0B;&#x662F;Android Scudo&#x5B98;&#x65B9;&#x6587;&#x6863;&#x4E2D;&#x5BF9;&#x4E8E;&#x5178;&#x578B;&#x9519;&#x8BEF;&#x4FE1;&#x606F;&#x7684;&#x5206;&#x6790;&#xFF0C;&#x5176;&#x4E2D;&#x4E0D;&#x5C11;&#x90FD;&#x53EF;&#x4EE5;&#x548C;&#x4E0A;&#x8FF0;&#x7684;&#x68C0;&#x6D4B;&#x73AF;&#x8282;&#x5173;&#x8054;&#x8D77;&#x6765;&#x3002;</p>
+<p><a href="/external_links/32402b5a91a258a2ce56bbc13815a108.html" target="blank" rel="noopener">source.android.com/devices/tec&#x2026;</a></p>
+<blockquote>
+<ul>
+<li><code>corrupted chunk header</code>&#xFF1A;&#x533A;&#x5757;&#x5934;&#x7684;&#x6821;&#x9A8C;&#x548C;&#x9A8C;&#x8BC1;&#x5931;&#x8D25;&#x3002;&#x53EF;&#x80FD;&#x539F;&#x56E0;&#x6709;&#x4E8C;&#xFF1A;&#x533A;&#x5757;&#x5934;&#x88AB;&#x90E8;&#x5206;&#x6216;&#x5168;&#x90E8;&#x8986;&#x76D6;&#xFF0C;&#x4E5F;&#x53EF;&#x80FD;&#x662F;&#x4F20;&#x9012;&#x7ED9;&#x51FD;&#x6570;&#x7684;&#x6307;&#x9488;&#x4E0D;&#x662F;&#x533A;&#x5757;&#x3002;</li>
+<li><code>race on chunk header</code>&#xFF1A;&#x4E24;&#x4E2A;&#x4E0D;&#x540C;&#x7684;&#x7EBF;&#x7A0B;&#x4F1A;&#x540C;&#x65F6;&#x5C1D;&#x8BD5;&#x64CD;&#x63A7;&#x540C;&#x4E00;&#x533A;&#x5757;&#x5934;&#x3002;&#x8FD9;&#x79CD;&#x75C7;&#x72B6;&#x901A;&#x5E38;&#x662F;&#x5728;&#x5BF9;&#x8BE5;&#x533A;&#x5757;&#x6267;&#x884C;&#x64CD;&#x4F5C;&#x65F6;&#x51FA;&#x73B0;&#x4E89;&#x7528;&#x60C5;&#x51B5;&#x6216;&#x901A;&#x5E38;&#x672A;&#x8FDB;&#x884C;&#x9501;&#x5B9A;&#x9020;&#x6210;&#x7684;&#x3002;</li>
+<li><code>invalid chunk state</code>&#xFF1A;&#x5BF9;&#x4E8E;&#x6307;&#x5B9A;&#x64CD;&#x4F5C;&#xFF0C;&#x533A;&#x5757;&#x672A;&#x5904;&#x4E8E;&#x9884;&#x671F;&#x72B6;&#x6001;&#xFF0C;&#x4F8B;&#x5982;&#xFF0C;&#x5728;&#x5C1D;&#x8BD5;&#x91CA;&#x653E;&#x533A;&#x5757;&#x65F6;&#x5176;&#x5904;&#x4E8E;&#x672A;&#x5206;&#x914D;&#x72B6;&#x6001;&#xFF0C;&#x6216;&#x8005;&#x5728;&#x5C1D;&#x8BD5;&#x56DE;&#x6536;&#x533A;&#x5757;&#x65F6;&#x5176;&#x672A;&#x5904;&#x4E8E;&#x9694;&#x79BB;&#x72B6;&#x6001;&#x3002;&#x53CC;&#x91CD;&#x91CA;&#x653E;&#x662F;&#x9020;&#x6210;&#x6B64;&#x9519;&#x8BEF;&#x7684;&#x5178;&#x578B;&#x539F;&#x56E0;&#x3002;</li>
+<li><code>misaligned pointer</code>&#xFF1A;&#x5F3A;&#x5236;&#x6267;&#x884C;&#x57FA;&#x672C;&#x5BF9;&#x9F50;&#x8981;&#x6C42;&#xFF1A;32 &#x4F4D;&#x5E73;&#x53F0;&#x4E0A;&#x4E3A; 8 &#x4E2A;&#x5B57;&#x8282;&#xFF0C;64 &#x4F4D;&#x5E73;&#x53F0;&#x4E0A;&#x4E3A; 16 &#x4E2A;&#x5B57;&#x8282;&#x3002;&#x5982;&#x679C;&#x4F20;&#x9012;&#x7ED9;&#x51FD;&#x6570;&#x7684;&#x6307;&#x9488;&#x4E0D;&#x9002;&#x5408;&#x8FD9;&#x4E9B;&#x51FD;&#x6570;&#xFF0C;&#x4F20;&#x9012;&#x7ED9;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x7684;&#x6307;&#x9488;&#x5C31;&#x4E0D;&#x4F1A;&#x5BF9;&#x9F50;&#x3002;</li>
+<li><code>allocation type mismatch</code>&#xFF1A;&#x542F;&#x7528;&#x6B64;&#x9009;&#x9879;&#x540E;&#xFF0C;&#x5728;&#x533A;&#x5757;&#x4E0A;&#x8C03;&#x7528;&#x7684;&#x53D6;&#x6D88;&#x5206;&#x914D;&#x51FD;&#x6570;&#x5FC5;&#x987B;&#x4E0E;&#x7528;&#x4E8E;&#x5206;&#x914D;&#x533A;&#x5757;&#x800C;&#x8C03;&#x7528;&#x7684;&#x51FD;&#x6570;&#x7C7B;&#x578B;&#x4E00;&#x81F4;&#x3002;&#x7C7B;&#x578B;&#x4E0D;&#x4E00;&#x81F4;&#x4F1A;&#x5F15;&#x53D1;&#x5B89;&#x5168;&#x95EE;&#x9898;&#x3002;</li>
+<li><code>invalid sized delete</code>&#xFF1A;&#x5982;&#x679C;&#x4F7F;&#x7528;&#x7684;&#x662F;&#x7B26;&#x5408; C++14 &#x6807;&#x51C6;&#x7684;&#x5220;&#x9664;&#x8FD0;&#x7B97;&#x7B26;&#xFF0C;&#x5728;&#x542F;&#x7528;&#x53EF;&#x9009;&#x68C0;&#x67E5;&#x4E4B;&#x540E;&#xFF0C;&#x53D6;&#x6D88;&#x5206;&#x914D;&#x533A;&#x5757;&#x65F6;&#x4F20;&#x9012;&#x7684;&#x5927;&#x5C0F;&#x4E0E;&#x5206;&#x914D;&#x533A;&#x5757;&#x65F6;&#x8BF7;&#x6C42;&#x7684;&#x5927;&#x5C0F;&#x4F1A;&#x51FA;&#x73B0;&#x4E0D;&#x4E00;&#x81F4;&#x7684;&#x60C5;&#x51B5;&#x3002;&#x8FD9;&#x901A;&#x5E38;&#x662F;&#x7531;&#x4E8E;&#x7F16;&#x8BD1;&#x5668;&#x51FA;&#x73B0;&#x95EE;&#x9898;&#x6216;&#x662F;&#x5BF9;&#x8981;&#x53D6;&#x6D88;&#x5206;&#x914D;&#x7684;&#x5BF9;&#x8C61;&#x4EA7;&#x751F;&#x4E86;<a href="/external_links/75107f895c6dbc80481f922e39a7bda0.html" target="blank" rel="noopener">&#x7C7B;&#x578B;&#x6DF7;&#x6DC6;</a>&#x3002;</li>
+<li><code>RSS limit exhausted</code>&#xFF1A;&#x5DF2;&#x8D85;&#x51FA;&#x9009;&#x62E9;&#x6027;&#x6307;&#x5B9A;&#x7684; RSS &#x5927;&#x5C0F;&#x4E0A;&#x9650;&#x3002;</li>
+</ul>
+</blockquote>
+<ol start="3">
+<li>&#x603B;&#x7ED3;</li>
+</ol>
+<hr>
+<p>&#x672C;&#x6587;&#x91CD;&#x70B9;&#x9610;&#x8FF0;&#x4E86;Scudo&#x7684;&#x6838;&#x5FC3;&#x539F;&#x7406;&#x3002;</p>
+<p>&#x548C;&#x4EE5;&#x5F80;&#x7684;&#x5199;&#x4F5C;&#x65B9;&#x5F0F;&#x4E0D;&#x540C;&#xFF0C;&#x8FD9;&#x4E00;&#x6B21;&#x6211;&#x5C3D;&#x529B;&#x5220;&#x51CF;&#x4E86;&#x7E41;&#x6742;&#x7684;&#x6E90;&#x7801;&#x89E3;&#x8BFB;&#xFF0C;&#x800C;&#x662F;&#x5C06;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x7ED8;&#x5236;&#x6210;&#x56FE;&#x3002;&#x901A;&#x8FC7;&#x56FE;&#x7247;&#x7406;&#x89E3;&#xFF0C;&#x6211;&#x60F3;&#x53EF;&#x80FD;&#x4F1A;&#x66F4;&#x52A0;&#x6E05;&#x695A;&#x3002;&#x6B64;&#x5916;&#xFF0C;&#x5173;&#x4E8E;Scudo&#x7684;&#x914D;&#x7F6E;&#x548C;&#x4F7F;&#x7528;&#x5E76;&#x4E0D;&#x662F;&#x672C;&#x6587;&#x7684;&#x91CD;&#x70B9;&#xFF0C;&#x56E0;&#x4E3A;<a href="/external_links/32402b5a91a258a2ce56bbc13815a108.html" target="blank" rel="noopener">&#x5B98;&#x65B9;&#x6587;&#x6863;</a>&#x4E2D;&#x5199;&#x7684;&#x5DF2;&#x7ECF;&#x8DB3;&#x591F;&#x6E05;&#x695A;&#xFF0C;&#x6211;&#x5C31;&#x6CA1;&#x6709;&#x5FC5;&#x8981;&#x518D;&#x72D7;&#x5C3E;&#x7EED;&#x8C82;&#x4E86;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/3f4a336ffab3413d42943efb72e92464.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6908271959381901325.html" rel="next" title="一文快速入门 Kotlin 协程 一、Kotlin 协程 二">
+                <i class="fa fa-chevron-left"></i> 一文快速入门 Kotlin 协程 一、Kotlin 协程 二
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6914802148614242312.html" rel="prev" title="抽丝剥茧Kotlin - 协程中绕不过的Flow">
+                抽丝剥茧Kotlin - 协程中绕不过的Flow <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">1775</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">725</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">2.</span> <span class="nav-text">目录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Primary-Allocator"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Primary Allocator</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-1-内存分布"><span class="nav-number">2.1.1.</span> <span class="nav-text">2.1.1 内存分布</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-2-分配策略"><span class="nav-number">2.1.2.</span> <span class="nav-text">2.1.2 分配策略</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#TSD-Thread-Specific-Data-机制"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">TSD(Thread Specific Data)机制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Cache机制"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">Cache机制</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-3-释放策略"><span class="nav-number">2.1.3.</span> <span class="nav-text">2.1.3 释放策略</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Secondary-Allocator"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Secondary Allocator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-检测机制"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 检测机制</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

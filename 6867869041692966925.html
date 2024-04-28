@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x524D;&amp;#x8A00; ServiceLoader&amp;#x662F;Java&amp;#x63D0;&amp;#x4F9B;&amp;#x7684;&amp;#x4E00;&amp;#x5957;**SPI&amp;#xFF08;Service Provider Interface&amp;#xFF0C;&amp;#x5E38;&amp;#x8BD1;&amp;#xFF1A;&amp;#x670D;&amp;#x52A1;&amp;#x53D1;&amp;#x73B0;&amp;#xFF09;**&amp;#x68">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java   带你理解 ServiceLoader 的原理与">
+<meta property="og:url" content="https://dev.newban.cn/6867869041692966925.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x524D;&amp;#x8A00; ServiceLoader&amp;#x662F;Java&amp;#x63D0;&amp;#x4F9B;&amp;#x7684;&amp;#x4E00;&amp;#x5957;**SPI&amp;#xFF08;Service Provider Interface&amp;#xFF0C;&amp;#x5E38;&amp;#x8BD1;&amp;#xFF1A;&amp;#x670D;&amp;#x52A1;&amp;#x53D1;&amp;#x73B0;&amp;#xFF09;**&amp;#x68">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/6d61ccfcc4afbd7f0c560ab58a4a040d3895837dd346a3a5b267828c96c95f39">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/d156e0e58839b77fa8b127621decdad58de61358a6dc43d6cb899bdc376576fb">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/1c444b86d43b7de19e31a3f76e09d4c83e486b5a9b124f11877165717b69fceb">
+<meta property="og:updated_time" content="2024-04-27T00:16:59.385Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java   带你理解 ServiceLoader 的原理与">
+<meta name="twitter:description" content="&amp;#x524D;&amp;#x8A00; ServiceLoader&amp;#x662F;Java&amp;#x63D0;&amp;#x4F9B;&amp;#x7684;&amp;#x4E00;&amp;#x5957;**SPI&amp;#xFF08;Service Provider Interface&amp;#xFF0C;&amp;#x5E38;&amp;#x8BD1;&amp;#xFF1A;&amp;#x670D;&amp;#x52A1;&amp;#x53D1;&amp;#x73B0;&amp;#xFF09;**&amp;#x68">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/6d61ccfcc4afbd7f0c560ab58a4a040d3895837dd346a3a5b267828c96c95f39">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6867869041692966925.html">
+
+
+
+
+
+  <title>Java   带你理解 ServiceLoader 的原理与 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java   带你理解 ServiceLoader 的原理与</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-02T20:40:08+08:00">
+                2020-09-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h2><ul>
+<li><code>ServiceLoader</code>&#x662F;<code>Java</code>&#x63D0;&#x4F9B;&#x7684;&#x4E00;&#x5957;**SPI&#xFF08;Service Provider Interface&#xFF0C;&#x5E38;&#x8BD1;&#xFF1A;&#x670D;&#x52A1;&#x53D1;&#x73B0;&#xFF09;**&#x6846;&#x67B6;&#xFF0C;&#x7528;&#x4E8E;&#x5B9E;&#x73B0;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x65B9;&#x4E0E;&#x670D;&#x52A1;&#x4F7F;&#x7528;&#x65B9;&#x89E3;&#x8026;</li>
+<li>&#x5728;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x91CC;&#xFF0C;&#x6211;&#x5C06;&#x5E26;&#x4F60;&#x7406;&#x89E3;<code>ServiceLoader</code>&#x7684;&#x539F;&#x7406;&#x4E0E;&#x8BBE;&#x8BA1;&#x601D;&#x60F3;&#xFF0C;&#x5E0C;&#x671B;&#x80FD;&#x5E2E;&#x4E0A;&#x5FD9;&#x3002;&#x8BF7;&#x70B9;&#x8D5E;&#xFF0C;&#x4F60;&#x7684;&#x70B9;&#x8D5E;&#x548C;&#x5173;&#x6CE8;&#x771F;&#x7684;&#x5BF9;&#x6211;&#x975E;&#x5E38;&#x91CD;&#x8981;&#xFF01;</li>
+</ul>
+<hr>
+<h2 id="&#x76EE;&#x5F55;"><a href="#&#x76EE;&#x5F55;" class="headerlink" title="&#x76EE;&#x5F55;"></a>&#x76EE;&#x5F55;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/6d61ccfcc4afbd7f0c560ab58a4a040d3895837dd346a3a5b267828c96c95f39" alt></p>
+<hr>
+<ol>
+<li>SPI &#x7B80;&#x4ECB;</li>
+</ol>
+<hr>
+<ul>
+<li>&#x5B9A;&#x4E49;</li>
+<li><em>&#x4E00;&#x4E2A;&#x670D;&#x52A1;&#x7684;&#x6CE8;&#x518C;&#x4E0E;&#x53D1;&#x73B0;&#x673A;&#x5236;*</em></li>
+<li>&#x4F5C;&#x7528;<br>&#x901A;&#x8FC7;<strong>&#x89E3;&#x8026;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x4E0E;&#x670D;&#x52A1;&#x4F7F;&#x7528;&#x8005;</strong>&#xFF0C;&#x5E2E;&#x52A9;&#x5B9E;&#x73B0;&#x6A21;&#x5757;&#x5316;&#x3001;&#x7EC4;&#x4EF6;&#x5316;</li>
+</ul>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/d156e0e58839b77fa8b127621decdad58de61358a6dc43d6cb899bdc376576fb" alt></p>
+<hr>
+<ol start="2">
+<li>ServiceLoader &#x4F7F;&#x7528;&#x6B65;&#x9AA4;</li>
+</ol>
+<hr>
+<p>&#x6211;&#x4EEC;&#x76F4;&#x63A5;&#x4F7F;&#x7528;<code>JDBC</code>&#x7684;&#x4F8B;&#x5B50;&#xFF0C;&#x5E2E;&#x52A9;&#x5404;&#x4F4D;&#x5EFA;&#x7ACB;&#x8D77;&#x5BF9;<code>ServiceLoader</code> &#x7684;&#x57FA;&#x672C;&#x4E86;&#x89E3;&#xFF0C;&#x5177;&#x4F53;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>&#x6211;&#x4EEC;&#x90FD;&#x77E5;&#x9053;<code>JDBC</code>&#x7F16;&#x7A0B;&#x6709;&#x4E94;&#x5927;&#x57FA;&#x672C;&#x6B65;&#x9AA4;&#xFF1A;</p>
+<ul>
+<li><ol>
+<li>&#x6267;&#x884C;&#x6570;&#x636E;&#x5E93;&#x9A71;&#x52A8;&#x7C7B;&#x52A0;&#x8F7D;&#xFF08;&#x975E;&#x5FC5;&#x987B;&#xFF09;&#xFF1A;<code>Class.forName(&quot;com.mysql.jdbc.driver&quot;)</code></li>
+</ol>
+</li>
+<li><ol start="2">
+<li>&#x8FDE;&#x63A5;&#x6570;&#x636E;&#x5E93;&#xFF1A;<code>DriverManager.getConnection(url, user, password)</code></li>
+</ol>
+</li>
+<li><ol start="3">
+<li>&#x521B;&#x5EFA;SQL&#x8BED;&#x53E5;&#xFF1A;<code>Connection#.creatstatement();</code></li>
+</ol>
+</li>
+<li><ol start="4">
+<li>&#x6267;&#x884C;SQL&#x8BED;&#x53E5;&#x5E76;&#x5904;&#x7406;&#x7ED3;&#x679C;&#x96C6;&#xFF1A;<code>Statement#executeQuery()</code></li>
+</ol>
+</li>
+<li><ol start="5">
+<li>&#x91CA;&#x653E;&#x8D44;&#x6E90;&#xFF1A;<code>ResultSet#close()</code>&#x3001;<code>Statement#close()</code>&#x4E0E;<code>Connection#close()</code></li>
+</ol>
+</li>
+</ul>
+<p>&#x64CD;&#x4F5C;&#x6570;&#x636E;&#x5E93;&#x9700;&#x8981;&#x4F7F;&#x7528;&#x5382;&#x5546;&#x63D0;&#x4F9B;&#x7684;&#x6570;&#x636E;&#x5E93;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#xFF0C;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x5382;&#x5546;&#x7684;&#x9A71;&#x52A8;&#x8026;&#x5408;&#x592A;&#x5F3A;&#x4E86;&#xFF0C;&#x66F4;&#x63A8;&#x8350;&#x7684;&#x65B9;&#x6CD5;&#x662F;&#x4F7F;&#x7528;<code>DriveManager</code>&#x7BA1;&#x7406;&#x7C7B;&#xFF1A;</p>
+<h4 id="&#x6B65;&#x9AA4;1&#xFF1A;&#x5B9A;&#x4E49;&#x670D;&#x52A1;&#x63A5;&#x53E3;"><a href="#&#x6B65;&#x9AA4;1&#xFF1A;&#x5B9A;&#x4E49;&#x670D;&#x52A1;&#x63A5;&#x53E3;" class="headerlink" title="&#x6B65;&#x9AA4;1&#xFF1A;&#x5B9A;&#x4E49;&#x670D;&#x52A1;&#x63A5;&#x53E3;"></a>&#x6B65;&#x9AA4;1&#xFF1A;&#x5B9A;&#x4E49;&#x670D;&#x52A1;&#x63A5;&#x53E3;</h4><p><code>JDBC</code>&#x62BD;&#x8C61;&#x51FA;&#x4E00;&#x4E2A;&#x670D;&#x52A1;&#x63A5;&#x53E3;&#xFF0C;&#x6570;&#x636E;&#x5E93;&#x9A71;&#x52A8;&#x5B9E;&#x73B0;&#x7C7B;&#x7EDF;&#x4E00;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public interface Driver {</span><br><span class="line">    // &#x521B;&#x5EFA;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;</span><br><span class="line">    Connection connect(String url, java.util.Properties info)</span><br><span class="line">        throws SQLException;</span><br><span class="line"></span><br><span class="line">    // &#x7701;&#x7565;&#x5176;&#x4ED6;&#x65B9;&#x6CD5;...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x6B65;&#x9AA4;2&#xFF1A;&#x5B9E;&#x73B0;&#x670D;&#x52A1;&#x63A5;&#x53E3;"><a href="#&#x6B65;&#x9AA4;2&#xFF1A;&#x5B9E;&#x73B0;&#x670D;&#x52A1;&#x63A5;&#x53E3;" class="headerlink" title="&#x6B65;&#x9AA4;2&#xFF1A;&#x5B9E;&#x73B0;&#x670D;&#x52A1;&#x63A5;&#x53E3;"></a>&#x6B65;&#x9AA4;2&#xFF1A;&#x5B9E;&#x73B0;&#x670D;&#x52A1;&#x63A5;&#x53E3;</h4><p>&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#xFF08;&#x6570;&#x636E;&#x5E93;&#x5382;&#x5546;&#xFF09;&#x63D0;&#x4F9B;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x670D;&#x52A1;&#x7684;&#x7C7B;&#xFF08;&#x9A71;&#x52A8;&#x5B9E;&#x73B0;&#x7C7B;&#xFF09;&#xFF0C;&#x5177;&#x4F53;&#x5982;&#x4E0B;&#xFF1A;</p>
+<ul>
+<li><strong>mysql</strong>&#xFF1A;<code>com.mysql.cj.jdbc.Driver.java</code></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">scala&#x590D;&#x5236;&#x4EE3;&#x7801;public class Driver extends NonRegisteringDriver implements java.sql.Driver {</span><br><span class="line">    static {</span><br><span class="line">        try {</span><br><span class="line">            // &#x6CE8;&#x518C;&#x9A71;&#x52A8;</span><br><span class="line">            java.sql.DriverManager.registerDriver(new Driver());</span><br><span class="line">        } catch (SQLException E) {</span><br><span class="line">            throw new RuntimeException(&quot;Can&apos;t register driver!&quot;);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    // &#x7701;&#x7565;...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>oracle</strong>&#xFF1A;<code>oracle.jdbc.driver.OracleDriver.java</code></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;public class OracleDriver implements Driver {</span><br><span class="line">    private static OracleDriver defaultDriver = null;</span><br><span class="line">    static {</span><br><span class="line">        try {</span><br><span class="line">            if (defaultDriver == null) {</span><br><span class="line">                //1. &#x5355;&#x4F8B;</span><br><span class="line">                defaultDriver = new OracleDriver();</span><br><span class="line">                // &#x6CE8;&#x518C;&#x9A71;&#x52A8;</span><br><span class="line">                DriverManager.registerDriver(defaultDriver);</span><br><span class="line">            }</span><br><span class="line">        } catch (RuntimeException localRuntimeException) {</span><br><span class="line">            ;</span><br><span class="line">        } catch (SQLException localSQLException) {</span><br><span class="line">            ;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x7701;&#x7565;...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x6B65;&#x9AA4;3&#xFF1A;&#x6CE8;&#x518C;&#x5B9E;&#x73B0;&#x7C7B;&#x5230;&#x914D;&#x7F6E;&#x6587;&#x4EF6;"><a href="#&#x6B65;&#x9AA4;3&#xFF1A;&#x6CE8;&#x518C;&#x5B9E;&#x73B0;&#x7C7B;&#x5230;&#x914D;&#x7F6E;&#x6587;&#x4EF6;" class="headerlink" title="&#x6B65;&#x9AA4;3&#xFF1A;&#x6CE8;&#x518C;&#x5B9E;&#x73B0;&#x7C7B;&#x5230;&#x914D;&#x7F6E;&#x6587;&#x4EF6;"></a>&#x6B65;&#x9AA4;3&#xFF1A;&#x6CE8;&#x518C;&#x5B9E;&#x73B0;&#x7C7B;&#x5230;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</h4><p>&#x5728;<code>java</code>&#x7684;&#x540C;&#x7EA7;&#x76EE;&#x5F55;&#x4E2D;&#x65B0;&#x5EFA;&#x76EE;&#x5F55;<code>resources/META-INF/services</code>&#xFF0C;&#x65B0;&#x5EFA;&#x4E00;&#x4E2A;&#x914D;&#x7F6E;&#x6587;&#x4EF6;<code>java.sql.Driver</code>&#xFF08;&#x6587;&#x4EF6;&#x540D;&#x4E3A;&#x670D;&#x52A1;&#x63A5;&#x53E3;&#x7684;&#x5168;&#x9650;&#x5B9A;&#x540D;&#xFF09;&#xFF0C;&#x6587;&#x4EF6;&#x4E2D;&#x6BCF;&#x4E00;&#x884C;&#x662F;&#x5B9E;&#x73B0;&#x7C7B;&#x7684;&#x5168;&#x9650;&#x5B9A;&#x540D;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;com.mysql.cj.jdbc.Driver</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x89E3;&#x538B;<code>mysql-connector-java-8.0.19.jar</code>&#x5305;&#xFF0C;&#x627E;&#x5230;&#x5BF9;&#x5E94;&#x7684;<code>META-INF</code>&#x6587;&#x4EF6;&#x5939;&#x3002;</p>
+<h4 id="&#x6B65;&#x9AA4;4&#xFF1A;&#x52A0;&#x8F7D;&#x670D;&#x52A1;"><a href="#&#x6B65;&#x9AA4;4&#xFF1A;&#x52A0;&#x8F7D;&#x670D;&#x52A1;" class="headerlink" title="&#x6B65;&#x9AA4;4&#xFF1A;&#x52A0;&#x8F7D;&#x670D;&#x52A1;"></a>&#x6B65;&#x9AA4;4&#xFF1A;&#x52A0;&#x8F7D;&#x670D;&#x52A1;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">csharp&#x590D;&#x5236;&#x4EE3;&#x7801;// DriverManager.java</span><br><span class="line">static {</span><br><span class="line">    loadInitialDrivers();</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">private static void loadInitialDrivers() {</span><br><span class="line">    // &#x7701;&#x7565;&#x6B21;&#x8981;&#x4EE3;&#x7801;...</span><br><span class="line">    AccessController.doPrivileged(new PrivilegedAction&lt;Void&gt;() {</span><br><span class="line">        public Void run() {</span><br><span class="line">            // &#x4F7F;&#x7528;ServiceLoader&#x904D;&#x5386;&#x5B9E;&#x73B0;&#x7C7B;</span><br><span class="line">            ServiceLoader&lt;Driver&gt; loadedDrivers = ServiceLoader.load(Driver.class);</span><br><span class="line">            // &#x83B7;&#x5F97;&#x8FED;&#x4EE3;&#x5668;</span><br><span class="line">            Iterator&lt;Driver&gt; driversIterator = loadedDrivers.iterator();</span><br><span class="line">            // &#x8FED;&#x4EE3;</span><br><span class="line">            try{</span><br><span class="line">                while(driversIterator.hasNext()) {</span><br><span class="line">                    driversIterator.next();</span><br><span class="line">                    // &#x7591;&#x95EE;&#xFF1A;&#x4E3A;&#x4EC0;&#x4E48;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x5904;&#x7406;&#xFF1F;</span><br><span class="line">                }</span><br><span class="line">            } catch(Throwable t) {</span><br><span class="line">                // Do nothing</span><br><span class="line">            }</span><br><span class="line">            return null;</span><br><span class="line">        }</span><br><span class="line">    });</span><br><span class="line">    // &#x7701;&#x7565;&#x6B21;&#x8981;&#x4EE3;&#x7801;...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;<code>DriverManager</code>&#x7684;&#x9759;&#x6001;&#x4EE3;&#x7801;&#x5757;&#x8C03;&#x7528;<code>loadInitialDrivers ()</code>&#xFF0C;&#x65B9;&#x6CD5;&#x5185;&#x90E8;&#x901A;&#x8FC7;<code>ServiceLoader</code>&#x63D0;&#x4F9B;&#x7684;&#x8FED;&#x4EE3;&#x5668;<code>Iterator&lt;Driver&gt;</code> &#x904D;&#x5386;&#x4E86;&#x6240;&#x6709;&#x9A71;&#x52A8;&#x5B9E;&#x73B0;&#x7C7B;&#xFF0C;&#x4F46;&#x662F;&#x4E3A;&#x4EC0;&#x4E48;&#x5728;&#x8FED;&#x4EE3;&#x91CC;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x64CD;&#x4F5C;&#x5462;&#xFF1F;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;while(driversIterator.hasNext()) {</span><br><span class="line">    driversIterator.next();</span><br><span class="line">    // &#x7591;&#x95EE;&#xFF1A;&#x4E3A;&#x4EC0;&#x4E48;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x5904;&#x7406;&#xFF1F;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x4E0B;&#x4E00;&#x8282;&#xFF0C;&#x6211;&#x4EEC;&#x6DF1;&#x5165;<code>ServiceLoader</code>&#x7684;&#x6E90;&#x7801;&#x6765;&#x89E3;&#x7B54;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x3002;</p>
+<hr>
+<ol start="3">
+<li>ServiceLoader &#x6E90;&#x7801;&#x89E3;&#x6790;</li>
+</ol>
+<hr>
+<blockquote>
+<h6 id="&#x63D0;&#x793A;"><a href="#&#x63D0;&#x793A;" class="headerlink" title="# &#x63D0;&#x793A;"></a># &#x63D0;&#x793A;</h6><p><code>ServiceLoader</code>&#x4E2D;&#x6709;&#x4E00;&#x4E9B;&#x6E90;&#x7801;&#x4F7F;&#x7528;&#x4E86;&#x5B89;&#x5168;&#x68C0;&#x6D4B;&#xFF0C;&#x5982;<code>AccessController.doPrivileged()</code>&#xFF0C;&#x5728;&#x4EE5;&#x4E0B;&#x4EE3;&#x7801;&#x6458;&#x8981;&#x4E2D;&#x7701;&#x7565;</p>
+</blockquote>
+<ul>
+<li><strong>&#x5DE5;&#x5382;&#x65B9;&#x6CD5;</strong><br><code>ServiceLoader</code>&#x63D0;&#x4F9B;&#x4E86;&#x4E09;&#x4E2A;&#x9759;&#x6001;&#x6CDB;&#x578B;&#x5DE5;&#x5382;&#x65B9;&#x6CD5;&#xFF0C;&#x5185;&#x90E8;&#x6700;&#x7EC8;&#x5C06;&#x8C03;&#x7528;<code>ServiceLoader.load(Class,ClassLoader)</code>&#xFF0C;&#x5177;&#x4F53;&#x5982;&#x4E0B;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;// 1.</span><br><span class="line">public static &lt;S&gt; ServiceLoader&lt;S&gt; loadInstalled(Class&lt;S&gt; service) {</span><br><span class="line">    // &#x4F7F;&#x7528;&#x53CC;&#x4EB2;&#x59D4;&#x6D3E;&#x6A21;&#x578B;&#x4E2D;&#x6700;&#x9876;&#x5C42;&#x7684;ClassLoader</span><br><span class="line">    ClassLoader cl = ClassLoader.getSystemClassLoader();</span><br><span class="line">    ClassLoader prev = null;</span><br><span class="line">    while (cl != null) {</span><br><span class="line">        prev = cl;</span><br><span class="line">        cl = cl.getParent();</span><br><span class="line">    }</span><br><span class="line">    return ServiceLoader.load(service, prev);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// 2.</span><br><span class="line">public static &lt;S&gt; ServiceLoader&lt;S&gt; load(Class&lt;S&gt; service) {</span><br><span class="line">    // &#x4F7F;&#x7528;&#x7EBF;&#x7A0B;&#x4E0A;&#x4E0B;&#x6587;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;</span><br><span class="line">    ClassLoader cl = Thread.currentThread().getContextClassLoader();</span><br><span class="line">    return ServiceLoader.load(service, cl);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// 3.</span><br><span class="line">public static &lt;S&gt; ServiceLoader&lt;S&gt; load(Class&lt;S&gt; service, ClassLoader loader){</span><br><span class="line">    return new ServiceLoader&lt;&gt;(service, loader);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x4E09;&#x4E2A;&#x65B9;&#x6CD5;&#x4EC5;&#x5728;&#x4F20;&#x5165;&#x7684;<code>ClassLoader</code>&#x53C2;&#x6570;&#x6709;&#x533A;&#x522B;&#xFF0C;&#x82E5;&#x8FD8;&#x4E0D;&#x4E86;&#x89E3;<code>ClassLoader</code>&#xFF0C;&#x8BF7;&#x52A1;&#x5FC5;&#x9605;&#x8BFB;[&#x300A;Java | &#x5E26;&#x4F60;&#x7406;&#x89E3; ClassLoader &#x7684;&#x539F;&#x7406;&#x4E0E;&#x8BBE;&#x8BA1;&#x601D;&#x60F3;&#x300B;]&#xFF08;Editting&#x2026;&#xFF09;</p>
+<ul>
+<li><strong>&#x6784;&#x9020;&#x65B9;&#x6CD5;</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;private final Class&lt;S&gt; service;</span><br><span class="line">private LinkedHashMap&lt;String,S&gt; providers = new LinkedHashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">private ServiceLoader(Class&lt;S&gt; svc, ClassLoader cl) { </span><br><span class="line">    service = Objects.requireNonNull(svc, &quot;Service interface cannot be null&quot;);</span><br><span class="line">    loader = (cl == null) ? ClassLoader.getSystemClassLoader() : cl;</span><br><span class="line">    reload();</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">public void reload() {</span><br><span class="line">    // &#x6E05;&#x7A7A; providers</span><br><span class="line">    providers.clear();</span><br><span class="line">    // &#x5B9E;&#x4F8B;&#x5316; LazyIterator</span><br><span class="line">    lookupIterator = new LazyIterator(service, loader);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;<code>ServiceLoader</code>&#x7684;&#x6784;&#x9020;&#x5668;&#x4E2D;&#x521B;&#x5EFA;&#x4E86;<code>LazyIterator</code>&#x8FED;&#x4EE3;&#x5668;&#x7684;&#x5B9E;&#x4F8B;&#xFF0C;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x201C;&#x61D2;&#x52A0;&#x8F7D;&#x201D;&#x7684;&#x8FED;&#x4EE3;&#x5668;&#x3002;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x8FED;&#x4EE3;&#x5668;&#x5728;&#x54EA;&#x91CC;&#x4F7F;&#x7528;&#x7684;&#x5462;&#xFF1F;&#x7EE7;&#x7EED;&#x5F80;&#x4E0B;&#x770B;~</p>
+<ul>
+<li><strong>&#x5916;&#x90E8;&#x8FED;&#x4EE3;&#x5668;</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">typescript&#x590D;&#x5236;&#x4EE3;&#x7801;private LazyIterator lookupIterator;</span><br><span class="line"></span><br><span class="line">// &#x8FD4;&#x56DE;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x8FED;&#x4EE3;&#x5668;&#xFF0C;&#x5305;&#x88C5;&#x4E86;providers&#x548C;lookupIterator</span><br><span class="line">public Iterator&lt;S&gt; iterator() {</span><br><span class="line">    return new Iterator&lt;S&gt;() {</span><br><span class="line"></span><br><span class="line">        Iterator&lt;Map.Entry&lt;String,S&gt;&gt; knownProviders</span><br><span class="line">            = providers.entrySet().iterator();</span><br><span class="line"></span><br><span class="line">        public boolean hasNext() {</span><br><span class="line">            // &#x4F18;&#x5148;&#x4ECE;knownProviders&#x53D6;</span><br><span class="line">            if (knownProviders.hasNext())</span><br><span class="line">                return true;</span><br><span class="line">            return lookupIterator.hasNext();</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        public S next() {</span><br><span class="line">            // &#x4F18;&#x5148;&#x4ECE;knownProviders&#x53D6;</span><br><span class="line">            if (knownProviders.hasNext())</span><br><span class="line">                return knownProviders.next().getValue();</span><br><span class="line">            return lookupIterator.next();</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        public void remove() {</span><br><span class="line">            throw new UnsupportedOperationException();</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">    };</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;<code>ServiceLoader</code>&#x91CC;&#x6709;&#x4E00;&#x4E2A;&#x6CDB;&#x578B;&#x65B9;&#x6CD5;<code>Iterator&lt;S&gt; iterator()</code>&#xFF0C;&#x5B83;&#x5305;&#x88C5;&#x4E86;<code>providers</code>&#x96C6;&#x5408;&#x8FED;&#x4EE3;&#x5668;&#x548C;<code>lookupIterator</code>&#x4E24;&#x4E2A;&#x8FED;&#x4EE3;&#x5668;&#xFF0C;&#x8FED;&#x4EE3;&#x8FC7;&#x7A0B;&#x4E2D;&#x4F18;&#x5148;&#x4ECE;<code>providers</code>&#x83B7;&#x53D6;&#x5143;&#x7D20;&#x3002;</p>
+<p>&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x4F18;&#x5148;&#x4ECE;<code>providers</code>&#x96C6;&#x5408;&#x4E2D;&#x53D6;&#x5143;&#x7D20;&#x5462;&#xFF1F;&#x9605;&#x8BFB;&#x6E90;&#x7801;&#x53D1;&#x73B0;&#xFF0C;<code>LazyIterator#next()</code>&#x4F1A;&#x5C06;&#x6BCF;&#x8F6E;&#x8FED;&#x4EE3;&#x4E2D;&#x53D6;&#x5230;&#x7684;&#x5143;&#x7D20;<code>put</code>&#x5230;<code>providers</code>&#x96C6;&#x5408;&#x4E2D;&#xFF0C;<code>providers</code>&#x5176;&#x5B9E;&#x662F;<code>LazyIterator</code>&#x7684;&#x5185;&#x5B58;&#x7F13;&#x5B58;&#x3002;</p>
+<ul>
+<li><strong>&#x5185;&#x90E8;&#x8FED;&#x4EE3;&#x5668;</strong></li>
+</ul>
+<blockquote>
+<h6 id="&#x63D0;&#x793A;-1"><a href="#&#x63D0;&#x793A;-1" class="headerlink" title="# &#x63D0;&#x793A;"></a># &#x63D0;&#x793A;</h6><p>&#x4EE5;&#x4E0B;&#x4EE3;&#x7801;&#x6458;&#x8981;&#x4E2D;&#x7701;&#x7565;&#x4E86;&#x6E90;&#x7801;&#x4E2D;&#x7684;<code>try-catch</code></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;// ServiceLoader.java</span><br><span class="line"></span><br><span class="line">private static final String PREFIX = &quot;META-INF/services/&quot;;</span><br><span class="line"></span><br><span class="line">private class LazyIteratorimplements Iterator&lt;S&gt; {</span><br><span class="line"></span><br><span class="line">    Class&lt;S&gt; service;</span><br><span class="line">    ClassLoader loader;</span><br><span class="line">    Enumeration&lt;URL&gt; configs = null;</span><br><span class="line">    Iterator&lt;String&gt; pending = null;</span><br><span class="line">    String nextName = null;</span><br><span class="line"></span><br><span class="line">    private LazyIterator(Class&lt;S&gt; service, ClassLoader loader) {</span><br><span class="line">        this.service = service;</span><br><span class="line">        this.loader = loader;</span><br><span class="line">    }</span><br><span class="line">    </span><br><span class="line">    private boolean hasNextService() {</span><br><span class="line">        if (nextName != null) {</span><br><span class="line">            return true;</span><br><span class="line">        }</span><br><span class="line">        if (configs == null) {</span><br><span class="line">            // configs &#x672A;&#x521D;&#x59CB;&#x5316;&#x624D;&#x6267;&#x884C;</span><br><span class="line">            // &#x914D;&#x7F6E;&#x6587;&#x4EF6;&#xFF1A;META-INF/services/&#x670D;&#x52A1;&#x63A5;&#x53E3;&#x7684;&#x5168;&#x9650;&#x5B9A;&#x540D;</span><br><span class="line">            String fullName = PREFIX + service.getName();</span><br><span class="line">            if (loader == null)</span><br><span class="line">                configs = ClassLoader.getSystemResources(fullName);</span><br><span class="line">            else</span><br><span class="line">                configs = loader.getResources(fullName);</span><br><span class="line">        }</span><br><span class="line">        </span><br><span class="line">        while ((pending == null) || !pending.hasNext()) {</span><br><span class="line">            if (!configs.hasMoreElements()) {</span><br><span class="line">                return false;</span><br><span class="line">            }</span><br><span class="line">            // &#x5206;&#x6790;&#x70B9;1&#xFF1A;&#x89E3;&#x6790;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x8D44;&#x6E90;</span><br><span class="line">            pending = parse(service, configs.nextElement());</span><br><span class="line">        }</span><br><span class="line">        // nextName&#xFF1A;&#x4E0B;&#x4E00;&#x4E2A;&#x5B9E;&#x73B0;&#x7C7B;&#x7684;&#x5168;&#x9650;&#x5B9A;&#x540D;</span><br><span class="line">        nextName = pending.next();</span><br><span class="line">        return true;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private S nextService() {</span><br><span class="line">        if (!hasNextService()) throw new NoSuchElementException();</span><br><span class="line">        String cn = nextName;</span><br><span class="line">        nextName = null;</span><br><span class="line">        // 1. &#x4F7F;&#x7528;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;loader&#x52A0;&#x8F7D;</span><br><span class="line">        Class&lt;?&gt; c = Class.forName(cn, false, loader);</span><br><span class="line">        if (!service.isAssignableFrom(c)) {</span><br><span class="line">            ClassCastException cce = new ClassCastException(service.getCanonicalName() + &quot; is not assignable from &quot; + c.getCanonicalName());</span><br><span class="line">            fail(service, &quot;Provider &quot; + cn  + &quot; not a subtype&quot;, cce);</span><br><span class="line">        }</span><br><span class="line">        // 2. &#x6839;&#x636E;Class&#x5B9E;&#x4F8B;&#x5316;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;</span><br><span class="line">        S p = service.cast(c.newInstance());</span><br><span class="line">        // 3. &#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x7F13;&#x5B58;&#x5230; providers</span><br><span class="line">        providers.put(cn, p);</span><br><span class="line">        return p;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public boolean hasNext() {</span><br><span class="line">        return hasNextService();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public S next() {</span><br><span class="line">        return nextService();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public void remove() {</span><br><span class="line">        throw new UnsupportedOperationException();</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line">// &#x5206;&#x6790;&#x70B9;1&#xFF1A;&#x89E3;&#x6790;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x8D44;&#x6E90;&#xFF0C;&#x5B9E;&#x73B0;&#x7C7B;&#x7684;&#x5168;&#x9650;&#x5B9A;&#x540D;&#x5217;&#x8868;&#x8FED;&#x4EE3;&#x5668;</span><br><span class="line">private Iterator&lt;String&gt; parse(Class&lt;?&gt; service, URL u) throws ServiceConfigurationError {</span><br><span class="line">    // &#x4F7F;&#x7528; UTF-8 &#x7F16;&#x7801;&#x8F93;&#x5165;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x8D44;&#x6E90;</span><br><span class="line">    InputStream in = u.openStream();</span><br><span class="line">    BufferedReader r = new BufferedReader(new InputStreamReader(in, &quot;utf-8&quot;));</span><br><span class="line">    ArrayList&lt;String&gt; names = new ArrayList&lt;&gt;();</span><br><span class="line">    int lc = 1;</span><br><span class="line">    while ((lc = parseLine(service, u, r, lc, names)) &gt;= 0);</span><br><span class="line">    return names.iterator();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>ServiceLoader &#x8981;&#x70B9;</li>
+</ol>
+<hr>
+<p>&#x7406;&#x89E3;<code>ServiceLoader</code>&#x6E90;&#x7801;&#x4E4B;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x603B;&#x7ED3;&#x8981;&#x70B9;&#x5982;&#x4E0B;&#xFF1A;</p>
+<ul>
+<li><strong>&#x7EA6;&#x675F;</strong></li>
+</ul>
+<pre><code>+ &#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x5FC5;&#x987B;&#x5B9E;&#x73B0;&#x670D;&#x52A1;&#x63A5;&#x53E3;`S`&#xFF0C;&#x53C2;&#x89C1;&#x6E90;&#x7801;&#xFF1A;`if (!service.isAssignableFrom(c))`
++ &#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x9700;&#x5305;&#x542B;&#x65E0;&#x53C2;&#x7684;&#x6784;&#x9020;&#x5668;&#xFF0C;`ServiceLoader`&#x5C06;&#x901A;&#x8FC7;&#x8BE5;&#x65E0;&#x53C2;&#x7684;&#x6784;&#x9020;&#x5668;&#x6765;&#x521B;&#x5EFA;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x8005;&#x7684;&#x5B9E;&#x4F8B;&#xFF0C;&#x53C2;&#x89C1;&#x6E90;&#x7801;&#xFF1A;`S p = service.cast(c.newInstance());`
++ &#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x9700;&#x8981;&#x4F7F;&#x7528;`UTF-8`&#x7F16;&#x7801;&#xFF0C;&#x53C2;&#x89C1;&#x6E90;&#x7801;&#xFF1A;`new BufferedReader(new InputStreamReader(in, &quot;utf-8&quot;));`</code></pre><ul>
+<li><strong>&#x61D2;&#x52A0;&#x8F7D;</strong><br><code>ServiceLoader</code>&#x4F7F;&#x7528;&#x201C;&#x61D2;&#x52A0;&#x8F7D;&#x201D;&#x7684;&#x65B9;&#x5F0F;&#x521B;&#x5EFA;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x5B9E;&#x4F8B;&#xFF0C;&#x53EA;&#x6709;&#x5728;&#x8FED;&#x4EE3;&#x5668;&#x63A8;&#x8FDB;&#x7684;&#x65F6;&#x5019;&#x624D;&#x4F1A;&#x521B;&#x5EFA;&#x5B9E;&#x4F8B;&#xFF0C;&#x53C2;&#x89C1;&#x6E90;&#x7801;&#xFF1A;<code>nextService()</code></li>
+<li><strong>&#x5185;&#x5B58;&#x7F13;&#x5B58;</strong><br><code>ServiceLoader</code>&#x4F7F;&#x7528;<code>LinkedHashMap</code>&#x7F13;&#x5B58;&#x521B;&#x5EFA;&#x7684;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x5B9E;&#x4F8B;&#xFF0C;<code>LinkedHashMap</code>&#x5728;&#x4E8C;&#x6B21;&#x8FED;&#x4EE3;&#x65F6;&#x4F1A;&#x6309;&#x7167;<code>Map#put</code>&#x6267;&#x884C;&#x987A;&#x5E8F;&#x904D;&#x5386;</li>
+<li><strong>&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7684;&#x9009;&#x62E9;</strong><br>&#x5F53;&#x5B58;&#x5728;&#x591A;&#x4E2A;&#x63D0;&#x4F9B;&#x8005;&#x65F6;&#xFF0C;&#x670D;&#x52A1;&#x6D88;&#x8D39;&#x8005;&#x6A21;&#x5757;&#x4E0D;&#x4E00;&#x5B9A;&#x8981;&#x5168;&#x90E8;&#x4F7F;&#x7528;&#xFF0C;&#x800C;&#x662F;&#x9700;&#x8981;&#x6839;&#x636E;&#x67D0;&#x4E9B;&#x7279;&#x6027;&#x7B5B;&#x9009;&#x4E00;&#x79CD;&#x6700;&#x4F73;&#x5B9E;&#x73B0;&#x3002;<code>ServiceLoader</code>&#x7684;&#x673A;&#x5236;&#x53EA;&#x80FD;&#x5728;&#x904D;&#x5386;&#x6574;&#x4E2A;&#x8FED;&#x4EE3;&#x5668;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x4ECE;&#x53D1;&#x73B0;&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#x4E2D;&#x51B3;&#x7B56;&#x51FA;&#x4E00;&#x4E2A;&#x6700;&#x4F73;&#x5B9E;&#x73B0;&#xFF0C;&#x4F8B;&#x5982;&#x4F7F;&#x7528;<code>Charset.forName(String)</code>&#x83B7;&#x5F97;<code>Charset</code>&#x5B9E;&#x73B0;&#x7C7B;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x670D;&#x52A1;&#x63A5;&#x53E3;</span><br><span class="line">public abstract class CharsetProvider {</span><br><span class="line">    public abstract Charset charsetForName(String charsetName);</span><br><span class="line">    // &#x7701;&#x7565;&#x5176;&#x4ED6;&#x65B9;&#x6CD5;...</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// Charset.java</span><br><span class="line">public static Charset forName(String charsetName) {</span><br><span class="line">    // &#x4EE5;&#x4E0B;&#x53EA;&#x6458;&#x8981;&#x4E0E;ServiceLoader&#x6709;&#x5173;&#x7684;&#x903B;&#x8F91;</span><br><span class="line">    ServiceLoader&lt;CharsetProvider&gt; sl = ServiceLoader.load(CharsetProvider.class, cl);</span><br><span class="line">    Iterator&lt;CharsetProvider&gt; i = sl.iterator();</span><br><span class="line">    for (Iterator&lt;CharsetProvider&gt; i = providers(); i.hasNext();) {</span><br><span class="line">        CharsetProvider cp = i.next();</span><br><span class="line">        // &#x6EE1;&#x8DB3;&#x5339;&#x914D;&#x6761;&#x4EF6;&#xFF0C;return</span><br><span class="line">        Charset cs = cp.charsetForName(charsetName);</span><br><span class="line">        if (cs != null)</span><br><span class="line">            return cs;</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong><code>ServiceLoader</code>&#x6CA1;&#x6709;&#x63D0;&#x4F9B;&#x670D;&#x52A1;&#x7684;&#x6CE8;&#x9500;&#x673A;&#x5236;</strong><br>&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x5B9E;&#x4F8B;&#x88AB;&#x521B;&#x5EFA;&#x540E;&#xFF0C;&#x5B83;&#x7684;&#x5783;&#x573E;&#x56DE;&#x6536;&#x7684;&#x884C;&#x4E3A;&#x4E0E;<code>Java</code>&#x4E2D;&#x7684;&#x5176;&#x4ED6;&#x5BF9;&#x8C61;&#x4E00;&#x6837;&#xFF0C;&#x53EA;&#x6709;&#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#x6CA1;&#x6709;&#x5230;<code>GC Root</code>&#x7684;&#x5F3A;&#x5F15;&#x7528;&#xFF0C;&#x624D;&#x80FD;&#x4F5C;&#x4E3A;&#x5783;&#x573E;&#x56DE;&#x6536;&#x3002;</li>
+</ul>
+<hr>
+<ol start="5">
+<li>&#x95EE;&#x9898;&#x56DE;&#x5F52;</li>
+</ol>
+<hr>
+<p>&#x73B0;&#x5728;&#x6211;&#x4EEC;&#x56DE;&#x5230;&#x9605;&#x8BFB;<code>DriverManager</code>&#x6E90;&#x7801;&#x63D0;&#x51FA;&#x7684;&#x7591;&#x95EE;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;while(driversIterator.hasNext()) {</span><br><span class="line">    driversIterator.next();</span><br><span class="line">    // &#x7591;&#x95EE;&#xFF1A;&#x4E3A;&#x4EC0;&#x4E48;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x5904;&#x7406;&#xFF1F;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E3A;&#x4EC0;&#x4E48;<code>next()</code>&#x64CD;&#x4F5C;&#x65E2;&#x4E0D;&#x53D6;&#x5F97;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x5BF9;&#x8C61;&#xFF0C;&#x540E;&#x7EED;&#x4E5F;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x5904;&#x7406;&#x5462;&#xFF1F;&#x6211;&#x4EEC;&#x518D;&#x56DE;&#x53BB;&#x770B;&#x4E0B;<code>LazyIterator#next()</code>&#x7684;&#x6E90;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;// ServiceLoader.java</span><br><span class="line"></span><br><span class="line">// next() &#x76F4;&#x63A5;&#x8C03;&#x7528; nextService()</span><br><span class="line">private S nextService() {</span><br><span class="line">    if (!hasNextService()) throw new NoSuchElementException();</span><br><span class="line">    String cn = nextName;</span><br><span class="line">    nextName = null;</span><br><span class="line">    // 1. &#x4F7F;&#x7528;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;loader&#x52A0;&#x8F7D;</span><br><span class="line">    Class&lt;?&gt; c = Class.forName(cn, false, loader);</span><br><span class="line">    if (!service.isAssignableFrom(c)) {</span><br><span class="line">        ClassCastException cce = new ClassCastException(service.getCanonicalName() + &quot; is not assignable from &quot; + c.getCanonicalName());</span><br><span class="line">        fail(service, &quot;Provider &quot; + cn  + &quot; not a subtype&quot;, cce);</span><br><span class="line">    }</span><br><span class="line">    // 2. &#x6839;&#x636E;Class&#x5B9E;&#x4F8B;&#x5316;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;</span><br><span class="line">    S p = service.cast(c.newInstance());</span><br><span class="line">    // 3. &#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x7F13;&#x5B58;&#x5230; providers</span><br><span class="line">    providers.put(cn, p);</span><br><span class="line">    return p;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><ol>
+<li>&#x4F7F;&#x7528;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;loader&#x52A0;&#x8F7D;&#xFF1A;<code>Class&lt;?&gt; c = Class.forName(cn, false, loader);</code><br>&#x8FD9;&#x91CC;&#x4F20;&#x53C2;&#x4F7F;&#x7528;<code>false</code>&#xFF0C;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x5C06;&#x6267;&#x884C;<strong>&#x52A0;&#x8F7D; -&gt; &#x94FE;&#x63A5;</strong>&#xFF0C;&#x4E0D;&#x4F1A;&#x6267;&#x884C;<strong>&#x521D;&#x59CB;&#x5316;</strong></li>
+</ol>
+</li>
+<li><ol start="2">
+<li>&#x6839;&#x636E; Class &#x5B9E;&#x4F8B;&#x5316;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;<br>&#x7531;&#x4E8E;&#x521B;&#x5EFA;&#x7C7B;&#x5B9E;&#x4F8B;&#x524D;&#x4E00;&#x5B9A;&#x4F1A;&#x4FDD;&#x8BC1;&#x7C7B;&#x52A0;&#x8F7D;&#x5B8C;&#x6210;&#xFF0C;&#x56E0;&#x6B64;&#x8FD9;&#x91CC;&#x7C7B;&#x52A0;&#x8F7D;&#x5668;&#x9690;&#x5F0F;&#x6267;&#x884C;&#x4E86;<strong>&#x521D;&#x59CB;&#x5316;</strong>&#xFF0C;&#x8FD9;&#x5C31;&#x5305;&#x62EC;&#x4E86;&#x7C7B;&#x7684;&#x9759;&#x6001;&#x4EE3;&#x7801;&#x5757;&#x6267;&#x884C;</li>
+</ol>
+</li>
+</ul>
+<p>&#x56DE;&#x8FC7;&#x5934;&#x770B;<code>com.mysql.cj.jdbc.Driver</code>&#x548C;<code>oracle.jdbc.driver.OracleDriver</code>&#x6E90;&#x7801;&#xFF0C;&#x6211;&#x4EEC;&#x90FD;&#x53D1;&#x73B0;&#x4E86;&#x7C7B;&#x4F3C;&#x7684;&#x9759;&#x6001;&#x4EE3;&#x7801;&#x5757;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">php&#x590D;&#x5236;&#x4EE3;&#x7801;static {</span><br><span class="line">    try {</span><br><span class="line">        // &#x6CE8;&#x518C;&#x9A71;&#x52A8;</span><br><span class="line">        java.sql.DriverManager.registerDriver(new Driver());</span><br><span class="line">    } catch (SQLException E) {</span><br><span class="line">        throw new RuntimeException(&quot;Can&apos;t register driver!&quot;);</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5B83;&#x4EEC;&#x90FD;&#x8C03;&#x7528;&#x4E86;<code>DriverManager#registerDriver</code>&#x6CE8;&#x518C;&#x4E86;&#x4E00;&#x4E2A;&#x670D;&#x52A1;&#x5B9E;&#x73B0;&#x7C7B;&#x5B9E;&#x4F8B;&#xFF0C;&#x4FDD;&#x5B58;&#x5728;<code>CopyOnWriteArrayList</code>&#x4E2D;&#xFF0C;&#x540E;&#x7EED;&#x83B7;&#x53D6;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#x65F6;&#x662F;&#x4ECE;&#x8FD9;&#x4E2A;&#x5217;&#x8868;&#x4E2D;&#x83B7;&#x53D6;&#x6570;&#x636E;&#x5E93;&#x9A71;&#x52A8;&#x3002;&#x73B0;&#x5728;&#xFF0C;&#x4F60;&#x7406;&#x89E3;&#x4E86;&#x5417;&#xFF1F;</p>
+<hr>
+<ol start="6">
+<li>&#x603B;&#x7ED3;</li>
+</ol>
+<hr>
+<ul>
+<li><ol>
+<li><code>ServiceLoader</code>&#x57FA;&#x4E8E; <strong>SPI</strong> &#x601D;&#x60F3;&#xFF0C;&#x53EF;&#x4EE5;&#x5B9E;&#x73B0;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x65B9;&#x4E0E;&#x670D;&#x52A1;&#x4F7F;&#x7528;&#x65B9;&#x89E3;&#x8026;&#xFF0C;&#x662F;<strong>&#x6A21;&#x5757;&#x5316;</strong>&#x3001;<strong>&#x7EC4;&#x4EF6;&#x5316;</strong>&#x7684;&#x4E00;&#x79CD;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;</li>
+</ol>
+</li>
+<li><ol start="2">
+<li><code>ServiceLoader</code>&#x662F;&#x4E00;&#x4E2A;&#x76F8;&#x5BF9;&#x7B80;&#x6613;&#x7684;&#x6846;&#x67B6;&#xFF0C;&#x5F80;&#x5F80;&#x53EA;&#x5728;<code>Java</code>&#x6E90;&#x7801;&#x4E2D;&#x4F7F;&#x7528;&#xFF0C;&#x4E3A;&#x4E86;&#x6EE1;&#x8DB3;&#x590D;&#x6742;&#x4E1A;&#x52A1;&#x7684;&#x9700;&#x8981;&#xFF0C;&#x4E00;&#x822C;&#x4F1A;&#x4F7F;&#x7528;&#x63D0;&#x4F9B;<code>SPI</code>&#x529F;&#x80FD;&#x7684;&#x7B2C;&#x4E09;&#x65B9;&#x6846;&#x67B6;&#xFF0C;&#x4F8B;&#x5982;&#x540E;&#x53F0;&#x7684;<code>Dubbo</code>&#x3001;&#x5BA2;&#x6237;&#x7AEF;&#x7684;<code>ARouter</code>&#x4E0E;<code>WMRouter</code>&#x7B49;</li>
+</ol>
+</li>
+</ul>
+<p>&#x5728;&#x540E;&#x9762;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x6211;&#x5C06;&#x4E0E;&#x4F60;&#x63A2;&#x8BA8;<code>ARouter</code>&#x4E0E;<code>WMRouter</code>&#x7684;&#x6E90;&#x7801;&#x5B9E;&#x73B0;&#xFF0C;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;<a href="/external_links/4158cd458f1f3537fa9dd46e0c3aa718.html" target="blank" rel="noopener">&#x5F6D;&#x65ED;&#x9510;</a>&#x7684;&#x535A;&#x5BA2;&#x3002;</p>
+<hr>
+<h4 id="&#x53C2;&#x8003;&#x8D44;&#x6599;"><a href="#&#x53C2;&#x8003;&#x8D44;&#x6599;" class="headerlink" title="&#x53C2;&#x8003;&#x8D44;&#x6599;"></a>&#x53C2;&#x8003;&#x8D44;&#x6599;</h4><ul>
+<li><a href="/external_links/d8e94ca2d5562208064dde11607ee269.html" target="blank" rel="noopener"><code>WMRouter Github</code></a> &#x2014;&#x2014; meituan</li>
+<li><a href="/external_links/e8a65f36501a7d1c87e6fa52cb1d4581.html" target="blank" rel="noopener"><code>ARouter Github</code></a> &#x2014;&#x2014; alibaba</li>
+<li><a href="/external_links/b6eff4853580ed7400897eff40ffe5ad.html" target="blank" rel="noopener"><code>ServiceLoader</code></a> &#x2014;&#x2014; Android Developers</li>
+<li><a href="/external_links/0d3a8f6e404c7d0535145796538005b9.html" target="blank" rel="noopener">&#x300A;&#x7F8E;&#x56E2;&#x732B;&#x773C;&#x7535;&#x5F71;android&#x6A21;&#x5757;&#x5316;&#x5B9E;&#x6218;&#x2013;&#x53EF;&#x80FD;&#x662F;&#x6700;&#x8BE6;&#x7EC6;&#x7684;&#x6A21;&#x5757;&#x5316;&#x5B9E;&#x6218;&#x300B;</a> &#x2014;&#x2014; &#x9648;&#x6587;&#x8D85;happylion &#x8457;</li>
+<li><a href="/external_links/869e620a97dc0c32112d62e3d5ff63b0.html" target="blank" rel="noopener">&#x300A;WMRouter&#xFF1A;&#x7F8E;&#x56E2;&#x5916;&#x5356;Android&#x5F00;&#x6E90;&#x8DEF;&#x7531;&#x6846;&#x67B6;&#x300B;</a> &#x2014;&#x2014; &#x5B50;&#x5065; &#x6E0A;&#x535A; &#x4E91;&#x9A70; &#xFF08;&#x7F8E;&#x56E2;&#x6280;&#x672F;&#x56E2;&#x961F;&#xFF09;&#x8457;</li>
+<li><a href="/external_links/31dc9262ef518b3eff2b8186e75673f7.html" target="blank" rel="noopener">&#x300A;Android&#x7EC4;&#x4EF6;&#x5316;&#x65B9;&#x6848;&#x53CA;&#x7EC4;&#x4EF6;&#x6D88;&#x606F;&#x603B;&#x7EBF;modular-event&#x5B9E;&#x6218;&#x300B;</a> &#x2014;&#x2014; &#x6D77;&#x4EAE; &#xFF08;&#x7F8E;&#x56E2;&#x6280;&#x672F;&#x56E2;&#x961F;&#xFF09;&#x8457;</li>
+</ul>
+<hr>
+<h4 id="&#x63A8;&#x8350;&#x9605;&#x8BFB;"><a href="#&#x63A8;&#x8350;&#x9605;&#x8BFB;" class="headerlink" title="&#x63A8;&#x8350;&#x9605;&#x8BFB;"></a>&#x63A8;&#x8350;&#x9605;&#x8BFB;</h4><ul>
+<li><a href="/external_links/f00c032aab02b6c18222060111f33201.html" target="blank" rel="noopener">Android | &#x5E26;&#x4F60;&#x7406;&#x89E3; NativeAllocationRegistry &#x7684;&#x539F;&#x7406;&#x4E0E;&#x8BBE;&#x8BA1;&#x601D;&#x60F3;</a></li>
+<li><a href="/external_links/a0160c379c0f902ebf7e22cb1a21b8bc.html" target="blank" rel="noopener">Android | &#x4E00;&#x6587;&#x5E26;&#x4F60;&#x5168;&#x9762;&#x4E86;&#x89E3; AspectJ &#x6846;&#x67B6;</a></li>
+<li><a href="/external_links/f4dd26ed9da80451be2c1d146fb86533.html" target="blank" rel="noopener">Android | &#x4F7F;&#x7528; AspectJ &#x9650;&#x5236;&#x6309;&#x94AE;&#x5FEB;&#x901F;&#x70B9;&#x51FB;</a></li>
+<li><a href="/external_links/720835eaabffb07ccf76a8ed70754cfc.html" target="blank" rel="noopener">Android | &#x8FD9;&#x662F;&#x4E00;&#x4EFD;&#x8BE6;&#x7EC6;&#x7684; EventBus &#x4F7F;&#x7528;&#x6559;&#x7A0B;</a></li>
+<li><a href="/external_links/7e56c3f672a5ca355ed625c0e82ffcc6.html" target="blank" rel="noopener">&#x5F00;&#x53D1;&#x8005; | &#x6D45;&#x6790;App&#x793E;&#x4EA4;&#x5206;&#x4EAB;&#x7684;5&#x79CD;&#x5F62;&#x5F0F;</a></li>
+<li><a href="/external_links/9d7deb14c5688eb1523798082f26908e.html" target="blank" rel="noopener">&#x5F00;&#x53D1;&#x8005; | &#x90A3;&#x4E9B;&#x4EE4;&#x4EBA;&#x201C;&#x5954;&#x6E83;&#x201D;&#x7684; UI &#x9A8C;&#x6536;</a></li>
+<li><a href="/external_links/41bf1cf4e51ac3c16e017eb42e4c4ee0.html" target="blank" rel="noopener">&#x8BA1;&#x7B97;&#x673A;&#x7EC4;&#x6210;&#x539F;&#x7406; | Unicode &#x548C; UTF-8&#x662F;&#x4EC0;&#x4E48;&#x5173;&#x7CFB;&#xFF1F;</a></li>
+<li><a href="/external_links/4e6ae53840651de94669c880a02684d3.html" target="blank" rel="noopener">&#x8BA1;&#x7B97;&#x673A;&#x7EC4;&#x6210;&#x539F;&#x7406; | &#x4E3A;&#x4EC0;&#x4E48;&#x6D6E;&#x70B9;&#x6570;&#x8FD0;&#x7B97;&#x4E0D;&#x7CBE;&#x786E;&#xFF1F;&#xFF08;&#x963F;&#x91CC;&#x7B14;&#x8BD5;&#xFF09;</a></li>
+</ul>
+<h4 id="&#x611F;&#x8C22;&#x559C;&#x6B22;&#xFF01;&#x4F60;&#x7684;&#x70B9;&#x8D5E;&#x662F;&#x5BF9;&#x6211;&#x6700;&#x5927;&#x7684;&#x9F13;&#x52B1;&#xFF01;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;&#x5F6D;&#x65ED;&#x9510;&#x7684;Github&#xFF01;"><a href="#&#x611F;&#x8C22;&#x559C;&#x6B22;&#xFF01;&#x4F60;&#x7684;&#x70B9;&#x8D5E;&#x662F;&#x5BF9;&#x6211;&#x6700;&#x5927;&#x7684;&#x9F13;&#x52B1;&#xFF01;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;&#x5F6D;&#x65ED;&#x9510;&#x7684;Github&#xFF01;" class="headerlink" title="&#x611F;&#x8C22;&#x559C;&#x6B22;&#xFF01;&#x4F60;&#x7684;&#x70B9;&#x8D5E;&#x662F;&#x5BF9;&#x6211;&#x6700;&#x5927;&#x7684;&#x9F13;&#x52B1;&#xFF01;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;&#x5F6D;&#x65ED;&#x9510;&#x7684;Github&#xFF01;"></a>&#x611F;&#x8C22;&#x559C;&#x6B22;&#xFF01;&#x4F60;&#x7684;&#x70B9;&#x8D5E;&#x662F;&#x5BF9;&#x6211;&#x6700;&#x5927;&#x7684;&#x9F13;&#x52B1;&#xFF01;&#x6B22;&#x8FCE;&#x5173;&#x6CE8;<a href="/external_links/2a8f5747ae1f12c20ae55b7bb420c6f6.html" target="blank" rel="noopener">&#x5F6D;&#x65ED;&#x9510;</a>&#x7684;Github&#xFF01;</h4><p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/1c444b86d43b7de19e31a3f76e09d4c83e486b5a9b124f11877165717b69fceb" alt></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/9da0503f43ab850986bbec085a75a5fa.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6867481742723268615.html" rel="next" title="「Java 路线」  方法调用的本质（含重载与重写区别） 前">
+                <i class="fa fa-chevron-left"></i> 「Java 路线」  方法调用的本质（含重载与重写区别） 前
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6870457006784774152.html" rel="prev" title="深入探索Android启动速度优化（下） 前言 思维导图大纲">
+                深入探索Android启动速度优化（下） 前言 思维导图大纲 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">1775</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">725</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目录"><span class="nav-number">2.</span> <span class="nav-text">目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤1：定义服务接口"><span class="nav-number">2.0.1.</span> <span class="nav-text">步骤1：定义服务接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤2：实现服务接口"><span class="nav-number">2.0.2.</span> <span class="nav-text">步骤2：实现服务接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤3：注册实现类到配置文件"><span class="nav-number">2.0.3.</span> <span class="nav-text">步骤3：注册实现类到配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#步骤4：加载服务"><span class="nav-number">2.0.4.</span> <span class="nav-text">步骤4：加载服务</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#提示"><span class="nav-number">2.0.4.0.1.</span> <span class="nav-text"># 提示</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#提示-1"><span class="nav-number">2.0.4.0.2.</span> <span class="nav-text"># 提示</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考资料"><span class="nav-number">2.0.5.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#推荐阅读"><span class="nav-number">2.0.6.</span> <span class="nav-text">推荐阅读</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#感谢喜欢！你的点赞是对我最大的鼓励！欢迎关注彭旭锐的Github！"><span class="nav-number">2.0.7.</span> <span class="nav-text">感谢喜欢！你的点赞是对我最大的鼓励！欢迎关注彭旭锐的Github！</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

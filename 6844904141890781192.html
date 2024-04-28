@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x80CC;&amp;#x666F;&amp;#x5206;&amp;#x6790; &amp;#x76F8;&amp;#x4FE1;&amp;#x5F88;&amp;#x591A;&amp;#x7A0B;&amp;#x5E8F;&amp;#x733F;&amp;#x5728;&amp;#x5E73;&amp;#x5E38;&amp;#x5B9E;&amp;#x73B0;&amp;#x529F;&amp;#x80FD;&amp;#x7684;&amp;#x8FC7;&amp;#x7A0B;&amp;#x5F53;&amp;#x4E2D;&amp;#xFF0C;&amp;#x90FD">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ThreadLocal和ThreadLocalMap源码分析">
+<meta property="og:url" content="https://dev.newban.cn/6844904141890781192.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x80CC;&amp;#x666F;&amp;#x5206;&amp;#x6790; &amp;#x76F8;&amp;#x4FE1;&amp;#x5F88;&amp;#x591A;&amp;#x7A0B;&amp;#x5E8F;&amp;#x733F;&amp;#x5728;&amp;#x5E73;&amp;#x5E38;&amp;#x5B9E;&amp;#x73B0;&amp;#x529F;&amp;#x80FD;&amp;#x7684;&amp;#x8FC7;&amp;#x7A0B;&amp;#x5F53;&amp;#x4E2D;&amp;#xFF0C;&amp;#x90FD">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/12465640a5e699468aff068ce836e2e158fa5166e9eb960ed350884d2c00acd7">
+<meta property="og:updated_time" content="2024-04-28T04:15:22.867Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ThreadLocal和ThreadLocalMap源码分析">
+<meta name="twitter:description" content="&amp;#x80CC;&amp;#x666F;&amp;#x5206;&amp;#x6790; &amp;#x76F8;&amp;#x4FE1;&amp;#x5F88;&amp;#x591A;&amp;#x7A0B;&amp;#x5E8F;&amp;#x733F;&amp;#x5728;&amp;#x5E73;&amp;#x5E38;&amp;#x5B9E;&amp;#x73B0;&amp;#x529F;&amp;#x80FD;&amp;#x7684;&amp;#x8FC7;&amp;#x7A0B;&amp;#x5F53;&amp;#x4E2D;&amp;#xFF0C;&amp;#x90FD">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/12465640a5e699468aff068ce836e2e158fa5166e9eb960ed350884d2c00acd7">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844904141890781192.html">
+
+
+
+
+
+  <title>ThreadLocal和ThreadLocalMap源码分析 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ThreadLocal和ThreadLocalMap源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-26T14:35:19+08:00">
+                2019-03-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x80CC;&#x666F;&#x5206;&#x6790;"><a href="#&#x80CC;&#x666F;&#x5206;&#x6790;" class="headerlink" title="&#x80CC;&#x666F;&#x5206;&#x6790;"></a>&#x80CC;&#x666F;&#x5206;&#x6790;</h2><p> &#x76F8;&#x4FE1;&#x5F88;&#x591A;&#x7A0B;&#x5E8F;&#x733F;&#x5728;&#x5E73;&#x5E38;&#x5B9E;&#x73B0;&#x529F;&#x80FD;&#x7684;&#x8FC7;&#x7A0B;&#x5F53;&#x4E2D;&#xFF0C;&#x90FD;&#x4F1A;&#x9047;&#x5230;&#x60F3;&#x8981;&#x67D0;&#x4E9B;&#x9759;&#x6001;&#x53D8;&#x91CF;&#xFF0C;&#x4E0D;&#x7BA1;&#x662F;&#x5355;&#x7EBF;&#x7A0B;&#x4EA6;&#x6216;&#x8005;&#x662F;&#x591A;&#x7EBF;&#x7A0B;&#x5728;&#x4F7F;&#x7528;&#xFF0C;&#x90FD;&#x4E0D;&#x4F1A;&#x4EA7;&#x751F;&#x76F8;&#x4E92;&#x4E4B;&#x95F4;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8FD9;&#x4E2A;&#x9759;&#x6001;&#x53D8;&#x91CF;&#x5728;&#x7EBF;&#x7A0B;&#x4E4B;&#x95F4;&#x662F;&#x8BFB;&#x5199;&#x9694;&#x79BB;&#x7684;&#x3002;</p>
+<p> &#x6709;&#x4E00;&#x4E2A;&#x6211;&#x4EEC;&#x7ECF;&#x5E38;&#x4F7F;&#x7528;&#x7684;&#x5DE5;&#x5177;&#x7C7B;&#xFF0C;&#x5B83;&#x7684;&#x5E76;&#x53D1;&#x95EE;&#x9898;&#x5C31;&#x662F;&#x7528;ThreadLocal&#x6765;&#x89E3;&#x51B3;&#x7684;&#xFF0C;&#x6211;&#x76F8;&#x4FE1;&#x5927;&#x591A;&#x6570;&#x4EBA;&#x90FD;&#x770B;&#x8FC7;&#xFF0C;&#x90A3;&#x5C31;&#x662F;<code>SimpleDateFormat</code>&#x65E5;&#x671F;&#x683C;&#x5F0F;&#x5316;&#x7684;&#x5DE5;&#x5177;&#x7C7B;&#x7684;&#x591A;&#x7EBF;&#x7A0B;&#x95EE;&#x9898;&#xFF0C;&#x5927;&#x5BB6;&#x53BB;&#x7F51;&#x4E0A;&#x641C;&#x7684;&#x8BDD;&#xFF0C;&#x5E94;&#x8BE5;&#x4F1A;&#x6709;&#x4E00;&#x5806;&#x4EBA;&#x90FD;&#x8BF4;&#x4F7F;&#x7528;ThreadLocal&#x3002;</p>
+<h3 id="&#x5B9A;&#x4E49;"><a href="#&#x5B9A;&#x4E49;" class="headerlink" title="&#x5B9A;&#x4E49;"></a>&#x5B9A;&#x4E49;</h3><p> &#x90A3;&#x7A76;&#x7ADF;&#x4F55;&#x8C13;<code>ThreadLocal</code>&#x5462;&#xFF1F;&#x901A;&#x8FC7;&#x6211;&#x4EEC;&#x7684;Chinese English&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x7FFB;&#x8BD1;&#x51FA;&#x6765;&#xFF0C;&#x90A3;&#x5C31;&#x662F;&#x7EBF;&#x7A0B;&#x672C;&#x5730;&#x7684;&#x610F;&#x601D;&#xFF0C;&#x800C;&#x4E14;&#x6211;&#x4EEC;&#x662F;&#x7528;&#x6765;&#x5B58;&#x653E;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x80FD;&#x591F;&#x7EBF;&#x7A0B;&#x9694;&#x79BB;&#x7684;&#x53D8;&#x91CF;&#x7684;&#xFF0C;&#x90A3;&#x5C31;&#x662F;&#x7EBF;&#x7A0B;&#x672C;&#x5730;&#x53D8;&#x91CF;&#x3002;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#xFF0C;&#x5F53;&#x6211;&#x4EEC;&#x628A;&#x53D8;&#x91CF;&#x4FDD;&#x5B58;&#x5728;ThreadLocal&#x5F53;&#x4E2D;&#x65F6;&#xFF0C;&#x5C31;&#x80FD;&#x591F;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x53D8;&#x91CF;&#x7684;&#x7EBF;&#x7A0B;&#x9694;&#x79BB;&#x4E86;&#x3002;</p>
+<h3 id="&#x4F8B;&#x5B50;"><a href="#&#x4F8B;&#x5B50;" class="headerlink" title="&#x4F8B;&#x5B50;"></a>&#x4F8B;&#x5B50;</h3><p> &#x6211;&#x4EEC;&#x5148;&#x6765;&#x770B;&#x4E24;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;&#x8FD9;&#x91CC;&#x4E5F;&#x521A;&#x597D;&#x6D89;&#x53CA;&#x5230;&#x4E24;&#x4E2A;&#x6982;&#x5FF5;&#xFF0C;&#x5206;&#x522B;&#x662F;<strong>&#x503C;&#x4F20;&#x9012;</strong>&#x548C;<strong>&#x5F15;&#x7528;&#x4F20;&#x9012;</strong>&#x3002;</p>
+<ul>
+<li>&#x503C;&#x4F20;&#x9012;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class ThreadLocalTest {</span><br><span class="line"></span><br><span class="line">    private static ThreadLocal&lt;Integer&gt; threadLocal = new ThreadLocal&lt;Integer&gt;(){</span><br><span class="line">        protected Integer initialValue(){</span><br><span class="line">            return 0;</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    // &#x503C;&#x4F20;&#x9012;</span><br><span class="line">    @Test</span><br><span class="line">    public void testValue(){</span><br><span class="line">        for (int i = 0; i &lt; 5; i++){</span><br><span class="line">            new Thread(() -&gt; {</span><br><span class="line">                Integer temp = threadLocal.get();</span><br><span class="line">                threadLocal.set(temp + 5);</span><br><span class="line">                System.out.println(&quot;current thread is &quot; + Thread.currentThread().getName() + &quot; num is &quot; + threadLocal.get());</span><br><span class="line">            }, &quot;thread-&quot; + i).start();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#x7A0B;&#x5E8F;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x662F;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;current thread is thread-1 num is 5</span><br><span class="line">current thread is thread-3 num is 5</span><br><span class="line">current thread is thread-0 num is 5</span><br><span class="line">current thread is thread-4 num is 5</span><br><span class="line">current thread is thread-2 num is 5</span><br></pre></td></tr></table></figure>
+
+<p> &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x6BCF;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x6253;&#x5370;&#x51FA;&#x6765;&#x7684;&#x90FD;&#x662F;5&#xFF0C;&#x54EA;&#x6015;&#x6211;&#x662F;&#x5148;&#x901A;&#x8FC7;<code>ThreadLocal.get()</code>&#x65B9;&#x6CD5;&#x83B7;&#x53D6;&#x53D8;&#x91CF;&#xFF0C;&#x7136;&#x540E;&#x518D;<code>set</code>&#x8FDB;&#x53BB;&#xFF0C;&#x4F9D;&#x7136;&#x4E0D;&#x4F1A;&#x8FDB;&#x884C;&#x91CD;&#x590D;&#x53E0;&#x52A0;&#x3002;</p>
+<p> &#x8FD9;&#x5C31;&#x662F;&#x7EBF;&#x7A0B;&#x9694;&#x79BB;&#x3002;</p>
+<p> &#x4F46;&#x662F;&#x5BF9;&#x4E8E;&#x5F15;&#x7528;&#x4F20;&#x9012;&#x6765;&#x8BF4;&#xFF0C;&#x6211;&#x4EEC;&#x53C8;&#x9700;&#x8981;&#x591A;&#x6CE8;&#x610F;&#x4E00;&#x4E0B;&#x4E86;&#xFF0C;&#x76F4;&#x63A5;&#x4E0A;&#x4F8B;&#x5B50;&#x770B;&#x770B;&#x3002;</p>
+<ul>
+<li>&#x5F15;&#x7528;&#x4F20;&#x9012;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class ThreadLocalTest {</span><br><span class="line"></span><br><span class="line">    static NumIndex numIndex = new NumIndex();</span><br><span class="line">    private static ThreadLocal&lt;NumIndex&gt; threadLocal1 = new ThreadLocal&lt;NumIndex&gt;(){</span><br><span class="line">        protected NumIndex initialValue(){</span><br><span class="line">            return numIndex;</span><br><span class="line">        }</span><br><span class="line">    };</span><br><span class="line"></span><br><span class="line">    static class NumIndex{</span><br><span class="line">        int num = 0;</span><br><span class="line">        public void increment(){</span><br><span class="line">            num++;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x5F15;&#x7528;&#x4F20;&#x9012;</span><br><span class="line">    @Test</span><br><span class="line">    public void testReference(){</span><br><span class="line">        for (int i = 0; i &lt; 5; i++){</span><br><span class="line">            new Thread(() -&gt; {</span><br><span class="line">                NumIndex index = threadLocal1.get();</span><br><span class="line">                index.increment();</span><br><span class="line">                threadLocal1.set(index);</span><br><span class="line">                System.out.println(&quot;current thread is &quot; + Thread.currentThread().getName() + &quot; num is &quot; + threadLocal1.get().num);</span><br><span class="line">            }, &quot;thread-&quot; + i).start();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p> &#x6211;&#x4EEC;&#x770B;&#x770B;&#x8FD0;&#x884C;&#x7684;&#x7ED3;&#x679C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;current thread is thread-0 num is 2</span><br><span class="line">current thread is thread-2 num is 3</span><br><span class="line">current thread is thread-1 num is 2</span><br><span class="line">current thread is thread-4 num is 5</span><br><span class="line">current thread is thread-3 num is 4</span><br></pre></td></tr></table></figure>
+
+<p> &#x6211;&#x4EEC;&#x770B;&#x5230;&#x503C;&#x4E0D;&#x4F46;&#x6CA1;&#x6709;&#x88AB;&#x9694;&#x79BB;&#xFF0C;&#x800C;&#x4E14;&#x8FD8;&#x51FA;&#x73B0;&#x4E86;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;&#x95EE;&#x9898;&#x3002;</p>
+<blockquote>
+<p>&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x4E00;&#x5B9A;&#x8981;&#x6CE8;&#x610F;&#x503C;&#x4F20;&#x9012;&#x548C;&#x5F15;&#x7528;&#x4F20;&#x9012;&#x7684;&#x533A;&#x522B;&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x4E5F;&#x4E0D;&#x8BB2;&#x8FD9;&#x4E24;&#x4E2A;&#x6982;&#x5FF5;&#x4E86;&#x3002;</p>
+</blockquote>
+<h2 id="&#x6E90;&#x7801;&#x5206;&#x6790;"><a href="#&#x6E90;&#x7801;&#x5206;&#x6790;" class="headerlink" title="&#x6E90;&#x7801;&#x5206;&#x6790;"></a>&#x6E90;&#x7801;&#x5206;&#x6790;</h2><p> &#x60F3;&#x8981;&#x66F4;&#x52A0;&#x6DF1;&#x5165;&#x5730;&#x4E86;&#x89E3;ThreadLocal&#x8FD9;&#x4E2A;&#x4E1C;&#x897F;&#x7684;&#x4F5C;&#x7528;&#xFF0C;&#x6700;&#x540E;&#x8FD8;&#x662F;&#x5F97;&#x56DE;&#x5230;&#x64B8;&#x6E90;&#x7801;&#xFF0C;&#x770B;&#x770B;==Josh Bloch and Doug Lea==&#x8FD9;&#x4E24;&#x4F4D;&#x5927;&#x795E;&#x7A76;&#x7ADF;&#x662F;&#x600E;&#x4E48;&#x5B9E;&#x73B0;&#x7684;&#xFF1F;&#x6574;&#x4E2A;&#x7C7B;&#x52A0;&#x8D77;&#x6765;&#x4E5F;&#x4E0D;&#x8FC7;&#x4E03;&#x516B;&#x767E;&#x884C;&#x800C;&#x5DF2;&#x3002;</p>
+<p> &#x5728;&#x8FD9;&#x91CC;&#xFF0C;&#x6211;&#x5206;&#x5F00;&#x4E24;&#x90E8;&#x5206;&#x6765;&#x8BF4;&#xFF0C;&#x5206;&#x522B;&#x662F;<code>ThreadLocal</code>&#x548C;<code>ThreadLocalMap</code>&#x8FD9;&#x4E24;&#x4E2A;&#x7684;&#x6E90;&#x7801;&#x5206;&#x6790;&#x3002;</p>
+<h3 id="ThreadLocalMap&#x6E90;&#x7801;&#x5206;&#x6790;"><a href="#ThreadLocalMap&#x6E90;&#x7801;&#x5206;&#x6790;" class="headerlink" title="ThreadLocalMap&#x6E90;&#x7801;&#x5206;&#x6790;"></a>ThreadLocalMap&#x6E90;&#x7801;&#x5206;&#x6790;</h3><p> &#x601D;&#x800C;&#x518D;&#x4E09;&#xFF0C;&#x6700;&#x540E;&#x8FD8;&#x662F;&#x51B3;&#x5B9A;&#x5148;&#x8BB2;<code>ThreadLocalMap</code>&#x7684;&#x6E90;&#x7801;&#x89E3;&#x6790;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x5462;&#xFF1F;</p>
+<p> <code>ThreadLocalMap</code>&#x662F;<code>ThreadLocal</code>&#x91CC;&#x9762;&#x7684;&#x4E00;&#x4E2A;&#x9759;&#x6001;&#x5185;&#x90E8;&#x7C7B;&#xFF0C;&#x4F46;&#x662F;&#x786E;&#x5B9E;&#x4E00;&#x4E2A;&#x5F88;&#x5173;&#x952E;&#x7684;&#x4E1C;&#x897F;&#xFF0C;&#x6211;&#x4EEC;&#x65E2;&#x7136;&#x662F;&#x5728;&#x770B;&#x6E90;&#x7801;&#x5E76;&#x4E14;&#x60F3;&#x8981;&#x5F04;&#x61C2;&#x8FD9;&#x4E2A;&#x4E1C;&#x897F;&#xFF0C;&#x90A3;&#x6211;&#x4EEC;&#x5C31;&#x4E00;&#x5B9A;&#x8981;&#x6709;&#x4E00;&#x79CD;&#x601D;&#x7EF4;&#xFF0C;&#x90A3;&#x5C31;&#x662F;&#x5982;&#x679C;&#x662F;&#x6211;&#x4EEC;&#x8981;&#x5B9E;&#x73B0;&#x8FD9;&#x4E48;&#x4E2A;&#x529F;&#x80FD;&#xFF0C;&#x6211;&#x4EEC;&#x8981;&#x600E;&#x4E48;&#x505A;&#xFF1F;&#x4EE5;&#x53CA;&#x770B;&#x5230;&#x522B;&#x4EBA;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x8981;&#x5B66;&#x4F1A;&#x601D;&#x8003;&#x522B;&#x4EBA;&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x8FD9;&#x4E48;&#x505A;&#xFF1F;</p>
+<p> &#x6211;&#x5E0C;&#x671B;&#x901A;&#x8FC7;&#x6211;&#x7684;&#x6587;&#x7AE0;&#xFF0C;&#x4E0D;&#x6C42;&#x80FD;&#x591F;&#x5E26;&#x7ED9;&#x4F60;&#x4EC0;&#x4E48;&#x725B;&#x903C;&#x7684;&#x6280;&#x672F;&#xFF0C;&#x4F46;&#x662F;&#x81F3;&#x5C11;&#x80FD;&#x8BA9;&#x4F60;&#x660E;&#x767D;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5B66;&#x4E60;&#x7684;&#x662F;&#x8FD9;&#x4E9B;&#x5927;&#x725B;&#x7684;&#x4E25;&#x8C28;&#x7684;&#x601D;&#x7EF4;&#x903B;&#x8F91;&#x3002;</p>
+<p> &#x8A00;&#x5F52;&#x6B63;&#x4F20;&#xFF0C;<code>ThreadLocalMap</code>&#x7A76;&#x7ADF;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;&#x6211;&#x4EEC;&#x8981;&#x8FD9;&#x4E48;&#x60F3;&#xFF0C;&#x65E2;&#x7136;&#x662F;&#x7EBF;&#x7A0B;&#x672C;&#x5730;&#x53D8;&#x91CF;&#xFF0C;&#x800C;&#x4E14;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;get&#x548C;set&#x65B9;&#x6CD5;&#x80FD;&#x591F;&#x83B7;&#x53D6;&#x548C;&#x8D4B;&#x503C;&#x3002;</p>
+<p> 1&#x3001;&#x90A3;&#x6211;&#x4EEC;&#x8D4B;&#x503C;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x7A76;&#x7ADF;&#x4FDD;&#x5B58;&#x5728;&#x4EC0;&#x4E48;&#x7ED3;&#x6784;&#x5F53;&#x4E2D;&#xFF1F;</p>
+<p> 2&#x3001;&#x5B83;&#x7A76;&#x7ADF;&#x662F;&#x600E;&#x4E48;&#x505A;&#x5230;&#x7EBF;&#x7A0B;&#x9694;&#x79BB;&#x7684;&#xFF1F;</p>
+<p> 3&#x3001;&#x5F53;&#x6211;get&#x548C;set&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5B83;&#x7A76;&#x7ADF;&#x662F;&#x600E;&#x4E48;&#x505A;&#x5230;&#x7EBF;&#x7A0B;-value&#x7684;&#x5BF9;&#x5E94;&#x5173;&#x7CFB;&#x8FDB;&#x884C;&#x4FDD;&#x5B58;&#x7684;&#xFF1F;</p>
+<p> &#x901A;&#x8FC7;&#x4EE5;&#x4E0A;&#x4E09;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x518D;&#x7ED3;&#x5408;<code>ThreadLocalMap</code>&#x8FD9;&#x4E2A;&#x540D;&#x5B57;&#xFF0C;&#x6211;&#x60F3;&#x5927;&#x5BB6;&#x4E5F;&#x77E5;&#x9053;&#x8FD9;&#x4E2A;&#x662F;&#x4EC0;&#x4E48;&#x4E86;&#x3002;</p>
+<p> &#x6CA1;&#x9519;&#xFF0C;&#x5B83;&#x5C31;&#x662F;<code>ThreadLocal</code>&#x975E;&#x5E38;&#x6838;&#x5FC3;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x662F;&#x7EF4;&#x62A4;&#x6211;&#x4EEC;&#x7EBF;&#x7A0B;&#x4E0E;&#x53D8;&#x91CF;&#x4E4B;&#x95F4;&#x5173;&#x7CFB;&#x7684;&#x4E00;&#x4E2A;&#x7C7B;&#xFF0C;&#x770B;&#x5230;&#x662F;Map&#x7ED3;&#x5C3E;&#xFF0C;&#x90A3;&#x6211;&#x4EEC;&#x4E5F;&#x80FD;&#x591F;&#x77E5;&#x9053;&#x5B83;&#x5B9E;&#x9645;&#x4E0A;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x952E;&#x503C;&#x5BF9;&#x3002;&#x81F3;&#x4E8E;KEY&#x662F;&#x4EC0;&#x4E48;&#xFF0C;&#x6211;&#x4EEC;&#x4F1A;&#x5728;&#x6E90;&#x7801;&#x5206;&#x6790;&#x5F53;&#x4E2D;&#x770B;&#x51FA;&#x6765;&#x3002;</p>
+<h4 id="Entry&#x5185;&#x90E8;&#x7C7B;"><a href="#Entry&#x5185;&#x90E8;&#x7C7B;" class="headerlink" title="Entry&#x5185;&#x90E8;&#x7C7B;"></a>Entry&#x5185;&#x90E8;&#x7C7B;</h4><p> &#x4EE5;&#x4E0B;&#x6E90;&#x7801;&#x90FD;&#x662F;&#x62BD;&#x53D6;&#x8BB2;&#x89E3;&#x90E8;&#x5206;&#x7684;&#x5185;&#x5BB9;&#x6765;&#x5C55;&#x793A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;static class ThreadLocalMap {</span><br><span class="line"></span><br><span class="line">    /**    </span><br><span class="line">         * &#x81EA;&#x5B9A;&#x4E49;&#x4E00;&#x4E2A;Entry&#x7C7B;&#xFF0C;&#x5E76;&#x7EE7;&#x627F;&#x81EA;&#x5F31;&#x5F15;&#x7528;</span><br><span class="line">         * &#x7528;&#x6765;&#x4FDD;&#x5B58;ThreadLocal&#x548C;Value&#x4E4B;&#x95F4;&#x7684;&#x5BF9;&#x5E94;&#x5173;&#x7CFB;</span><br><span class="line">         *</span><br><span class="line">         * &#x4E4B;&#x6240;&#x4EE5;&#x7528;&#x5F31;&#x5F15;&#x7528;&#xFF0C;&#x662F;&#x4E3A;&#x4E86;&#x89E3;&#x51B3;&#x7EBF;&#x7A0B;&#x4E0E;ThreadLocal&#x4E4B;&#x95F4;&#x7684;&#x5F3A;&#x7ED1;&#x5B9A;&#x5173;&#x7CFB;</span><br><span class="line">         * &#x4F1A;&#x5BFC;&#x81F4;&#x5982;&#x679C;&#x7EBF;&#x7A0B;&#x6CA1;&#x6709;&#x88AB;&#x56DE;&#x6536;&#xFF0C;&#x5219;GC&#x4FBF;&#x4E00;&#x76F4;&#x65E0;&#x6CD5;&#x56DE;&#x6536;&#x8FD9;&#x90E8;&#x5206;&#x5185;&#x5BB9;</span><br><span class="line">         */</span><br><span class="line">    static class Entry extends WeakReference&lt;ThreadLocal&lt;?&gt;&gt; {</span><br><span class="line">        /** The value associated with this ThreadLocal. */</span><br><span class="line">        Object value;</span><br><span class="line"></span><br><span class="line">        Entry(ThreadLocal&lt;?&gt; k, Object v) {</span><br><span class="line">            super(k);</span><br><span class="line">            value = v;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    </span><br><span class="line">    /**</span><br><span class="line">         * The initial capacity -- MUST be a power of two.</span><br><span class="line">         * Entry&#x6570;&#x7EC4;&#x7684;&#x521D;&#x59CB;&#x5316;&#x5927;&#x5C0F;</span><br><span class="line">         */</span><br><span class="line">    private static final int INITIAL_CAPACITY = 16;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">         * The table, resized as necessary.</span><br><span class="line">         * table.length MUST always be a power of two.</span><br><span class="line">         * &lt;ThreadLocal, &#x4FDD;&#x5B58;&#x7684;&#x6CDB;&#x578B;&#x503C;&gt;&#x6570;&#x7EC4;</span><br><span class="line">         * &#x957F;&#x5EA6;&#x5FC5;&#x987B;&#x662F;2&#x7684;N&#x6B21;&#x5E42;</span><br><span class="line">         * &#x8FD9;&#x4E2A;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x4E3A;&#x4EC0;&#x4E48;HashMap&#x91CC;&#x7EF4;&#x62A4;&#x7684;&#x6570;&#x7EC4;&#x4E5F;&#x5FC5;&#x987B;&#x662F;2&#x7684;N&#x6B21;&#x5E42;</span><br><span class="line">         * &#x4E3B;&#x8981;&#x662F;&#x4E3A;&#x4E86;&#x51CF;&#x5C11;&#x78B0;&#x649E;&#xFF0C;&#x80FD;&#x591F;&#x8BA9;&#x4FDD;&#x5B58;&#x7684;&#x5143;&#x7D20;&#x5C3D;&#x91CF;&#x7684;&#x5206;&#x6563;</span><br><span class="line">         * &#x5173;&#x952E;&#x4EE3;&#x7801;&#x8FD8;&#x662F;hashcode &amp; table.length - 1</span><br><span class="line">         */</span><br><span class="line">    private Entry[] table;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">         * The number of entries in the table.</span><br><span class="line">         * table&#x91CC;&#x7684;&#x5143;&#x7D20;&#x4E2A;&#x6570;</span><br><span class="line">         */</span><br><span class="line">    private int size = 0;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">         * The next size value at which to resize.</span><br><span class="line">         * &#x6269;&#x5BB9;&#x7684;&#x9608;&#x503C;</span><br><span class="line">         */</span><br><span class="line">    private int threshold; // Default to 0</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">         * Set the resize threshold to maintain at worst a 2/3 load factor.</span><br><span class="line">         * &#x6839;&#x636E;&#x957F;&#x5EA6;&#x8BA1;&#x7B97;&#x6269;&#x5BB9;&#x7684;&#x9608;&#x503C;</span><br><span class="line">         */</span><br><span class="line">    private void setThreshold(int len) {</span><br><span class="line">        threshold = len * 2 / 3;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">         * &#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x4E24;&#x4E2A;&#x83B7;&#x53D6;next&#x548C;prev&#x7684;&#x4EE3;&#x7801;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;entry&#x6570;&#x7EC4;&#x5B9E;&#x9645;&#x4E0A;&#x662F;&#x4E00;&#x4E2A;&#x73AF;&#x5F62;&#x7ED3;&#x6784;</span><br><span class="line">         */</span><br><span class="line">    /**</span><br><span class="line">         * Increment i modulo len.</span><br><span class="line">         * &#x83B7;&#x53D6;&#x4E0B;&#x4E00;&#x4E2A;&#x7D22;&#x5F15;&#xFF0C;&#x8D85;&#x51FA;&#x957F;&#x5EA6;&#x5219;&#x8FD4;&#x56DE;0</span><br><span class="line">         */</span><br><span class="line">    private static int nextIndex(int i, int len) {</span><br><span class="line">        return ((i + 1 &lt; len) ? i + 1 : 0);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">         * Decrement i modulo len.</span><br><span class="line">         * &#x8FD4;&#x56DE;&#x4E0A;&#x4E00;&#x4E2A;&#x7D22;&#x5F15;&#xFF0C;&#x5982;&#x679C;-1&#x4E3A;&#x8D1F;&#x6570;&#xFF0C;&#x8FD4;&#x56DE;&#x957F;&#x5EA6;-1&#x7684;&#x7D22;&#x5F15;</span><br><span class="line">         */</span><br><span class="line">    private static int prevIndex(int i, int len) {</span><br><span class="line">        return ((i - 1 &gt;= 0) ? i - 1 : len - 1);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**       </span><br><span class="line">         * &#x6784;&#x9020;&#x53C2;&#x6570;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;ThreadLocalMap&#x4EE3;&#x7801;</span><br><span class="line">         * ThreadLocal&#x4E3A;key&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x6CDB;&#x578B;&#x4E3A;value</span><br><span class="line">         */</span><br><span class="line">    ThreadLocalMap(ThreadLocal&lt;?&gt; firstKey, Object firstValue) {</span><br><span class="line">        // &#x521D;&#x59CB;&#x5316;table&#x7684;&#x5927;&#x5C0F;&#x4E3A;16</span><br><span class="line">        table = new Entry[INITIAL_CAPACITY];</span><br><span class="line"></span><br><span class="line">        // &#x901A;&#x8FC7;hashcode &amp; &#xFF08;&#x957F;&#x5EA6;-1&#xFF09;&#x7684;&#x4F4D;&#x8FD0;&#x7B97;&#xFF0C;&#x786E;&#x5B9A;&#x952E;&#x503C;&#x5BF9;&#x7684;&#x4F4D;&#x7F6E;</span><br><span class="line">        int i = firstKey.threadLocalHashCode &amp; (INITIAL_CAPACITY - 1);</span><br><span class="line"></span><br><span class="line">        // &#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x8282;&#x70B9;&#x4FDD;&#x5B58;&#x5728;table&#x5F53;&#x4E2D;</span><br><span class="line">        table[i] = new Entry(firstKey, firstValue);</span><br><span class="line"></span><br><span class="line">        // &#x8BBE;&#x7F6E;table&#x5185;&#x5143;&#x7D20;&#x4E3A;1</span><br><span class="line">        size = 1;</span><br><span class="line"></span><br><span class="line">        // &#x8BBE;&#x7F6E;&#x6269;&#x5BB9;&#x9608;&#x503C;</span><br><span class="line">        setThreshold(INITIAL_CAPACITY);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**       </span><br><span class="line">         * ThreadLocal&#x672C;&#x8EAB;&#x662F;&#x7EBF;&#x7A0B;&#x9694;&#x79BB;&#x7684;&#xFF0C;&#x6309;&#x9053;&#x7406;&#x662F;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0;&#x6570;&#x636E;&#x5171;&#x4EAB;&#x548C;&#x4F20;&#x9012;&#x7684;&#x884C;&#x4E3A;&#x7684;</span><br><span class="line">         * &#x8FD9;&#x662F;InheritableThreadLocal&#x63D0;&#x4F9B;&#x4E86;&#x4E86;&#x4E00;&#x79CD;&#x7236;&#x5B50;&#x95F4;&#x6570;&#x636E;&#x5171;&#x4EAB;&#x7684;&#x673A;&#x5236;</span><br><span class="line">         * @param parentMap the map associated with parent thread.</span><br><span class="line">         */</span><br><span class="line">    private ThreadLocalMap(ThreadLocalMap parentMap) {</span><br><span class="line">        Entry[] parentTable = parentMap.table;</span><br><span class="line">        int len = parentTable.length;</span><br><span class="line">        setThreshold(len);</span><br><span class="line">        table = new Entry[len];</span><br><span class="line"></span><br><span class="line">        for (int j = 0; j &lt; len; j++) {</span><br><span class="line">            Entry e = parentTable[j];</span><br><span class="line">            if (e != null) {</span><br><span class="line">                @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">                ThreadLocal&lt;Object&gt; key = (ThreadLocal&lt;Object&gt;) e.get();</span><br><span class="line">                if (key != null) {</span><br><span class="line">                    Object value = key.childValue(e.value);</span><br><span class="line">                    Entry c = new Entry(key, value);</span><br><span class="line">                    int h = key.threadLocalHashCode &amp; (len - 1);</span><br><span class="line">                    while (table[h] != null)</span><br><span class="line">                        h = nextIndex(h, len);</span><br><span class="line">                    table[h] = c;</span><br><span class="line">                    size++;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p> &#x4E00;&#x4E9B;&#x7B80;&#x5355;&#x7684;&#x4E1C;&#x897F;&#x76F4;&#x63A5;&#x770B;&#x6211;&#x4E0A;&#x9762;&#x7684;&#x6CE8;&#x91CA;&#x5C31;&#x53EF;&#x4EE5;&#x4E86;&#x3002;</p>
+<p> &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5728;ThreadLocalMap&#x8FD9;&#x4E2A;&#x5185;&#x90E8;&#x7C7B;&#x5F53;&#x4E2D;&#xFF0C;&#x53C8;&#x5B9A;&#x4E49;&#x4E86;&#x4E00;&#x4E2A;Entry&#x5185;&#x90E8;&#x7C7B;&#xFF0C;&#x5E76;&#x4E14;&#x7EE7;&#x627F;&#x81EA;&#x5F31;&#x5F15;&#x7528;&#xFF0C;&#x6CDB;&#x578B;&#x662F;ThreadLocal&#xFF0C;&#x5176;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x6784;&#x9020;&#x65B9;&#x6CD5;&#xFF0C;&#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x6211;&#x4EEC;&#x5C31;&#x5927;&#x81F4;&#x53EF;&#x4EE5;&#x731C;&#x51FA;&#xFF0C;ThreadLocalMap&#x5F53;&#x4E2D;&#x7684;key&#x5B9E;&#x9645;&#x4E0A;&#x5C31;&#x662F;&#x5F53;&#x524D;ThreadLocal&#x5BF9;&#x8C61;&#x3002;</p>
+<p> &#x81F3;&#x4E8E;&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x7528;&#x5F31;&#x5F15;&#x7528;&#x5462;&#xFF1F;&#x6211;&#x60F3;&#x6211;&#x6E90;&#x7801;&#x4E0A;&#x9762;&#x7684;&#x6CE8;&#x91CA;&#x5176;&#x5B9E;&#x4E5F;&#x5199;&#x5F97;&#x5F88;&#x660E;&#x767D;&#x4E86;&#xFF0C;&#x8FD9;ThreadLocal&#x5B9E;&#x9645;&#x4E0A;&#x5C31;&#x662F;&#x4E2A;&#x7EBF;&#x7A0B;&#x672C;&#x5730;&#x53D8;&#x91CF;&#x9694;&#x79BB;&#x4F5C;&#x7528;&#x7684;&#x5DE5;&#x5177;&#x7C7B;&#x800C;&#x5DF2;&#xFF0C;&#x5F53;&#x7EBF;&#x7A0B;&#x8D70;&#x5B8C;&#x4E86;&#xFF0C;&#x80AF;&#x5B9A;&#x5E0C;&#x671B;&#x80FD;&#x56DE;&#x6536;&#x8FD9;&#x90E8;&#x5206;&#x4EA7;&#x751F;&#x7684;&#x8D44;&#x6E90;&#xFF0C;&#x6240;&#x4EE5;&#x5C31;&#x7528;&#x4E86;&#x5F31;&#x5F15;&#x7528;&#x3002;</p>
+<p> &#x6211;&#x76F8;&#x4FE1;&#x6709;&#x4EBA;&#x4F1A;&#x6709;&#x7591;&#x95EE;&#xFF0C;&#x5982;&#x679C;&#x5728;&#x6211;&#x8981;&#x7528;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x88AB;&#x56DE;&#x6536;&#x4E86;&#x600E;&#x4E48;&#x529E;&#xFF1F;&#x4E0B;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x4F1A;&#x4E00;&#x6B65;&#x6B65;&#x5730;&#x8BA9;&#x4F60;&#x660E;&#x767D;&#xFF0C;&#x4F60;&#x8003;&#x8651;&#x5230;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x8FD9;&#x4E9B;&#x5927;&#x725B;&#x90FD;&#x5DF2;&#x7ECF;&#x60F3;&#x5230;&#x5E76;&#x4E14;&#x89E3;&#x51B3;&#x4E86;&#x3002;&#x63A5;&#x7740;&#x5F80;&#x4E0B;&#x5B66;&#x5427;&#xFF01;</p>
+<h4 id="getEntry&#x548C;getEntryAfterMiss&#x65B9;&#x6CD5;"><a href="#getEntry&#x548C;getEntryAfterMiss&#x65B9;&#x6CD5;" class="headerlink" title="getEntry&#x548C;getEntryAfterMiss&#x65B9;&#x6CD5;"></a>getEntry&#x548C;getEntryAfterMiss&#x65B9;&#x6CD5;</h4><p> &#x901A;&#x8FC7;&#x65B9;&#x6CD5;&#x540D;&#x6211;&#x4EEC;&#x5C31;&#x80FD;&#x770B;&#x5F97;&#x51FA;&#x662F;&#x4ECE;<code>ThreadLocal</code>&#x5BF9;&#x5E94;&#x7684;<code>ThreadLocalMap</code>&#x5F53;&#x4E2D;&#x83B7;&#x53D6;Entry&#x8282;&#x70B9;&#xFF0C;&#x5728;&#x8FD9;&#x6211;&#x4EEC;&#x5C31;&#x8981;&#x601D;&#x8003;&#x4E86;&#x3002;</p>
+<p> 1&#xFF09;&#x6211;&#x4EEC;&#x8981;&#x901A;&#x8FC7;&#x4EC0;&#x4E48;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;Entry</p>
+<p> 2&#xFF09;&#x6211;&#x4EEC;&#x901A;&#x8FC7;&#x4E0A;&#x9762;&#x77E5;&#x9053;&#x4F7F;&#x7528;&#x4E86;&#x5F31;&#x5F15;&#x7528;&#xFF0C;&#x5982;&#x679C;&#x88AB;GC&#x56DE;&#x6536;&#x4E86;&#x6CA1;&#x6709;&#x83B7;&#x53D6;&#x5230;&#x600E;&#x4E48;&#x529E;&#xFF1F;</p>
+<p> 3&#xFF09;&#x4E0D;&#x5728;&#x901A;&#x8FC7;&#x8BA1;&#x7B97;&#x5F97;&#x5230;&#x7684;&#x4E0B;&#x6807;&#x4E0A;&#xFF0C;&#x53C8;&#x8981;&#x600E;&#x4E48;&#x529E;&#xFF1F;</p>
+<p> 4&#xFF09;&#x5982;&#x679C;<code>ThreadLocal</code>&#x5BF9;&#x5E94;&#x7684;<code>ThreadLocalMap</code>&#x4E0D;&#x5B58;&#x5728;&#x8981;&#x600E;&#x4E48;&#x529E;&#xFF1F;</p>
+<p> &#x4EE5;&#x4E0A;&#x8FD9;4&#x4E2A;&#x95EE;&#x9898;&#x662F;&#x6211;&#x81EA;&#x5DF1;&#x5728;&#x770B;&#x6E90;&#x7801;&#x7684;&#x65F6;&#x5019;&#x80FD;&#x591F;&#x60F3;&#x5230;&#x7684;&#x4E1C;&#x897F;&#xFF0C;&#x6709;&#x4E9B;&#x95EE;&#x9898;&#x7684;&#x7B54;&#x6848;&#x5149;&#x770B;<code>THreadLocalMap</code>&#x7684;&#x6E90;&#x7801;&#x662F;&#x770B;&#x4E0D;&#x51FA;&#x6240;&#x4EE5;&#x7136;&#x7684;&#xFF0C;<strong>&#x9700;&#x8981;&#x7ED3;&#x5408;&#x4E4B;&#x540E;&#x7684;ThreadLocal&#x6E90;&#x7801;&#x5206;&#x6790;</strong>&#x3002;</p>
+<p> &#x5728;&#x8FD9;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#x5927;&#x725B;&#x7684;&#x6E90;&#x7801;&#x662F;&#x600E;&#x4E48;&#x89E3;&#x51B3;&#x4EE5;&#x4E0A;&#x95EE;&#x9898;&#x7684;&#x5427;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;/**      </span><br><span class="line">         * &#x83B7;&#x53D6;ThreadLocal&#x7684;&#x7D22;&#x5F15;&#x4F4D;&#x7F6E;&#xFF0C;&#x901A;&#x8FC7;&#x4E0B;&#x6807;&#x7D22;&#x5F15;&#x83B7;&#x53D6;&#x5185;&#x5BB9;</span><br><span class="line">         */</span><br><span class="line">private Entry getEntry(ThreadLocal&lt;?&gt; key) {</span><br><span class="line">    // &#x901A;&#x8FC7;hashcode&#x786E;&#x5B9A;&#x4E0B;&#x6807;</span><br><span class="line">    int i = key.threadLocalHashCode &amp; (table.length - 1);</span><br><span class="line">    Entry e = table[i];</span><br><span class="line"></span><br><span class="line">    // &#x5982;&#x679C;&#x627E;&#x5230;&#x5219;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;</span><br><span class="line">    if (e != null &amp;&amp; e.get() == key)</span><br><span class="line">        return e;</span><br><span class="line">    else</span><br><span class="line">        // &#x627E;&#x4E0D;&#x5230;&#x7684;&#x8BDD;&#x63A5;&#x7740;&#x4ECE;i&#x4F4D;&#x7F6E;&#x5F00;&#x59CB;&#x5411;&#x540E;&#x904D;&#x5386;&#xFF0C;&#x57FA;&#x4E8E;&#x7EBF;&#x6027;&#x63A2;&#x6D4B;&#x6CD5;&#xFF0C;&#x662F;&#x6709;&#x53EF;&#x80FD;&#x5728;i&#x4E4B;&#x540E;&#x7684;&#x4F4D;&#x7F6E;&#x627E;&#x5230;&#x7684;</span><br><span class="line">        return getEntryAfterMiss(key, i, e);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">private Entry getEntryAfterMiss(ThreadLocal&lt;?&gt; key, int i, Entry e) {</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line">    int len = tab.length;</span><br><span class="line"></span><br><span class="line">    // &#x5FAA;&#x73AF;&#x5411;&#x540E;&#x904D;&#x5386;</span><br><span class="line">    while (e != null) {</span><br><span class="line"></span><br><span class="line">        // &#x83B7;&#x53D6;&#x8282;&#x70B9;&#x5BF9;&#x5E94;&#x7684;k</span><br><span class="line">        ThreadLocal&lt;?&gt; k = e.get();</span><br><span class="line"></span><br><span class="line">        // &#x76F8;&#x7B49;&#x5219;&#x8FD4;&#x56DE;</span><br><span class="line">        if (k == key)</span><br><span class="line">            return e;</span><br><span class="line"></span><br><span class="line">        // &#x5982;&#x679C;&#x4E3A;null&#xFF0C;&#x89E6;&#x53D1;&#x4E00;&#x6B21;&#x8FDE;&#x7EED;&#x6BB5;&#x6E05;&#x7406;</span><br><span class="line">        if (k == null)</span><br><span class="line">            expungeStaleEntry(i);</span><br><span class="line"></span><br><span class="line">        // &#x83B7;&#x53D6;&#x4E0B;&#x4E00;&#x4E2A;&#x4E0B;&#x6807;&#x63A5;&#x7740;&#x8FDB;&#x884C;&#x5224;&#x65AD;</span><br><span class="line">        else</span><br><span class="line">            i = nextIndex(i, len);</span><br><span class="line">        e = tab[i];</span><br><span class="line">    }</span><br><span class="line">    return null;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p> &#x4E00;&#x770B;&#x8FD9;&#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#x540D;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x77E5;&#x9053;&#x8FD9;&#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x83B7;&#x53D6;Entry&#x8282;&#x70B9;&#x7684;&#x65B9;&#x6CD5;&#x3002;</p>
+<p> &#x6211;&#x4EEC;&#x9996;&#x5148;&#x770B;<code>getEntry(ThreadLocal&lt;?&gt; key)</code>&#x548C;<code>getEntryAfterMiss(ThreadLocal&lt;?&gt; key, int i, Entry e)</code>&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x5C31;&#x770B;&#x51FA;&#x6765;&#x4E86;&#xFF0C;&#x76F4;&#x63A5;&#x6839;&#x636E;<code>ThreadLocal</code>&#x5BF9;&#x8C61;&#x6765;&#x83B7;&#x53D6;&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x518D;&#x6B21;&#x8BC1;&#x660E;&#xFF0C;key&#x5C31;&#x662F;<code>ThreadLocal</code>&#x5BF9;&#x8C61;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#x5B83;&#x7684;&#x6D41;&#x7A0B;</p>
+<p> 1&#x3001;&#x9996;&#x5148;&#x6839;&#x636E;key&#x7684;hashcode &amp; table.length - 1&#x6765;&#x786E;&#x5B9A;&#x5728;table&#x5F53;&#x4E2D;&#x7684;&#x4E0B;&#x6807;</p>
+<p> 2&#x3001;&#x5982;&#x679C;&#x83B7;&#x53D6;&#x5230;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#xFF0C;&#x6CA1;&#x83B7;&#x53D6;&#x5230;&#x7684;&#x8BDD;&#xFF0C;&#x5C31;&#x63A5;&#x7740;&#x5F80;&#x540E;&#x904D;&#x5386;&#x770B;&#x662F;&#x5426;&#x80FD;&#x83B7;&#x53D6;&#x5230;&#xFF08;&#x56E0;&#x4E3A;&#x7528;&#x7684;&#x662F;&#x7EBF;&#x6027;&#x63A2;&#x6D4B;&#x6CD5;&#xFF0C;&#x5F80;&#x540E;&#x904D;&#x5386;&#x6709;&#x53EF;&#x80FD;&#x83B7;&#x53D6;&#x5230;&#x7ED3;&#x679C;&#xFF09;</p>
+<p> 3&#x3001;&#x8FDB;&#x5165;&#x4E86;getEntryAfterMiss&#x65B9;&#x6CD5;&#x8FDB;&#x884C;&#x7EBF;&#x6027;&#x63A2;&#x6D4B;&#xFF0C;&#x5982;&#x679C;&#x83B7;&#x53D6;&#x5230;&#x5219;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#xFF1B;&#x83B7;&#x53D6;&#x7684;key&#x4E3A;null&#xFF0C;&#x5219;&#x89E6;&#x53D1;&#x4E00;&#x6B21;&#x8FDE;&#x7EED;&#x6BB5;&#x6E05;&#x7406;&#xFF08;&#x5B9E;&#x9645;&#x4E0A;&#x5728;&#x5F88;&#x591A;&#x65B9;&#x6CD5;&#x5F53;&#x4E2D;&#x90FD;&#x4F1A;&#x89E6;&#x53D1;&#x8BE5;&#x65B9;&#x6CD5;&#xFF0C;&#x7ECF;&#x5E38;&#x4F1A;&#x8FDB;&#x884C;&#x8FDE;&#x7EED;&#x6BB5;&#x6E05;&#x7406;&#xFF0C;&#x8FD9;&#x662F;ThreadLocal&#x6838;&#x5FC3;&#x7684;&#x6E05;&#x7406;&#x65B9;&#x6CD5;&#xFF09;&#x3002;</p>
+<h4 id="expungeStaleEntry&#x65B9;&#x6CD5;"><a href="#expungeStaleEntry&#x65B9;&#x6CD5;" class="headerlink" title="expungeStaleEntry&#x65B9;&#x6CD5;"></a>expungeStaleEntry&#x65B9;&#x6CD5;</h4><p> &#x8FD9;&#x53EF;&#x4EE5;&#x8BF4;&#x662F;<code>ThreadLocal</code>&#x975E;&#x5E38;&#x6838;&#x5FC3;&#x7684;&#x4E00;&#x4E2A;&#x6E05;&#x7406;&#x65B9;&#x6CD5;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x9700;&#x8981;&#x6E05;&#x7406;&#x5462;&#xFF1F;&#x6216;&#x8BB8;&#x5F88;&#x591A;&#x4EBA;&#x60F3;&#x4E0D;&#x660E;&#x767D;&#xFF0C;&#x6211;&#x4EEC;&#x7528;List&#x6216;&#x8005;&#x662F;Map&#x4E5F;&#x597D;&#xFF0C;&#x90FD;&#x6CA1;&#x6709;&#x8BF4;&#x8981;&#x6E05;&#x7406;&#x91CC;&#x9762;&#x7684;&#x5185;&#x5BB9;&#x3002;</p>
+<p> &#x4F46;&#x662F;&#x8FD9;&#x91CC;&#x662F;&#x5BF9;&#x4E8E;&#x7EBF;&#x7A0B;&#x6765;&#x8BF4;&#x7684;&#x9694;&#x79BB;&#x7684;&#x672C;&#x5730;&#x53D8;&#x91CF;&#xFF0C;&#x5E76;&#x4E14;&#x4F7F;&#x7528;&#x7684;&#x662F;&#x5F31;&#x5F15;&#x7528;&#xFF0C;&#x90A3;&#x4FBF;&#x6709;&#x53EF;&#x80FD;&#x5728;GC&#x7684;&#x65F6;&#x5019;&#x5C31;&#x88AB;&#x56DE;&#x6536;&#x4E86;&#x3002;</p>
+<p> 1&#xFF09;&#x5982;&#x679C;&#x6709;&#x5F88;&#x591A;Entry&#x8282;&#x70B9;&#x5DF2;&#x7ECF;&#x88AB;&#x56DE;&#x6536;&#x4E86;&#xFF0C;&#x4F46;&#x662F;&#x5728;table&#x6570;&#x7EC4;&#x4E2D;&#x8FD8;&#x7559;&#x7740;&#x4F4D;&#x7F6E;&#xFF0C;&#x8FD9;&#x65F6;&#x5019;&#x4E0D;&#x6E05;&#x7406;&#x5C31;&#x4F1A;&#x6D6A;&#x8D39;&#x8D44;&#x6E90;</p>
+<p> 2&#xFF09;&#x5728;&#x6E05;&#x7406;&#x8282;&#x70B9;&#x7684;&#x540C;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x5C06;&#x540E;&#x7EED;&#x975E;&#x7A7A;&#x7684;Entry&#x8282;&#x70B9;&#x91CD;&#x65B0;&#x8BA1;&#x7B97;&#x4E0B;&#x6807;&#x8FDB;&#x884C;&#x6392;&#x653E;&#xFF0C;&#x8FD9;&#x6837;&#x5B50;&#x5728;get&#x7684;&#x65F6;&#x5019;&#x5C31;&#x80FD;&#x5FEB;&#x901F;&#x5B9A;&#x4F4D;&#x8D44;&#x6E90;&#xFF0C;&#x52A0;&#x5FEB;&#x6548;&#x7387;&#x3002;</p>
+<p> &#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#x522B;&#x4EBA;&#x6E90;&#x7801;&#x662F;&#x600E;&#x4E48;&#x505A;&#x7684;&#x5427;&#xFF01;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;/**        </span><br><span class="line"> * &#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x770B;&#x505A;&#x662F;ThreadLocal&#x91CC;&#x7684;&#x6838;&#x5FC3;&#x6E05;&#x7406;&#x51FD;&#x6570;&#xFF0C;&#x5B83;&#x4E3B;&#x8981;&#x505A;&#x7684;&#x4E8B;&#x60C5;&#x5C31;&#x662F;</span><br><span class="line"> * 1&#x3001;&#x4ECE;staleSlot&#x5F00;&#x59CB;&#xFF0C;&#x5411;&#x540E;&#x904D;&#x5386;&#x5C06;ThreadLocal&#x5BF9;&#x8C61;&#x88AB;&#x56DE;&#x6536;&#x6240;&#x5728;Entry&#x8282;&#x70B9;&#x7684;value&#x548C;Entry&#x8282;&#x70B9;&#x672C;&#x8EAB;&#x8BBE;&#x7F6E;null&#xFF0C;&#x65B9;&#x4FBF;GC&#xFF0C;&#x5E76;&#x4E14;size&#x81EA;&#x51CF;1</span><br><span class="line"> * 2&#x3001;&#x5E76;&#x4E14;&#x4F1A;&#x5BF9;&#x975E;null&#x7684;Entry&#x8282;&#x70B9;&#x8FDB;&#x884C;rehash&#xFF0C;&#x53EA;&#x8981;&#x4E0D;&#x662F;&#x5728;&#x5F53;&#x524D;&#x4F4D;&#x7F6E;&#xFF0C;&#x5C31;&#x4F1A;&#x5C06;Entry&#x632A;&#x5230;&#x4E0B;&#x4E00;&#x4E2A;&#x4E3A;null&#x7684;&#x4F4D;&#x7F6E;&#x4E0A;</span><br><span class="line"> * &#x6240;&#x4EE5;&#x5B9E;&#x9645;&#x4E0A;&#x662F;&#x5BF9;&#x4ECE;staleSlot&#x5F00;&#x59CB;&#x505A;&#x4E00;&#x4E2A;&#x8FDE;&#x7EED;&#x6BB5;&#x7684;&#x6E05;&#x7406;&#x548C;rehash&#x64CD;&#x4F5C;</span><br><span class="line"> */</span><br><span class="line">private int expungeStaleEntry(int staleSlot) {</span><br><span class="line">    // &#x65B0;&#x7684;&#x5F15;&#x7528;&#x6307;&#x5411;table</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;&#x957F;&#x5EA6;</span><br><span class="line">    int len = tab.length;</span><br><span class="line"></span><br><span class="line">    // expunge entry at staleSlot</span><br><span class="line">    // &#x5148;&#x5C06;&#x4F20;&#x8FC7;&#x6765;&#x7684;&#x4E0B;&#x6807;&#x7F6E;null</span><br><span class="line">    tab[staleSlot].value = null;</span><br><span class="line">    tab[staleSlot] = null;</span><br><span class="line"></span><br><span class="line">    // table&#x7684;size-1</span><br><span class="line">    size--;</span><br><span class="line"></span><br><span class="line">    // Rehash until we encounter null</span><br><span class="line">    Entry e;</span><br><span class="line">    int i;</span><br><span class="line">    // &#x904D;&#x5386;&#x5220;&#x9664;&#x6307;&#x5B9A;&#x8282;&#x70B9;&#x6240;&#x6709;&#x540E;&#x7EED;&#x8282;&#x70B9;&#x5F53;&#x4E2D;&#xFF0C;ThreadLocal&#x88AB;&#x56DE;&#x6536;&#x7684;&#x8282;&#x70B9;</span><br><span class="line">    for (i = nextIndex(staleSlot, len);</span><br><span class="line">         (e = tab[i]) != null;</span><br><span class="line">         i = nextIndex(i, len)) {</span><br><span class="line">        // &#x83B7;&#x53D6;entry&#x5F53;&#x4E2D;&#x7684;key</span><br><span class="line">        ThreadLocal&lt;?&gt; k = e.get();</span><br><span class="line"></span><br><span class="line">        // &#x5982;&#x679C;ThreadLocal&#x4E3A;null&#xFF0C;&#x5219;&#x5C06;value&#x4EE5;&#x53CA;&#x6570;&#x7EC4;&#x4E0B;&#x6807;&#x6240;&#x5728;&#x4F4D;&#x7F6E;&#x8BBE;&#x7F6E;null&#xFF0C;&#x65B9;&#x4FBF;GC</span><br><span class="line">        // &#x5E76;&#x4E14;size-1</span><br><span class="line">        if (k == null) {</span><br><span class="line">            e.value = null;</span><br><span class="line">            tab[i] = null;</span><br><span class="line">            size--;</span><br><span class="line">        } else {    // &#x5982;&#x679C;&#x4E0D;&#x4E3A;null</span><br><span class="line">            // &#x91CD;&#x65B0;&#x8BA1;&#x7B97;key&#x7684;&#x4E0B;&#x6807;</span><br><span class="line">            int h = k.threadLocalHashCode &amp; (len - 1);</span><br><span class="line"></span><br><span class="line">            // &#x5982;&#x679C;&#x662F;&#x5F53;&#x524D;&#x4F4D;&#x7F6E;&#x5219;&#x904D;&#x5386;&#x4E0B;&#x4E00;&#x4E2A;</span><br><span class="line">            // &#x4E0D;&#x662F;&#x5F53;&#x524D;&#x4F4D;&#x7F6E;&#xFF0C;&#x5219;&#x91CD;&#x65B0;&#x4ECE;i&#x5F00;&#x59CB;&#x627E;&#x5230;&#x4E0B;&#x4E00;&#x4E2A;&#x4E3A;null&#x7684;&#x5750;&#x6807;&#x8FDB;&#x884C;&#x8D4B;&#x503C;</span><br><span class="line">            if (h != i) {</span><br><span class="line">                tab[i] = null;</span><br><span class="line"></span><br><span class="line">                // Unlike Knuth 6.4 Algorithm R, we must scan until</span><br><span class="line">                // null because multiple entries could have been stale.</span><br><span class="line">                while (tab[h] != null)</span><br><span class="line">                    h = nextIndex(h, len);</span><br><span class="line">                tab[h] = e;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    return i;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p> &#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x6CE8;&#x91CA;&#x6211;&#x76F8;&#x4FE1;&#x5DF2;&#x7ECF;&#x662F;&#x5199;&#x7684;&#x5F88;&#x6E05;&#x695A;&#x4E86;&#xFF0C;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x5B9E;&#x9645;&#x4E0A;&#x5C31;&#x662F;&#x4ECE;staleSlot&#x5F00;&#x59CB;&#x505A;&#x4E00;&#x4E2A;&#x8FDE;&#x7EED;&#x6BB5;&#x7684;&#x6E05;&#x7406;&#x548C;rehash&#x64CD;&#x4F5C;&#x3002;</p>
+<h4 id="set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;"><a href="#set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;" class="headerlink" title="set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;"></a>set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;</h4><p> &#x63A5;&#x4E0B;&#x6765;&#x6211;&#x4EEC;&#x770B;&#x770B;set&#x65B9;&#x6CD5;&#xFF0C;&#x81EA;&#x7136;&#x5C31;&#x662F;&#x8981;&#x5C06;&#x6211;&#x4EEC;&#x7684;&#x53D8;&#x91CF;&#x4FDD;&#x5B58;&#x8FDB;<code>ThreadLocal</code>&#x5F53;&#x4E2D;&#xFF0C;&#x5B9E;&#x9645;&#x4E0A;&#x5C31;&#x662F;&#x4FDD;&#x5B58;&#x5230;<code>ThreadLocalMap</code>&#x5F53;&#x4E2D;&#x53BB;&#xFF0C;&#x5728;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x4E00;&#x6837;&#x8981;&#x601D;&#x8003;&#x51E0;&#x4E2A;&#x95EE;&#x9898;&#x3002;</p>
+<p> 1&#xFF09;&#x5982;&#x679C;&#x8BE5;<code>ThreadLocal</code>&#x5BF9;&#x5E94;&#x7684;<code>ThreadLocalMap</code>&#x8FD8;&#x4E0D;&#x5B58;&#x5728;&#xFF0C;&#x8981;&#x600E;&#x4E48;&#x5904;&#x7406;&#xFF1F;</p>
+<p> 2&#xFF09;&#x5982;&#x679C;&#x6240;&#x8BA1;&#x7B97;&#x7684;&#x4E0B;&#x6807;&#xFF0C;&#x5728;table&#x5F53;&#x4E2D;&#x5DF2;&#x7ECF;&#x5B58;&#x5728;Entry&#x8282;&#x70B9;&#x4E86;&#x600E;&#x4E48;&#x529E;&#xFF1F;</p>
+<p> &#x6211;&#x60F3;&#x901A;&#x8FC7;&#x4E0A;&#x9762;&#x90E8;&#x5206;&#x4EE3;&#x7801;&#x7684;&#x8BB2;&#x89E3;&#xFF0C;&#x5BF9;&#x8FD9;&#x4E24;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x5927;&#x5BB6;&#x4E5F;&#x90FD;&#x6BD4;&#x8F83;&#x6709;&#x601D;&#x8DEF;&#x4E86;&#x5427;&#x3002;</p>
+<p> &#x8001;&#x89C4;&#x77E9;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x770B;&#x770B;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;/**        </span><br><span class="line"> * ThreadLocalMap&#x7684;set&#x65B9;&#x6CD5;&#xFF0C;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x8FD8;&#x662F;&#x633A;&#x5173;&#x952E;&#x7684;</span><br><span class="line"> * &#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x8BE5;&#x54C8;&#x5E0C;&#x8868;&#x662F;&#x7528;&#x7EBF;&#x6027;&#x63A2;&#x6D4B;&#x6CD5;&#x6765;&#x89E3;&#x51B3;&#x51B2;&#x7A81;&#x7684;</span><br><span class="line"> */</span><br><span class="line">private void set(ThreadLocal&lt;?&gt; key, Object value) {</span><br><span class="line"></span><br><span class="line">    // &#x65B0;&#x5F00;&#x4E00;&#x4E2A;&#x5F15;&#x7528;&#x6307;&#x5411;table</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;table&#x7684;&#x957F;&#x5EA6;</span><br><span class="line">    int len = tab.length;</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;&#x5BF9;&#x5E94;ThreadLocal&#x5728;table&#x5F53;&#x4E2D;&#x7684;&#x4E0B;&#x6807;</span><br><span class="line">    int i = key.threadLocalHashCode &amp; (len-1);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x4ECE;&#x8BE5;&#x4E0B;&#x6807;&#x5F00;&#x59CB;&#x5FAA;&#x73AF;&#x904D;&#x5386;</span><br><span class="line">     * 1&#x3001;&#x5982;&#x9047;&#x76F8;&#x540C;key&#xFF0C;&#x5219;&#x76F4;&#x63A5;&#x66FF;&#x6362;value</span><br><span class="line">     * 2&#x3001;&#x5982;&#x679C;&#x8BE5;key&#x5DF2;&#x7ECF;&#x88AB;&#x56DE;&#x6536;&#x5931;&#x6548;&#xFF0C;&#x5219;&#x66FF;&#x6362;&#x8BE5;&#x5931;&#x6548;&#x7684;key</span><br><span class="line">     */</span><br><span class="line">    for (Entry e = tab[i];</span><br><span class="line">         e != null;</span><br><span class="line">         e = tab[i = nextIndex(i, len)]) {</span><br><span class="line">        ThreadLocal&lt;?&gt; k = e.get();</span><br><span class="line"></span><br><span class="line">        if (k == key) {</span><br><span class="line">            e.value = value;</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        // &#x5982;&#x679C; k &#x4E3A;null&#xFF0C;&#x5219;&#x66FF;&#x6362;&#x5F53;&#x524D;&#x5931;&#x6548;&#x7684;k&#x6240;&#x5728;Entry&#x8282;&#x70B9;</span><br><span class="line">        if (k == null) {</span><br><span class="line">            replaceStaleEntry(key, value, i);</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x627E;&#x5230;&#x7A7A;&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x521B;&#x5EFA;Entry&#x5BF9;&#x8C61;&#x5E76;&#x63D2;&#x5165;</span><br><span class="line">    tab[i] = new Entry(key, value);</span><br><span class="line"></span><br><span class="line">    // table&#x5185;&#x5143;&#x7D20;size&#x81EA;&#x589E;</span><br><span class="line">    int sz = ++size;</span><br><span class="line">    if (!cleanSomeSlots(i, sz) &amp;&amp; sz &gt;= threshold)</span><br><span class="line">        rehash();</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">private void replaceStaleEntry(ThreadLocal&lt;?&gt; key, Object value,</span><br><span class="line">                                       int staleSlot) {</span><br><span class="line">    // &#x65B0;&#x5F00;&#x4E00;&#x4E2A;&#x5F15;&#x7528;&#x6307;&#x5411;table</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;table&#x7684;&#x957F;&#x5EA6;</span><br><span class="line">    int len = tab.length;</span><br><span class="line">    Entry e;</span><br><span class="line"></span><br><span class="line">    // &#x8BB0;&#x5F55;&#x5F53;&#x524D;&#x5931;&#x6548;&#x7684;&#x8282;&#x70B9;&#x4E0B;&#x6807;</span><br><span class="line">    int slotToExpunge = staleSlot;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x901A;&#x8FC7;&#x8FD9;&#x4E2A;for&#x5FAA;&#x73AF;&#x7684;prevIndex(staleSlot, len)&#x53EF;&#x4EE5;&#x770B;&#x51FA;</span><br><span class="line">     * &#x8FD9;&#x662F;&#x7531;staleSlot&#x4E0B;&#x6807;&#x5F00;&#x59CB;&#x5411;&#x524D;&#x626B;&#x63CF;</span><br><span class="line">     * &#x67E5;&#x627E;&#x5E76;&#x8BB0;&#x5F55;&#x6700;&#x524D;&#x4F4D;&#x7F6E;value&#x4E3A;null&#x7684;&#x4E0B;&#x6807;</span><br><span class="line">     */</span><br><span class="line">    for (int i = prevIndex(staleSlot, len);</span><br><span class="line">         (e = tab[i]) != null;</span><br><span class="line">         i = prevIndex(i, len))</span><br><span class="line">        if (e.get() == null)</span><br><span class="line">            slotToExpunge = i;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x901A;&#x8FC7;for&#x5FAA;&#x73AF;nextIndex(staleSlot, len)&#x53EF;&#x4EE5;&#x770B;&#x51FA;</span><br><span class="line">     * &#x8FD9;&#x662F;&#x7531;staleSlot&#x4E0B;&#x6807;&#x5F00;&#x59CB;&#x5411;&#x540E;&#x626B;&#x63CF;</span><br><span class="line">     */</span><br><span class="line">    for (int i = nextIndex(staleSlot, len);</span><br><span class="line">         (e = tab[i]) != null;</span><br><span class="line">         i = nextIndex(i, len)) {</span><br><span class="line"></span><br><span class="line">        // &#x83B7;&#x53D6;Entry&#x8282;&#x70B9;&#x5BF9;&#x5E94;&#x7684;ThreadLocal&#x5BF9;&#x8C61;</span><br><span class="line">        ThreadLocal&lt;?&gt; k = e.get();</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * &#x5982;&#x679C;&#x4E0E;&#x65B0;&#x7684;key&#x5BF9;&#x5E94;&#xFF0C;&#x76F4;&#x63A5;&#x8D4B;&#x503C;value</span><br><span class="line">         * &#x5219;&#x76F4;&#x63A5;&#x66FF;&#x6362;i&#x4E0E;staleSlot&#x4E24;&#x4E2A;&#x4E0B;&#x6807;</span><br><span class="line">         */</span><br><span class="line">        if (k == key) {</span><br><span class="line">            e.value = value;</span><br><span class="line"></span><br><span class="line">            tab[i] = tab[staleSlot];</span><br><span class="line">            tab[staleSlot] = e;</span><br><span class="line"></span><br><span class="line">            // Start expunge at preceding stale entry if it exists</span><br><span class="line">            // &#x901A;&#x8FC7;&#x6CE8;&#x91CA;&#x770B;&#x51FA;&#xFF0C;i&#x4E4B;&#x524D;&#x7684;&#x8282;&#x70B9;&#x91CC;&#xFF0C;&#x6CA1;&#x6709;value&#x4E3A;null&#x7684;&#x60C5;&#x51B5;</span><br><span class="line">            if (slotToExpunge == staleSlot)</span><br><span class="line">                slotToExpunge = i;</span><br><span class="line"></span><br><span class="line">            /**</span><br><span class="line">             * &#x5728;&#x8C03;&#x7528;cleanSomeSlots&#x8FDB;&#x884C;&#x542F;&#x53D1;&#x5F0F;&#x6E05;&#x7406;&#x4E4B;&#x524D;</span><br><span class="line">             * &#x4F1A;&#x5148;&#x8C03;&#x7528;expungeStaleEntry&#x65B9;&#x6CD5;&#x4ECE;slotToExpunge&#x5230;table&#x4E0B;&#x6807;&#x6240;&#x5728;&#x4E3A;null&#x7684;&#x8FDE;&#x7EED;&#x6BB5;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x6E05;&#x7406;</span><br><span class="line">             * &#x8FD4;&#x56DE;&#x503C;&#x4FBF;&#x662F;table[]&#x4E3A;null&#x7684;&#x4E0B;&#x6807;</span><br><span class="line">             * &#x7136;&#x540E;&#x4EE5;&#x8BE5;&#x4E0B;&#x6807;--len&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x542F;&#x53D1;&#x5F0F;&#x6E05;&#x7406;</span><br><span class="line">             * &#x6700;&#x7EC8;&#x91CC;&#x9762;&#x7684;&#x65B9;&#x6CD5;&#x5B9E;&#x9645;&#x4E0A;&#x8FD8;&#x662F;&#x8C03;&#x7528;&#x4E86;expungeStaleEntry</span><br><span class="line">             * &#x53EF;&#x4EE5;&#x770B;&#x51FA;expungeStaleEntry&#x65B9;&#x6CD5;&#x662F;ThreadLocal&#x6838;&#x5FC3;&#x7684;&#x6E05;&#x7406;&#x51FD;&#x6570;</span><br><span class="line">             */</span><br><span class="line">            cleanSomeSlots(expungeStaleEntry(slotToExpunge), len);</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * &#x5982;&#x679C;&#x5F53;&#x524D;&#x4E0B;&#x6807;&#x6240;&#x5728;&#x5DF2;&#x7ECF;&#x5931;&#x6548;&#xFF0C;&#x5E76;&#x4E14;&#x5411;&#x540E;&#x626B;&#x63CF;&#x8FC7;&#x7A0B;&#x5F53;&#x4E2D;&#x6CA1;&#x6709;&#x627E;&#x5230;&#x5931;&#x6548;&#x7684;Entry&#x8282;&#x70B9;</span><br><span class="line">         * &#x5219;slotToExpunge&#x8D4B;&#x503C;&#x4E3A;&#x5F53;&#x524D;&#x4F4D;&#x7F6E;</span><br><span class="line">         */</span><br><span class="line">        if (k == null &amp;&amp; slotToExpunge == staleSlot)</span><br><span class="line">            slotToExpunge = i;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // If key not found, put new entry in stale slot</span><br><span class="line">    // &#x5982;&#x679C;&#x5E76;&#x6CA1;&#x6709;&#x5728;table&#x5F53;&#x4E2D;&#x627E;&#x5230;&#x8BE5;key&#xFF0C;&#x5219;&#x76F4;&#x63A5;&#x5728;&#x5F53;&#x524D;&#x4F4D;&#x7F6E;new&#x4E00;&#x4E2A;Entry</span><br><span class="line">    tab[staleSlot].value = null;</span><br><span class="line">    tab[staleSlot] = new Entry(key, value);</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x5728;&#x4E0A;&#x9762;&#x7684;for&#x5FAA;&#x73AF;&#x63A2;&#x6D4B;&#x8FC7;&#x7A0B;&#x5F53;&#x4E2D;</span><br><span class="line">     * &#x5982;&#x679C;&#x53D1;&#x73B0;&#x4EFB;&#x4F55;&#x65E0;&#x6548;&#x7684;Entry&#x8282;&#x70B9;&#xFF0C;&#x5219;slotToExpunge&#x4F1A;&#x88AB;&#x91CD;&#x65B0;&#x8D4B;&#x503C;</span><br><span class="line">     * &#x5C31;&#x4F1A;&#x89E6;&#x53D1;&#x8FDE;&#x7EED;&#x6BB5;&#x6E05;&#x7406;&#x548C;&#x542F;&#x53D1;&#x5F0F;&#x6E05;&#x7406;</span><br><span class="line">     */</span><br><span class="line">    if (slotToExpunge != staleSlot)</span><br><span class="line">        cleanSomeSlots(expungeStaleEntry(slotToExpunge), len);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**     </span><br><span class="line"> * &#x542F;&#x53D1;&#x5F0F;&#x5730;&#x6E05;&#x7406;&#x88AB;&#x56DE;&#x6536;&#x7684;Entry</span><br><span class="line"> * i&#x5BF9;&#x5E94;&#x7684;Entry&#x662F;&#x975E;&#x65E0;&#x6548;&#x7684;&#xFF0C;&#x6709;&#x53EF;&#x80FD;&#x662F;&#x5931;&#x6548;&#x88AB;&#x56DE;&#x6536;&#x4E86;&#xFF0C;&#x4E5F;&#x6709;&#x53EF;&#x80FD;&#x662F;null</span><br><span class="line"> * &#x4F1A;&#x6709;&#x4E24;&#x4E2A;&#x5730;&#x65B9;&#x8C03;&#x7528;&#x5230;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;</span><br><span class="line"> * 1&#x3001;set&#x65B9;&#x6CD5;&#xFF0C;&#x5728;&#x5224;&#x65AD;&#x662F;&#x5426;&#x9700;&#x8981;resize&#x4E4B;&#x524D;&#xFF0C;&#x4F1A;&#x6E05;&#x7406;&#x5E76;rehash&#x4E00;&#x904D;</span><br><span class="line"> * 2&#x3001;&#x66FF;&#x6362;&#x5931;&#x6548;&#x7684;&#x8282;&#x70B9;&#x65F6;&#x5019;&#xFF0C;&#x4E5F;&#x4F1A;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x6E05;&#x7406;</span><br><span class="line"> */</span><br><span class="line">private boolean cleanSomeSlots(int i, int n) {</span><br><span class="line">    boolean removed = false;</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line">    int len = tab.length;</span><br><span class="line">    do {</span><br><span class="line">        i = nextIndex(i, len);</span><br><span class="line">        Entry e = tab[i];</span><br><span class="line">        // Entry&#x5BF9;&#x8C61;&#x4E0D;&#x4E3A;&#x7A7A;&#xFF0C;&#x4F46;&#x662F;ThreadLocal&#x8FD9;&#x4E2A;key&#x5DF2;&#x7ECF;&#x4E3A;null</span><br><span class="line">        if (e != null &amp;&amp; e.get() == null) {</span><br><span class="line">            n = len;</span><br><span class="line">            removed = true;</span><br><span class="line"></span><br><span class="line">            /**</span><br><span class="line">             * &#x8C03;&#x7528;&#x8BE5;&#x65B9;&#x6CD5;&#x8FDB;&#x884C;&#x56DE;&#x6536;</span><br><span class="line">             * &#x5B9E;&#x9645;&#x4E0A;&#x4E0D;&#x662F;&#x53EA;&#x56DE;&#x6536; i &#x8FD9;&#x4E00;&#x4E2A;&#x8282;&#x70B9;&#x800C;&#x5DF2;</span><br><span class="line">             * &#x800C;&#x662F;&#x5BF9; i &#x5F00;&#x59CB;&#x5230;table&#x6240;&#x5728;&#x4E0B;&#x6807;&#x4E3A;null&#x7684;&#x8303;&#x56F4;&#x5185;&#xFF0C;&#x5BF9;&#x90A3;&#x4E9B;&#x8282;&#x70B9;&#x90FD;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x6E05;&#x7406;&#x548C;rehash</span><br><span class="line">             */</span><br><span class="line">            i = expungeStaleEntry(i);</span><br><span class="line">        }</span><br><span class="line">    } while ( (n &gt;&gt;&gt;= 1) != 0);</span><br><span class="line">    return removed;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * &#x5BF9;table&#x8FDB;&#x884C;&#x6269;&#x5BB9;&#xFF0C;&#x56E0;&#x4E3A;&#x8981;&#x4FDD;&#x8BC1;table&#x7684;&#x957F;&#x5EA6;&#x662F;2&#x7684;&#x5E42;&#xFF0C;&#x6240;&#x4EE5;&#x6269;&#x5BB9;&#x5C31;&#x6269;&#x5927;2&#x500D;</span><br><span class="line"> */</span><br><span class="line">private void resize() {</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;&#x65E7;table&#x7684;&#x957F;&#x5EA6;&#xFF0C;&#x5E76;&#x4E14;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x957F;&#x5EA6;&#x4E3A;&#x65E7;&#x957F;&#x5EA6;2&#x500D;&#x7684;Entry&#x6570;&#x7EC4;</span><br><span class="line">    Entry[] oldTab = table;</span><br><span class="line">    int oldLen = oldTab.length;</span><br><span class="line">    int newLen = oldLen * 2;</span><br><span class="line">    Entry[] newTab = new Entry[newLen];</span><br><span class="line"></span><br><span class="line">    // &#x8BB0;&#x5F55;&#x63D2;&#x5165;&#x7684;&#x6709;&#x6548;Entry&#x8282;&#x70B9;&#x6570;</span><br><span class="line">    int count = 0;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x4ECE;&#x4E0B;&#x6807;0&#x5F00;&#x59CB;&#xFF0C;&#x9010;&#x4E2A;&#x5411;&#x540E;&#x904D;&#x5386;&#x63D2;&#x5165;&#x5230;&#x65B0;&#x7684;table&#x5F53;&#x4E2D;</span><br><span class="line">     * 1&#x3001;&#x5982;&#x9047;&#x5230;key&#x5DF2;&#x7ECF;&#x4E3A;null&#xFF0C;&#x5219;value&#x8BBE;&#x7F6E;null&#xFF0C;&#x65B9;&#x4FBF;GC&#x56DE;&#x6536;</span><br><span class="line">     * 2&#x3001;&#x901A;&#x8FC7;hashcode &amp; len - 1&#x8BA1;&#x7B97;&#x4E0B;&#x6807;&#xFF0C;&#x5982;&#x679C;&#x8BE5;&#x4F4D;&#x7F6E;&#x5DF2;&#x7ECF;&#x6709;Entry&#x6570;&#x7EC4;&#xFF0C;&#x5219;&#x901A;&#x8FC7;&#x7EBF;&#x6027;&#x63A2;&#x6D4B;&#x5411;&#x540E;&#x63A2;&#x6D4B;&#x63D2;&#x5165;</span><br><span class="line">     */</span><br><span class="line">    for (int j = 0; j &lt; oldLen; ++j) {</span><br><span class="line">        Entry e = oldTab[j];</span><br><span class="line">        if (e != null) {</span><br><span class="line">            ThreadLocal&lt;?&gt; k = e.get();</span><br><span class="line">            if (k == null) {</span><br><span class="line">                e.value = null; // Help the GC</span><br><span class="line">            } else {</span><br><span class="line">                int h = k.threadLocalHashCode &amp; (newLen - 1);</span><br><span class="line">                while (newTab[h] != null)</span><br><span class="line">                    h = nextIndex(h, newLen);</span><br><span class="line">                newTab[h] = e;</span><br><span class="line">                count++;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x91CD;&#x65B0;&#x8BBE;&#x7F6E;&#x6269;&#x5BB9;&#x7684;&#x9608;&#x503C;</span><br><span class="line">    setThreshold(newLen);</span><br><span class="line"></span><br><span class="line">    // &#x66F4;&#x65B0;size</span><br><span class="line">    size = count;</span><br><span class="line"></span><br><span class="line">    // &#x6307;&#x5411;&#x65B0;&#x7684;Entry&#x6570;&#x7EC4;</span><br><span class="line">    table = newTab;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p> &#x4EE5;&#x4E0A;&#x7684;&#x4EE3;&#x7801;&#x5C31;&#x662F;&#x8C03;&#x7528;set&#x65B9;&#x6CD5;&#x5F80;<code>ThreadLocalMap</code>&#x5F53;&#x4E2D;&#x4FDD;&#x5B58;K-V&#x5173;&#x7CFB;&#x7684;&#x4E00;&#x7CFB;&#x5217;&#x4EE3;&#x7801;&#xFF0C;&#x6211;&#x5C31;&#x4E0D;&#x5206;&#x5F00;&#x518D;&#x4E00;&#x4E2A;&#x4E2A;&#x8BB2;&#x4E86;&#xFF0C;&#x8FD9;&#x6837;&#x5927;&#x5BB6;&#x770B;&#x8D77;&#x6765;&#x4F30;&#x8BA1;&#x4E5F;&#x6BD4;&#x8F83;&#x65B9;&#x4FBF;&#xFF0C;&#x6709;&#x8FDE;&#x7EED;&#x6027;&#x3002;</p>
+<p> &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6765;&#x770B;&#x770B;&#x4E00;&#x6574;&#x4E2A;&#x7684;set&#x6D41;&#x7A0B;&#xFF1A;</p>
+<p> 1&#x3001;&#x5148;&#x901A;&#x8FC7;hashcode &amp; (len - 1)&#x6765;&#x5B9A;&#x4F4D;&#x8BE5;<code>ThreadLocal</code>&#x5728;table&#x5F53;&#x4E2D;&#x7684;&#x4E0B;&#x6807;</p>
+<p> 2&#x3001;for&#x5FAA;&#x73AF;&#x5411;&#x540E;&#x904D;&#x5386;</p>
+<p> 1&#xFF09;&#x5982;&#x679C;&#x83B7;&#x53D6;Entry&#x8282;&#x70B9;&#x7684;key&#x4E0E;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x64CD;&#x4F5C;&#x7684;<code>ThreadLocal</code>&#x76F8;&#x7B49;&#xFF0C;&#x5219;&#x76F4;&#x63A5;&#x66FF;&#x6362;value</p>
+<p> 2&#xFF09;&#x5982;&#x679C;&#x904D;&#x5386;&#x7684;&#x65F6;&#x5019;&#x62FF;&#x5230;&#x4E86;key&#x4E3A;null&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x5219;&#x8C03;&#x7528;<code>replaceStaleEntry</code>&#x65B9;&#x6CD5;&#x8FDB;&#x884C;&#x4E0E;&#x4E4B;&#x66FF;&#x6362;&#x3002;</p>
+<p> 3&#x3001;&#x5982;&#x679C;&#x4E0A;&#x8FF0;&#x4E24;&#x4E2A;&#x60C5;&#x51B5;&#x90FD;&#x662F;&#xFF0C;&#x5219;&#x76F4;&#x63A5;&#x5728;&#x8BA1;&#x7B97;&#x7684;&#x51FA;&#x6765;&#x7684;&#x4E0B;&#x6807;&#x5F53;&#x4E2D;new&#x4E00;&#x4E2A;Entry&#x9636;&#x6BB5;&#x63D2;&#x5165;&#x3002;</p>
+<p> 4&#x3001;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x542F;&#x53D1;&#x5F0F;&#x5730;&#x6E05;&#x7406;&#x5E76;&#x4E14;&#x5982;&#x679C;&#x63D2;&#x5165;&#x8282;&#x70B9;&#x540E;&#x7684;size&#x5927;&#x4E8E;&#x6269;&#x5BB9;&#x7684;&#x9608;&#x503C;&#xFF0C;&#x5219;&#x8C03;&#x7528;resize&#x65B9;&#x6CD5;&#x8FDB;&#x884C;&#x6269;&#x5BB9;&#x3002;</p>
+<h4 id="remove&#x65B9;&#x6CD5;"><a href="#remove&#x65B9;&#x6CD5;" class="headerlink" title="remove&#x65B9;&#x6CD5;"></a>remove&#x65B9;&#x6CD5;</h4><p> &#x65E2;&#x7136;&#x662F;Map&#x5F62;&#x5F0F;&#x8FDB;&#x884C;&#x5B58;&#x50A8;&#xFF0C;&#x6211;&#x4EEC;&#x6709;put&#x65B9;&#x6CD5;&#xFF0C;&#x90A3;&#x80AF;&#x5B9A;&#x5C31;&#x4F1A;&#x6709;remove&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4EFB;&#x4F55;&#x4E00;&#x79CD;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;&#x80AF;&#x5B9A;&#x90FD;&#x5F97;&#x7B26;&#x5408;&#x589E;&#x5220;&#x6539;&#x67E5;&#x7684;&#x3002;</p>
+<p> &#x6211;&#x4EEC;&#x76F4;&#x63A5;&#x6765;&#x770B;&#x770B;&#x4EE3;&#x7801;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> * Remove the entry for key.</span><br><span class="line"> * &#x5C06;ThreadLocal&#x5BF9;&#x8C61;&#x5BF9;&#x5E94;&#x7684;Entry&#x8282;&#x70B9;&#x4ECE;table&#x5F53;&#x4E2D;&#x5220;&#x9664;</span><br><span class="line"> */</span><br><span class="line">private void remove(ThreadLocal&lt;?&gt; key) {</span><br><span class="line">    Entry[] tab = table;</span><br><span class="line">    int len = tab.length;</span><br><span class="line">    int i = key.threadLocalHashCode &amp; (len-1);</span><br><span class="line">    for (Entry e = tab[i];</span><br><span class="line">         e != null;</span><br><span class="line">         e = tab[i = nextIndex(i, len)]) {</span><br><span class="line">        if (e.get() == key) {</span><br><span class="line">            // &#x5C06;&#x5F15;&#x7528;&#x8BBE;&#x7F6E;null&#xFF0C;&#x65B9;&#x4FBF;GC</span><br><span class="line">            e.clear();</span><br><span class="line"></span><br><span class="line">            // &#x4ECE;&#x8BE5;&#x4F4D;&#x7F6E;&#x5F00;&#x59CB;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x8FDE;&#x7EED;&#x6BB5;&#x6E05;&#x7406;</span><br><span class="line">            expungeStaleEntry(i);</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;remove&#x8282;&#x70B9;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E5F;&#x4F1A;&#x4F7F;&#x7528;&#x7EBF;&#x6027;&#x63A2;&#x6D4B;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x5F53;&#x627E;&#x5230;&#x5BF9;&#x5E94;key&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C31;&#x4F1A;&#x8C03;&#x7528;clear&#x5C06;&#x5F15;&#x7528;&#x6307;&#x5411;null&#xFF0C;&#x5E76;&#x4E14;&#x4F1A;&#x89E6;&#x53D1;&#x4E00;&#x6B21;&#x8FDE;&#x7EED;&#x6BB5;&#x6E05;&#x7406;&#x3002;</p>
+<p>&#x6211;&#x76F8;&#x4FE1;&#x901A;&#x8FC7;&#x4EE5;&#x4E0A;&#x5BF9;<code>ThreadLocalMap</code>&#x7684;&#x6E90;&#x7801;&#x5206;&#x6790;&#xFF0C;&#x5DF2;&#x7ECF;&#x8BA9;&#x5927;&#x5BB6;&#x5BF9;&#x5176;&#x6709;&#x4E86;&#x4E2A;&#x57FA;&#x672C;&#x7684;&#x6982;&#x5FF5;&#x8BA4;&#x8BC6;&#xFF0C;&#x76F8;&#x4FE1;&#x5BF9;&#x5927;&#x5BB6;&#x7406;&#x89E3;ThreadLocal&#x8FD9;&#x4E2A;&#x6982;&#x5FF5;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5DF2;&#x7ECF;&#x4E0D;&#x662F;&#x505C;&#x7559;&#x5728;&#x77E5;&#x9053;&#x5B83;&#x5C31;&#x662F;&#x4E3A;&#x4E86;&#x5B9E;&#x73B0;&#x7EBF;&#x7A0B;&#x672C;&#x5730;&#x53D8;&#x91CF;&#x800C;&#x5DF2;&#x4E86;&#x3002;</p>
+<p>&#x90A3;&#x63A5;&#x4E0B;&#x6765;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;<code>ThreadLocal</code>&#x7684;&#x6E90;&#x7801;&#x5206;&#x6790;&#x5427;&#x3002;</p>
+<h3 id="ThreadLocal&#x6E90;&#x7801;&#x5206;&#x6790;"><a href="#ThreadLocal&#x6E90;&#x7801;&#x5206;&#x6790;" class="headerlink" title="ThreadLocal&#x6E90;&#x7801;&#x5206;&#x6790;"></a>ThreadLocal&#x6E90;&#x7801;&#x5206;&#x6790;</h3><p> <code>ThreadLocal</code>&#x7684;&#x6E90;&#x7801;&#x76F8;&#x5BF9;&#x4E8E;&#x6765;&#x8BF4;&#x5C31;&#x7B80;&#x5355;&#x5F88;&#x591A;&#x4E86;&#xFF0C;&#x56E0;&#x4E3A;&#x4E3B;&#x8981;&#x90FD;&#x662F;ThreadLocalMap&#x8FD9;&#x4E2A;&#x5185;&#x90E8;&#x7C7B;&#x5728;&#x5E72;&#x6D3B;&#xFF0C;&#x5728;&#x7BA1;&#x7406;&#x6211;&#x4EEC;&#x7684;&#x672C;&#x5730;&#x53D8;&#x91CF;&#x3002;</p>
+<h4 id="get&#x65B9;&#x6CD5;&#x7CFB;&#x5217;"><a href="#get&#x65B9;&#x6CD5;&#x7CFB;&#x5217;" class="headerlink" title="get&#x65B9;&#x6CD5;&#x7CFB;&#x5217;"></a>get&#x65B9;&#x6CD5;&#x7CFB;&#x5217;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;/**     </span><br><span class="line"> * &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x672C;&#x5730;&#x53D8;&#x91CF;&#x7684;&#x503C;</span><br><span class="line"> */</span><br><span class="line">public T get() {</span><br><span class="line">    // &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x5BF9;&#x5E94;&#x7684;ThreadLocalMap</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line"></span><br><span class="line">    // &#x5982;&#x679C;map&#x4E0D;&#x4E3A;&#x7A7A;</span><br><span class="line">    if (map != null) {</span><br><span class="line"></span><br><span class="line">        // &#x5982;&#x679C;&#x5F53;&#x524D;ThreadLocal&#x5BF9;&#x8C61;&#x5BF9;&#x5E94;&#x7684;Entry&#x8FD8;&#x5B58;&#x5728;</span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(this);</span><br><span class="line"></span><br><span class="line">        // &#x5E76;&#x4E14;Entry&#x4E0D;&#x4E3A;null&#xFF0C;&#x8FD4;&#x56DE;&#x5BF9;&#x5E94;&#x7684;&#x503C;&#xFF0C;&#x5426;&#x5219;&#x90FD;&#x6267;&#x884C;setInitialValue&#x65B9;&#x6CD5;</span><br><span class="line">        if (e != null) {</span><br><span class="line">            @SuppressWarnings(&quot;unchecked&quot;)</span><br><span class="line">            T result = (T)e.value;</span><br><span class="line">            return result;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    // &#x5982;&#x679C;&#x8BE5;&#x7EBF;&#x7A0B;&#x5BF9;&#x5E94;&#x7684;ThreadLocalMap&#x8FD8;&#x4E0D;&#x5B58;&#x5728;&#xFF0C;&#x5219;&#x6267;&#x884C;&#x521D;&#x59CB;&#x5316;&#x65B9;&#x6CD5;</span><br><span class="line">    return setInitialValue();</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ThreadLocalMap getMap(Thread t) {</span><br><span class="line">    return t.threadLocals;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">private T setInitialValue() {</span><br><span class="line">    // &#x83B7;&#x53D6;&#x521D;&#x59CB;&#x503C;&#xFF0C;&#x4E00;&#x822C;&#x662F;&#x5B50;&#x7C7B;&#x91CD;&#x5199;</span><br><span class="line">    T value = initialValue();</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x5BF9;&#x5E94;&#x7684;ThreadLocalMap</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line"></span><br><span class="line">    // &#x5982;&#x679C;map&#x4E0D;&#x4E3A;null</span><br><span class="line">    if (map != null)</span><br><span class="line"></span><br><span class="line">        // &#x8C03;&#x7528;ThreadLocalMap&#x7684;set&#x65B9;&#x6CD5;&#x8FDB;&#x884C;&#x8D4B;&#x503C;</span><br><span class="line">        map.set(this, value);</span><br><span class="line"></span><br><span class="line">    // &#x5426;&#x5219;&#x521B;&#x5EFA;&#x4E2A;ThreadLocalMap&#x8FDB;&#x884C;&#x8D4B;&#x503C;</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">    return value;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * &#x6784;&#x9020;&#x53C2;&#x6570;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;ThreadLocalMap&#x4EE3;&#x7801;</span><br><span class="line"> * ThreadLocal&#x4E3A;key&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x6CDB;&#x578B;&#x4E3A;value</span><br><span class="line"> */</span><br><span class="line">ThreadLocalMap(ThreadLocal&lt;?&gt; firstKey, Object firstValue) {</span><br><span class="line">    // &#x521D;&#x59CB;&#x5316;table&#x7684;&#x5927;&#x5C0F;&#x4E3A;16</span><br><span class="line">    table = new Entry[INITIAL_CAPACITY];</span><br><span class="line"></span><br><span class="line">    // &#x901A;&#x8FC7;hashcode &amp; &#xFF08;&#x957F;&#x5EA6;-1&#xFF09;&#x7684;&#x4F4D;&#x8FD0;&#x7B97;&#xFF0C;&#x786E;&#x5B9A;&#x952E;&#x503C;&#x5BF9;&#x7684;&#x4F4D;&#x7F6E;</span><br><span class="line">    int i = firstKey.threadLocalHashCode &amp; (INITIAL_CAPACITY - 1);</span><br><span class="line"></span><br><span class="line">    // &#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x8282;&#x70B9;&#x4FDD;&#x5B58;&#x5728;table&#x5F53;&#x4E2D;</span><br><span class="line">    table[i] = new Entry(firstKey, firstValue);</span><br><span class="line"></span><br><span class="line">    // &#x8BBE;&#x7F6E;table&#x5185;&#x5143;&#x7D20;&#x4E3A;1</span><br><span class="line">    size = 1;</span><br><span class="line"></span><br><span class="line">    // &#x8BBE;&#x7F6E;&#x6269;&#x5BB9;&#x9608;&#x503C;</span><br><span class="line">    setThreshold(INITIAL_CAPACITY);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p> <code>ThreadLocal</code>&#x7684;get&#x65B9;&#x6CD5;&#x4E5F;&#x4E0D;&#x96BE;&#xFF0C;&#x5C31;&#x51E0;&#x884C;&#x4EE3;&#x7801;&#xFF0C;&#x4F46;&#x662F;&#x5F53;&#x5B83;&#x7ED3;&#x5408;&#x4E86;<code>ThreadLocalMap</code>&#x7684;&#x65B9;&#x6CD5;&#x540E;&#xFF0C;&#x8FD9;&#x6574;&#x4E2A;&#x903B;&#x8F91;&#x5C31;&#x503C;&#x5F97;&#x6211;&#x4EEC;&#x6DF1;&#x5165;&#x7814;&#x7A76;&#x5199;&#x8FD9;&#x4E2A;&#x5DE5;&#x5177;&#x7684;&#x4EBA;&#x7684;&#x601D;&#x7EF4;&#x4E86;&#x3002;</p>
+<p> &#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#x5B83;&#x7684;&#x4E00;&#x4E2A;&#x6D41;&#x7A0B;&#x5427;&#x3002;</p>
+<p> 1&#x3001;&#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF0C;&#x6839;&#x636E;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;<code>ThreadLocalMap</code></p>
+<p> 2&#x3001;&#x5728;<code>ThreadLocalMap</code>&#x5F53;&#x4E2D;&#x83B7;&#x53D6;&#x8BE5;<code>ThreadLocal</code>&#x5BF9;&#x8C61;&#x5BF9;&#x5E94;&#x7684;Entry&#x8282;&#x70B9;&#xFF0C;&#x5E76;&#x4E14;&#x8FD4;&#x56DE;&#x5BF9;&#x5E94;&#x7684;&#x503C;</p>
+<p> 3&#x3001;&#x5982;&#x679C;&#x83B7;&#x53D6;&#x5230;&#x7684;<code>ThreadLocalMap</code>&#x4E3A;null&#xFF0C;&#x5219;&#x8BC1;&#x660E;&#x8FD8;&#x6CA1;&#x6709;&#x521D;&#x59CB;&#x5316;&#xFF0C;&#x5C31;&#x8C03;&#x7528;setInitialValue&#x65B9;&#x6CD5;</p>
+<p> 1&#xFF09;&#x5728;&#x8C03;&#x7528;setInitialValue&#x65B9;&#x6CD5;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4F1A;&#x53CC;&#x91CD;&#x4FDD;&#x8BC1;&#xFF0C;&#x518D;&#x8FDB;&#x884C;&#x83B7;&#x53D6;&#x4E00;&#x6B21;<code>ThreadLocalMap</code></p>
+<p> 2&#xFF09;&#x5982;&#x679C;&#x4F9D;&#x7136;&#x4E3A;null&#xFF0C;&#x5C31;&#x6700;&#x7EC8;&#x8C03;&#x7528;ThreadLocalMap&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;</p>
+<h4 id="set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;-1"><a href="#set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;-1" class="headerlink" title="set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;"></a>set&#x65B9;&#x6CD5;&#x7CFB;&#x5217;</h4><p>&#x5728;&#x8FD9;&#x91CC;&#x6211;&#x4E5F;&#x4E0D;&#x5BF9;<code>ThreadLocal</code>&#x7684;set&#x65B9;&#x6CD5;&#x505A;&#x592A;&#x591A;&#x4ECB;&#x7ECD;&#x4E86;&#xFF0C;&#x7ED3;&#x5408;&#x4E0A;&#x9762;&#x7684;<code>ThreadLocalMap</code>&#x7684;set&#x65B9;&#x6CD5;&#xFF0C;&#x6211;&#x60F3;&#x5C31;&#x53EF;&#x4EE5;&#x5BF9;&#x4E0A;&#x9762;&#x6BCF;&#x4E2A;&#x65B9;&#x6CD5;&#x601D;&#x8003;&#x51FA;&#x7684;&#x95EE;&#x9898;&#x6709;&#x4E2A;&#x5927;&#x6982;&#x7684;&#x7B54;&#x6848;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public void set(T value) {</span><br><span class="line">    // &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line"></span><br><span class="line">    // &#x83B7;&#x53D6;&#x7EBF;&#x7A0B;&#x6240;&#x5BF9;&#x5E94;&#x7684;ThreadLocalMap&#xFF0C;&#x4ECE;&#x8FD9;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x90FD;&#x662F;&#x72EC;&#x7ACB;&#x7684;</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line"></span><br><span class="line">    // &#x5982;&#x679C;map&#x4E0D;&#x4E3A;&#x7A7A;&#xFF0C;&#x5219;k-v&#x8D4B;&#x503C;&#xFF0C;&#x770B;&#x51FA;k&#x662F;this&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x5F53;&#x524D;ThreaLocal&#x5BF9;&#x8C61;</span><br><span class="line">    if (map != null)</span><br><span class="line">        map.set(this, value);</span><br><span class="line"></span><br><span class="line">    // &#x5982;&#x679C;&#x83B7;&#x53D6;&#x7684;map&#x4E3A;&#x7A7A;&#xFF0C;&#x5219;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x5E76;&#x4FDD;&#x5B58;k-v&#x5173;&#x7CFB;</span><br><span class="line">    else</span><br><span class="line">        createMap(t, value);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5176;&#x5B9E;<code>ThreadLocal</code>&#x7684;set&#x65B9;&#x6CD5;&#x5F88;&#x7B80;&#x5355;&#x7684;&#xFF0C;&#x6700;&#x4E3B;&#x8981;&#x7684;&#x90FD;&#x662F;&#x8C03;&#x7528;&#x4E86;<code>ThreadLocalMap</code>&#x7684;set&#x65B9;&#x6CD5;&#xFF0C;&#x91CC;&#x9762;&#x624D;&#x662F;&#x771F;&#x6B63;&#x6838;&#x5FC3;&#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x3002;</p>
+<p>&#x4E0D;&#x8FC7;&#x6211;&#x4EEC;&#x7167;&#x6837;&#x6765;&#x770B;&#x770B;&#x8FD9;&#x4E2A;&#x6D41;&#x7A0B;&#xFF1A;</p>
+<p>1&#x3001;&#x83B7;&#x53D6;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF0C;&#x6839;&#x636E;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;<code>ThreadLocalMap</code></p>
+<p>2&#x3001;&#x5982;&#x679C;&#x5BF9;&#x5E94;&#x7684;<code>ThreadLocalMap</code>&#x4E0D;&#x4E3A;null&#xFF0C;&#x5219;&#x8C03;&#x7528;&#x5176;&#x7684;set&#x65B9;&#x6CD5;&#x4FDD;&#x5B58;&#x5BF9;&#x5E94;&#x5173;&#x7CFB;</p>
+<p>3&#x3001;&#x5982;&#x679C;map&#x4E3A;null&#xFF0C;&#x5C31;&#x6700;&#x7EC8;&#x8C03;&#x7528;<code>ThreadLocalMap</code>&#x7684;&#x6784;&#x9020;&#x65B9;&#x6CD5;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;<code>ThreadLocalMap</code>&#x5E76;&#x4FDD;&#x5B58;&#x5BF9;&#x5E94;&#x5173;&#x7CFB;</p>
+<h3 id="&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;"><a href="#&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;" class="headerlink" title="&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;"></a>&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x603B;&#x7ED3;</h3><p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/12465640a5e699468aff068ce836e2e158fa5166e9eb960ed350884d2c00acd7" alt="&#x5728;&#x8FD9;&#x91CC;&#x63D2;&#x5165;&#x56FE;&#x7247;&#x63CF;&#x8FF0;"></p>
+<h3 id="&#x6E90;&#x7801;&#x5206;&#x6790;&#x603B;&#x7ED3;"><a href="#&#x6E90;&#x7801;&#x5206;&#x6790;&#x603B;&#x7ED3;" class="headerlink" title="&#x6E90;&#x7801;&#x5206;&#x6790;&#x603B;&#x7ED3;"></a>&#x6E90;&#x7801;&#x5206;&#x6790;&#x603B;&#x7ED3;</h3><p> &#x4E0A;&#x9762;&#x901A;&#x8FC7;&#x5BF9;<code>ThreadLocal</code>&#x548C;<code>ThreadLocalMap</code>&#x4E24;&#x4E2A;&#x7C7B;&#x7684;&#x6E90;&#x7801;&#x8FDB;&#x884C;&#x4E86;&#x5206;&#x6790;&#xFF0C;&#x6211;&#x60F3;&#x5BF9;&#x4E8E;ThreadLocal&#x8FD9;&#x4E2A;&#x529F;&#x80FD;&#x7684;&#x4E00;&#x6574;&#x4E2A;&#x6D41;&#x7A0B;&#xFF0C;&#x5927;&#x5BB6;&#x90FD;&#x6709;&#x4E86;&#x4E2A;&#x6BD4;&#x8F83;&#x6E05;&#x695A;&#x7684;&#x4E86;&#x89E3;&#x4E86;&#x3002;&#x6211;&#x771F;&#x7684;&#x662F;&#x5F88;&#x4F69;&#x670D;==Josh Bloch and Doug Lea==&#x8FD9;&#x4E24;&#x4F4D;&#x5927;&#x795E;&#xFF0C;&#x4ED6;&#x4EEC;&#x5728;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x4E1C;&#x897F;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E0D;&#x662F;&#x8BF4;&#x5149;&#x5B9E;&#x73B0;&#x4E86;&#x5C31;&#x53EF;&#x4EE5;&#x4E86;&#xFF0C;&#x8003;&#x8651;&#x4E86;&#x5F88;&#x591A;&#x60C5;&#x51B5;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;GC&#x95EE;&#x9898;&#x3001;&#x5982;&#x4F55;&#x7EF4;&#x62A4;&#x597D;&#x6570;&#x636E;&#x5B58;&#x50A8;&#x7684;&#x95EE;&#x9898;&#x4EE5;&#x53CA;&#x7EBF;&#x7A0B;&#x4E0E;&#x672C;&#x5730;&#x53D8;&#x91CF;&#x4E4B;&#x95F4;&#x5E94;&#x8BE5;&#x4EE5;&#x4F55;&#x79CD;&#x65B9;&#x5F0F;&#x5EFA;&#x7ACB;&#x5BF9;&#x5E94;&#x5173;&#x7CFB;&#x3002;</p>
+<p> &#x4ED6;&#x4EEC;&#x5199;&#x7684;&#x4EE3;&#x7801;&#x903B;&#x8F91;&#x975E;&#x5E38;&#x4E4B;&#x4E25;&#x8C28;&#xFF0C;&#x770B;&#x5230;&#x8FD9;&#x533A;&#x533A;&#x51E0;&#x767E;&#x884C;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x624D;&#x771F;&#x6B63;&#x5730;&#x53D1;&#x73B0;&#xFF0C;&#x6211;&#x4EEC;&#x5176;&#x5B9E;&#x4E3B;&#x8981;&#x4E0D;&#x662F;&#x5728;&#x6280;&#x672F;&#x4E0A;&#x4E0E;&#x522B;&#x4EBA;&#x7684;&#x5DEE;&#x8DDD;&#xFF0C;&#x800C;&#x662F;&#x5728;&#x529F;&#x80FD;&#x5B9E;&#x73B0;&#x7684;&#x4E00;&#x6574;&#x5957;&#x601D;&#x7EF4;&#x903B;&#x8F91;&#x4E0A;&#x9762;&#x5C31;&#x4E0E;&#x4ED6;&#x4EEC;&#x6709;&#x7740;&#x5DE8;&#x5927;&#x7684;&#x5DEE;&#x8DDD;&#xFF0C;&#x6700;&#x660E;&#x663E;&#x7684;&#x4E00;&#x70B9;&#x5C31;&#x662F;&#xFF0C;&#x6211;&#x4EEC;&#x5355;&#x7EAF;&#x662F;&#x4E3A;&#x4E86;&#x5B9E;&#x73B0;&#x800C;&#x5B9E;&#x73B0;&#xFF0C;&#x57FA;&#x672C;&#x4E0A;&#x4E0D;&#x4F1A;&#x8003;&#x8651;&#x5176;&#x4ED6;&#x5F02;&#x5E38;&#x60C5;&#x51B5;&#xFF0C;&#x66F4;&#x52A0;&#x4E0D;&#x4F1A;&#x8003;&#x8651;&#x5230;&#x4E00;&#x4E9B;GC&#x95EE;&#x9898;&#x3002;</p>
+<p> &#x6240;&#x4EE5;&#x901A;&#x8FC7;&#x8BE5;&#x7BC7;&#x6E90;&#x7801;&#x7684;&#x5206;&#x6790;&#xFF0C;&#x8BA9;&#x6211;&#x771F;&#x6B63;&#x5730;&#x610F;&#x8BC6;&#x5230;&#xFF0C;&#x6211;&#x4EEC;&#x4E0D;&#x80FD;&#x5149;&#x662F;&#x770B;&#x6E90;&#x7801;&#x505A;&#x7FFB;&#x8BD1;&#x800C;&#x5DF2;&#xFF0C;&#x6211;&#x4EEC;&#x4E00;&#x5B9A;&#x8981;&#x5B66;&#x4F1A;&#x4ED6;&#x4EEC;&#x662F;&#x5982;&#x4F55;&#x601D;&#x8003;&#x5B9E;&#x73B0;&#x8FD9;&#x4E48;&#x4E2A;&#x529F;&#x80FD;&#xFF0C;&#x6211;&#x4EEC;&#x8981;&#x5B66;&#x4F1A;&#x4ED6;&#x4EEC;&#x601D;&#x8003;&#x6BCF;&#x4E00;&#x4E2A;&#x529F;&#x80FD;&#x7684;&#x903B;&#x8F91;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/aa2da7a70fa6d024b493ecbe79c727c0.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903801783058440.html" rel="next" title="Gson源码解析和它的设计模式">
+                <i class="fa fa-chevron-left"></i> Gson源码解析和它的设计模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903824583294984.html" rel="prev" title="Axios 源码解析">
+                Axios 源码解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">1775</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">725</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景分析"><span class="nav-number">1.</span> <span class="nav-text">背景分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义"><span class="nav-number">1.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#例子"><span class="nav-number">1.2.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocalMap源码分析"><span class="nav-number">2.1.</span> <span class="nav-text">ThreadLocalMap源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Entry内部类"><span class="nav-number">2.1.1.</span> <span class="nav-text">Entry内部类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#getEntry和getEntryAfterMiss方法"><span class="nav-number">2.1.2.</span> <span class="nav-text">getEntry和getEntryAfterMiss方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#expungeStaleEntry方法"><span class="nav-number">2.1.3.</span> <span class="nav-text">expungeStaleEntry方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#set方法系列"><span class="nav-number">2.1.4.</span> <span class="nav-text">set方法系列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#remove方法"><span class="nav-number">2.1.5.</span> <span class="nav-text">remove方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocal源码分析"><span class="nav-number">2.2.</span> <span class="nav-text">ThreadLocal源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#get方法系列"><span class="nav-number">2.2.1.</span> <span class="nav-text">get方法系列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#set方法系列-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">set方法系列</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行流程总结"><span class="nav-number">2.3.</span> <span class="nav-text">执行流程总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码分析总结"><span class="nav-number">2.4.</span> <span class="nav-text">源码分析总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

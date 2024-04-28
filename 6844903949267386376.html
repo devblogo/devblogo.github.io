@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android Jetpack,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x524D;&amp;#x8A00;&amp;#x5F53;&amp;#x524D;&amp;#x5E02;&amp;#x9762;&amp;#x4E0A;, &amp;#x6BD4;&amp;#x8F83;&amp;#x5E38;&amp;#x7528;&amp;#x7684;&amp;#x4E8B;&amp;#x4EF6;&amp;#x603B;&amp;#x7EBF;, &amp;#x4ECD;&amp;#x7136;&amp;#x662F;EventBus&amp;#x548C;RxBus, &amp;#x65E9;&amp;#x671F;&amp;#x62">
+<meta name="keywords" content="Android Jetpack">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于LiveData实现事件总线思路和方案">
+<meta property="og:url" content="https://dev.newban.cn/6844903949267386376.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x5F53;&amp;#x524D;&amp;#x5E02;&amp;#x9762;&amp;#x4E0A;, &amp;#x6BD4;&amp;#x8F83;&amp;#x5E38;&amp;#x7528;&amp;#x7684;&amp;#x4E8B;&amp;#x4EF6;&amp;#x603B;&amp;#x7EBF;, &amp;#x4ECD;&amp;#x7136;&amp;#x662F;EventBus&amp;#x548C;RxBus, &amp;#x65E9;&amp;#x671F;&amp;#x62">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2ed7147535ab250796547a062814eca00265e3b781897b289257c8996f8a203a">
+<meta property="og:updated_time" content="2024-04-27T04:28:04.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于LiveData实现事件总线思路和方案">
+<meta name="twitter:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x5F53;&amp;#x524D;&amp;#x5E02;&amp;#x9762;&amp;#x4E0A;, &amp;#x6BD4;&amp;#x8F83;&amp;#x5E38;&amp;#x7528;&amp;#x7684;&amp;#x4E8B;&amp;#x4EF6;&amp;#x603B;&amp;#x7EBF;, &amp;#x4ECD;&amp;#x7136;&amp;#x662F;EventBus&amp;#x548C;RxBus, &amp;#x65E9;&amp;#x671F;&amp;#x62">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2ed7147535ab250796547a062814eca00265e3b781897b289257c8996f8a203a">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903949267386376.html">
+
+
+
+
+
+  <title>基于LiveData实现事件总线思路和方案 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于LiveData实现事件总线思路和方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-20T17:58:44+08:00">
+                2019-09-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h3><p>&#x5F53;&#x524D;&#x5E02;&#x9762;&#x4E0A;, &#x6BD4;&#x8F83;&#x5E38;&#x7528;&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;, &#x4ECD;&#x7136;&#x662F;<code>EventBus</code>&#x548C;<code>RxBus</code>, &#x65E9;&#x671F;&#x6211;&#x66FE;&#x7ECF;&#x5199;&#x8FC7;<a href="/external_links/4d6b381b3d294cc319bd4019ee411b24.html" target="blank" rel="noopener">EventBus&#x6E90;&#x7801;&#x89E3;&#x6790;</a>,&#x8FD9;&#x4E24;&#x4E2A;&#x6846;&#x67B6;&#x4E0D;&#x8BBA;&#x662F;&#x54EA;&#x4E2A;, &#x5F00;&#x53D1;&#x8005;&#x90FD;&#x9700;&#x8981;&#x53BB;&#x8003;&#x8651;&#x751F;&#x547D;&#x5468;&#x671F;&#x7684;&#x5904;&#x7406;.&#x800C;&#x7F8E;&#x56E2;&#x7ED9;&#x51FA;&#x4E86;&#x4E2A;<a href="/external_links/bbc67f52ce19d15c0a5bc510636f2271.html" target="blank" rel="noopener">&#x89E3;&#x51B3;&#x65B9;&#x6848;</a>, &#x901A;&#x8FC7;LiveData&#x6765;&#x5B9E;&#x73B0;&#x81EA;&#x5E26;&#x751F;&#x547D;&#x5468;&#x671F;&#x611F;&#x77E5;&#x80FD;&#x529B;&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;&#x6846;&#x67B6;. &#x672C;&#x7BC7;&#x6211;&#x4EEC;&#x81EA;&#x5DF1;&#x64B8;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;&#x6846;&#x67B6;.</p>
+<h3 id="LiveData&#x7684;&#x539F;&#x7406;"><a href="#LiveData&#x7684;&#x539F;&#x7406;" class="headerlink" title="LiveData&#x7684;&#x539F;&#x7406;"></a>LiveData&#x7684;&#x539F;&#x7406;</h3><p>&#x6211;&#x4EEC;&#x8981;&#x7528;<a href="/external_links/cdecb9702831448d483c07b6aa75d8e4.html" target="blank" rel="noopener"><code>LiveData</code></a>&#x505A;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;, &#x603B;&#x9700;&#x8981;&#x77E5;&#x9053;&#x5B83;&#x662F;&#x4EC0;&#x4E48;, &#x4E3A;&#x4EC0;&#x4E48;&#x53EF;&#x4EE5;&#x7528;&#x5B83;&#x6765;&#x5B9E;&#x73B0;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;.</p>
+<blockquote>
+<p>LiveData&#x53EF;&#x5BF9;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x89C2;&#x6D4B;, &#x5E76;&#x5177;&#x6709;&#x751F;&#x547D;&#x5468;&#x671F;&#x611F;&#x77E5;&#x80FD;&#x529B;, &#x8FD9;&#x5C31;&#x610F;&#x5473;&#x7740;&#x5F53;liveData&#x53EA;&#x4F1A;&#x5728;&#x751F;&#x547D;&#x5468;&#x671F;&#x5904;&#x4E8E;&#x6D3B;&#x8DC3;(inActive)&#x7684;&#x72B6;&#x6001;&#x4E0B;&#x624D;&#x4F1A;&#x53BB;&#x6267;&#x884C;&#x89C2;&#x6D4B;&#x52A8;&#x4F5C;, &#x800C;&#x4ED6;&#x7684;&#x80FD;&#x529B;&#x8D4B;&#x4E88;&#x4E0D;&#x80FD;&#x8131;&#x79BB;LifeCycle&#x7684;&#x8303;&#x56F4;.</p>
+</blockquote>
+<p>&#x9996;&#x5148;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x4E0B;<code>LiveData</code>&#x7684;UML&#x56FE;, &#x4FBF;&#x4E8E;&#x5BF9;&#x4ED6;&#x6709;&#x4E2A;&#x5927;&#x6982;&#x7684;&#x7406;&#x89E3;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p3/raw/master/img/2ed7147535ab250796547a062814eca00265e3b781897b289257c8996f8a203a" alt></p>
+<p>&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;,<code>LiveData</code>&#x5185;&#x7EF4;&#x62A4;&#x7684;<code>mVersion</code>&#x8868;&#x793A;&#x7684;&#x662F;&#x53D1;&#x9001;&#x4FE1;&#x606F;&#x7684;&#x7248;&#x672C;,&#x6BCF;&#x6B21;&#x53D1;&#x9001;&#x4E00;&#x6B21;&#x4FE1;&#x606F;, &#x5B83;&#x90FD;&#x4F1A;+1, &#x800C;<code>ObserverWrapper</code>&#x5185;&#x7EF4;&#x62A4;&#x7684;<code>mLastVersion</code>&#x4E3A;&#x8BA2;&#x9605;&#x89E6;&#x53D1;&#x7684;&#x7248;&#x672C;&#x53F7;, &#x5F53;&#x8BA2;&#x9605;&#x52A8;&#x4F5C;&#x751F;&#x6548;&#x7684;&#x65F6;&#x5019;, &#x5B83;&#x7684;&#x7248;&#x672C;&#x53F7;&#x4F1A;&#x548C;&#x53D1;&#x9001;&#x4FE1;&#x606F;&#x7684;&#x7248;&#x672C;&#x53F7;&#x540C;&#x6B65;.&#x4ED6;&#x4EEC;&#x521D;&#x59CB;&#x503C;&#x90FD;&#x4E3A;-1</p>
+<h4 id="&#x8BA2;&#x9605;"><a href="#&#x8BA2;&#x9605;" class="headerlink" title="&#x8BA2;&#x9605;"></a>&#x8BA2;&#x9605;</h4><p><code>LiveData</code>&#x5185;&#x90E8;&#x5B58;&#x5728;&#x4E00;&#x4E2A;<code>mObservers</code>&#x7528;&#x6765;&#x4FDD;&#x5B58;&#x76F8;&#x5173;&#x7ED1;&#x5B9A;&#x7684;&#x6240;&#x6709;&#x89C2;&#x5BDF;&#x8005;, &#x901A;&#x8FC7;<code>LiveData#observe</code>&#x4EE5;&#x53CA;<code>LiveData#oberveForever</code>&#x65B9;&#x6CD5;, &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x8BA2;&#x9605;&#x52A8;&#x4F5C;.&#x5982;&#x679C;&#x9700;&#x8981;&#x4E0E;&#x751F;&#x547D;&#x5468;&#x671F;&#x7ED1;&#x5B9A;, &#x5219;&#x9700;&#x8981;&#x4F20;&#x5165;<code>LifecycleOwner</code>&#x5BF9;&#x8C61;, &#x5C06;&#x6211;&#x4EEC;&#x7684;LiveData&#x6570;&#x636E;&#x89C2;&#x6D4B;&#x8005;(Observer)&#x5305;&#x88C5;&#x6CE8;&#x518C;&#x5230;&#x751F;&#x547D;&#x5468;&#x671F;&#x7684;&#x89C2;&#x6D4B;&#x8005;&#x4E2D;, &#x5F97;&#x4EE5;&#x63A5;&#x6536;&#x5230;&#x751F;&#x547D;&#x5468;&#x671F;&#x7684;&#x53D8;&#x66F4;, &#x5E76;&#x505A;&#x51FA;&#x53CA;&#x65F6;&#x7684;&#x5BF9;&#x5E94;&#x66F4;&#x65B0;&#x6D3B;&#x52A8;, &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x4E0B;LiveData&#x7684;&#x8BA2;&#x9605;&#x7684;&#x65B9;&#x6CD5;&#x4EE3;&#x7801;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;@MainThread</span><br><span class="line">   public void observe(@NonNull LifecycleOwner owner, @NonNull Observer&lt;? super T&gt; observer) {</span><br><span class="line">       assertMainThread(&quot;observe&quot;);</span><br><span class="line">       // &#x5F53;&#x524D;&#x7ED1;&#x5B9A;&#x7684;&#x7EC4;&#x4EF6;(activity or fragment)&#x72B6;&#x6001;&#x4E3A;DESTROYED&#x7684;&#x65F6;&#x5019;, &#x5219;&#x4F1A;&#x5FFD;&#x89C6;&#x5F53;&#x524D;&#x7684;&#x8BA2;&#x9605;&#x8BF7;&#x6C42;</span><br><span class="line">       if (owner.getLifecycle().getCurrentState() == DESTROYED) {</span><br><span class="line">           return;</span><br><span class="line">       }</span><br><span class="line">       // &#x8F6C;&#x4E3A;&#x5E26;&#x751F;&#x547D;&#x5468;&#x671F;&#x611F;&#x77E5;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x5305;&#x88C5;&#x7C7B;</span><br><span class="line">       LifecycleBoundObserver wrapper = new LifecycleBoundObserver(owner, observer);</span><br><span class="line">       ObserverWrapper existing = mObservers.putIfAbsent(observer, wrapper);</span><br><span class="line">       // &#x5BF9;&#x5E94;&#x89C2;&#x5BDF;&#x8005;&#x53EA;&#x80FD;&#x4E0E;&#x4E00;&#x4E2A;owner&#x7ED1;&#x5B9A;</span><br><span class="line">       if (existing != null &amp;&amp; !existing.isAttachedTo(owner)) {</span><br><span class="line">           throw new IllegalArgumentException(&quot;Cannot add the same observer&quot;</span><br><span class="line">                   + &quot; with different lifecycles&quot;);</span><br><span class="line">       }</span><br><span class="line">       if (existing != null) {</span><br><span class="line">           return;</span><br><span class="line">       }</span><br><span class="line">       // lifecycle&#x6CE8;&#x518C;</span><br><span class="line">       owner.getLifecycle().addObserver(wrapper);</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+
+<p>&#x9488;&#x5BF9;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x76D1;&#x6D4B;&#x751F;&#x547D;&#x5468;&#x671F;&#x7684;&#x89C2;&#x5BDF;&#x8005;, <code>LiveData</code>&#x5C06;&#x5176;&#x5305;&#x88C5;&#x6210;&#x4E86;<code>LifecycleBoundObserver</code>&#x5BF9;&#x8C61;, &#x5B83;&#x7EE7;&#x627F;&#x4E8E;<code>ObserverWrapper</code>, &#x5E76;&#x6700;&#x7EC8;&#x5B9E;&#x73B0;&#x4E86;<code>GenericLifecycleObserver</code>&#x63A5;&#x53E3;, &#x901A;&#x8FC7;&#x5B9E;&#x73B0;<code>GenericLifecycleObserver#onStateChanged</code>&#x65B9;&#x6CD5;&#x83B7;&#x53D6;&#x5230;&#x751F;&#x547D;&#x5468;&#x671F;&#x72B6;&#x6001;&#x53D8;&#x66F4;&#x4E8B;&#x4EF6;.</p>
+<h4 id="&#x53D1;&#x9001;&#x4FE1;&#x606F;"><a href="#&#x53D1;&#x9001;&#x4FE1;&#x606F;" class="headerlink" title="&#x53D1;&#x9001;&#x4FE1;&#x606F;"></a>&#x53D1;&#x9001;&#x4FE1;&#x606F;</h4><p><code>LiveData#setValue</code>&#x548C;<code>LiveData#postValue</code>&#x7684;&#x533A;&#x522B;&#x5728;&#x4E8E;&#x4E00;&#x4E2A;&#x662F;&#x5728;&#x4E3B;&#x7EBF;&#x7A0B;&#x53D1;&#x9001;&#x4FE1;&#x606F;, &#x800C;post&#x662F;&#x5728;&#x5B50;&#x7EBF;&#x7A0B;&#x53D1;&#x9001;&#x4FE1;&#x606F;, post&#x6700;&#x7EC8;&#x901A;&#x8FC7;&#x6307;&#x5B9A;&#x4E3B;&#x7EBF;&#x7A0B;&#x7684;Handler&#x6267;&#x884C;&#x8C03;&#x7528;setValue, &#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x4E3B;&#x8981;&#x770B;&#x4E0B;<code>LiveData#setValue</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;@MainThread</span><br><span class="line">    protected void setValue(T value) {</span><br><span class="line">        assertMainThread(&quot;setValue&quot;);</span><br><span class="line">        // &#x53D1;&#x9001;&#x7248;&#x672C;+1</span><br><span class="line">        mVersion++;</span><br><span class="line">        mData = value;</span><br><span class="line">        // &#x4FE1;&#x606F;&#x5206;&#x53D1;</span><br><span class="line">        dispatchingValue(null);</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F53;&#x8C03;&#x7528;setValue&#x7684;&#x65F6;&#x5019;, &#x5C31;&#x76F8;&#x5F53;&#x4E8E;&#x662F;<code>LiveData</code>&#x5185;&#x90E8;&#x7EF4;&#x62A4;&#x7684;&#x53EF;&#x89C2;&#x6D4B;&#x6570;&#x636E;&#x53D1;&#x751F;&#x53D8;&#x5316;, &#x5219;&#x76F4;&#x63A5;&#x89E6;&#x53D1;&#x4E8B;&#x4EF6;&#x5206;&#x53D1;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;void dispatchingValue(@Nullable ObserverWrapper initiator) {</span><br><span class="line">        // mDispatchingValue&#x7684;&#x5224;&#x65AD;&#x4E3B;&#x8981;&#x662F;&#x4E3A;&#x4E86;&#x89E3;&#x51B3;&#x5E76;&#x53D1;&#x8C03;&#x7528;dispatchingValue&#x7684;&#x60C5;&#x51B5;</span><br><span class="line">        // &#x5F53;&#x5BF9;&#x5E94;&#x6570;&#x636E;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x5728;&#x6267;&#x884C;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;, &#x5982;&#x6709;&#x65B0;&#x7684;&#x6570;&#x636E;&#x53D8;&#x66F4;, &#x5219;&#x4E0D;&#x4F1A;&#x518D;&#x6B21;&#x901A;&#x77E5;&#x5230;&#x89C2;&#x5BDF;&#x8005;</span><br><span class="line">        // &#x6240;&#x4EE5;&#x89C2;&#x5BDF;&#x8005;&#x5185;&#x7684;&#x6267;&#x884C;&#x4E0D;&#x5E94;&#x8FDB;&#x884C;&#x8017;&#x65F6;&#x5DE5;&#x4F5C;</span><br><span class="line">        if (mDispatchingValue) {</span><br><span class="line">            mDispatchInvalidated = true;</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        mDispatchingValue = true;</span><br><span class="line">        do {</span><br><span class="line">            mDispatchInvalidated = false;</span><br><span class="line">            if (initiator != null) {</span><br><span class="line">                considerNotify(initiator);</span><br><span class="line">                initiator = null;</span><br><span class="line">            } else {</span><br><span class="line">                for (Iterator&lt;Map.Entry&lt;Observer&lt;? super T&gt;, ObserverWrapper&gt;&gt; iterator =</span><br><span class="line">                        mObservers.iteratorWithAdditions(); iterator.hasNext(); ) {</span><br><span class="line">                    considerNotify(iterator.next().getValue());</span><br><span class="line">                    if (mDispatchInvalidated) {</span><br><span class="line">                        break;</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        } while (mDispatchInvalidated);</span><br><span class="line">        mDispatchingValue = false;</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x6700;&#x7EC8;, &#x4F1A;&#x8D70;&#x5230;<code>considerNotify</code>&#x65B9;&#x6CD5;, &#x5728;&#x4FDD;&#x8BC1;&#x89C2;&#x5BDF;&#x8005;&#x6D3B;&#x8DC3;, &#x5E76;&#x4E14;&#x4ED6;&#x7684;&#x8BA2;&#x9605;&#x751F;&#x6548;&#x6570;&#x5C0F;&#x4E8E;&#x53D1;&#x9001;&#x6570;&#x7684;&#x60C5;&#x51B5;&#x4E0B;, &#x6700;&#x7EC8;&#x89E6;&#x53D1;&#x5230;&#x6211;&#x4EEC;&#x5B9E;&#x73B0;&#x7684;&#x89C2;&#x5BDF;&#x65B9;&#x6CD5;.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private void considerNotify(ObserverWrapper observer) {</span><br><span class="line">        if (!observer.mActive) {</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        if (!observer.shouldBeActive()) {</span><br><span class="line">            observer.activeStateChanged(false);</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        if (observer.mLastVersion &gt;= mVersion) {</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        observer.mLastVersion = mVersion;</span><br><span class="line">        //noinspection unchecked</span><br><span class="line">        observer.mObserver.onChanged((T) mData);</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;, <code>LiveData#dispatchingValue</code>&#x9664;&#x4E86;&#x5728;&#x6211;&#x4EEC;&#x4E3B;&#x52A8;&#x66F4;&#x65B0;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x89E6;&#x53D1;, &#x5728;&#x6211;&#x4EEC;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x72B6;&#x6001;&#x53D8;&#x66F4;(inactive-&gt;active)&#x7684;&#x65F6;&#x5019;, &#x4E5F;&#x4F1A;&#x901A;&#x77E5;&#x5230;, &#x8FD9;&#x5C31;&#x5BFC;&#x81F4;&#x4E86;<code>LiveData</code>&#x5FC5;&#x7136;&#x652F;&#x6301;&#x7C98;&#x6027;&#x4E8B;&#x4EF6;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;class LifecycleBoundObserver extends ObserverWrapper implements GenericLifecycleObserver {</span><br><span class="line">  @Override</span><br><span class="line">       public void onStateChanged(LifecycleOwner source, Lifecycle.Event event) {</span><br><span class="line">           if (mOwner.getLifecycle().getCurrentState() == DESTROYED) {</span><br><span class="line">               removeObserver(mObserver);</span><br><span class="line">               return;</span><br><span class="line">           }</span><br><span class="line">           activeStateChanged(shouldBeActive());</span><br><span class="line">       }</span><br><span class="line">}</span><br><span class="line">private abstract class ObserverWrapper {</span><br><span class="line">  void activeStateChanged(boolean newActive) {</span><br><span class="line">            if (newActive == mActive) {</span><br><span class="line">                return;</span><br><span class="line">            }</span><br><span class="line">            // &#x5F53;observer&#x7684;&#x72B6;&#x6001;&#x4ECE;active-&gt;inactive, &#x6216;&#x8005;inactive-&gt;active&#x7684;&#x65F6;&#x5019;&#x8D70;&#x4EE5;&#x4E0B;&#x6D41;&#x7A0B;</span><br><span class="line">            mActive = newActive;</span><br><span class="line">            boolean wasInactive = LiveData.this.mActiveCount == 0;</span><br><span class="line">            LiveData.this.mActiveCount += mActive ? 1 : -1;</span><br><span class="line">            if (wasInactive &amp;&amp; mActive) {</span><br><span class="line">                onActive();</span><br><span class="line">            }</span><br><span class="line">            if (LiveData.this.mActiveCount == 0 &amp;&amp; !mActive) {</span><br><span class="line">              // &#x5F53;&#x524D;liveData&#x7EF4;&#x62A4;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x90FD;&#x4E0D;&#x6D3B;&#x8DC3;, &#x5E76;&#x4E14;&#x76EE;&#x524D;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x4E5F;&#x4ECE;active-&gt;inactive, &#x4F1A;&#x89E6;&#x53D1;onInactive&#x7A7A;&#x65B9;&#x6CD5;</span><br><span class="line">              // &#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8986;&#x5199;onInactive&#x6765;&#x5224;&#x65AD;livedata&#x6240;&#x6709;&#x89C2;&#x5BDF;&#x8005;&#x5931;&#x6548;&#x65F6;&#x5019;&#x7684;&#x60C5;&#x51B5;, &#x6BD4;&#x5982;&#x91CA;&#x653E;&#x6389;&#x4E00;&#x4E9B;&#x5927;&#x5185;&#x5B58;&#x5BF9;&#x8C61;</span><br><span class="line">                onInactive();</span><br><span class="line">            }</span><br><span class="line">            // &#x5F53;observer&#x662F;&#x4ECE;inactive-&gt;active&#x7684;&#x65F6;&#x5019;</span><br><span class="line">            // &#x9700;&#x8981;&#x901A;&#x77E5;&#x5230;&#x89C2;&#x5BDF;&#x8005;</span><br><span class="line">            if (mActive) {</span><br><span class="line">                dispatchingValue(this);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x539F;&#x7406;&#x603B;&#x7ED3;"><a href="#&#x539F;&#x7406;&#x603B;&#x7ED3;" class="headerlink" title="&#x539F;&#x7406;&#x603B;&#x7ED3;"></a>&#x539F;&#x7406;&#x603B;&#x7ED3;</h4><p>&#x6211;&#x4EEC;&#x6982;&#x62EC;&#x4E0B;&#x6765;, &#x5173;&#x4E8E;<code>LiveData</code>&#x53EF;&#x4EE5;&#x4E86;&#x89E3;&#x5982;&#x4E0B;:</p>
+<ol>
+<li><code>LiveData</code>&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x53EF;&#x4EE5;&#x8054;&#x52A8;&#x751F;&#x547D;&#x5468;&#x671F;, &#x4E5F;&#x53EF;&#x4EE5;&#x4E0D;&#x8054;&#x52A8;</li>
+<li><code>LiveData</code>&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x53EA;&#x80FD;&#x4E0E;&#x4E00;&#x4E2A;<code>LifecycleOwner</code>&#x7ED1;&#x5B9A;, &#x5426;&#x5219;&#x4F1A;&#x629B;&#x51FA;&#x5F02;&#x5E38;</li>
+<li>&#x5F53;&#x89C2;&#x5BDF;&#x8005;&#x7684;active&#x72B6;&#x6001;&#x53D8;&#x66F4;&#x7684;&#x65F6;&#x5019;</li>
+<li>active-&gt;inactive : &#x5982;&#x679C;LiveCycler&#x901A;&#x77E5;OnDestroy, &#x5219;&#x79FB;&#x9664;&#x5BF9;&#x5E94;&#x7684;&#x89C2;&#x5BDF;&#x8005;, &#x5207;&#x5F53;&#x6240;&#x6709;&#x89C2;&#x5BDF;&#x8005;&#x90FD;&#x975E;&#x6D3B;&#x8DC3;&#x7684;&#x72B6;&#x6001;&#x4E0B;&#x65F6;, &#x4F1A;&#x89E6;&#x53D1;onInactive</li>
+<li>inactive-&gt;active: &#x4F1A;&#x901A;&#x77E5;&#x89C2;&#x5BDF;&#x8005;&#x6700;&#x8FD1;&#x7684;&#x6570;&#x636E;&#x66F4;&#x65B0;(&#x7C98;&#x6027;&#x6D88;&#x606F;)</li>
+<li>&#x9664;&#x4E86;&#x89C2;&#x5BDF;&#x8005;&#x72B6;&#x6001;&#x53D8;&#x66F4;&#x65F6;, &#x4F1A;&#x63A5;&#x6536;&#x5230;&#x6570;&#x636E;&#x66F4;&#x65B0;&#x7684;&#x901A;&#x77E5;&#x5916;, &#x8FD8;&#x6709;&#x4E00;&#x79CD;&#x5C31;&#x662F;&#x5728;&#x6D3B;&#x8DC3;&#x7684;&#x60C5;&#x51B5;&#x4E0B;, &#x901A;&#x8FC7;&#x5F00;&#x53D1;&#x8005;&#x4E3B;&#x52A8;&#x66F4;&#x65B0;&#x6570;&#x636E;, &#x4F1A;&#x63A5;&#x6536;&#x5230;&#x6570;&#x636E;&#x66F4;&#x65B0;&#x7684;&#x901A;&#x77E5;.</li>
+</ol>
+<h3 id="&#x57FA;&#x4E8E;LiveData&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;&#x7684;&#x5B9E;&#x73B0;"><a href="#&#x57FA;&#x4E8E;LiveData&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;&#x7684;&#x5B9E;&#x73B0;" class="headerlink" title="&#x57FA;&#x4E8E;LiveData&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;&#x7684;&#x5B9E;&#x73B0;"></a>&#x57FA;&#x4E8E;LiveData&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;&#x7684;&#x5B9E;&#x73B0;</h3><p>&#x53EF;&#x4EE5;&#x770B;&#x51FA;, <code>LiveData</code>&#x672C;&#x8EAB;&#x5C31;&#x5DF2;&#x7ECF;&#x53EF;&#x89C2;&#x6D4B;&#x6570;&#x636E;&#x66F4;&#x65B0;, &#x6211;&#x4EEC;&#x901A;&#x8FC7;&#x7EF4;&#x62A4;&#x4E00;&#x5F20;eventName-LiveData&#x7684;&#x54C8;&#x5E0C;&#x8868;, &#x5C31;&#x53EF;&#x4EE5;&#x5F97;&#x5230;&#x4E00;&#x4E2A;&#x57FA;&#x7840;&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;class LiveDataBus {</span><br><span class="line">    internal val liveDatas by lazy { mutableMapOf&lt;String, LiveData&lt;*&gt;&gt;() }</span><br><span class="line"></span><br><span class="line">    @Synchronized</span><br><span class="line">    private fun &lt;T&gt;bus(channel: String): LiveData&lt;T&gt;{</span><br><span class="line">        return liveDatas.getOrPut(channel){</span><br><span class="line">            LiveDataEvent&lt;T&gt;(channel)</span><br><span class="line">        } as LiveData&lt;T&gt;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    fun &lt;T&gt; with(channel: String): LiveData&lt;T&gt;{</span><br><span class="line">        return bus(channel)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    companion object{</span><br><span class="line">        private val INSTANCE by lazy { LiveDataBus() }</span><br><span class="line">        @JvmStatic</span><br><span class="line">        fun get() = INSTANCE</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F46;&#x662F;&#x9664;&#x4E86;&#x7C98;&#x6027;&#x4E8B;&#x4EF6;&#x4EE5;&#x5916;, &#x6211;&#x4EEC;&#x8FD8;&#x9700;&#x8981;&#x975E;&#x7C98;&#x6027;&#x4E8B;&#x4EF6;&#x7684;&#x652F;&#x6301;, &#x8FD9;&#x91CC;&#x6709;&#x4E24;&#x79CD;&#x505A;&#x6CD5;.</p>
+<p>&#x7F8E;&#x56E2;&#x662F;&#x6839;&#x636E;&#x8986;&#x5199;observe&#x65B9;&#x6CD5;, &#x53CD;&#x5C04;&#x83B7;&#x53D6;<code>ObserverWrapper.mLastVersion</code>, &#x5728;&#x8BA2;&#x9605;&#x7684;&#x65F6;&#x5019;&#x4F7F;&#x5F97;&#x521D;&#x59CB;&#x5316;&#x7684;<code>ObserverWrapper.mLastVersion</code>&#x7B49;&#x4E8E;<code>LiveData.mVersion</code>, &#x4F7F;&#x5F97;&#x7C98;&#x6027;&#x6D88;&#x606F;&#x65E0;&#x6CD5;&#x901A;&#x8FC7;&#x5B9E;&#x73B0;(&#x8BE6;&#x7EC6;&#x53EF;&#x4EE5;&#x770B;&#x4E0B;<a href="/external_links/bbc67f52ce19d15c0a5bc510636f2271.html" target="blank" rel="noopener">&#x53C2;&#x8003;1</a>&#x7684;&#x6587;&#x7AE0;&#x5185;&#x5BB9;)</p>
+<p>&#x8FD9;&#x91CC;&#x6211;&#x7528;&#x4E86;&#x53E6;&#x5916;&#x4E00;&#x79CD;&#x505A;&#x6CD5;,&#x7C98;&#x6027;&#x6D88;&#x606F;&#x6700;&#x7EC8;&#x4F1A;&#x8C03;&#x5230;<code>Observer#onChanged</code>, &#x90A3;&#x4E48;&#x6211;&#x4EEC;&#x5C31;&#x5E72;&#x8106;&#x5C06;&#x5176;&#x518D;&#x8FDB;&#x884C;&#x4E00;&#x5C42;&#x5305;&#x88C5;, &#x5185;&#x90E8;&#x7EF4;&#x62A4;&#x5B9E;&#x9645;&#x7684;&#x8BA2;&#x9605;&#x6D88;&#x606F;&#x6570;, &#x6765;&#x5224;&#x65AD;&#x662F;&#x5426;&#x8981;&#x89E6;&#x53D1;&#x771F;&#x6B63;&#x7684;<code>onChanged</code>&#x65B9;&#x6CD5;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;internal open class ExternalObserverWrapper&lt;T&gt;(val observer: Observer&lt;in T&gt;, val liveData: ExternalLiveData&lt;T&gt;): Observer&lt;T&gt;{</span><br><span class="line">    // &#x65B0;&#x5EFA;&#x89C2;&#x5BDF;&#x8005;&#x5305;&#x88C5;&#x7C7B;&#x7684;&#x65F6;&#x5019;, &#x5185;&#x90E8;&#x5B9E;&#x9645;&#x7684;version&#x76F4;&#x63A5;&#x7B49;&#x4E8E;LiveData&#x7684;version</span><br><span class="line">    private var mLastVersion = liveData.version</span><br><span class="line">    override fun onChanged(t: T) {</span><br><span class="line">        if(mLastVersion &gt;= liveData.version){</span><br><span class="line">            return</span><br><span class="line">        }</span><br><span class="line">        mLastVersion = liveData.version</span><br><span class="line">        observer.onChanged(t)</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x9700;&#x8981;&#x8986;&#x5199;observe&#x65B9;&#x6CD5;, &#x5C06;&#x6211;&#x4EEC;&#x5305;&#x88C5;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x4F20;&#x8FDB;&#x53BB;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;internal class ExternalLiveData&lt;T&gt;(val key: String) : MutableLiveData&lt;T&gt;(){</span><br><span class="line">    @MainThread</span><br><span class="line">    override fun observe(owner: LifecycleOwner, observer: Observer&lt;in T&gt;) {</span><br><span class="line">        super.observe(owner, ExternalObserverWrapper(observer, this, owner))</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;, LiveData&#x7EF4;&#x62A4;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x96C6;&#x5408;&#x53D8;&#x4E3A;&#x6211;&#x4EEC;&#x5305;&#x88C5;&#x540E;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x96C6;&#x5408;&#x540E;, &#x90A3;&#x4E48;&#x5BF9;&#x5E94;&#x7684;&#x79FB;&#x9664;&#x89C2;&#x5BDF;&#x8005;&#x65B9;&#x6CD5;, &#x6211;&#x4EEC;&#x4E5F;&#x9700;&#x8981;&#x91CD;&#x65B0;&#x5305;&#x88C5;&#x4F20;&#x5165;, &#x5E76;&#x4E14;&#x9700;&#x8981;&#x989D;&#x5916;&#x7EF4;&#x62A4;&#x4E00;&#x4EFD;&#x771F;&#x6B63;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x548C;&#x5305;&#x88C5;&#x540E;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x7684;&#x5BF9;&#x5E94;hash&#x8868;&#x5BF9;&#x8C61;, &#x5E76;&#x5728;&#x89C2;&#x5BDF;&#x8005;&#x88AB;&#x79FB;&#x9664;&#x7684;&#x65F6;&#x5019;&#x5220;&#x9664;&#x5BF9;&#x5E94;&#x7684;&#x5185;&#x5B58;&#x5BF9;&#x8C61;, &#x9632;&#x6B62;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;&#x7684;&#x4EA7;&#x751F;, &#x6700;&#x7EC8;&#x7684;&#x4EE3;&#x7801;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;internal class ExternalLiveData&lt;T&gt;(val key: String) : MutableLiveData&lt;T&gt;(){</span><br><span class="line">    internal var mObservers = mutableMapOf&lt;Observer&lt;in T&gt;, ExternalObserverWrapper&lt;T&gt;&gt;()</span><br><span class="line"></span><br><span class="line">    @MainThread</span><br><span class="line">    override fun observe(owner: LifecycleOwner, observer: Observer&lt;in T&gt;) {</span><br><span class="line">        val exist = mObservers.getOrPut(observer){</span><br><span class="line">            LifecycleExternalObserver(observer, this, owner).apply {</span><br><span class="line">                mObservers[observer] = this</span><br><span class="line">                owner.lifecycle.addObserver(this)</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        super.observe(owner, exist)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @MainThread</span><br><span class="line">    override fun observeForever(observer: Observer&lt;in T&gt;) {</span><br><span class="line">        val exist = mObservers.getOrPut(observer){</span><br><span class="line">            AlwaysExternalObserver(observer, this).apply { mObservers[observer] = this }</span><br><span class="line">        }</span><br><span class="line">        super.observeForever(exist)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @MainThread</span><br><span class="line">    fun observeSticky(owner: LifecycleOwner, observer: Observer&lt;in T&gt;) {</span><br><span class="line">        super.observe(owner, observer)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @MainThread</span><br><span class="line">    fun observeStickyForever(observer: Observer&lt;in T&gt;){</span><br><span class="line">        super.observeForever(observer)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @MainThread</span><br><span class="line">    override fun removeObserver(observer: Observer&lt;in T&gt;) {</span><br><span class="line">        val exist = mObservers.remove(observer) ?: observer</span><br><span class="line">        super.removeObserver(exist)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @MainThread</span><br><span class="line">    override fun removeObservers(owner: LifecycleOwner) {</span><br><span class="line">        mObservers.iterator().forEach { item-&gt;</span><br><span class="line">            if(item.value.isAttachedTo(owner)){</span><br><span class="line">                mObservers.remove(item.key)</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        super.removeObservers(owner)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun onInactive() {</span><br><span class="line">        super.onInactive()</span><br><span class="line">        if(!hasObservers()){</span><br><span class="line">            // &#x5F53;&#x5BF9;&#x5E94;liveData&#x6CA1;&#x6709;&#x76F8;&#x5173;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x7684;&#x65F6;&#x5019;</span><br><span class="line">            // &#x5C31;&#x53EF;&#x4EE5;&#x79FB;&#x9664;&#x6389;&#x7EF4;&#x62A4;&#x7684;LiveData</span><br><span class="line">            LiveDataBus.get().liveDatas.remove(key)</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">internal open class ExternalObserverWrapper&lt;T&gt;(val observer: Observer&lt;in T&gt;, val liveData: ExternalLiveData&lt;T&gt;): Observer&lt;T&gt;{</span><br><span class="line"></span><br><span class="line">    private var mLastVersion = liveData.version</span><br><span class="line">    override fun onChanged(t: T) {</span><br><span class="line">        if(mLastVersion &gt;= liveData.version){</span><br><span class="line">            return</span><br><span class="line">        }</span><br><span class="line">        mLastVersion = liveData.version</span><br><span class="line">        observer.onChanged(t)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    open fun isAttachedTo(owner: LifecycleOwner) = false</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * always active &#x7684;&#x89C2;&#x5BDF;&#x8005;&#x5305;&#x88C5;&#x7C7B;</span><br><span class="line"> * @param T</span><br><span class="line"> * @constructor</span><br><span class="line"> */</span><br><span class="line">internal class AlwaysExternalObserver&lt;T&gt;(observer: Observer&lt;in T&gt;, liveData: ExternalLiveData&lt;T&gt;):</span><br><span class="line">    ExternalObserverWrapper&lt;T&gt;(observer, liveData)</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * &#x7ED1;&#x5B9A;&#x751F;&#x547D;&#x5468;&#x671F;&#x7684;&#x89C2;&#x5BDF;&#x8005;&#x5305;&#x88C5;&#x7C7B;</span><br><span class="line"> * @param T</span><br><span class="line"> * @property owner LifecycleOwner</span><br><span class="line"> * @constructor</span><br><span class="line"> */</span><br><span class="line">internal class LifecycleExternalObserver&lt;T&gt;(observer: Observer&lt;in T&gt;, liveData: ExternalLiveData&lt;T&gt;, val owner: LifecycleOwner): ExternalObserverWrapper&lt;T&gt;(</span><br><span class="line">    observer,</span><br><span class="line">    liveData</span><br><span class="line">), LifecycleObserver{</span><br><span class="line">    /**</span><br><span class="line">     * &#x5F53;&#x7ED1;&#x5B9A;&#x7684;lifecycle&#x9500;&#x6BC1;&#x7684;&#x65F6;&#x5019;</span><br><span class="line">     * &#x79FB;&#x9664;&#x6389;&#x5185;&#x90E8;&#x7EF4;&#x62A4;&#x7684;&#x5BF9;&#x5E94;&#x89C2;&#x5BDF;&#x8005;</span><br><span class="line">     */</span><br><span class="line">    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)</span><br><span class="line">    fun onDestroy(){</span><br><span class="line">        liveData.mObservers.remove(observer)</span><br><span class="line">        owner.lifecycle.removeObserver(this)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    override fun isAttachedTo(owner: LifecycleOwner): Boolean {</span><br><span class="line">        return owner == this.owner</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x4E8B;&#x4EF6;&#x7684;&#x7EA6;&#x675F;"><a href="#&#x4E8B;&#x4EF6;&#x7684;&#x7EA6;&#x675F;" class="headerlink" title="&#x4E8B;&#x4EF6;&#x7684;&#x7EA6;&#x675F;"></a>&#x4E8B;&#x4EF6;&#x7684;&#x7EA6;&#x675F;</h4><p>&#x6B63;&#x5982;<a href="/external_links/31dc9262ef518b3eff2b8186e75673f7.html" target="blank" rel="noopener">&#x7F8E;&#x56E2;&#x540E;&#x671F;&#x8BA8;&#x8BBA;&#x7684;&#x6539;&#x8FDB;&#x6587;&#x7AE0;</a>&#x5185;&#x6240;&#x8BF4;, &#x5F53;&#x524D;&#x7684;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;(&#x4E0D;&#x8BBA;&#x662F;EventBus&#x8FD8;&#x662F;LiveEventBus)&#x90FD;&#x6CA1;&#x6709;&#x5BF9;&#x4E8B;&#x4EF6;&#x8FDB;&#x884C;&#x7EA6;&#x675F;, &#x5047;&#x5982;A&#x540C;&#x5B66;&#x4EE5;&#x201D;event1&#x201D;&#x5B57;&#x7B26;&#x4E32;&#x5B9A;&#x4E49;&#x4E8B;&#x4EF6;&#x540D;&#x5E76;&#x53D1;&#x9001;&#x4E8B;&#x4EF6;, &#x800C;B&#x540C;&#x5B66;&#x52FF;&#x5199;&#x6210;&#x201D;eventl&#x201D;&#x5B57;&#x7B26;&#x4E32;&#x8BA2;&#x9605;&#x4E8B;&#x4EF6;, &#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x4E8B;&#x4EF6;&#x5C31;&#x6C38;&#x8FDC;&#x90FD;&#x63A5;&#x6536;&#x4E0D;&#x5230;&#x4E86;. &#x53E6;&#x5916;&#x5F53;&#x4E0A;&#x6E38;&#x5220;&#x9664;&#x53D1;&#x9001;&#x7684;&#x4E8B;&#x4EF6;&#x76F8;&#x5173;&#x4EE3;&#x7801;, &#x8BA2;&#x9605;&#x65B9;&#x4E5F;&#x65E0;&#x4ECE;&#x611F;&#x77E5;&#x5230;.<br>&#x57FA;&#x4E8E;&#x6B64;, &#x53C2;&#x8003;&#x4E86;Retrofit&#x9488;&#x5BF9;&#x4E8E;&#x8BF7;&#x6C42;&#x7684;&#x52A8;&#x6001;&#x4EE3;&#x7406;&#x7684;&#x505A;&#x6CD5;, &#x5C06;&#x4E8B;&#x4EF6;&#x7684;&#x5B9A;&#x4E49;&#x7531;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;&#x6846;&#x67B6;&#x672C;&#x8EAB;&#x901A;&#x8FC7;&#x52A8;&#x6001;&#x4EE3;&#x7406;&#x53BB;&#x5B9E;&#x73B0;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;class LiveDataBus {</span><br><span class="line">  fun &lt;E&gt; of(clz: Class&lt;E&gt;): E {</span><br><span class="line">        if(!clz.isInterface){</span><br><span class="line">            throw IllegalArgumentException(&quot;API declarations must be interfaces.&quot;)</span><br><span class="line">        }</span><br><span class="line">        if(0 &lt; clz.interfaces.size){</span><br><span class="line">            throw IllegalArgumentException(&quot;API interfaces must not extend other interfaces.&quot;)</span><br><span class="line">        }</span><br><span class="line">        return Proxy.newProxyInstance(clz.classLoader, arrayOf(clz), InvocationHandler { _, method, _-&gt;</span><br><span class="line">            return@InvocationHandler get().with(</span><br><span class="line">                // &#x4E8B;&#x4EF6;&#x540D;&#x4EE5;&#x96C6;&#x5408;&#x7C7B;&#x540D;_&#x4E8B;&#x4EF6;&#x65B9;&#x6CD5;&#x540D;&#x5B9A;&#x4E49;</span><br><span class="line">                // &#x4EE5;&#x6B64;&#x4FDD;&#x8BC1;&#x4E8B;&#x4EF6;&#x7684;&#x552F;&#x4E00;&#x6027;</span><br><span class="line">                &quot;${clz.canonicalName}_${method.name}&quot;,</span><br><span class="line">                (method.genericReturnType as ParameterizedType).actualTypeArguments[0].javaClass)</span><br><span class="line">        }) as E</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F00;&#x53D1;&#x8005;&#x9700;&#x8981;&#x5148;&#x5B9A;&#x4E49;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;, &#x624D;&#x53EF;&#x4EE5;&#x5BF9;&#x5B83;&#x8FDB;&#x884C;&#x76F8;&#x5173;&#x7684;&#x53D1;&#x9001;&#x548C;&#x8BA2;&#x9605;&#x7684;&#x5DE5;&#x4F5C;.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;interface LiveEvents {</span><br><span class="line">    /**</span><br><span class="line">     * &#x5B9A;&#x4E49;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;</span><br><span class="line">     * @return LiveEventObserver&lt;Boolean&gt; &#x4E8B;&#x4EF6;&#x7C7B;&#x578B;</span><br><span class="line">     */</span><br><span class="line">    fun event1(): LiveEventObserver&lt;Boolean&gt;</span><br><span class="line">    fun event2(): LiveEventObserver&lt;MutableList&lt;String&gt;&gt;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7136;&#x540E;&#x5F00;&#x53D1;&#x8005;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x65B9;&#x5F0F;&#x53BB;&#x53D1;&#x9001;&#x548C;&#x8BA2;&#x9605;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private fun sendEvent(){</span><br><span class="line">        LiveDataBus</span><br><span class="line">            .get()</span><br><span class="line">            .of(LiveEvents::class.java)</span><br><span class="line">            .event1()</span><br><span class="line">            .post(true)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">private fun observe(){</span><br><span class="line">    LiveDataBus</span><br><span class="line">        .get()</span><br><span class="line">        .of(LiveEvents::class.java)</span><br><span class="line">        .event1()</span><br><span class="line">        .observe(this, Observer {</span><br><span class="line">            Log.i(LOG, it.toString())</span><br><span class="line">        })</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x53C2;&#x8003;"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</h3><ol>
+<li><a href="/external_links/bbc67f52ce19d15c0a5bc510636f2271.html" target="blank" rel="noopener">Android&#x6D88;&#x606F;&#x603B;&#x7EBF;&#x7684;&#x6F14;&#x8FDB;&#x4E4B;&#x8DEF;&#xFF1A;&#x7528;LiveDataBus&#x66FF;&#x4EE3;RxBus&#x3001;EventBus</a></li>
+<li><a href="/external_links/31dc9262ef518b3eff2b8186e75673f7.html" target="blank" rel="noopener">Android&#x7EC4;&#x4EF6;&#x5316;&#x65B9;&#x6848;&#x53CA;&#x7EC4;&#x4EF6;&#x6D88;&#x606F;&#x603B;&#x7EBF;modular-event&#x5B9E;&#x6218;</a></li>
+<li><a href="/external_links/78e06644e46a26514b4097d79ac647f6.html" target="blank" rel="noopener">&#x7528;LiveData&#x5B9E;&#x73B0;&#x4E00;&#x4E2A;&#x4E8B;&#x4EF6;&#x603B;&#x7EBF;</a></li>
+</ol>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/cb481a2b66dc9f7280d53ed4b7ebc90e.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Android-Jetpack/" rel="tag"># Android Jetpack</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903939062628360.html" rel="next" title="学习 lodash 源码整体架构，打造属于自己的函数式编程类">
+                <i class="fa fa-chevron-left"></i> 学习 lodash 源码整体架构，打造属于自己的函数式编程类
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903949686800392.html" rel="prev" title="【码上开学】Kotlin 的协程用力瞥一眼">
+                【码上开学】Kotlin 的协程用力瞥一眼 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">1775</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">725</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LiveData的原理"><span class="nav-number">2.</span> <span class="nav-text">LiveData的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#订阅"><span class="nav-number">2.1.</span> <span class="nav-text">订阅</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#发送信息"><span class="nav-number">2.2.</span> <span class="nav-text">发送信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原理总结"><span class="nav-number">2.3.</span> <span class="nav-text">原理总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于LiveData的事件总线的实现"><span class="nav-number">3.</span> <span class="nav-text">基于LiveData的事件总线的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#事件的约束"><span class="nav-number">3.1.</span> <span class="nav-text">事件的约束</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
