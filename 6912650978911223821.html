@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Dubbo,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x524D;&amp;#x8A00;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x6587;&amp;#x7AE0;&amp;#x89E3;&amp;#x91CA;&amp;#x4E86;dubbo-spi&amp;#x7684;&amp;#x5B9E;&amp;#x73B0;&amp;#x539F;&amp;#x7406;&amp;#xFF0C;&amp;#x8FD9;&amp;#x7BC7;&amp;#x6587;&amp;#x7AE0;&amp;#x4ECB;&amp;#x7ECD;&amp;#x5982;&amp;#x4F55">
+<meta name="keywords" content="Dubbo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dubbo源码分析（2）—— 服务是如何暴露的">
+<meta property="og:url" content="https://dev.newban.cn/6912650978911223821.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x6587;&amp;#x7AE0;&amp;#x89E3;&amp;#x91CA;&amp;#x4E86;dubbo-spi&amp;#x7684;&amp;#x5B9E;&amp;#x73B0;&amp;#x539F;&amp;#x7406;&amp;#xFF0C;&amp;#x8FD9;&amp;#x7BC7;&amp;#x6587;&amp;#x7AE0;&amp;#x4ECB;&amp;#x7ECD;&amp;#x5982;&amp;#x4F55">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/cbc82ded7c11db51db6ff8442dae4d8c0a801a427a06238f990ae3740f635606">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/4dfcf967a0a5e70e2cc380a61cce4e3b1ade7fad8382e5c1fcb024a11baf6ee1">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/2c2bb3363e7ca7820d19e1844cb636eed497aabf5991db5f8e2dcaef244e9147">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/8d046023046d3720bbc3a0f0067c5188ddb752bddf6d4214ba43e9dbd1596e36">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/384b5cf6920cb68f0eb3b0c44dd2e82d43533cf319ee1bc4c7dffadb5fdbbe83">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/acc746a598a72188c65c259505604048ad06fd2668a359effb4fba16ad98fe4d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/6e853ef108dd2b5a25becb94db371d5973a528e8450f95656c717d479e432b7e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/669f4d3b8b081d9a343494e6a7cfe04acd4bfab9518af153e80fcee3e3dcbb18">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/70a984697cb15f52fb9593ff1acc2d9e27d4d16bbd7b94b6183ca61e05efce1e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/35922b19da6493b3fbf411ecb1142acd18177b1e8b7d83d97998e7340a8d92a8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/8d427bb314a4a6c9b9fbc784ef7028f12cc8d013d07697493bb922819fd2f4e4">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/95d8e158fce4e1fe0ac929c869d1f0e4e81417ac75fcbd601fe6cd57903c45e7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/90d28012776ccbfa01cb17dc37fdcedf4ebd26bbcd0d3e4c44eaffb33605d159">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/3d4b176c68423b139516847cd03ecd573986be0eb2bbe47b50fa2d52b4fb8e11">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/0d464d08946d9395ce1d6bab672fbdfb07585f99a426c6270c2b90c16a9f7f71">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/85b01972ffa378d358ab87e496e7ff2b13d080db1313b00b4c5822be437d0c44">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/603a658fdde2c71341cd8bb58a8db2c56a9e41770d8a6323ad7d8bae5365ffa3">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/a9610766af997d8d0058f1b5822d8e1f36cf13c2adf4118bda7f53a104341a9a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/6db60d62e50ad8c3645096fb954e4b4e4758d5f73301956155d58218d47aee4d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/c2e9fe135d05366c02806f4c3013c07f2a11850c0316a2fab1bfa16aee4541da">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/fb247fe30901f503579ccd21dcb154cc8585240bfb408f0aadf3645588895cbe">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/59f7adf5c35f1f2da771a7fb26551de9c9d8ff0db5953757b14549a195fb6aed">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/569fd8e56a0018a3c6409214bb76b035e0c7e006262975108e08db4a4899efb5">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/868b0eb769eab382c63143a0aec30aac7cd9e99bb00dbc8390b8257bb8a3df1d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/a5bfba5c64e94db8c2fc27b1e751933618d4130068457b78a8286a3098096c50">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/7dcc37e19cc9f03fec90ff1f649389b195c3a2193d6092e9aac9510bca933d6c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/3cf7886fb7eed20376ddfb94107388453e58e6af00830b292abc99d4bd4a8e21">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/acc54b77c36e3e1b91a68c5bd93b4bdaae7b9133b93664f4961dd73d3fc96365">
+<meta property="og:updated_time" content="2024-04-28T12:36:31.350Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dubbo源码分析（2）—— 服务是如何暴露的">
+<meta name="twitter:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x6587;&amp;#x7AE0;&amp;#x89E3;&amp;#x91CA;&amp;#x4E86;dubbo-spi&amp;#x7684;&amp;#x5B9E;&amp;#x73B0;&amp;#x539F;&amp;#x7406;&amp;#xFF0C;&amp;#x8FD9;&amp;#x7BC7;&amp;#x6587;&amp;#x7AE0;&amp;#x4ECB;&amp;#x7ECD;&amp;#x5982;&amp;#x4F55">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/cbc82ded7c11db51db6ff8442dae4d8c0a801a427a06238f990ae3740f635606">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6912650978911223821.html">
+
+
+
+
+
+  <title>Dubbo源码分析（2）—— 服务是如何暴露的 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Dubbo源码分析（2）—— 服务是如何暴露的</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-01T13:07:01+08:00">
+                2021-01-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h3><p>&#x4E0A;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x89E3;&#x91CA;&#x4E86;dubbo-spi&#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#xFF0C;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4ECB;&#x7ECD;&#x5982;&#x4F55;&#x66B4;&#x9732;&#x4E00;&#x4E2A;&#x63A5;&#x53E3;&#x670D;&#x52A1;</p>
+<h3 id="&#x6B63;&#x6587;"><a href="#&#x6B63;&#x6587;" class="headerlink" title="&#x6B63;&#x6587;"></a>&#x6B63;&#x6587;</h3><p>&#x521A;&#x5F00;&#x59CB;&#x4F7F;&#x7528;dubbo&#x7684;&#x4F7F;&#x7528;&#xFF0C;&#x4F7F;&#x7528;&#x4E86;XML&#x914D;&#x7F6E;&#x53BB;&#x914D;&#x7F6E;&#x670D;&#x52A1;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/cbc82ded7c11db51db6ff8442dae4d8c0a801a427a06238f990ae3740f635606" alt></p>
+<p>&#x8868;&#x793A;&#x4E86;DemoService&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;&#xFF0C;&#x4F9D;&#x8D56;&#x4E86;domoService&#x8FD9;&#x4E2A;bean&#xFF0C;&#x8868;&#x793A;&#x6211;&#x4EEC;&#x4F7F;&#x7528;DemoService&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;&#x53BB;&#x8BF7;&#x6C42;dubbo&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x4F1A;&#x8C03;&#x7528;DemoServiceImpl&#x8FD9;&#x4E2A;&#x5B9E;&#x73B0;&#x7C7B;&#x53BB;&#x5904;&#x7406;&#x3002;</p>
+<p>dubbo:service&#x662F;dubbo&#x81EA;&#x5B9A;&#x4E49;&#x7684;xml&#x65B9;&#x5F0F;&#xFF0C;bean&#x6807;&#x7B7E;&#x5219;&#x662F;&#x5C5E;&#x4E8E;spring&#xFF0C;&#x800C;spring&#x4E5F;&#x63D0;&#x4F9B;&#x4E86;&#x81EA;&#x5B9A;&#x4E49;xml&#x89E3;&#x6790;&#x65B9;&#x5F0F;&#xFF0C;&#xFF0C;&#x68C0;&#x67E5;&#x4E00;&#x4E0B;dubbo-config-spring&#x8FD9;&#x4E2A;&#x5305;&#x3002;</p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;dubbo.xsd&#x6587;&#x4EF6;&#xFF0C;&#x91CC;&#x9762;&#x89C4;&#x5B9A;&#x4E86;dubbo-xml&#x6240;&#x6709;&#x6807;&#x7B7E;&#x4EE5;&#x53CA;&#x53C2;&#x6570;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/4dfcf967a0a5e70e2cc380a61cce4e3b1ade7fad8382e5c1fcb024a11baf6ee1" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/2c2bb3363e7ca7820d19e1844cb636eed497aabf5991db5f8e2dcaef244e9147" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/8d046023046d3720bbc3a0f0067c5188ddb752bddf6d4214ba43e9dbd1596e36" alt></p>
+<blockquote>
+<p>&#x770B;spring.handlers&#x5185;&#x90E8;&#x586B;&#x5199;&#x7684;&#x89E3;&#x6790;&#x7C7B;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/384b5cf6920cb68f0eb3b0c44dd2e82d43533cf319ee1bc4c7dffadb5fdbbe83" alt></p>
+<blockquote>
+<p>&#x4F7F;&#x7528;&#x4E86;DubboBeanDefinitionParser&#xFF0C;&#x7EE7;&#x627F;spring&#x7684;BeanDefinitionParser&#xFF0C;&#x7528;&#x4E8E;xml&#x7684;&#x89E3;&#x6790;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/acc746a598a72188c65c259505604048ad06fd2668a359effb4fba16ad98fe4d" alt></p>
+<p><strong>&#x8FD9;&#x4E2A;&#x7C7B;&#x91CC;&#x9762;&#x5185;&#x5BB9;&#x5199;&#x5F97;&#x5F88;&#x6DF7;&#x4E71;&#xFF0C;&#x628A;&#x6240;&#x6709;&#x7684;&#x914D;&#x7F6E;&#x9879;&#x5168;&#x878D;&#x5408;&#x5728;&#x4E00;&#x8D77;&#x5199;&#xFF0C;&#x5927;&#x4F53;&#x601D;&#x8DEF;&#x5C31;&#x662F;&#x89E3;&#x6790;xml&#xFF0C;&#x6839;&#x636E;&#x4F20;&#x5165;&#x7684;class&#x7C7B;&#x578B;&#x4F5C;&#x51FA;&#x4E0D;&#x540C;&#x7684;&#x89E3;&#x6790;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x7C7B;&#x5B9E;&#x4F8B;&#x5316;&#x5E76;&#x4E14;&#x7ED9;set&#x6216;&#x8005;is&#x5F00;&#x5934;&#x7684;&#x65B9;&#x6CD5;&#x6CE8;&#x5165;&#x503C;&#xFF1B;&#x6839;&#x636E;&#x4E0A;&#x4E00;&#x5F20;&#x56FE;&#x7247;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;service&#x914D;&#x7F6E;&#x662F;&#x7531;ServiceBean&#x8FD9;&#x4E2A;&#x7C7B;&#x6765;&#x89E3;&#x6790;&#x7684;&#x3002;</strong></p>
+<p>ServiceBean&#x8FD9;&#x4E2A;&#x7C7B;&#x7684;&#x7EE7;&#x627F;&#x548C;&#x5B9E;&#x73B0;&#x63A5;&#x53E3;&#x5173;&#x7CFB;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/6e853ef108dd2b5a25becb94db371d5973a528e8450f95656c717d479e432b7e" alt></p>
+<p>&#x7EE7;&#x627F;&#x4E86;spring&#x7684;&#x4E00;&#x4E9B;&#x63A5;&#x53E3;&#x90FD;&#x4E0E;bean&#x76F8;&#x5173;&#xFF0C;&#x800C;&#x771F;&#x6B63;&#x6709;&#x7528;&#x7684;&#x662F;ApplicationListener&#xFF0C;&#x8FD9;&#x4E2A;&#x63A5;&#x53E3;&#x662F;&#x4E00;&#x4E2A;Listener&#x63A5;&#x53E3;&#xFF0C;ContextRefreshedEvent&#x8868;&#x660E;&#x4E86;&#x662F;&#x5728;&#x8FD9;&#x4E2A;&#x7C7B;&#x521D;&#x59CB;&#x5316;&#x5B8C;&#x6BD5;&#x65F6;&#x6267;&#x884C;&#x8BE5;&#x65B9;&#x6CD5;</p>
+<p><strong>&#x67E5;&#x770B;&#x8BE5;&#x65B9;&#x6CD5;&#xFF1A;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/669f4d3b8b081d9a343494e6a7cfe04acd4bfab9518af153e80fcee3e3dcbb18" alt></p>
+<blockquote>
+<p>&#x5728;ServiceBean&#x521D;&#x59CB;&#x5316;&#x5B8C;&#x6BD5;&#x540E;&#xFF0C;&#x68C0;&#x67E5;&#x72B6;&#x6001;&#xFF0C;&#x7136;&#x540E;&#x5F00;&#x59CB;&#x66B4;&#x9732;&#x670D;&#x52A1;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/70a984697cb15f52fb9593ff1acc2d9e27d4d16bbd7b94b6183ca61e05efce1e" alt></p>
+<blockquote>
+<p>export&#x65B9;&#x6CD5;&#x4EA4;&#x7ED9;&#x4E86;&#x5B83;&#x7684;&#x7236;&#x7C7B;&#x53BB;&#x6267;&#x884C;&#xFF0C;ServiceBean&#x53EA;&#x662F;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;bean&#x5B58;&#x5728;&#xFF0C;&#x771F;&#x6B63;&#x5E72;&#x6D3B;&#x7684;&#x662F;ServiceConfig&#x7C7B;</p>
+</blockquote>
+<p><strong>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8FD9;&#x5C31;&#x662F;&#x66B4;&#x9732;&#x670D;&#x52A1;&#x7684;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF0C;&#x76F8;&#x6BD4;&#x4E8E;xml&#x914D;&#x7F6E;&#x65B9;&#x6CD5;&#xFF0C;&#x8FD8;&#x6709;&#x4E00;&#x79CD;&#x4F7F;&#x7528;API&#x914D;&#x7F6E;&#x65B9;&#x6CD5;&#xFF0C;&#x770B;&#x4E00;&#x4E0B;xml&#x548C;api&#x914D;&#x7F6E;&#x7684;&#x5BF9;&#x6BD4;&#xFF1A;</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;  ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{&quot;META-INF/spring/dubbo-demo-provider.xml&quot;});</span><br><span class="line">        context.start();</span><br><span class="line">        ServiceConfig&lt;DemoService&gt; serviceServiceConfig = new ServiceConfig&lt;DemoService&gt;();</span><br><span class="line">        System.in.read(); // press any key to exit</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>&#x8FD9;&#x662F;xml&#x914D;&#x7F6E;&#x65B9;&#x6CD5;&#x7684;&#x542F;&#x52A8;&#x7C7B;</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;ServiceConfig&lt;DemoService&gt; serviceConfig = new ServiceConfig&lt;DemoService&gt;();</span><br><span class="line">        serviceConfig.setApplication(new ApplicationConfig(&quot;app&quot;));</span><br><span class="line">        serviceConfig.setRegistry(new RegistryConfig(&quot;zookpeer://127.0.0.1:2181&quot;));</span><br><span class="line">        serviceConfig.setInterface(DemoService.class);</span><br><span class="line">        serviceConfig.setRef(new DemoServiceImpl());</span><br><span class="line">        serviceConfig.export();</span><br><span class="line">        System.in.read();</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x53EA;&#x9700;&#x8981;&#x6267;&#x884C;export&#x65B9;&#x6CD5;&#xFF0C;&#x5C31;&#x80FD;&#x5C06;dubbo&#x670D;&#x52A1;&#x542F;&#x52A8;&#xFF0C;&#x8BF4;&#x660E;ServiceConfig&#x4E0D;&#x4EC5;&#x505A;&#x4E86;&#x670D;&#x52A1;&#x66B4;&#x9732;&#x7684;&#x4E8B;&#x60C5;&#xFF0C;&#x8FD8;&#x628A;&#x505A;&#x4E86;&#x6CE8;&#x518C;&#x4E2D;&#x5FC3;&#x7ED9;&#x4E00;&#x5E76;&#x6DFB;&#x52A0;&#x4E86;&#xFF0C;&#x5148;&#x770B;export&#x5185;&#x90E8;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/35922b19da6493b3fbf411ecb1142acd18177b1e8b7d83d97998e7340a8d92a8" alt="image.png"></p>
+<blockquote>
+<p>&#x540C;&#x6B65;&#x65B9;&#x6CD5;&#xFF0C;&#x5224;&#x65AD;&#x4E00;&#x4E9B;null&#x503C;&#x5E76;&#x83B7;&#x53D6;&#xFF0C;&#x5BF9;&#x5EF6;&#x8FDF;&#x5C5E;&#x6027;&#x7684;&#x5224;&#x65AD;&#xFF0C;&#x4E3B;&#x8981;&#x65B9;&#x6CD5;&#x8FDB;&#x5165;doExport</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/8d427bb314a4a6c9b9fbc784ef7028f12cc8d013d07697493bb922819fd2f4e4" alt="image.png"></p>
+<blockquote>
+<p>&#x8FD9;&#x4E00;&#x957F;&#x6BB5;&#x65B9;&#x6CD5;&#xFF0C;&#x4E3B;&#x8981;&#x662F;&#x5BF9;&#x76D1;&#x63A7;&#x3001;&#x534F;&#x8BAE;&#x3001;&#x6CE8;&#x518C;&#x4E2D;&#x5FC3;&#x3001;&#x63A5;&#x53E3;&#x3001;&#x5B9E;&#x73B0;&#x7C7B;&#x7B49;&#x7684;&#x4E00;&#x4E9B;&#x5224;&#x65AD;&#xFF0C;&#x7136;&#x540E;&#x8FDB;&#x5165; doExportUrls&#x65B9;&#x6CD5;&#x3002;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/95d8e158fce4e1fe0ac929c869d1f0e4e81417ac75fcbd601fe6cd57903c45e7" alt="image.png"></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/90d28012776ccbfa01cb17dc37fdcedf4ebd26bbcd0d3e4c44eaffb33605d159" alt="image.png"></p>
+<p>&#x8FD9;&#x91CC;&#x7684;protocols&#x548C;registryURLs&#x5BF9;&#x5E94;&#x4E86;xml&#x4E0A;&#x9762;&#x7684;&#x8FD9;&#x4E24;&#x4E2A;&#x90E8;&#x5206;&#xFF0C;&#x628A;&#x6CE8;&#x518C;&#x4E2D;&#x5FC3;&#x914D;&#x7F6E;&#x8F6C;&#x53D8;&#x6210;URL&#x683C;&#x5F0F;&#xFF0C;&#x5176;&#x683C;&#x5F0F;&#x4E3A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/3d4b176c68423b139516847cd03ecd573986be0eb2bbe47b50fa2d52b4fb8e11" alt="image.png"></p>
+<blockquote>
+<p>&#x4E3B;&#x8981;&#x662F;&#xFF1A;ip-&#x8DEF;&#x5F84;&#xFF08;&#x7C7B;&#x540D;&#xFF09;-param&#xFF0C;param&#x9664;&#x4E86;xml&#x914D;&#x7F6E;&#x7684;&#x4E00;&#x4E9B;&#x5C5E;&#x6027;&#x5916;&#xFF0C;&#x8FD8;&#x6709;dubbo&#x7248;&#x672C;&#xFF0C;&#x65F6;&#x95F4;&#x6233;&#x7B49;&#x3002;</p>
+</blockquote>
+<p>&#x5728;&#x751F;&#x6210;&#x4E86;&#x6CE8;&#x518C;&#x4E2D;&#x5FC3;URL&#x548C;&#x534F;&#x8BAE;&#x540E;&#xFF0C;&#x4EA4;&#x7ED9;doExportUrlsFor1Protocol&#x5904;&#x7406;&#xFF0C;<br>&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x5F88;&#x957F;&#xFF0C;&#x524D;&#x9762;&#x5F88;&#x5927;&#x4E00;&#x90E8;&#x5206;&#x90FD;&#x662F;&#x5728;&#x6784;&#x9020;URL&#xFF0C;&#x6700;&#x540E;&#x6784;&#x9020;&#x7684;URL&#x5982;&#x4E0B;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/0d464d08946d9395ce1d6bab672fbdfb07585f99a426c6270c2b90c16a9f7f71" alt="image.png"></p>
+<blockquote>
+<p>&#x6839;&#x636E;&#x4E0D;&#x540C;&#x534F;&#x8BAE;&#x548C;&#x914D;&#x7F6E;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x6784;&#x9020;&#x51FA;&#x8FD9;&#x6837;&#x4E00;&#x4E2A;URL&#xFF0C;&#x5305;&#x542B;&#x7684;&#x4FE1;&#x606F;&#x5168;&#x90E8;&#x5728;URL&#x4E2D;&#x3002;</p>
+</blockquote>
+<p>&#x6700;&#x5173;&#x952E;&#x662F;&#x8FD9;&#x4E00;&#x6BB5;&#x4EE3;&#x7801;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/85b01972ffa378d358ab87e496e7ff2b13d080db1313b00b4c5822be437d0c44" alt="image.png"></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/603a658fdde2c71341cd8bb58a8db2c56a9e41770d8a6323ad7d8bae5365ffa3" alt="image.png"></p>
+<blockquote>
+<p>proxyFactory&#x662F;&#x4E00;&#x4E2A;spi&#x65B9;&#x6CD5;&#xFF0C;&#x9ED8;&#x8BA4;&#x4F7F;&#x7528;JavassistProxyFactory&#xFF0C;&#x8FD9;&#x91CC;&#x5C06;&#x4E0A;&#x9762;&#x7684;url&#x7684;param&#x548C;registryURL&#x62FC;&#x63A5;&#x5728;&#x4E00;&#x8D77;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/a9610766af997d8d0058f1b5822d8e1f36cf13c2adf4118bda7f53a104341a9a" alt="image.png"></p>
+<blockquote>
+<p>&#x8FD9;&#x91CC;&#x5C06;&#x5B9E;&#x73B0;&#x7C7B;&#x7528;wrapper&#x5305;&#x88C5;&#x4E86;&#x4E00;&#x4E0B;&#xFF0C;&#x7136;&#x540E;&#x8FD4;&#x56DE;&#x4E86;&#x4E00;&#x4E2A;AbstractProxyInvoker&#xFF0C;&#x5185;&#x90E8;&#x8C03;&#x7528;&#x4E86;wrapper&#x7684;invokeMethod&#x65B9;&#x6CD5;&#xFF0C;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#x548C;&#x53CD;&#x5C04;&#x7C7B;&#x4F3C;</p>
+</blockquote>
+<p>&#x8FDB;&#x5165;Wrapper&#x5185;&#x90E8;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/6db60d62e50ad8c3645096fb954e4b4e4758d5f73301956155d58218d47aee4d" alt="image.png"></p>
+<blockquote>
+<p>&#x6CE8;&#x610F;&#x8FD9;&#x4E2A;makeWrapper</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/c2e9fe135d05366c02806f4c3013c07f2a11850c0316a2fab1bfa16aee4541da" alt></p>
+<p>&#x4F7F;&#x7528;Javassist&#xFF0C;&#x4F7F;&#x7528;builder&#x6784;&#x9020;&#x5B57;&#x8282;&#x7801;&#xFF0C;&#x53CD;&#x7F16;&#x8BD1;&#x51FA;&#x6765;&#x662F;&#x8FD9;&#x6837;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;package org.apache.dubbo.common.bytecode;</span><br><span class="line"></span><br><span class="line">import java.lang.reflect.InvocationTargetException;</span><br><span class="line">import java.util.Map;</span><br><span class="line">import org.apache.dubbo.common.bytecode.ClassGenerator.DC;</span><br><span class="line">import org.apache.dubbo.demo.DemoService;</span><br><span class="line"></span><br><span class="line">public class Wrapper0 extends Wrapper implements DC {</span><br><span class="line">    public static String[] pns;</span><br><span class="line">    public static Map pts;</span><br><span class="line">    public static String[] mns;</span><br><span class="line">    public static String[] dmns;</span><br><span class="line">    public static Class[] mts0;</span><br><span class="line"></span><br><span class="line">    public String[] getPropertyNames() {</span><br><span class="line">        return pns;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public boolean hasProperty(String var1) {</span><br><span class="line">        return pts.containsKey(var1);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public Class getPropertyType(String var1) {</span><br><span class="line">        return (Class)pts.get(var1);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public String[] getMethodNames() {</span><br><span class="line">        return mns;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public String[] getDeclaredMethodNames() {</span><br><span class="line">        return dmns;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public void setPropertyValue(Object var1, String var2, Object var3) {</span><br><span class="line">        try {</span><br><span class="line">            DemoService var4 = (DemoService)var1;</span><br><span class="line">        } catch (Throwable var6) {</span><br><span class="line">            throw new IllegalArgumentException(var6);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        throw new NoSuchPropertyException(&quot;Not found property \&quot;&quot; + var2 + &quot;\&quot; filed or setter method in class org.apache.dubbo.demo.DemoService.&quot;);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public Object getPropertyValue(Object var1, String var2) {</span><br><span class="line">        try {</span><br><span class="line">            DemoService var3 = (DemoService)var1;</span><br><span class="line">        } catch (Throwable var5) {</span><br><span class="line">            throw new IllegalArgumentException(var5);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        throw new NoSuchPropertyException(&quot;Not found property \&quot;&quot; + var2 + &quot;\&quot; filed or setter method in class org.apache.dubbo.demo.DemoService.&quot;);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public Object invokeMethod(Object var1, String var2, Class[] var3, Object[] var4) throws InvocationTargetException {</span><br><span class="line">        DemoService var5;</span><br><span class="line">        try {</span><br><span class="line">            var5 = (DemoService)var1;</span><br><span class="line">        } catch (Throwable var8) {</span><br><span class="line">            throw new IllegalArgumentException(var8);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        try {</span><br><span class="line">            if (&quot;sayHello&quot;.equals(var2) &amp;&amp; var3.length == 1) {</span><br><span class="line">                return var5.sayHello((String)var4[0]);</span><br><span class="line">            }</span><br><span class="line">        } catch (Throwable var9) {</span><br><span class="line">            throw new InvocationTargetException(var9);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        throw new NoSuchMethodException(&quot;Not found method \&quot;&quot; + var2 + &quot;\&quot; in class org.apache.dubbo.demo.DemoService.&quot;);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public Wrapper0() {</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x7EE7;&#x627F;&#x4E86;Wrapper&#xFF0C;&#x5B9E;&#x73B0;&#x4E86;invokeMethod&#x65B9;&#x6CD5;&#xFF0C;&#x6839;&#x636E;&#x65B9;&#x6CD5;&#x7684;&#x540D;&#x79F0;&#x6765;&#x53CD;&#x5C04;&#x8C03;&#x7528;&#x65B9;&#x6CD5;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x591A;&#x4E2A;&#x65B9;&#x6CD5;&#x90A3;&#x5C31;&#x662F;&#x591A;&#x4E2A;if&#x64CD;&#x4F5C;&#x800C;&#x5DF2;</strong></p>
+<p>&#x5230;&#x76EE;&#x524D;&#x4E3A;&#x6B62;&#xFF0C;&#x5DF2;&#x7ECF;&#x5C06;&#x9700;&#x8981;&#x66B4;&#x9732;&#x7684;&#x670D;&#x52A1;&#x5B9E;&#x4F8B;&#x5305;&#x88C5;&#x8D77;&#x6765;&#x4E86;&#xFF0C;&#x4E0B;&#x9762;&#x5C31;&#x662F;&#x5C06;&#x8FD9;&#x4E2A;&#x670D;&#x52A1;&#x5668;&#x66B4;&#x9732;&#x51FA;&#x53BB;&#x4E86;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/fb247fe30901f503579ccd21dcb154cc8585240bfb408f0aadf3645588895cbe" alt="image.png"></p>
+<blockquote>
+<p>&#x6240;&#x652F;&#x6301;&#x7684;&#x534F;&#x8BAE;&#x5982;&#x5305;&#x540D;&#x6240;&#x89C1;&#xFF0C;&#x9ED8;&#x8BA4;&#x4E3A;dubbo</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/59f7adf5c35f1f2da771a7fb26551de9c9d8ff0db5953757b14549a195fb6aed" alt="image.png"></p>
+<blockquote>
+<p>&#x8C03;&#x7528;Protocol&#x7684;export&#x65B9;&#x6CD5;&#x66B4;&#x9732;&#x670D;&#x52A1;&#xFF0C;&#x9ED8;&#x8BA4;&#x4F7F;&#x7528;dubbo</p>
+</blockquote>
+<p><strong>&#x770B;DubboProtocol</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/569fd8e56a0018a3c6409214bb76b035e0c7e006262975108e08db4a4899efb5" alt="image.png"></p>
+<blockquote>
+<p>&#x4E3B;&#x8981;&#x662F;&#x8FD9;&#x4E2A;openServer&#x65B9;&#x6CD5;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/868b0eb769eab382c63143a0aec30aac7cd9e99bb00dbc8390b8257bb8a3df1d" alt="image.png"></p>
+<blockquote>
+<p>&#x8FDB;&#x5165;createServer</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/a5bfba5c64e94db8c2fc27b1e751933618d4130068457b78a8286a3098096c50" alt="image.png"></p>
+<blockquote>
+<p>&#x8FD9;&#x91CC;&#x7ED1;&#x5B9A;&#x4E86;&#x4E00;&#x4E2A;&#x670D;&#x52A1;&#x5668;&#x548C;&#x7528;&#x4E8E;&#x5904;&#x7406;&#x8BF7;&#x6C42;&#x7684;hander</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/7dcc37e19cc9f03fec90ff1f649389b195c3a2193d6092e9aac9510bca933d6c" alt="image.png"></p>
+<blockquote>
+<p>&#x4F7F;&#x7528;&#x4E86;tranposrt&#xFF0C;&#x5C5E;&#x4E8E;dubbo-remoting&#x5C42;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/3cf7886fb7eed20376ddfb94107388453e58e6af00830b292abc99d4bd4a8e21" alt="image.png"></p>
+<blockquote>
+<p>tranposrt&#x4E5F;&#x662F;&#x4E00;&#x4E2A;spi&#xFF0C;&#x9ED8;&#x8BA4;&#x4F7F;&#x7528;netty&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x8DDF;&#x6362;&#x4E3A;&#x5176;&#x4ED6;&#x6BD4;&#x5982;http&#xFF0C;&#x6839;&#x636E;xml&#x914D;&#x7F6E;&#x6784;&#x9020;&#x6210;URL&#xFF0C;&#x9009;&#x62E9;&#x4E0D;&#x540C;&#x7684;&#x670D;&#x52A1;&#x4E3B;&#x8981;&#x662F;&#x5728;URL&#x7684;param&#x53C2;&#x6570;&#x91CC;&#x9762;&#x4F53;&#x73B0;</p>
+</blockquote>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/acc54b77c36e3e1b91a68c5bd93b4bdaae7b9133b93664f4961dd73d3fc96365" alt="image.png"></p>
+<blockquote>
+<p>&#x6253;&#x5F00;&#x4E00;&#x4E2A;nettyServer&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x548C;&#x7ECF;&#x5178;netty&#x65B9;&#x6CD5;&#x5DEE;&#x4E0D;&#x591A;&#xFF0C;&#x4E3B;&#x8981;&#x505A;&#x4E86;&#x4E00;&#x4E9B;&#x5C01;&#x88C5;&#x3002;</p>
+</blockquote>
+<p><strong>&#x5230;&#x6B64;&#x4E3A;&#x6B62;&#xFF0C;&#x5DF2;&#x7ECF;&#x5F00;&#x542F;&#x4E86;&#x4E00;&#x4E2A;netty&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x7ED1;&#x5B9A;&#x4E86;&#x6307;&#x5B9A;&#x7AEF;&#x53E3;&#x53F7;&#xFF0C;&#x5E76;&#x4E14;&#x5C06;&#x914D;&#x7F6E;&#x7684;service&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#x5305;&#x88C5;&#x8D77;&#x6765;&#xFF0C;&#x901A;&#x8FC7;netty&#x670D;&#x52A1;&#x5668;&#x7684;&#x8BF7;&#x6C42;&#xFF0C;&#x586B;&#x5165;&#x6307;&#x5B9A;&#x63A5;&#x53E3;&#x540D;&#x79F0;&#x3001;&#x65B9;&#x6CD5;&#x540D;&#x79F0;&#x4EE5;&#x53CA;&#x53C2;&#x6570;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;invoker&#x7136;&#x540E;&#x8C03;&#x7528;invokeMethod&#x65B9;&#x6CD5;&#x8C03;&#x7528;&#x5B9E;&#x73B0;&#x7C7B;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x5B9E;&#x73B0;&#x4E86;&#x4E00;&#x6B21;RPC</strong></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/e79b2ffe65f093cfd1e1aeb3d27d9fab.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Dubbo/" rel="tag"># Dubbo</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6912021312663879693.html" rel="next" title="百万数据量关联查询的索引优化">
+                <i class="fa fa-chevron-left"></i> 百万数据量关联查询的索引优化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6913087354290831374.html" rel="prev" title="接口测试用例设计 主题列表：juejin, github,">
+                接口测试用例设计 主题列表：juejin, github, <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#正文"><span class="nav-number">2.</span> <span class="nav-text">正文</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

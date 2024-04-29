@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x524D;&amp;#x8A00;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x9762;&amp;#x8BD5;&amp;#x5B98;&amp;#x95EE;&amp;#x6211;&amp;#xFF0C;&amp;#x4F7F;&amp;#x7528;Dubbo&amp;#x6709;&amp;#x6CA1;&amp;#x6709;&amp;#x9047;&amp;#x5230;&amp;#x4E00;&amp;#x4E9B;&amp;#x5751;&amp;#xFF1F;&amp;#x6211;&amp;#x7B11;&amp;#x">
+<meta name="keywords" content="后端,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【肥朝】面试官问我，Redis分布式锁如何续期？懵了。">
+<meta property="og:url" content="https://dev.newban.cn/6844903874675867656.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x9762;&amp;#x8BD5;&amp;#x5B98;&amp;#x95EE;&amp;#x6211;&amp;#xFF0C;&amp;#x4F7F;&amp;#x7528;Dubbo&amp;#x6709;&amp;#x6CA1;&amp;#x6709;&amp;#x9047;&amp;#x5230;&amp;#x4E00;&amp;#x4E9B;&amp;#x5751;&amp;#xFF1F;&amp;#x6211;&amp;#x7B11;&amp;#x">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/75075319882b5829488986c0ee81cb2c155d8cf0cc07fbdf756b9286708be256">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/53584ea96589c405e69bb3618613d823fa6168996b327e9032c30362dcffed9b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/04aa7a39f100ab4e854ff5415df1d19bd36eded226d94295a24aa7737b8f9dc9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/84beddb308214a22f579a2d1960305f6506e01772c722f120a3f891f4da8b735">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/4a723516236909f1f00a781cefba28ee28a55d5901e90903b58e32cbc965244b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/6f77a0fdb8d67347c4a49847f9ad41adae3d14b6035458fb68fe6af34d6da4d7">
+<meta property="og:updated_time" content="2024-04-28T13:32:48.737Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【肥朝】面试官问我，Redis分布式锁如何续期？懵了。">
+<meta name="twitter:description" content="&amp;#x524D;&amp;#x8A00;&amp;#x4E0A;&amp;#x4E00;&amp;#x7BC7;&amp;#x9762;&amp;#x8BD5;&amp;#x5B98;&amp;#x95EE;&amp;#x6211;&amp;#xFF0C;&amp;#x4F7F;&amp;#x7528;Dubbo&amp;#x6709;&amp;#x6CA1;&amp;#x6709;&amp;#x9047;&amp;#x5230;&amp;#x4E00;&amp;#x4E9B;&amp;#x5751;&amp;#xFF1F;&amp;#x6211;&amp;#x7B11;&amp;#x">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/75075319882b5829488986c0ee81cb2c155d8cf0cc07fbdf756b9286708be256">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903874675867656.html">
+
+
+
+
+
+  <title>【肥朝】面试官问我，Redis分布式锁如何续期？懵了。 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">【肥朝】面试官问我，Redis分布式锁如何续期？懵了。</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-26T09:09:46+08:00">
+                2019-06-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x524D;&#x8A00;"><a href="#&#x524D;&#x8A00;" class="headerlink" title="&#x524D;&#x8A00;"></a>&#x524D;&#x8A00;</h2><p>&#x4E0A;&#x4E00;&#x7BC7;<a href="/external_links/efe5e5d6ce538a908c299cf605a2a102.html" target="blank" rel="noopener">&#x9762;&#x8BD5;&#x5B98;&#x95EE;&#x6211;&#xFF0C;&#x4F7F;&#x7528;Dubbo&#x6709;&#x6CA1;&#x6709;&#x9047;&#x5230;&#x4E00;&#x4E9B;&#x5751;&#xFF1F;&#x6211;&#x7B11;&#x4E86;&#x3002;</a>&#x4E4B;&#x540E;,&#x53C8;&#x6709;&#x4E00;&#x4F4D;&#x7C89;&#x4E1D;&#x548C;&#x6211;&#x8BF4;&#x5728;&#x9762;&#x8BD5;&#x8FC7;&#x7A0B;&#x4E2D;&#x88AB;&#x8650;&#x4E86;.&#x9274;&#x4E8E;&#x8FD9;&#x4F4D;&#x7C89;&#x4E1D;&#x662F;&#x4E4B;&#x524D;&#x80A5;&#x671D;&#x7684;**<code>&#x8001;&#x7C89;&#x4E1D;</code>**,&#x800C;&#x4E14;&#x5468;&#x4E00;&#x53C8;&#x8981;&#x5F00;&#x542F;&#x65B0;&#x4E00;&#x8F6E;&#x7684;&#x9762;&#x8BD5;,&#x4E3A;&#x4E86;&#x56DE;&#x9988;&#x4ED6;&#x957F;&#x671F;&#x4EE5;&#x6765;&#x7684;&#x652F;&#x6301;,&#x6240;&#x4EE5;&#x8FDE;&#x591C;&#x5199;&#x4E86;&#x672C;&#x7BC7;,&#x5E0C;&#x671B;&#x80FD;&#x5BF9;&#x4ED6;&#x63A5;&#x4E0B;&#x6765;&#x7684;&#x9762;&#x8BD5;&#x6709;&#x6240;&#x5E2E;&#x52A9;.</p>
+<h2 id="&#x771F;&#x5B9E;&#x6848;&#x4F8B;"><a href="#&#x771F;&#x5B9E;&#x6848;&#x4F8B;" class="headerlink" title="&#x771F;&#x5B9E;&#x6848;&#x4F8B;"></a>&#x771F;&#x5B9E;&#x6848;&#x4F8B;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/75075319882b5829488986c0ee81cb2c155d8cf0cc07fbdf756b9286708be256" alt></p>
+<h2 id="Redis&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x6B63;&#x786E;&#x59FF;&#x52BF;"><a href="#Redis&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x6B63;&#x786E;&#x59FF;&#x52BF;" class="headerlink" title="Redis&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x6B63;&#x786E;&#x59FF;&#x52BF;"></a>Redis&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x6B63;&#x786E;&#x59FF;&#x52BF;</h2><p>&#x636E;&#x80A5;&#x671D;&#x4E86;&#x89E3;,&#x5F88;&#x591A;&#x540C;&#x5B66;&#x5728;&#x7528;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x65F6;,&#x90FD;&#x662F;&#x76F4;&#x63A5;&#x767E;&#x5EA6;&#x641C;&#x7D22;&#x627E;&#x4E00;&#x4E2A;Redis&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x5DE5;&#x5177;&#x7C7B;&#x5C31;&#x76F4;&#x63A5;&#x7528;&#x4E86;.&#x5173;&#x952E;&#x662F;&#x8BE5;&#x5DE5;&#x5177;&#x7C7B;&#x4E2D;&#x8FD8;&#x5145;&#x65A5;&#x7740;&#x5F88;&#x591A;<code>System.out.println();</code>&#x7B49;&#x8BED;&#x53E5;.&#x5176;&#x5B9E;Redis&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x6BD4;&#x8F83;&#x6B63;&#x786E;&#x7684;&#x59FF;&#x52BF;&#x662F;&#x91C7;&#x7528;<code>redisson</code>&#x8FD9;&#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x5DE5;&#x5177;.&#x5177;&#x4F53;&#x4ECB;&#x7ECD;&#x53EF;&#x4EE5;&#x641C;&#x7D22;&#x6700;&#x5927;&#x7684;&#x540C;&#x6027;&#x4EA4;&#x53CB;&#x7F51;&#x7AD9;<code>github</code>.</p>
+<h2 id="&#x5982;&#x4F55;&#x56DE;&#x7B54;"><a href="#&#x5982;&#x4F55;&#x56DE;&#x7B54;" class="headerlink" title="&#x5982;&#x4F55;&#x56DE;&#x7B54;"></a>&#x5982;&#x4F55;&#x56DE;&#x7B54;</h2><p>&#x9996;&#x5148;&#x5982;&#x679C;&#x4F60;&#x4E4B;&#x524D;&#x7528;Redis&#x7684;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x59FF;&#x52BF;&#x6B63;&#x786E;,&#x5E76;&#x4E14;&#x770B;&#x8FC7;&#x76F8;&#x5E94;&#x7684;&#x5B98;&#x65B9;&#x6587;&#x6863;&#x7684;&#x8BDD;,&#x8FD9;&#x4E2A;&#x95EE;&#x9898;<code>So easy</code>.&#x6211;&#x4EEC;&#x6765;&#x770B;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/53584ea96589c405e69bb3618613d823fa6168996b327e9032c30362dcffed9b" alt></p>
+<p>&#x5766;&#x767D;&#x8BF4;,&#x5982;&#x679C;&#x4F60;&#x82F1;&#x6587;&#x68D2;&#x68D2;&#x54D2;&#x90A3;&#x4E48;&#x770B;&#x82F1;&#x6587;&#x6587;&#x6863;&#x53EF;&#x80FD;&#x66F4;&#x597D;&#x7406;&#x89E3;</p>
+<blockquote>
+<p>By default lock watchdog timeout is 30 seconds and can be changed through Config.lockWatchdogTimeout setting.</p>
+</blockquote>
+<p>&#x4F46;&#x662F;&#x4F60;&#x5982;&#x679C;&#x770B;&#x7684;&#x662F;&#x4E2D;&#x6587;&#x6587;&#x6863;</p>
+<blockquote>
+<p>&#x770B;&#x95E8;&#x72D7;&#x68C0;&#x67E5;&#x9501;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x9ED8;&#x8BA4;&#x662F;30&#x79D2;</p>
+</blockquote>
+<p>&#x8FD9;&#x53E5;&#x8BDD;&#x80A5;&#x671D;&#x4ECE;&#x8BED;&#x6587;&#x89D2;&#x5EA6;&#x5206;&#x6790;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x6B67;&#x4E49;&#x53E5;,&#x4ED6;&#x6709;&#x4E24;&#x4E2A;&#x610F;&#x601D;</p>
+<blockquote>
+<p>1.&#x770B;&#x95E8;&#x72D7;&#x9ED8;&#x8BA4;30&#x79D2;&#x53BB;&#x68C0;&#x67E5;&#x4E00;&#x6B21;&#x9501;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;</p>
+</blockquote>
+<blockquote>
+<p>2.&#x770B;&#x4EEC;&#x72D7;&#x4F1A;&#x53BB;&#x68C0;&#x67E5;&#x9501;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;,&#x9501;&#x7684;&#x65F6;&#x95F4;&#x65F6;&#x95F4;&#x9ED8;&#x8BA4;&#x662F;30&#x79D2;</p>
+</blockquote>
+<p>&#x770B;&#x5230;&#x8FD9;&#x91CC;,&#x6211;&#x5E0C;&#x671B;&#x5927;&#x5BB6;&#x4E0D;&#x8981;&#x9ED1;&#x6211;&#x7684;&#x5C0F;&#x5B66;&#x4F53;&#x80B2;&#x8001;&#x5E08;,&#x867D;&#x7136;&#x4ED6;&#x548C;&#x8BED;&#x6587;&#x8001;&#x5E08;&#x662F;&#x540C;&#x4E2A;&#x4EBA;.&#x8BED;&#x6587;&#x4E0D;&#x884C;,&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6E90;&#x7801;&#x6765;&#x51D1;!</p>
+<h2 id="&#x6E90;&#x7801;&#x5206;&#x6790;"><a href="#&#x6E90;&#x7801;&#x5206;&#x6790;" class="headerlink" title="&#x6E90;&#x7801;&#x5206;&#x6790;"></a>&#x6E90;&#x7801;&#x5206;&#x6790;</h2><p>&#x6211;&#x4EEC;&#x6839;&#x636E;&#x5B98;&#x65B9;&#x6587;&#x6863;&#x7ED9;&#x51FA;&#x7684;&#x4F8B;&#x5B50;,&#x5199;&#x4E86;&#x4E00;&#x4E2A;&#x6700;&#x7B80;&#x5355;&#x7684;demo,&#x4F8B;&#x5B50;&#x6839;&#x636E;&#x4E0A;&#x9762;&#x622A;&#x56FE;&#x4E2D;<code>Ctr+C&#x548C;Ctr+V</code>&#x4E00;&#x6CE2;&#x64CD;&#x4F5C;,&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class DemoMain {</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception {</span><br><span class="line">        Config config = new Config();</span><br><span class="line">        config.useSingleServer().setAddress(&quot;redis://127.0.0.1:6379&quot;);</span><br><span class="line"></span><br><span class="line">        RedissonClient redisson = Redisson.create(config);</span><br><span class="line">        RLock lock = redisson.getLock(&quot;anyLock&quot;);</span><br><span class="line"></span><br><span class="line">        lock.lock();</span><br><span class="line">        //lock.unlock();</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="create"><a href="#create" class="headerlink" title="create"></a>create</h3><p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/04aa7a39f100ab4e854ff5415df1d19bd36eded226d94295a24aa7737b8f9dc9" alt></p>
+<p>&#x4ECE;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x77E5;&#x9053;,<code>internalLockLeaseTime</code> &#x548C; <code>lockWatchdogTimeout</code>&#x8FD9;&#x4E24;&#x4E2A;&#x53C2;&#x6570;&#x662F;&#x76F8;&#x7B49;&#x7684;.</p>
+<p><code>lockWatchdogTimeout</code>&#x9ED8;&#x8BA4;&#x503C;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class Config {</span><br><span class="line">	</span><br><span class="line">	private long lockWatchdogTimeout = 30 * 1000;</span><br><span class="line">		</span><br><span class="line">	public long getLockWatchdogTimeout() {</span><br><span class="line">		return lockWatchdogTimeout;</span><br><span class="line">	}</span><br><span class="line">	</span><br><span class="line">	//&#x7701;&#x7565;&#x65E0;&#x5173;&#x4EE3;&#x7801;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4ECE;<code>internalLockLeaseTime</code>&#x8FD9;&#x4E2A;&#x5355;&#x8BCD;&#x4E5F;&#x53EF;&#x4EE5;&#x770B;&#x51FA;,&#x8FD9;&#x4E2A;&#x52A0;&#x7684;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x9ED8;&#x8BA4;&#x662F;30&#x79D2;.&#x4F46;&#x662F;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x95EE;&#x9898;,&#x90A3;&#x5C31;&#x662F;&#x8FD9;&#x4E2A;&#x770B;&#x95E8;&#x72D7;,&#x591A;&#x4E45;&#x6765;&#x5EF6;&#x957F;&#x4E00;&#x6B21;&#x6709;&#x6548;&#x671F;&#x5462;?&#x6211;&#x4EEC;&#x5F80;&#x4E0B;&#x770B;</p>
+<h3 id="lock"><a href="#lock" class="headerlink" title="lock"></a>lock</h3><p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/84beddb308214a22f579a2d1960305f6506e01772c722f120a3f891f4da8b735" alt></p>
+<p>&#x4ECE;&#x6211;&#x56FE;&#x4E2D;&#x6846;&#x8D77;&#x6765;&#x7684;&#x5730;&#x65B9;&#x6211;&#x4EEC;&#x5C31;&#x77E5;&#x9053;&#x4E86;,&#x83B7;&#x53D6;&#x9501;&#x6210;&#x529F;&#x5C31;&#x4F1A;&#x5F00;&#x542F;&#x4E00;&#x4E2A;&#x5B9A;&#x65F6;&#x4EFB;&#x52A1;,&#x4E5F;&#x5C31;&#x662F;<code>watchdog</code>,&#x5B9A;&#x65F6;&#x4EFB;&#x52A1;&#x4F1A;&#x5B9A;&#x671F;&#x68C0;&#x67E5;&#x53BB;&#x7EED;&#x671F;<code>renewExpirationAsync(threadId)</code>.</p>
+<p>&#x8FD9;&#x91CC;&#x5B9A;&#x65F6;&#x7528;&#x7684;&#x662F;<code>netty-common</code>&#x5305;&#x4E2D;&#x7684;<code>HashedWheelTimer</code>,&#x80A5;&#x671D;&#x516C;&#x4F17;&#x53F7;&#x5DF2;&#x7ECF;&#x548C;&#x5404;&#x5927;&#x641C;&#x7D22;&#x5F15;&#x64CE;&#x5EFA;&#x7ACB;&#x4E86;&#x5BC6;&#x5207;&#x7684;&#x5408;&#x4F5C;&#x5173;&#x7CFB;,&#x4F60;&#x53EA;&#x9700;&#x8981;&#x628A;&#x8FD9;&#x4E2A;&#x7C7B;&#x5728;&#x4EFB;&#x4F55;&#x641C;&#x7D22;&#x5F15;&#x64CE;&#x4E00;&#x641C;,&#x90FD;&#x80FD;&#x77E5;&#x9053;&#x76F8;&#x5173;API&#x53C2;&#x6570;&#x7684;&#x610F;&#x4E49;.</p>
+<p>&#x4ECE;&#x56FE;&#x4E2D;&#x6211;&#x4EEC;&#x660E;&#x767D;,&#x8BE5;&#x5B9A;&#x65F6;&#x8C03;&#x5EA6;&#x6BCF;&#x6B21;&#x8C03;&#x7528;&#x7684;&#x65F6;&#x95F4;&#x5DEE;&#x662F;<code>internalLockLeaseTime / 3</code>.&#x4E5F;&#x5C31;10&#x79D2;.</p>
+<h3 id="&#x771F;&#x76F8;&#x5927;&#x767D;"><a href="#&#x771F;&#x76F8;&#x5927;&#x767D;" class="headerlink" title="&#x771F;&#x76F8;&#x5927;&#x767D;"></a>&#x771F;&#x76F8;&#x5927;&#x767D;</h3><p>&#x901A;&#x8FC7;&#x6E90;&#x7801;&#x5206;&#x6790;&#x6211;&#x4EEC;&#x77E5;&#x9053;,&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;,&#x52A0;&#x9501;&#x7684;&#x65F6;&#x95F4;&#x662F;30&#x79D2;.&#x5982;&#x679C;&#x52A0;&#x9501;&#x7684;&#x4E1A;&#x52A1;&#x6CA1;&#x6709;&#x6267;&#x884C;&#x5B8C;,&#x90A3;&#x4E48;&#x5230; 30-10 = 20&#x79D2;&#x7684;&#x65F6;&#x5019;,&#x5C31;&#x4F1A;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x7EED;&#x671F;,&#x628A;&#x9501;&#x91CD;&#x7F6E;&#x6210;30&#x79D2;.&#x90A3;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x53EF;&#x80FD;&#x53C8;&#x6709;&#x540C;&#x5B66;&#x95EE;&#x4E86;,&#x90A3;&#x4E1A;&#x52A1;&#x7684;&#x673A;&#x5668;&#x4E07;&#x4E00;&#x5B95;&#x673A;&#x4E86;&#x5462;?&#x5B95;&#x673A;&#x4E86;&#x5B9A;&#x65F6;&#x4EFB;&#x52A1;&#x8DD1;&#x4E0D;&#x4E86;,&#x5C31;&#x7EED;&#x4E0D;&#x4E86;&#x671F;,&#x90A3;&#x81EA;&#x7136;30&#x79D2;&#x4E4B;&#x540E;&#x9501;&#x5C31;&#x89E3;&#x5F00;&#x4E86;&#x5457;.</p>
+<h2 id="&#x5199;&#x5728;&#x6700;&#x540E;"><a href="#&#x5199;&#x5728;&#x6700;&#x540E;" class="headerlink" title="&#x5199;&#x5728;&#x6700;&#x540E;"></a>&#x5199;&#x5728;&#x6700;&#x540E;</h2><p>&#x5982;&#x679C;&#x4F60;&#x662F;&#x80A5;&#x671D;&#x516C;&#x4F17;&#x53F7;&#x7684;&#x8001;&#x7C89;&#x4E1D;,&#x5E76;&#x4E14;&#x5728;&#x9762;&#x8BD5;&#x3001;&#x5DE5;&#x4F5C;&#x8FC7;&#x7A0B;&#x4E2D;&#x9047;&#x5230;&#x4E86;&#x4EC0;&#x4E48;&#x95EE;&#x9898;,&#x6B22;&#x8FCE;&#x6765;&#x64A9;.&#x4F46;&#x662F;&#x80A5;&#x671D;&#x662F;&#x4E2A;&#x6B63;&#x7ECF;&#x7684;Java&#x5F00;&#x53D1;,&#x6211;&#x4EEC;&#x53EA;&#x8C03;&#x63A5;&#x53E3;,&#x4E0D;&#x8C03;&#x60C5;!</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/4a723516236909f1f00a781cefba28ee28a55d5901e90903b58e32cbc965244b" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/6f77a0fdb8d67347c4a49847f9ad41adae3d14b6035458fb68fe6af34d6da4d7" alt></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/61843eba0e9061303bcfe2614b0de522.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-Java/" rel="tag"># 后端,Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903874361311239.html" rel="next" title="获取视频截图">
+                <i class="fa fa-chevron-left"></i> 获取视频截图
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903875569254414.html" rel="prev" title="ConstraintLayout,看完一篇真的就够了么？">
+                ConstraintLayout,看完一篇真的就够了么？ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#真实案例"><span class="nav-number">2.</span> <span class="nav-text">真实案例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis分布式锁的正确姿势"><span class="nav-number">3.</span> <span class="nav-text">Redis分布式锁的正确姿势</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何回答"><span class="nav-number">4.</span> <span class="nav-text">如何回答</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">5.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#create"><span class="nav-number">5.1.</span> <span class="nav-text">create</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lock"><span class="nav-number">5.2.</span> <span class="nav-text">lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#真相大白"><span class="nav-number">5.3.</span> <span class="nav-text">真相大白</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写在最后"><span class="nav-number">6.</span> <span class="nav-text">写在最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

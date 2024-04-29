@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Java&amp;#x4E2D;&amp;#x7684;try finally &amp;#x7684;&amp;#x539F;&amp;#x7406; &amp;#x60C5;&amp;#x51B5;&amp;#x4E00;&amp;#xFF1A; doTryFinally1() &amp;#x5C31;&amp;#x662F;try &amp;#x4E2D;&amp;#x4FEE;&amp;#x6539;&amp;#x503C;&amp;#x5E76;&amp;#x4E14;returnJava &amp;#x4EE3;&amp;#x7801">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java中try finally 的原理(字节码解释)">
+<meta property="og:url" content="https://dev.newban.cn/6844903520475283469.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="Java&amp;#x4E2D;&amp;#x7684;try finally &amp;#x7684;&amp;#x539F;&amp;#x7406; &amp;#x60C5;&amp;#x51B5;&amp;#x4E00;&amp;#xFF1A; doTryFinally1() &amp;#x5C31;&amp;#x662F;try &amp;#x4E2D;&amp;#x4FEE;&amp;#x6539;&amp;#x503C;&amp;#x5E76;&amp;#x4E14;returnJava &amp;#x4EE3;&amp;#x7801">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T05:03:02.851Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java中try finally 的原理(字节码解释)">
+<meta name="twitter:description" content="Java&amp;#x4E2D;&amp;#x7684;try finally &amp;#x7684;&amp;#x539F;&amp;#x7406; &amp;#x60C5;&amp;#x51B5;&amp;#x4E00;&amp;#xFF1A; doTryFinally1() &amp;#x5C31;&amp;#x662F;try &amp;#x4E2D;&amp;#x4FEE;&amp;#x6539;&amp;#x503C;&amp;#x5E76;&amp;#x4E14;returnJava &amp;#x4EE3;&amp;#x7801">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903520475283469.html">
+
+
+
+
+
+  <title>Java中try finally 的原理(字节码解释) | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java中try finally 的原理(字节码解释)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-10T09:37:08+08:00">
+                2017-12-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Java&#x4E2D;&#x7684;try finally &#x7684;&#x539F;&#x7406;</p>
+<h3 id="&#x60C5;&#x51B5;&#x4E00;&#xFF1A;-doTryFinally1-&#x5C31;&#x662F;try-&#x4E2D;&#x4FEE;&#x6539;&#x503C;&#x5E76;&#x4E14;return"><a href="#&#x60C5;&#x51B5;&#x4E00;&#xFF1A;-doTryFinally1-&#x5C31;&#x662F;try-&#x4E2D;&#x4FEE;&#x6539;&#x503C;&#x5E76;&#x4E14;return" class="headerlink" title="&#x60C5;&#x51B5;&#x4E00;&#xFF1A; doTryFinally1() &#x5C31;&#x662F;try &#x4E2D;&#x4FEE;&#x6539;&#x503C;&#x5E76;&#x4E14;return"></a>&#x60C5;&#x51B5;&#x4E00;&#xFF1A; doTryFinally1() &#x5C31;&#x662F;try &#x4E2D;&#x4FEE;&#x6539;&#x503C;&#x5E76;&#x4E14;return</h3><h4 id="Java-&#x4EE3;&#x7801;&#xFF1A;"><a href="#Java-&#x4EE3;&#x7801;&#xFF1A;" class="headerlink" title="Java &#x4EE3;&#x7801;&#xFF1A;"></a>Java &#x4EE3;&#x7801;&#xFF1A;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">    public static String doTryFinally1 (){</span><br><span class="line">        String name = null;</span><br><span class="line">        try {</span><br><span class="line">            name= &quot;zhuang&quot;;</span><br><span class="line">            return name;</span><br><span class="line">        } finally {</span><br><span class="line">            name = &quot;zhuang111111&quot;;</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x5B57;&#x8282;&#x7801;&#xFF1A;-&#x52A0;&#x62EC;&#x53F7;&#x662F;&#x81EA;&#x5DF1;&#x7684;&#x7406;&#x89E3;"><a href="#&#x5B57;&#x8282;&#x7801;&#xFF1A;-&#x52A0;&#x62EC;&#x53F7;&#x662F;&#x81EA;&#x5DF1;&#x7684;&#x7406;&#x89E3;" class="headerlink" title="&#x5B57;&#x8282;&#x7801;&#xFF1A; (&#x52A0;&#x62EC;&#x53F7;&#x662F;&#x81EA;&#x5DF1;&#x7684;&#x7406;&#x89E3;)"></a>&#x5B57;&#x8282;&#x7801;&#xFF1A; (&#x52A0;&#x62EC;&#x53F7;&#x662F;&#x81EA;&#x5DF1;&#x7684;&#x7406;&#x89E3;)</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">  public static java.lang.String doTryFinally1();</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=3, args_size=0</span><br><span class="line">         0: aconst_null   (&#x521D;&#x59CB;&#x5316;null&#x503C;&#xFF0C;&#x8FDB;&#x6808;)</span><br><span class="line">         1: astore_0      </span><br><span class="line">         2: ldc           #2                  // String zhuang  </span><br><span class="line">                 (int, float&#x6216;String&#x578B;&#x5E38;&#x91CF;&#x503C;&#x4ECE;&#x5E38;&#x91CF;&#x6C60;&#x4E2D;&#x63A8;&#x9001;&#x81F3;&#x6808;&#x9876;)</span><br><span class="line">         4: astore_0      </span><br><span class="line">                (&#x5C06;&#x6808;&#x9876;&#x5F15;&#x7528;&#x578B;&#x6570;&#x503C;&#x5B58;&#x5165;&#x7B2C;&#x4E00;&#x4E2A;&#x672C;&#x5730;&#x53D8;&#x91CF;)</span><br><span class="line">         5: aload_0   </span><br><span class="line">                (&#x5C06;&#x4E00;&#x4E2A;&#x5C40;&#x90E8;&#x53D8;&#x91CF;&#x52A0;&#x8F7D;&#x5230;&#x64CD;&#x4F5C;&#x6570;&#x6808;&#x7684;&#x6307;&#x4EE4;)    </span><br><span class="line">         6: astore_1    </span><br><span class="line">                (&#x5C06;&#x6808;&#x9876;&#x5F15;&#x7528;&#x578B;&#x6570;&#x503C;&#x5B58;&#x5165;&#x7B2C;&#x4E8C;&#x4E2A;&#x672C;&#x5730;&#x53D8;&#x91CF; &#x8FD9;&#x91CC;&#x7B49;&#x4E8E;&#x53C8;&#x5B58;&#x4E86;&#x4E2A;&#x8981; return &#x7684;&#x503C;&#x5230;&#x672C;&#x5730;&#x53D8;&#x91CF;&#x8868;)</span><br><span class="line">         7: ldc           #3                  // String zhuang111111</span><br><span class="line">         9: astore_0   </span><br><span class="line">              (&#x7ED9;name &#x8D4B;&#x503C;&#xFF0C;&#x4E5F;&#x662F; finally &#x5757;&#x91CC;&#x7684;&#x4EE3;&#x7801;)   </span><br><span class="line">        10: aload_1  </span><br><span class="line">              (&#x5C06;&#x7B2C;&#x4E8C;&#x4E2A;&#x5C40;&#x90E8;&#x53D8;&#x91CF;&#x52A0;&#x8F7D;&#x5230;&#x64CD;&#x4F5C;&#x6570;&#x6808;&#x7684;&#x6307;&#x4EE4; &#x4E5F;&#x5C31;&#x662F; name = &quot;zhuang&quot; &#x7684;&#x503C;, &#x6240;&#x4EE5;finally &#x4E2D;&#x5BF9;name &#x7684;&#x5730;&#x5740;&#x8FDB;&#x884C;&#x64CD;&#x4F5C;&#x5BF9;&#x8FD4;&#x56DE;&#x503C;&#x6CA1;&#x6709;&#x6548;&#x679C;)   </span><br><span class="line">        11: areturn       </span><br><span class="line">        12: astore_2 </span><br><span class="line"></span><br><span class="line">        13: ldc           #3                  // String zhuang111111</span><br><span class="line">        15: astore_0      </span><br><span class="line">        16: aload_2       </span><br><span class="line">        17: athrow        </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             2     7    12   any</span><br><span class="line"></span><br><span class="line">         (finally &#x7684;&#x53E6;&#x4E00;&#x4E2A;&#x4F5C;&#x7528;&#x662F;&#x5F53;&#x629B;&#x5F02;&#x5E38;&#x65F6;&#xFF0C;finally &#x4E2D;&#x7684;&#x4EE3;&#x7801;&#x5757;&#x8FD8;&#x4F9D;&#x7136;&#x6267;&#x884C;&#xFF0C;&#x6240;&#x4EE5;&#x5728;exception table &#x4E2D;&#xFF0C;&#x53C8;&#x5B9A;&#x4E49;&#x4E86;&#x4E00;&#x4E2A; any &#x7684;&#x5F02;&#x5E38;&#x5904;&#x7406;&#x5982;&#x679C;&#x629B;&#x5F02;&#x5E38;&#x4E86;&#xFF0C;&#x7A0B;&#x5E8F;&#x4E5F;&#x4F9D;&#x7136;&#x6267;&#x884C;target &#x4E0B;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x6700;&#x540E;&#x8FD4;&#x56DE;&#x7684;&#x503C;&#x4E5F;&#x662F;&#x4E0D;&#x53D8;&#x7684;  )</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 26: 0</span><br><span class="line">        line 28: 2</span><br><span class="line">        line 29: 5</span><br><span class="line">        line 31: 7</span><br><span class="line">        line 29: 10</span><br><span class="line">        line 31: 12</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">               2      16     0  name   Ljava/lang/String;</span><br><span class="line">      StackMapTable: number_of_entries = 1</span><br><span class="line">           frame_type = 255 /* full_frame */</span><br><span class="line">          offset_delta = 12</span><br><span class="line">          locals = [ class java/lang/String ]</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x7ED3;&#x8BBA;&#xFF1A;"><a href="#&#x7ED3;&#x8BBA;&#xFF1A;" class="headerlink" title="&#x7ED3;&#x8BBA;&#xFF1A;"></a>&#x7ED3;&#x8BBA;&#xFF1A;</h4><p>finally &#x7684;&#x4EE3;&#x7801;&#x5757;&#x7F16;&#x8BD1;&#x540E;&#x90FD;&#x4F1A;&#x63A5;&#x5230; try &#x4EE3;&#x7801;&#x5757;&#x4E4B;&#x540E;</p>
+<p>1.&#x5982;&#x679C; try &#x4EE3;&#x7801;&#x5757;&#x4E2D;return ,&#x5C31;return &#x4E86; 2.&#x5982;&#x679C; try &#x4EE3;&#x7801;&#x5757;&#x540E;&#x8FD8;&#x6709;&#x4EE3;&#x7801;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#xFF0C;&#x5219;&#x4F1A;&#x51FA;&#x73B0; goto &#x6307;&#x4EE4;&#xFF0C;&#x8DF3;&#x8F6C;&#x5230;&#x4E0B;&#x6BB5;&#x6307;&#x4EE4; &#x7136;&#x540E;&#x5728; exception table &#x4E2D;&#x6CE8;&#x518C;&#x4E86; any &#x5F02;&#x5E38; &#x5982;&#x679C;&#x5728; try &#x5185;&#x629B;&#x4E86;&#x5F02;&#x5E38;&#xFF0C;&#x5C31;&#x4F1A;&#x53BB;&#x5F02;&#x5E38;&#x8868;&#x627E;&#x5230; any &#x7136;&#x540E;&#xFF0C;&#x8DF3;&#x8F6C;&#x5230;&#x5BF9;&#x5E94;&#x7684; target &#x4EE3;&#x7801;&#x6BB5;&#x7EE7;&#x7EED;&#x6267;&#x884C;</p>
+<h3 id="&#x6D4B;&#x8BD5;&#x7684;Java-&#x4EE3;&#x7801;"><a href="#&#x6D4B;&#x8BD5;&#x7684;Java-&#x4EE3;&#x7801;" class="headerlink" title="&#x6D4B;&#x8BD5;&#x7684;Java &#x4EE3;&#x7801;"></a>&#x6D4B;&#x8BD5;&#x7684;Java &#x4EE3;&#x7801;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">/**</span><br><span class="line"> * Created by zhuangjiesen on 2017/12/9.</span><br><span class="line"> */</span><br><span class="line">public class TryFinallyTest {</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) {</span><br><span class="line">        try {</span><br><span class="line">            String str = &quot;zhuang&quot;;</span><br><span class="line">        } finally {</span><br><span class="line">            String name = &quot;zhuang111111&quot;;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        System.out.println(&quot;doTryFinally1 : &quot; + doTryFinally1());</span><br><span class="line">        System.out.println(&quot;doTryFinally2 : &quot; + doTryFinally2());</span><br><span class="line">        System.out.println(&quot;doTryFinally3 : &quot; + doTryFinally3());</span><br><span class="line">        System.out.println(&quot;doTryFinally4 : &quot; + doTryFinally4());</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public static String doTryFinally1 (){</span><br><span class="line">        String name = null;</span><br><span class="line">        try {</span><br><span class="line">            name= &quot;zhuang&quot;;</span><br><span class="line">            return name;</span><br><span class="line">        } finally {</span><br><span class="line">            name = &quot;zhuang111111&quot;;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public static String doTryFinally2 (){</span><br><span class="line">        String name = null;</span><br><span class="line">        try {</span><br><span class="line">            name= &quot;zhuang&quot;;</span><br><span class="line">            return name;</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        } finally {</span><br><span class="line">            name = &quot;zhuang111111&quot;;</span><br><span class="line">            return name;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public static String doTryFinally3 (){</span><br><span class="line">        String name = null;</span><br><span class="line">        try {</span><br><span class="line">            name= &quot;zhuang&quot;;</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        } finally {</span><br><span class="line">            name = &quot;zhuang111111&quot;;</span><br><span class="line">            return name;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public static int doTryFinally4 (){</span><br><span class="line">        int a = 0;</span><br><span class="line">        try {</span><br><span class="line">            a = 10;</span><br><span class="line">            return a;</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        } finally {</span><br><span class="line">            a++;</span><br><span class="line">            return a;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public static String doTryFinally5 (){</span><br><span class="line">        String name = null;</span><br><span class="line">        try {</span><br><span class="line">            name= &quot;zhuang&quot;;</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        } finally {</span><br><span class="line">            name = &quot;zhuang111111&quot;;</span><br><span class="line">        }</span><br><span class="line">        return name;</span><br><span class="line">    }</span><br><span class="line">    public static String doTryFinally6 (){</span><br><span class="line">        String name = null;</span><br><span class="line">        try {</span><br><span class="line">            name= &quot;zhuang&quot;;</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            name= &quot;444444&quot;;</span><br><span class="line">            return name;</span><br><span class="line">        } finally {</span><br><span class="line">            name = &quot;zhuang111111&quot;;</span><br><span class="line">        }</span><br><span class="line">        return name;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x5B57;&#x8282;&#x7801;-javap-verbose-TryFinallyTest"><a href="#&#x5B57;&#x8282;&#x7801;-javap-verbose-TryFinallyTest" class="headerlink" title="&#x5B57;&#x8282;&#x7801; (javap -verbose TryFinallyTest)"></a>&#x5B57;&#x8282;&#x7801; (javap -verbose TryFinallyTest)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">Classfile /C:/Users/zhuangjiesen/IdeaProjects/HelloWorld/target/classes/com/java/TryFinallyTest.class</span><br><span class="line">  Last modified 2017-12-9; size 2387 bytes</span><br><span class="line">  MD5 checksum 1d97c2b783088a05dc7a89a3066f1fcc</span><br><span class="line">  Compiled from &quot;TryFinallyTest.java&quot;</span><br><span class="line">public class com.java.TryFinallyTest</span><br><span class="line">  SourceFile: &quot;TryFinallyTest.java&quot;</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line">   #1 = Methodref          #23.#55        //  java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #2 = String             #56            //  zhuang</span><br><span class="line">   #3 = String             #57            //  zhuang111111</span><br><span class="line">   #4 = Fieldref           #58.#59        //  java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">   #5 = Class              #60            //  java/lang/StringBuilder</span><br><span class="line">   #6 = Methodref          #5.#55         //  java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #7 = String             #61            //  doTryFinally1 : </span><br><span class="line">   #8 = Methodref          #5.#62         //  java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">   #9 = Methodref          #22.#63        //  com/java/TryFinallyTest.doTryFinally1:()Ljava/lang/String;</span><br><span class="line">  #10 = Methodref          #5.#64         //  java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">  #11 = Methodref          #65.#66        //  java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">  #12 = String             #67            //  doTryFinally2 : </span><br><span class="line">  #13 = Methodref          #22.#68        //  com/java/TryFinallyTest.doTryFinally2:()Ljava/lang/String;</span><br><span class="line">  #14 = String             #69            //  doTryFinally3 : </span><br><span class="line">  #15 = Methodref          #22.#70        //  com/java/TryFinallyTest.doTryFinally3:()Ljava/lang/String;</span><br><span class="line">  #16 = String             #71            //  doTryFinally4 : </span><br><span class="line">  #17 = Methodref          #22.#72        //  com/java/TryFinallyTest.doTryFinally4:()I</span><br><span class="line">  #18 = Methodref          #5.#73         //  java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;</span><br><span class="line">  #19 = Class              #74            //  java/lang/Exception</span><br><span class="line">  #20 = Methodref          #19.#75        //  java/lang/Exception.printStackTrace:()V</span><br><span class="line">  #21 = String             #76            //  444444</span><br><span class="line">  #22 = Class              #77            //  com/java/TryFinallyTest</span><br><span class="line">  #23 = Class              #78            //  java/lang/Object</span><br><span class="line">  #24 = Utf8               &lt;init&gt;</span><br><span class="line">  #25 = Utf8               ()V</span><br><span class="line">  #26 = Utf8               Code</span><br><span class="line">  #27 = Utf8               LineNumberTable</span><br><span class="line">  #28 = Utf8               LocalVariableTable</span><br><span class="line">  #29 = Utf8               this</span><br><span class="line">  #30 = Utf8               Lcom/java/TryFinallyTest;</span><br><span class="line">  #31 = Utf8               main</span><br><span class="line">  #32 = Utf8               ([Ljava/lang/String;)V</span><br><span class="line">  #33 = Utf8               args</span><br><span class="line">  #34 = Utf8               [Ljava/lang/String;</span><br><span class="line">  #35 = Utf8               StackMapTable</span><br><span class="line">  #36 = Class              #79            //  java/lang/Throwable</span><br><span class="line">  #37 = Utf8               doTryFinally1</span><br><span class="line">  #38 = Utf8               ()Ljava/lang/String;</span><br><span class="line">  #39 = Utf8               name</span><br><span class="line">  #40 = Utf8               Ljava/lang/String;</span><br><span class="line">  #41 = Class              #80            //  java/lang/String</span><br><span class="line">  #42 = Utf8               doTryFinally2</span><br><span class="line">  #43 = Utf8               e</span><br><span class="line">  #44 = Utf8               Ljava/lang/Exception;</span><br><span class="line">  #45 = Class              #74            //  java/lang/Exception</span><br><span class="line">  #46 = Utf8               doTryFinally3</span><br><span class="line">  #47 = Utf8               doTryFinally4</span><br><span class="line">  #48 = Utf8               ()I</span><br><span class="line">  #49 = Utf8               a</span><br><span class="line">  #50 = Utf8               I</span><br><span class="line">  #51 = Utf8               doTryFinally5</span><br><span class="line">  #52 = Utf8               doTryFinally6</span><br><span class="line">  #53 = Utf8               SourceFile</span><br><span class="line">  #54 = Utf8               TryFinallyTest.java</span><br><span class="line">  #55 = NameAndType        #24:#25        //  &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">  #56 = Utf8               zhuang</span><br><span class="line">  #57 = Utf8               zhuang111111</span><br><span class="line">  #58 = Class              #81            //  java/lang/System</span><br><span class="line">  #59 = NameAndType        #82:#83        //  out:Ljava/io/PrintStream;</span><br><span class="line">  #60 = Utf8               java/lang/StringBuilder</span><br><span class="line">  #61 = Utf8               doTryFinally1 : </span><br><span class="line">  #62 = NameAndType        #84:#85        //  append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">  #63 = NameAndType        #37:#38        //  doTryFinally1:()Ljava/lang/String;</span><br><span class="line">  #64 = NameAndType        #86:#38        //  toString:()Ljava/lang/String;</span><br><span class="line">  #65 = Class              #87            //  java/io/PrintStream</span><br><span class="line">  #66 = NameAndType        #88:#89        //  println:(Ljava/lang/String;)V</span><br><span class="line">  #67 = Utf8               doTryFinally2 : </span><br><span class="line">  #68 = NameAndType        #42:#38        //  doTryFinally2:()Ljava/lang/String;</span><br><span class="line">  #69 = Utf8               doTryFinally3 : </span><br><span class="line">  #70 = NameAndType        #46:#38        //  doTryFinally3:()Ljava/lang/String;</span><br><span class="line">  #71 = Utf8               doTryFinally4 : </span><br><span class="line">  #72 = NameAndType        #47:#48        //  doTryFinally4:()I</span><br><span class="line">  #73 = NameAndType        #84:#90        //  append:(I)Ljava/lang/StringBuilder;</span><br><span class="line">  #74 = Utf8               java/lang/Exception</span><br><span class="line">  #75 = NameAndType        #91:#25        //  printStackTrace:()V</span><br><span class="line">  #76 = Utf8               444444</span><br><span class="line">  #77 = Utf8               com/java/TryFinallyTest</span><br><span class="line">  #78 = Utf8               java/lang/Object</span><br><span class="line">  #79 = Utf8               java/lang/Throwable</span><br><span class="line">  #80 = Utf8               java/lang/String</span><br><span class="line">  #81 = Utf8               java/lang/System</span><br><span class="line">  #82 = Utf8               out</span><br><span class="line">  #83 = Utf8               Ljava/io/PrintStream;</span><br><span class="line">  #84 = Utf8               append</span><br><span class="line">  #85 = Utf8               (Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">  #86 = Utf8               toString</span><br><span class="line">  #87 = Utf8               java/io/PrintStream</span><br><span class="line">  #88 = Utf8               println</span><br><span class="line">  #89 = Utf8               (Ljava/lang/String;)V</span><br><span class="line">  #90 = Utf8               (I)Ljava/lang/StringBuilder;</span><br><span class="line">  #91 = Utf8               printStackTrace</span><br><span class="line">{</span><br><span class="line">  public com.java.TryFinallyTest();</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">         0: aload_0       </span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return        </span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 6: 0</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">               0       5     0  this   Lcom/java/TryFinallyTest;</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=3, locals=4, args_size=1</span><br><span class="line">         0: ldc           #2                  // String zhuang</span><br><span class="line">         2: astore_1      </span><br><span class="line">         3: ldc           #3                  // String zhuang111111</span><br><span class="line">         5: astore_1      </span><br><span class="line">         6: goto          15</span><br><span class="line">         9: astore_2      </span><br><span class="line">        10: ldc           #3                  // String zhuang111111</span><br><span class="line">        12: astore_3      </span><br><span class="line">        13: aload_2       </span><br><span class="line">        14: athrow        </span><br><span class="line">        15: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">        18: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">        21: dup           </span><br><span class="line">        22: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">        25: ldc           #7                  // String doTryFinally1 : </span><br><span class="line">        27: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        30: invokestatic  #9                  // Method doTryFinally1:()Ljava/lang/String;</span><br><span class="line">        33: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        36: invokevirtual #10                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">        39: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        42: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">        45: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">        48: dup           </span><br><span class="line">        49: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">        52: ldc           #12                 // String doTryFinally2 : </span><br><span class="line">        54: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        57: invokestatic  #13                 // Method doTryFinally2:()Ljava/lang/String;</span><br><span class="line">        60: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        63: invokevirtual #10                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">        66: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        69: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">        72: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">        75: dup           </span><br><span class="line">        76: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">        79: ldc           #14                 // String doTryFinally3 : </span><br><span class="line">        81: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        84: invokestatic  #15                 // Method doTryFinally3:()Ljava/lang/String;</span><br><span class="line">        87: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        90: invokevirtual #10                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">        93: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        96: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">        99: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">       102: dup           </span><br><span class="line">       103: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       106: ldc           #16                 // String doTryFinally4 : </span><br><span class="line">       108: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">       111: invokestatic  #17                 // Method doTryFinally4:()I</span><br><span class="line">       114: invokevirtual #18                 // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;</span><br><span class="line">       117: invokevirtual #10                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">       120: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       123: return        </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             0     3     9   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 11: 0</span><br><span class="line">        line 13: 3</span><br><span class="line">        line 14: 6</span><br><span class="line">        line 13: 9</span><br><span class="line">        line 14: 13</span><br><span class="line">        line 17: 15</span><br><span class="line">        line 18: 42</span><br><span class="line">        line 19: 69</span><br><span class="line">        line 20: 96</span><br><span class="line">        line 21: 123</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">               0     124     0  args   [Ljava/lang/String;</span><br><span class="line">      StackMapTable: number_of_entries = 2</span><br><span class="line">           frame_type = 73 /* same_locals_1_stack_item */</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br><span class="line">           frame_type = 5 /* same */</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public static java.lang.String doTryFinally1();</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=3, args_size=0</span><br><span class="line">         0: aconst_null   </span><br><span class="line">         1: astore_0      </span><br><span class="line">         2: ldc           #2                  // String zhuang</span><br><span class="line">         4: astore_0      </span><br><span class="line">         5: aload_0       </span><br><span class="line">         6: astore_1      </span><br><span class="line">         7: ldc           #3                  // String zhuang111111</span><br><span class="line">         9: astore_0      </span><br><span class="line">        10: aload_1       </span><br><span class="line">        11: areturn       </span><br><span class="line">        12: astore_2      </span><br><span class="line">        13: ldc           #3                  // String zhuang111111</span><br><span class="line">        15: astore_0      </span><br><span class="line">        16: aload_2       </span><br><span class="line">        17: athrow        </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             2     7    12   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 26: 0</span><br><span class="line">        line 28: 2</span><br><span class="line">        line 29: 5</span><br><span class="line">        line 31: 7</span><br><span class="line">        line 29: 10</span><br><span class="line">        line 31: 12</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">               2      16     0  name   Ljava/lang/String;</span><br><span class="line">      StackMapTable: number_of_entries = 1</span><br><span class="line">           frame_type = 255 /* full_frame */</span><br><span class="line">          offset_delta = 12</span><br><span class="line">          locals = [ class java/lang/String ]</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public static java.lang.String doTryFinally2();</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=3, args_size=0</span><br><span class="line">         0: aconst_null   </span><br><span class="line">         1: astore_0      </span><br><span class="line">         2: ldc           #2                  // String zhuang</span><br><span class="line">         4: astore_0      </span><br><span class="line">         5: aload_0       </span><br><span class="line">         6: astore_1      </span><br><span class="line">         7: ldc           #3                  // String zhuang111111</span><br><span class="line">         9: astore_0      </span><br><span class="line">        10: aload_0       </span><br><span class="line">        11: areturn       </span><br><span class="line">        12: astore_1      </span><br><span class="line">        13: aload_1       </span><br><span class="line">        14: invokevirtual #20                 // Method java/lang/Exception.printStackTrace:()V</span><br><span class="line">        17: ldc           #3                  // String zhuang111111</span><br><span class="line">        19: astore_0      </span><br><span class="line">        20: aload_0       </span><br><span class="line">        21: areturn       </span><br><span class="line">        22: astore_2      </span><br><span class="line">        23: ldc           #3                  // String zhuang111111</span><br><span class="line">        25: astore_0      </span><br><span class="line">        26: aload_0       </span><br><span class="line">        27: areturn       </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             2     7    12   Class java/lang/Exception</span><br><span class="line">             2     7    22   any</span><br><span class="line">            12    17    22   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 39: 0</span><br><span class="line">        line 41: 2</span><br><span class="line">        line 42: 5</span><br><span class="line">        line 46: 7</span><br><span class="line">        line 47: 10</span><br><span class="line">        line 43: 12</span><br><span class="line">        line 44: 13</span><br><span class="line">        line 46: 17</span><br><span class="line">        line 47: 20</span><br><span class="line">        line 46: 22</span><br><span class="line">        line 47: 26</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">              13       4     1     e   Ljava/lang/Exception;</span><br><span class="line">               2      26     0  name   Ljava/lang/String;</span><br><span class="line">      StackMapTable: number_of_entries = 2</span><br><span class="line">           frame_type = 255 /* full_frame */</span><br><span class="line">          offset_delta = 12</span><br><span class="line">          locals = [ class java/lang/String ]</span><br><span class="line">          stack = [ class java/lang/Exception ]</span><br><span class="line">           frame_type = 73 /* same_locals_1_stack_item */</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public static java.lang.String doTryFinally3();</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=3, args_size=0</span><br><span class="line">         0: aconst_null   </span><br><span class="line">         1: astore_0      </span><br><span class="line">         2: ldc           #2                  // String zhuang</span><br><span class="line">         4: astore_0      </span><br><span class="line">         5: ldc           #3                  // String zhuang111111</span><br><span class="line">         7: astore_0      </span><br><span class="line">         8: aload_0       </span><br><span class="line">         9: areturn       </span><br><span class="line">        10: astore_1      </span><br><span class="line">        11: aload_1       </span><br><span class="line">        12: invokevirtual #20                 // Method java/lang/Exception.printStackTrace:()V</span><br><span class="line">        15: ldc           #3                  // String zhuang111111</span><br><span class="line">        17: astore_0      </span><br><span class="line">        18: aload_0       </span><br><span class="line">        19: areturn       </span><br><span class="line">        20: astore_2      </span><br><span class="line">        21: ldc           #3                  // String zhuang111111</span><br><span class="line">        23: astore_0      </span><br><span class="line">        24: aload_0       </span><br><span class="line">        25: areturn       </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             2     5    10   Class java/lang/Exception</span><br><span class="line">             2     5    20   any</span><br><span class="line">            10    15    20   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 56: 0</span><br><span class="line">        line 58: 2</span><br><span class="line">        line 62: 5</span><br><span class="line">        line 63: 8</span><br><span class="line">        line 59: 10</span><br><span class="line">        line 60: 11</span><br><span class="line">        line 62: 15</span><br><span class="line">        line 63: 18</span><br><span class="line">        line 62: 20</span><br><span class="line">        line 63: 24</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">              11       4     1     e   Ljava/lang/Exception;</span><br><span class="line">               2      24     0  name   Ljava/lang/String;</span><br><span class="line">      StackMapTable: number_of_entries = 2</span><br><span class="line">           frame_type = 255 /* full_frame */</span><br><span class="line">          offset_delta = 10</span><br><span class="line">          locals = [ class java/lang/String ]</span><br><span class="line">          stack = [ class java/lang/Exception ]</span><br><span class="line">           frame_type = 73 /* same_locals_1_stack_item */</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public static int doTryFinally4();</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=3, args_size=0</span><br><span class="line">         0: iconst_0      </span><br><span class="line">         1: istore_0      </span><br><span class="line">         2: bipush        10</span><br><span class="line">         4: istore_0      </span><br><span class="line">         5: iload_0       </span><br><span class="line">         6: istore_1      </span><br><span class="line">         7: iinc          0, 1</span><br><span class="line">        10: iload_0       </span><br><span class="line">        11: ireturn       </span><br><span class="line">        12: astore_1      </span><br><span class="line">        13: aload_1       </span><br><span class="line">        14: invokevirtual #20                 // Method java/lang/Exception.printStackTrace:()V</span><br><span class="line">        17: iinc          0, 1</span><br><span class="line">        20: iload_0       </span><br><span class="line">        21: ireturn       </span><br><span class="line">        22: astore_2      </span><br><span class="line">        23: iinc          0, 1</span><br><span class="line">        26: iload_0       </span><br><span class="line">        27: ireturn       </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             2     7    12   Class java/lang/Exception</span><br><span class="line">             2     7    22   any</span><br><span class="line">            12    17    22   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 70: 0</span><br><span class="line">        line 72: 2</span><br><span class="line">        line 73: 5</span><br><span class="line">        line 77: 7</span><br><span class="line">        line 78: 10</span><br><span class="line">        line 74: 12</span><br><span class="line">        line 75: 13</span><br><span class="line">        line 77: 17</span><br><span class="line">        line 78: 20</span><br><span class="line">        line 77: 22</span><br><span class="line">        line 78: 26</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">              13       4     1     e   Ljava/lang/Exception;</span><br><span class="line">               2      26     0     a   I</span><br><span class="line">      StackMapTable: number_of_entries = 2</span><br><span class="line">           frame_type = 255 /* full_frame */</span><br><span class="line">          offset_delta = 12</span><br><span class="line">          locals = [ int ]</span><br><span class="line">          stack = [ class java/lang/Exception ]</span><br><span class="line">           frame_type = 73 /* same_locals_1_stack_item */</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public static java.lang.String doTryFinally5();</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=3, args_size=0</span><br><span class="line">         0: aconst_null   </span><br><span class="line">         1: astore_0      </span><br><span class="line">         2: ldc           #2                  // String zhuang</span><br><span class="line">         4: astore_0      </span><br><span class="line">         5: ldc           #3                  // String zhuang111111</span><br><span class="line">         7: astore_0      </span><br><span class="line">         8: goto          28</span><br><span class="line">        11: astore_1      </span><br><span class="line">        12: aload_1       </span><br><span class="line">        13: invokevirtual #20                 // Method java/lang/Exception.printStackTrace:()V</span><br><span class="line">        16: ldc           #3                  // String zhuang111111</span><br><span class="line">        18: astore_0      </span><br><span class="line">        19: goto          28</span><br><span class="line">        22: astore_2      </span><br><span class="line">        23: ldc           #3                  // String zhuang111111</span><br><span class="line">        25: astore_0      </span><br><span class="line">        26: aload_2       </span><br><span class="line">        27: athrow        </span><br><span class="line">        28: aload_0       </span><br><span class="line">        29: areturn       </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             2     5    11   Class java/lang/Exception</span><br><span class="line">             2     5    22   any</span><br><span class="line">            11    16    22   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 85: 0</span><br><span class="line">        line 87: 2</span><br><span class="line">        line 91: 5</span><br><span class="line">        line 92: 8</span><br><span class="line">        line 88: 11</span><br><span class="line">        line 89: 12</span><br><span class="line">        line 91: 16</span><br><span class="line">        line 92: 19</span><br><span class="line">        line 91: 22</span><br><span class="line">        line 93: 28</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">              12       4     1     e   Ljava/lang/Exception;</span><br><span class="line">               2      28     0  name   Ljava/lang/String;</span><br><span class="line">      StackMapTable: number_of_entries = 3</span><br><span class="line">           frame_type = 255 /* full_frame */</span><br><span class="line">          offset_delta = 11</span><br><span class="line">          locals = [ class java/lang/String ]</span><br><span class="line">          stack = [ class java/lang/Exception ]</span><br><span class="line">           frame_type = 74 /* same_locals_1_stack_item */</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br><span class="line">           frame_type = 5 /* same */</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  public static java.lang.String doTryFinally6();</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=4, args_size=0</span><br><span class="line">         0: aconst_null   </span><br><span class="line">         1: astore_0      </span><br><span class="line">         2: ldc           #2                  // String zhuang</span><br><span class="line">         4: astore_0      </span><br><span class="line">         5: ldc           #3                  // String zhuang111111</span><br><span class="line">         7: astore_0      </span><br><span class="line">         8: goto          28</span><br><span class="line">        11: astore_1      </span><br><span class="line">        12: ldc           #21                 // String 444444</span><br><span class="line">        14: astore_0      </span><br><span class="line">        15: aload_0       </span><br><span class="line">        16: astore_2      </span><br><span class="line">        17: ldc           #3                  // String zhuang111111</span><br><span class="line">        19: astore_0      </span><br><span class="line">        20: aload_2       </span><br><span class="line">        21: areturn       </span><br><span class="line">        22: astore_3      </span><br><span class="line">        23: ldc           #3                  // String zhuang111111</span><br><span class="line">        25: astore_0      </span><br><span class="line">        26: aload_3       </span><br><span class="line">        27: athrow        </span><br><span class="line">        28: aload_0       </span><br><span class="line">        29: areturn       </span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">             2     5    11   Class java/lang/Exception</span><br><span class="line">             2     5    22   any</span><br><span class="line">            11    17    22   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 98: 0</span><br><span class="line">        line 100: 2</span><br><span class="line">        line 105: 5</span><br><span class="line">        line 106: 8</span><br><span class="line">        line 101: 11</span><br><span class="line">        line 102: 12</span><br><span class="line">        line 103: 15</span><br><span class="line">        line 105: 17</span><br><span class="line">        line 103: 20</span><br><span class="line">        line 105: 22</span><br><span class="line">        line 107: 28</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">              12      10     1     e   Ljava/lang/Exception;</span><br><span class="line">               2      28     0  name   Ljava/lang/String;</span><br><span class="line">      StackMapTable: number_of_entries = 3</span><br><span class="line">           frame_type = 255 /* full_frame */</span><br><span class="line">          offset_delta = 11</span><br><span class="line">          locals = [ class java/lang/String ]</span><br><span class="line">          stack = [ class java/lang/Exception ]</span><br><span class="line">           frame_type = 74 /* same_locals_1_stack_item */</span><br><span class="line">          stack = [ class java/lang/Throwable ]</span><br><span class="line">           frame_type = 5 /* same */</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/19a134ccaacf8e5ed5ca972ad76bd938.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903520437534734.html" rel="next" title="Java笔记-反射机制(三)-小demo">
+                <i class="fa fa-chevron-left"></i> Java笔记-反射机制(三)-小demo
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903520471105544.html" rel="prev" title="(详细可用)分布式锁实现 Java + redis (一)">
+                (详细可用)分布式锁实现 Java + redis (一) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#情况一：-doTryFinally1-就是try-中修改值并且return"><span class="nav-number">1.</span> <span class="nav-text">情况一： doTryFinally1() 就是try 中修改值并且return</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-代码："><span class="nav-number">1.1.</span> <span class="nav-text">Java 代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#字节码：-加括号是自己的理解"><span class="nav-number">1.2.</span> <span class="nav-text">字节码： (加括号是自己的理解)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结论："><span class="nav-number">1.3.</span> <span class="nav-text">结论：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试的Java-代码"><span class="nav-number">2.</span> <span class="nav-text">测试的Java 代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字节码-javap-verbose-TryFinallyTest"><span class="nav-number">3.</span> <span class="nav-text">字节码 (javap -verbose TryFinallyTest)</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

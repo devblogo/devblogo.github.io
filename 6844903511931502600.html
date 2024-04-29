@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="算法,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4F5C;&amp;#x8005;&amp;#x4ECB;&amp;#x7ECD;&amp;#xFF1A;&amp;#x718A;&amp;#x8BAD;&amp;#x5FB7; &amp;#x817E;&amp;#x8BAF;&amp;#x4E91;&amp;#x5DE5;&amp;#x7A0B;&amp;#x5E08;  Hbase &amp;#x7684; WAL &amp;#x673A;&amp;#x5236;&amp;#x662F;&amp;#x4FDD;&amp;#x8BC1; hbase &amp;#x4F7F;&amp;#x7528; l">
+<meta name="keywords" content="算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hbase WAL 线程模型源码分析">
+<meta property="og:url" content="https://dev.newban.cn/6844903511931502600.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#x4ECB;&amp;#x7ECD;&amp;#xFF1A;&amp;#x718A;&amp;#x8BAD;&amp;#x5FB7; &amp;#x817E;&amp;#x8BAF;&amp;#x4E91;&amp;#x5DE5;&amp;#x7A0B;&amp;#x5E08;  Hbase &amp;#x7684; WAL &amp;#x673A;&amp;#x5236;&amp;#x662F;&amp;#x4FDD;&amp;#x8BC1; hbase &amp;#x4F7F;&amp;#x7528; l">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/83026e6ae7e400024d67d72d3cdf1e94aef0cd0aae296918723fb03cdafc1850">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/86ba12a909eadf6cf5baa228c6397165b59fc43bb7cc6a0e3a0ab009d94e9b97">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/37d95d7cb09f6c8e7fb306f056074d0631519dc9c534875ea61b657aa70aef3e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/766cab55597f3c2a9cd937b67c269d6ef058b13728c9db5adb1c9df19b5d0cb1">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/5fe42eb2bd1de1dad097eb30c40c20f171c998039a91cd6d4829107936df11c4">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/7de293ce7666064be9aaafba4519726c2667b153c3951d30b851ee3f7a879714">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/24915e44706ae9c185c803718218adf68144305acf0c6602008d80a3dc9eaa64">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f79fe35319db5b22270f695a95c641bd6976ddf27bb5043c83472f60c1981154">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0c764f1f185b41f209f9a3c8b6b021695e39eed85d5df314efd84e19ed374ccf">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/c5cdcd3da398b4d0de6af1b1f09b9dd93943322babd0bfc052e44cd09392a8ad">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/bf89a6c78314d496fa3b2905ce3e741de0fcfb9f368472acc10ec0e025a43cb6">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0ee300138a9acad4f534878b0012b668a1f16163b7cbc4a1277390b07e81928d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e16717bf9d4e06961adb024339ec2297ab930bbe024ac8d8029a5597f2d01717">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/8dd1b7b906973100e36c594177343da7696c94554c3ca92c3fb01e616c8e3d4e">
+<meta property="og:updated_time" content="2024-04-28T05:31:29.030Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hbase WAL 线程模型源码分析">
+<meta name="twitter:description" content="&amp;#x4F5C;&amp;#x8005;&amp;#x4ECB;&amp;#x7ECD;&amp;#xFF1A;&amp;#x718A;&amp;#x8BAD;&amp;#x5FB7; &amp;#x817E;&amp;#x8BAF;&amp;#x4E91;&amp;#x5DE5;&amp;#x7A0B;&amp;#x5E08;  Hbase &amp;#x7684; WAL &amp;#x673A;&amp;#x5236;&amp;#x662F;&amp;#x4FDD;&amp;#x8BC1; hbase &amp;#x4F7F;&amp;#x7528; l">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/83026e6ae7e400024d67d72d3cdf1e94aef0cd0aae296918723fb03cdafc1850">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903511931502600.html">
+
+
+
+
+
+  <title>Hbase WAL 线程模型源码分析 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hbase WAL 线程模型源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-17T11:02:32+08:00">
+                2017-11-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x4F5C;&#x8005;&#x4ECB;&#x7ECD;&#xFF1A;&#x718A;&#x8BAD;&#x5FB7; &#x817E;&#x8BAF;&#x4E91;&#x5DE5;&#x7A0B;&#x5E08;</p>
+</blockquote>
+<p>Hbase &#x7684; WAL &#x673A;&#x5236;&#x662F;&#x4FDD;&#x8BC1; hbase &#x4F7F;&#x7528; lsm &#x6811;&#x5B58;&#x50A8;&#x6A21;&#x578B;&#x628A;&#x968F;&#x673A;&#x5199;&#x8F6C;&#x5316;&#x6210;&#x987A;&#x5E8F;&#x5199;&#xFF0C;&#x5E76;&#x4ECE;&#x5185;&#x5B58; read &#x6570;&#x636E;&#xFF0C;&#x4ECE;&#x800C;&#x63D0;&#x9AD8;&#x5927;&#x89C4;&#x6A21;&#x8BFB;&#x5199;&#x6548;&#x7387;&#x7684;&#x5173;&#x952E;&#x4E00;&#x73AF;&#x3002;wal &#x7684;&#x591A;&#x751F;&#x4EA7;&#x8005;&#x5355;&#x6D88;&#x8D39;&#x8005;&#x7684;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x8BA9;wal&#x7684;&#x5199;&#x5165;&#x53D8;&#x5F97;&#x5B89;&#x5168;&#x800C;&#x9AD8;&#x6548;&#x3002;</p>
+<p>&#x5728;&#x6587;&#x7AE0;<a href="/external_links/8d9b89fdd90dc82ce8871867964782d2.html" target="blank" rel="noopener">&#x300A;WAL&#x5728;RegionServer&#x8C03;&#x7528;&#x8FC7;&#x7A0B;&#x300B;</a>&#x4E2D;&#x4ECE;&#x4EE3;&#x7801;&#x5C42;&#x9762;&#x9610;&#x8FF0;&#x4E86;&#x4E00;&#x4E2A; client &#x7684;&#x201C;&#x5199;&#x201D;&#x64CD;&#x4F5C;&#x662F;&#x5982;&#x4F55;&#x5230;&#x8FBE;Hbase&#x7684;RegionServer&#xFF0C;&#x53C8;&#x662F;&#x5982;&#x4F55;&#x771F;&#x6B63;&#x5730;&#x5199;&#x5165;&#x5230; wal(FSHLog) &#x6587;&#x4EF6;&#xFF0C;&#x518D;&#x5199;&#x5165;&#x5230; memstore &#x3002;&#x4F46;&#x662F; hbase &#x662F;&#x652F;&#x6301; mvcc &#x673A;&#x5236;&#x7684;&#x5B58;&#x50A8;&#x7CFB;&#x7EDF;&#xFF0C;&#x672C;&#x6587;&#x6863;&#x5C06;&#x8BF4;&#x660E;<br> RegionServer &#x662F;&#x5982;&#x4F55;&#x628A;&#x591A;&#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x201C;&#x5199;&#x201D;&#x64CD;&#x4F5C;&#x5B89;&#x5168;&#x6709;&#x5E8F;&#x5730;&#x843D;&#x5730;&#x65E5;&#x5FD7;&#x6587;&#x4EF6;&#xFF0C;&#x53C8;&#x5982;&#x4F55;&#x8BA9; client &#x7AEF;&#x4F18;&#x96C5;&#x5730;&#x611F;&#x77E5;&#x5230;&#x5DF2;&#x7ECF;&#x771F;&#x6B63;&#x7684;&#x843D;&#x5730;&#x3002;</p>
+<p>wal &#x4E3A;&#x4E86;&#x9AD8;&#x6548;&#x5B89;&#x5168;&#x6709;&#x5E8F;&#x7684;&#x5199;&#x5165;&#xFF0C;&#x7B14;&#x8005;&#x8BA4;&#x4E3A;&#x6700;&#x5173;&#x952E;&#x7684;&#x4E24;&#x4E2A;&#x673A;&#x5236;&#x662F; wal &#x4E2D;&#x4F7F;&#x7528;&#x7684;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x548C;&#x591A;&#x751F;&#x4EA7;&#x8005;&#x5355;&#x6D88;&#x8D39;&#x8005;&#x6A21;&#x578B;&#x3002;</p>
+<h2 id="&#x7EBF;&#x7A0B;&#x6A21;&#x578B;"><a href="#&#x7EBF;&#x7A0B;&#x6A21;&#x578B;" class="headerlink" title="&#x7EBF;&#x7A0B;&#x6A21;&#x578B;"></a>&#x7EBF;&#x7A0B;&#x6A21;&#x578B;</h2><p>&#x5176;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x4E3B;&#x8981;&#x5B9E;&#x73B0;&#x5B9E;&#x5728;FSHLog&#x4E2D;&#xFF0C;FSHLog&#x662F;WAL&#x63A5;&#x53E3;&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#xFF0C;&#x5B9E;&#x73B0;&#x4E86;&#x6700;&#x5173;&#x952E;&#x7684;apend()&#x548C;sync()&#x65B9;&#x6CD5;&#xFF0C;&#x5176;&#x6A21;&#x578B;&#x5982;&#x56FE;&#x6240;&#x793A;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/83026e6ae7e400024d67d72d3cdf1e94aef0cd0aae296918723fb03cdafc1850" alt></p>
+<p>&#x8FD9;&#x4E2A;&#x56FE;&#x4E3B;&#x8981;&#x63CF;&#x8FF0;&#x4E86;HRegion&#x4E2D;&#x8C03;&#x7528;append&#x548C;sync&#x540E;,hbase&#x7684;wal&#x7EBF;&#x7A0B;&#x6D41;&#x8F6C;&#x6A21;&#x578B;&#x3002;&#x6700;&#x5DE6;&#x8FB9;&#x662F;&#x6709;&#x591A;&#x4E2A;client&#x63D0;&#x4EA4;&#x5230;HRegion&#x7684;append&#x548C;sync&#x64CD;&#x4F5C;&#x3002;</p>
+<p>&#x5F53;&#x8C03;&#x7528;append&#x540E;WALEdit&#x548C;WALKey&#x4F1A;&#x88AB;&#x5C01;&#x88C5;&#x6210;FSWALEntry&#x7C7B;&#x8FDB;&#x800C;&#x518D;&#x5C01;&#x88C5;&#x6210;RinbBufferTruck&#x7C7B;&#x653E;&#x5165;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;Buffer(LMAX Disruptor RingBuffer)&#x4E2D;&#x3002;</p>
+<p>&#x5F53;&#x8C03;&#x7528;sync&#x540E;&#x4F1A;&#x751F;&#x6210;&#x4E00;&#x4E2A;SyncFuture&#x8FDB;&#x800C;&#x5C01;&#x88C5;&#x6210;RinbBufferTruck&#x7C7B;&#x540C;&#x6837;&#x653E;&#x5165;&#x8FD9;&#x4E2A;Buffer&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x6B64;&#x65F6;&#x4F1A;&#x88AB;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x88AB;notify()&#x5524;&#x9192;&#x3002;&#x5728;&#x6700;&#x53F3;&#x8FB9;&#x4F1A;&#x6709;&#x4E00;&#x4E2A;&#x4E14;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x4E13;&#x95E8;&#x53BB;&#x5904;&#x7406;&#x8FD9;&#x4E9B;RinbBufferTruck&#xFF0C;&#x5982;&#x679C;&#x662F;FSWALEntry&#x5219;&#x5199;&#x5165;hadoop sequence&#x6587;&#x4EF6;&#x3002;&#x56E0;&#x4E3A;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#x7684;&#x5B58;&#x5728;&#xFF0C;&#x8FD9;&#x65F6;&#x5019;&#x5F88;&#x53EF;&#x80FD;client&#x6570;&#x636E;&#x5E76;&#x6CA1;&#x6709;&#x843D;&#x76D8;&#x3002;&#x6240;&#x4EE5;&#x8FDB;&#x4E00;&#x6B65;&#x5982;&#x679C;&#x662F;SyncFuture&#x4F1A;&#x88AB;&#x6279;&#x91CF;&#x7684;&#x653E;&#x5230;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x6C60;&#x4E2D;&#xFF0C;&#x5F02;&#x6B65;&#x7684;&#x6279;&#x91CF;&#x53BB;&#x5237;&#x76D8;,&#x5237;&#x76D8;&#x6210;&#x529F;&#x540E;&#x5524;&#x9192;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x5B8C;&#x6210;wal&#x3002;</p>
+<h2 id="&#x6E90;&#x7801;&#x5206;&#x6790;"><a href="#&#x6E90;&#x7801;&#x5206;&#x6790;" class="headerlink" title="&#x6E90;&#x7801;&#x5206;&#x6790;"></a>&#x6E90;&#x7801;&#x5206;&#x6790;</h2><p>&#x4E0B;&#x9762;&#x5C06;&#x4ECE;&#x6E90;&#x7801;&#x89D2;&#x5EA6;&#x5206;&#x6790;&#x5176;&#x4E2D;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x8FC7;&#x7A0B;&#x548C;&#x7EC6;&#x8282;&#x3002;</p>
+<p>&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x4E2D;&#x5F53;HRegion&#x51C6;&#x5907;&#x597D;&#x4E00;&#x4E2A;&#x884C;&#x4E8B;&#x52A1;&#x201C;&#x5199;&#x201D;&#x64CD;&#x4F5C;&#x7684;&#xFF0C;WALEdit&#xFF0C;WALKey&#x540E;&#x5C31;&#x4F1A;&#x8C03;&#x7528;FSHLog&#x7684;append&#x65B9;&#x6CD5;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/86ba12a909eadf6cf5baa228c6397165b59fc43bb7cc6a0e3a0ab009d94e9b97" alt></p>
+<p>FSHLog&#x7684;append&#x65B9;&#x6CD5;&#x9996;&#x5148;&#x4F1A;&#x4ECE;LAMX Disruptor RingbBuffer&#x4E2D;&#x62FF;&#x5230;&#x4E00;&#x4E2A;&#x5E8F;&#x53F7;&#x4F5C;&#x4E3A;txid(sequence)&#xFF0C;&#x7136;&#x540E;&#x628A;WALEdit,WALKey&#x548C;sequence&#x7B49;&#x6784;&#x5EFA;&#x4E00;&#x4E2A;FSALEntry&#x5B9E;&#x4F8B;entry&#xFF0C;&#x5E76;&#x628A;entry&#x653E;&#x5230;ringbuffer&#x4E2D;&#x3002;&#x800C;entry&#x4EE5;truck(RingBufferTruck&#xFF0C;ringbuffer&#x5B9E;&#x9645;&#x5B58;&#x50A8;&#x7C7B;&#x578B;)&#x901A;&#x8FC7;sequence&#x548C;ringbuffer&#x4E00;&#x4E00;&#x5BF9;&#x5E94;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/37d95d7cb09f6c8e7fb306f056074d0631519dc9c534875ea61b657aa70aef3e" alt></p>
+<p>&#x5982;&#x679C;client&#x8BBE;&#x7F6E;&#x7684;&#x6301;&#x4E45;&#x5316;&#x7B49;&#x7EA7;&#x662F;USER_DEFAULT&#xFF0C;SYNC_WAL&#x6216;FSYNC_WAL&#xFF0C;&#x90A3;&#x4E48;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x7684;HRegion&#x8FD8;&#x5C06;&#x8C03;&#x7528;FSHLog&#x7684;sync()&#x65B9;&#x6CD5;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/766cab55597f3c2a9cd937b67c269d6ef058b13728c9db5adb1c9df19b5d0cb1" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/5fe42eb2bd1de1dad097eb30c40c20f171c998039a91cd6d4829107936df11c4" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/7de293ce7666064be9aaafba4519726c2667b153c3951d30b851ee3f7a879714" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/24915e44706ae9c185c803718218adf68144305acf0c6602008d80a3dc9eaa64" alt></p>
+<p>&#x8FFD;&#x8E2A;&#x4EE3;&#x7801;&#x53EF;&#x4EE5;&#x5206;&#x6790;&#x51FA;Sync()&#x65B9;&#x6CD5;&#x4F1A;&#x5F80;ringbuffer&#x4E2D;&#x653E;&#x5165;&#x4E00;&#x4E2A;SyncFuture&#x5BF9;&#x8C61;&#xFF0C;&#x5E76;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x5B8C;&#x6210;(&#x5524;&#x9192;)&#x3002;</p>
+<p>&#x50CF;&#x6A21;&#x578B;&#x56FE;&#x4E2D;&#x6240;&#x5C55;&#x793A;&#x7684;&#x591A;&#x4E2A;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x5C01;&#x88C5;&#x540E;&#x62FF;&#x5230;&#x7531;ringbuffer&#x751F;&#x6210;&#x7684;sequence&#x540E;&#x4F5C;&#x4E3A;&#x751F;&#x4EA7;&#x8005;&#x653E;&#x5165;ringbuffer&#x4E2D;&#x3002;&#x5728;FSHLog&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x79C1;&#x6709;&#x5185;&#x90E8;&#x7C7B;RingBufferEventHandler&#x7C7B;&#x5B9E;&#x73B0;&#x4E86;LAMX Disruptor&#x7684;EventHandler&#x63A5;&#x53E3;&#xFF0C;&#x4E5F;&#x5373;&#x662F;&#x5B9E;&#x73B0;&#x4E86;OnEvent&#x65B9;&#x6CD5;&#x7684;ringbuffer&#x7684;&#x6D88;&#x8D39;&#x8005;&#x3002;Disruptor&#x901A;&#x8FC7; java.util.concurrent.ExecutorService &#x63D0;&#x4F9B;&#x7684;&#x7EBF;&#x7A0B;&#x6765;&#x89E6;&#x53D1; Consumer &#x7684;&#x4E8B;&#x4EF6;&#x5904;&#x7406;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;hbase&#x7684;wal&#x4E2D;&#x53EA;&#x542F;&#x4E86;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#xFF0C;&#x4ECE;&#x6E90;&#x7801;&#x6CE8;&#x91CA;&#x4E2D;&#x4E5F;&#x53EF;&#x4EE5;&#x770B;&#x5230;RingBufferEventHandler&#x5728;&#x8FD0;&#x884C;&#x4E2D;&#x53EA;&#x6709;&#x5355;&#x4E2A;&#x7EBF;&#x7A0B;&#x3002;&#x7531;&#x4E8E;&#x6D88;&#x8D39;&#x8005;&#x662F;&#x6309;&#x7167;sequence&#x7684;&#x987A;&#x5E8F;&#x5237;&#x6570;&#x636E;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x80FD;&#x4FDD;&#x8BC1;WAL&#x65E5;&#x5FD7;&#x5E76;&#x53D1;&#x5199;&#x5165;&#x65F6;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5728;&#x771F;&#x6B63;&#x7684;&#x5199;&#x5165;&#x65E5;&#x5FD7;&#x6587;&#x4EF6;&#x7684;&#x53EF;&#x611F;&#x77E5;&#x7684;&#x5168;&#x5C40;&#x552F;&#x4E00;&#x987A;&#x5E8F;&#x3002;</p>
+<p> <img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f79fe35319db5b22270f695a95c641bd6976ddf27bb5043c83472f60c1981154" alt></p>
+<p>RingBufferEventHandler&#x7C7B;&#x7684;onEvent()(&#x4E00;&#x4E2A;&#x56DE;&#x8C03;&#x65B9;&#x6CD5;)&#x662F;&#x5177;&#x4F53;&#x5904;&#x7406;append&#x548C;sync&#x7684;&#x65B9;&#x6CD5;&#x3002;&#x5728;&#x524D;&#x9762;&#x8BF4;&#x660E;&#x8FC7;wal&#x4F7F;&#x7528;RingBufferTruck&#x6765;&#x5C01;&#x88C5;WALEntry&#x548C;SyncFuture(&#x5982;&#x4E0B;&#x56FE;&#x6E90;&#x7801;)&#xFF0C;&#x5728;&#x6D88;&#x8D39;&#x7EBF;&#x7A0B;&#x7684;&#x5B9E;&#x9645;&#x6267;&#x884C;&#x65B9;&#x6CD5;onEvent()&#x4E2D;&#x5C31;&#x662F;&#x88AB;ringbuffer&#x901A;&#x77E5;&#x4E00;&#x4E2A;&#x4E2A;&#x7684;&#x4ECE;ringbfer&#x53D6;&#x51FA;RingBufferTruck&#xFF0C;&#x5982;&#x679C;&#x662F;WALEntry&#x5219;&#x4F7F;&#x7528;&#x5F53;&#x524D;HadoopSequence&#x6587;&#x4EF6;writer&#x5199;&#x5165;&#x6587;&#x4EF6;&#xFF08;&#x6B64;&#x65F6;&#x5F88;&#x53EF;&#x80FD;&#x5199;&#x7684;&#x662F;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#xFF09;&#xFF0C;&#x5982;&#x679C;&#x662F;SyncFuture&#x5219;&#x7B80;&#x5355;&#x7684;&#x8F6E;&#x8BE2;&#x5904;&#x7406;&#x653E;&#x5165;SyncRunner&#x7EBF;&#x7A0B;&#x5F02;&#x6B65;&#x53BB;&#x628A;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#x4E2D;&#x6570;&#x636E;&#x5237;&#x5230;&#x78C1;&#x76D8;&#x3002;</p>
+<p>&#x8FD9;&#x91CC;&#x518D;&#x52A0;&#x4E00;&#x4E2A;&#x5F02;&#x6B65;&#x64CD;&#x4F5C;&#x53BB;&#x771F;&#x6B63;&#x5237;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#x7684;&#x539F;&#x56E0;wal&#x6E90;&#x7801;&#x4E2D;&#x6709;&#x89E3;&#x91CA;&#xFF1A;&#x5237;&#x78C1;&#x76D8;&#x662F;&#x5F88;&#x8D39;&#x65F6;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x5982;&#x679C;&#x6BCF;&#x6B21;&#x90FD;&#x540C;&#x6B65;&#x7684;&#x53BB;&#x5237;client&#x7684;&#x56DE;&#x5E94;&#x6BD4;&#x8F83;&#x5FEB;&#xFF0C;&#x4F46;&#x662F;&#x5199;&#x6548;&#x7387;&#x4E0D;&#x9AD8;&#xFF0C;&#x5982;&#x679C;&#x5F02;&#x6B65;&#x5237;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#xFF0C;&#x5199;&#x6548;&#x7387;&#x63D0;&#x9AD8;&#x4F46;&#x662F;&#x53CB;&#x597D;&#x6027;&#x964D;&#x4F4E;&#xFF0C;&#x5728;&#x8003;&#x8651;&#x4E86;&#x5199;&#x541E;&#x5410;&#x7387;&#x548C;&#x5BF9;client&#x53CB;&#x597D;&#x56DE;&#x5E94;&#x5E73;&#x8861;&#x540E;&#xFF0C;wal&#x9009;&#x62E9;&#x4E86;&#x540E;&#x8005;&#xFF0C;&#x79EF;&#x7D2F;&#x4E86;&#x4E00;&#x5B9A;&#x91CF;(&#x901A;&#x8FC7;ringbuffer&#x7684;sequence)&#x7684;&#x7F13;&#x5B58;&#x518D;&#x5237;&#x78C1;&#x76D8;&#x4EE5;&#x6B64;&#x63D0;&#x9AD8;&#x5199;&#x6548;&#x7387;&#x548C;&#x541E;&#x5410;&#x7387;&#x3002;&#x8FD9;&#x4E2A;&#x51B3;&#x7B56;&#x4ECE;hbase&#x5B58;&#x50A8;&#x673A;&#x5236;&#x6700;&#x521D;&#x91C7;&#x7528;lsm&#x6811;&#x628A;&#x968F;&#x673A;&#x5199;&#x8F6C;&#x6362;&#x6210;&#x987A;&#x5E8F;&#x5199;&#x4EE5;&#x63D0;&#x9AD8;&#x5199;&#x541E;&#x5410;&#x7387;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x662F;&#x76EE;&#x6807;&#x4E00;&#x81F4;&#x7684;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0c764f1f185b41f209f9a3c8b6b021695e39eed85d5df314efd84e19ed374ccf" alt></p>
+<p>&#x8FD9;&#x90E8;&#x5206;&#x6E90;&#x7801;&#x53EF;&#x4EE5;&#x770B;&#x5230;RingBufferTruck&#x7C7B;&#x7684;&#x7ED3;&#x6784;&#xFF0C;&#x4ECE;&#x6CE8;&#x91CA;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x9009;&#x62E9;SyncFuture&#x548C;FSWALEntry&#x4E00;&#x4E2A;&#x653E;&#x5165;ringbuffer&#x4E2D;&#x3002;</p>
+<p>&#x8FD9;&#x90E8;&#x5206;&#x6E90;&#x7801;&#x53EF;&#x4EE5;&#x770B;&#x5230;append&#x7684;&#x6700;&#x7EC8;&#x5F52;&#x5C5E;&#x5C31;&#x662F;&#x6839;&#x636E;sequence&#x6709;&#x5E8F;&#x7684;&#x628A;FSWALEntry&#x5B9E;&#x4F8B;entry&#x5199;&#x5165;HadoopSequence&#x6587;&#x4EF6;&#x3002;&#x8FD9;&#x91CC;&#x6709;&#x5E8F;&#x7684;&#x539F;&#x56E0;&#x662F;&#x591A;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x5199;&#x4E4B;&#x524D;&#x901A;&#x8FC7;ringbuffer&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;CAS&#x5F97;&#x5230;&#x4E00;&#x4E2A;&#x9012;&#x589E;&#x7684;sequence&#xFF0C;ringbuffer&#x4F1A;&#x6839;&#x636E;sequence&#x53D6;&#x51FA;FSWALEntry&#x5E76;&#x843D;&#x76D8;&#x3002;&#x8FD9;&#x6837;&#x505A;&#x5176;&#x5B9E;&#x53EA;&#x6709;&#x5728;&#x5F97;&#x5230;&#x9012;&#x589E;&#x7684;sequence&#x7684;&#x65F6;&#x5019;&#x9700;&#x8981;&#x4FDD;&#x8BC1;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#xFF0C;&#x800C;java&#x7684;CAS&#x901A;&#x8FC7;&#x8F6E;&#x8BE2;&#x5E76;&#x4E0D;&#x7528;&#x52A0;&#x9501;&#xFF0C;&#x6240;&#x4EE5;&#x6548;&#x7387;&#x5F88;&#x9AD8;&#x3002;&#x5177;&#x4F53;&#x6709;&#x5173;ringbuffer&#x8BF4;&#x660E;&#x548C;&#x5B9E;&#x73B0;&#x53EF;&#x4EE5;&#x53C2;&#x8003;<a href="/external_links/67c2476c48b2b7ddf7aebcd2fca437ea.html" target="blank" rel="noopener">LMAX Disruptor&#x6587;&#x6863;</a>&#x3002;</p>
+<p> <img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/c5cdcd3da398b4d0de6af1b1f09b9dd93943322babd0bfc052e44cd09392a8ad" alt></p>
+<p>&#x8FD9;&#x90E8;&#x5206;&#x6E90;&#x7801;&#x662F;&#x8BF4;&#x660E;sync&#x64CD;&#x4F5C;&#x7684;SyncFuture&#x4F1A;&#x88AB;&#x63D0;&#x4EA4;&#x5230;SyncRunner&#x4E2D;&#xFF0C;&#x8FD9;&#x91CC;&#x53EF;&#x4EE5;&#x6CE8;&#x610F;SyncFuture&#x5B9E;&#x4F8B;&#x5176;&#x5B9E;&#x5E76;&#x4E0D;&#x662F;&#x4E00;&#x4E2A;&#x4E2A;&#x63D0;&#x4EA4;&#x5230;SyncRunner&#x4E2D;&#x6267;&#x884C;&#x7684;&#xFF0C;&#x800C;&#x662F;&#x4EE5;syncFutures(&#x6570;&#x7EC4;,&#x591A;&#x4E2A;SyncFuture&#x5B9E;&#x4F8B;)&#x65B9;&#x5F0F;&#x63D0;&#x4EA4;&#x7684;&#x3002;&#x4E0B;&#x9762;&#x8FD9;&#x90E8;&#x5206;&#x6E90;&#x7801;&#x662F;&#x6CE8;&#x91CA;&#x4E2D;&#x8BF4;&#x660E;&#x6279;&#x91CF;&#x5237;&#x76D8;&#x7684;&#x51B3;&#x7B56;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/bf89a6c78314d496fa3b2905ce3e741de0fcfb9f368472acc10ec0e025a43cb6" alt></p>
+<p>SyncRunner&#x662F;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#xFF0C;wal&#x5B9E;&#x9645;&#x6709;&#x4E00;&#x4E2A;SyncRunner&#x7684;&#x7EBF;&#x7A0B;&#x7EC4;&#xFF0C;&#x4E13;&#x95E8;&#x8D1F;&#x8D23;&#x4E4B;&#x524D;append&#x5230;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#x7684;&#x5237;&#x76D8;&#x5DE5;&#x4F5C;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0ee300138a9acad4f534878b0012b668a1f16163b7cbc4a1277390b07e81928d" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e16717bf9d4e06961adb024339ec2297ab930bbe024ac8d8029a5597f2d01717" alt></p>
+<p>SyncRunner&#x7684;&#x7EBF;&#x7A0B;&#x65B9;&#x6CD5;&#xFF08;run()&#xFF09;&#x8D1F;&#x8D23;&#x5177;&#x4F53;&#x7684;&#x5237;&#x5199;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#x5230;&#x78C1;&#x76D8;&#x7684;&#x5DE5;&#x4F5C;&#x3002;&#x9996;&#x5148;&#x53BB;&#x4E4B;&#x524D;&#x63D0;&#x4EA4;&#x7684;synceFutues&#x4E2D;&#x62FF;&#x5230;&#x5176;&#x4E2D;sequence&#x6700;&#x5927;&#x7684;SyncFuture&#x5B9E;&#x4F8B;&#xFF0C;&#x5E76;&#x62FF;&#x5230;&#x5B83;&#x5BF9;&#x5E94;ringbuffer&#x7684;sequence&#x3002;&#x518D;&#x53BB;&#x6BD4;&#x5BF9;&#x5F53;&#x524D;&#x6700;&#x5927;&#x7684;sequence&#xFF0C;&#x5982;&#x679C;&#x53D1;&#x73B0;&#x6BD4;&#x5F53;&#x524D;&#x6700;&#x5927;&#x7684;sequence&#x5219;&#x53BB;&#x8C03;&#x7528;releaseSyncFuture()&#x65B9;&#x6CD5;&#x91CA;&#x653E;synceFuture&#xFF0C;&#x5B9E;&#x9645;&#x5C31;&#x662F;notify&#x901A;&#x77E5;&#x6B63;&#x88AB;&#x963B;&#x585E;&#x7684;sync&#x64CD;&#x4F5C;&#xFF0C;&#x8BA9;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x53EF;&#x4EE5;&#x7EE7;&#x7EED;&#x5F80;&#x4E0B;&#x7EE7;&#x7EED;&#x3002;</p>
+<p>&#x524D;&#x9762;&#x89E3;&#x91CA;&#x4E86;sequence&#x662F;&#x6839;&#x636E;&#x63D0;&#x4EA4;&#x987A;&#x5E8F;&#x8FC7;&#x6765;&#x7684;&#xFF0C;&#x5E76;&#x4E14;&#x89E3;&#x91CA;&#x4E86;append&#x5230;&#x6587;&#x4EF6;&#x7F13;&#x5B58;&#x7684;&#x65F6;&#x5019;&#x4E5F;&#x662F;&#x5168;&#x5C40;&#x6709;&#x5E8F;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x53D6;&#x6700;&#x5927;&#x7684;&#x53BB;&#x5237;&#x76D8;&#xFF0C;&#x53EA;&#x8981;&#x6700;&#x5927;sequence&#x5DF2;&#x7ECF;&#x5237;&#x76D8;&#xFF0C;&#x90A3;&#x4E48;&#x6BD4;&#x8FD9;&#x4E2A;sequence&#x7684;&#x4E5F;&#x5C31;&#x5DF2;&#x7ECF;&#x5237;&#x76D8;&#x6210;&#x529F;&#x3002;&#x6700;&#x540E;&#x8C03;&#x7528;&#x5F53;&#x524D;HadoopSequence&#x6587;&#x4EF6;writer&#x5237;&#x76D8;&#xFF0C;&#x5E76;notify&#x5BF9;&#x5E94;&#x7684;syncFuture&#x3002;&#x8FD9;&#x6837;&#x6574;&#x4E2A;wal&#x5199;&#x5165;&#x4E5F;&#x5B8C;&#x6210;&#x4E86;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/8dd1b7b906973100e36c594177343da7696c94554c3ca92c3fb01e616c8e3d4e" alt></p>
+<h2 id="&#x5C0F;&#x7ED3;"><a href="#&#x5C0F;&#x7ED3;" class="headerlink" title="&#x5C0F;&#x7ED3;"></a>&#x5C0F;&#x7ED3;</h2><p>Hbase&#x7684;WAL&#x673A;&#x5236;&#x662F;&#x4FDD;&#x8BC1;hbase&#x4F7F;&#x7528;lsm&#x6811;&#x5B58;&#x50A8;&#x6A21;&#x578B;&#x628A;&#x968F;&#x673A;&#x5199;&#x8F6C;&#x5316;&#x6210;&#x987A;&#x5E8F;&#x5199;&#xFF0C;&#x5E76;&#x4ECE;&#x5185;&#x5B58;read&#x6570;&#x636E;&#xFF0C;&#x4ECE;&#x800C;&#x63D0;&#x9AD8;&#x5927;&#x89C4;&#x6A21;&#x8BFB;&#x5199;&#x6548;&#x7387;&#x7684;&#x5173;&#x952E;&#x4E00;&#x73AF;&#x3002;wal&#x7684;&#x591A;&#x751F;&#x4EA7;&#x8005;&#x5355;&#x6D88;&#x8D39;&#x8005;&#x7684;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x8BA9;wal&#x7684;&#x5199;&#x5165;&#x53D8;&#x5F97;&#x5B89;&#x5168;&#x800C;&#x9AD8;&#x6548;&#xFF0C;&#x672C;&#x6587;&#x6863;&#x4ECE;&#x6E90;&#x7801;&#x5165;&#x624B;&#x5206;&#x6790;&#x4E86;&#x5176;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x4E3A;&#x4EE5;&#x540E;&#x66F4;&#x597D;&#x5F00;&#x53D1;&#x548C;&#x7814;&#x7A76;hbase&#x5176;&#x4ED6;&#x76F8;&#x5173;&#x77E5;&#x8BC6;&#x5960;&#x5B9A;&#x57FA;&#x7840;&#x3002;</p>
+<hr>
+<p><strong>&#x76F8;&#x5173;&#x63A8;&#x8350;</strong></p>
+<p> <a href="/external_links/8d9b89fdd90dc82ce8871867964782d2.html" target="blank" rel="noopener">Hbase&#x7684;WAL&#x5728;RegionServer&#x57FA;&#x672C;&#x8C03;&#x7528;&#x8FC7;&#x7A0B;</a><br><a href="/external_links/c3585d45977ca0a588de2b05fe6fc11a.html" target="blank" rel="noopener">HBase&#x8DE8;&#x7248;&#x672C;&#x6570;&#x636E;&#x8FC1;&#x79FB;&#x603B;&#x7ED3;</a><br> <a href="/external_links/de76d9444daf40879285cee1789ee4f3.html" target="blank" rel="noopener">Hbase&#x5199;&#x5165;hdfs&#x6E90;&#x7801;&#x5206;&#x6790;</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/64ee73781ea92e0098f4d35eee0cf534.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/算法/" rel="tag"># 算法</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903511885348877.html" rel="next" title="SpringMvc4x高级配置(四) 服务器端推送技术之S">
+                <i class="fa fa-chevron-left"></i> SpringMvc4x高级配置(四) 服务器端推送技术之S
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903511944069127.html" rel="prev" title="数据库中间件TDDL调研笔记 四，TDDL其他特性">
+                数据库中间件TDDL调研笔记 四，TDDL其他特性 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程模型"><span class="nav-number">1.</span> <span class="nav-text">线程模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

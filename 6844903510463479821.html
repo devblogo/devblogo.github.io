@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="源码,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="csdn &amp;#x94FE;&amp;#x63A5;&amp;#xFF1A;blog.csdn.net/ziwang_/art&amp;#x2026; &amp;#x6CE8;&amp;#xFF1A;&amp;#x672C;&amp;#x6587;&amp;#x7684;&amp;#x6E90;&amp;#x7801;&amp;#x6458;&amp;#x81EA; jdk1.8 &amp;#x4E2D; TreeMap  &amp;#x7EA2;&amp;#x9ED1;&amp;#x6811;&amp;#x7684;&amp;#x610F">
+<meta name="keywords" content="源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="结合 TreeMap 源码分析红黑树在 java 中的实现">
+<meta property="og:url" content="https://dev.newban.cn/6844903510463479821.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="csdn &amp;#x94FE;&amp;#x63A5;&amp;#xFF1A;blog.csdn.net/ziwang_/art&amp;#x2026; &amp;#x6CE8;&amp;#xFF1A;&amp;#x672C;&amp;#x6587;&amp;#x7684;&amp;#x6E90;&amp;#x7801;&amp;#x6458;&amp;#x81EA; jdk1.8 &amp;#x4E2D; TreeMap  &amp;#x7EA2;&amp;#x9ED1;&amp;#x6811;&amp;#x7684;&amp;#x610F">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/45823141cc18c8964e7bce285496b7e12a905e016bcae4736ada967f671a79f1">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/fe2fa0a0bc3a5d80be0a8b1a6ef63e215c981e648f619edd416072eaafe96359">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3622f716686632a87794915d37695d3f6f44f6251dc5a255097670ab3efc2192">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6447a8adbabdb097250e52429f0e51a4dee84eb66395eabe973aedbe86e3b769">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/4f693a25f831074152fdff6e544d978984446d4057102d09c6b71634ae000656">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/dc509986616efba760a9c49d470bc8ecbdf9509c77dbf0fe21945f2c28e87039">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/aa82a8404a8b6ad7707ab6e63ef94279502b4ddc081fac7a615dfe2ecb2aeb16">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e20baa245b6f5e7d4a7b61fdcf8706bb6ee3b887821560c854d8eb3e4ef93daa">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/583b37c55ac3409d483c65f4e03b038ca54805af46c6eec584d700d88f8bd6ae">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f6275302df1f53610285210bb425ab28be5f240eb88dc9984168b769d7e7f473">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/59e40f6706f08899a86b33390e6a1018183763dcf3c592605f97db12a78eac2b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f5f5c5fca2ea93f79f02640aab23f5dedf1339154886ad348be3d512e35b75a3">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/be6e4bcb253437aaa7b97fc15ef2998c6903e048815166d6be066517e8b46855">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/27e5ff6eb46fbbc43f9f8c28f8e75a5ea4b586ebfa9843bb4411fc23be246e03">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/49255fbef1be3ebf2319675aeee76541fb7ecf4f778b4f0f2973cd535765528f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f3a81be446f2b16bd3279bdfe0bc598742aa01efc1ff380272f5757e8863b855">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/82ac9724038652ff6127e5c078732ea9dec127bbc3614906736b7e878d420937">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/d65e8496bcd0c195596432298f9e456a4fde59112f99ee555f7096c5297bc57b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/be15a8fd4501839924ff9dc46d28fa69b827c1d8bc0bcbb3e1ac925698906646">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/ef52e674e1bbbadc7278f6be775bc88506cebdbfdfce52a0eb1d38d84c782340">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2e4a697c438ab389826562f7653f8d1623f01b04c610126f828dc1af33f53781">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0f2ab8dd966f0f30e990cb847cace858afd0e90a44d98c6f8151e752d4b02fbc">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3079044a40b2c9d4b85b76ca66c888867a27c06866f50d6839e987369cf46cf3">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/855cc7d4c698777003cd57c9c25827cfa78ac55cc7a5152fd7a9c77638318679">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6b5405d300c4ed37113657cee9300fc03ab14f38b460471d89b0a1e9c88c82b1">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/bcbde8fd842fbd43e97b30efaa2fe345cd52a96d12fdef162a724305660266aa">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/055659f168edba22096c49410222310ed6d4adc0b80f9d032921fd755ea16bf8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/81f5515aaba5ada9af698fe5f5c84e59f3cf4b17576000b176c2fc6f2775f7ff">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/fd09dc2375dbb2ae32f8e0c40ee63a2dd32c1a3aee26521f0012c8e90efdb9d1">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e1d5c3721365c6f951decab014429be67942672ac4a8643109b9d6e3a3eefe66">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f648daa62b754bd77c11b62addeace17f4e8847b91d3448a1c926c6e4bbbfe61">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/94ec8d0754a4ecd455a91d6e40095165afc5910c5b2d94b8c905639f7612fc50">
+<meta property="og:updated_time" content="2024-04-28T05:06:56.940Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="结合 TreeMap 源码分析红黑树在 java 中的实现">
+<meta name="twitter:description" content="csdn &amp;#x94FE;&amp;#x63A5;&amp;#xFF1A;blog.csdn.net/ziwang_/art&amp;#x2026; &amp;#x6CE8;&amp;#xFF1A;&amp;#x672C;&amp;#x6587;&amp;#x7684;&amp;#x6E90;&amp;#x7801;&amp;#x6458;&amp;#x81EA; jdk1.8 &amp;#x4E2D; TreeMap  &amp;#x7EA2;&amp;#x9ED1;&amp;#x6811;&amp;#x7684;&amp;#x610F">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/45823141cc18c8964e7bce285496b7e12a905e016bcae4736ada967f671a79f1">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903510463479821.html">
+
+
+
+
+
+  <title>结合 TreeMap 源码分析红黑树在 java 中的实现 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">结合 TreeMap 源码分析红黑树在 java 中的实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-11T10:04:24+08:00">
+                2017-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>csdn &#x94FE;&#x63A5;&#xFF1A;<a href="/external_links/da67fcc28dac63692daf1666fd6f5690.html" target="blank" rel="noopener">blog.csdn.net/ziwang_/art&#x2026;</a></p>
+<p>&#x6CE8;&#xFF1A;&#x672C;&#x6587;&#x7684;&#x6E90;&#x7801;&#x6458;&#x81EA; jdk1.8 &#x4E2D; TreeMap</p>
+<ul>
+<li><a href="#mean">&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x610F;&#x4E49;</a></li>
+<li><a href="#feature">&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x6027;&#x8D28;</a></li>
+<li><a href="#rotate">&#x5DE6;&#x65CB;&#x3001;&#x53F3;&#x65CB;</a></li>
+<li><a href="#add">&#x589E;</a></li>
+<li><a href="#delete">&#x5220;</a></li>
+<li><a href="#summary">&#x603B;&#x7ED3;</a></li>
+</ul>
+<h2 id="&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x610F;&#x4E49;"><a href="#&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x610F;&#x4E49;" class="headerlink" title="&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x610F;&#x4E49;"></a>&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x610F;&#x4E49;</h2><p>&#x7EA2;&#x9ED1;&#x6811;&#x672C;&#x8D28;&#x4E0A;&#x662F;&#x4E00;&#x79CD;&#x7279;&#x6B8A;&#x7684;&#x4E8C;&#x53C9;&#x67E5;&#x627E;&#x6811;&#xFF0C;&#x7EA2;&#x9ED1;&#x6811;&#x4FDD;&#x8BC1;&#x4E86;&#x4E00;&#x79CD;&#x5E73;&#x8861;&#xFF0C;&#x63D2;&#x5165;&#x3001;&#x5220;&#x9664;&#x3001;&#x67E5;&#x627E;&#x7684;&#x6700;&#x574F;&#x65F6;&#x95F4;&#x590D;&#x6742;&#x5EA6;&#x90FD;&#x4E3A; O(lgN)&#x3002;&#x90A3;&#x4E48;&#x7EA2;&#x9ED1;&#x6811;&#x662F;&#x5982;&#x4F55;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x7279;&#x6027;&#x7684;&#x5462;&#xFF1F;&#x7EA2;&#x9ED1;&#x6811;&#x533A;&#x522B;&#x4E8E;&#x5176;&#x4ED6;&#x4E8C;&#x53C9;&#x67E5;&#x627E;&#x6811;&#x7684;&#x89C4;&#x5219;&#x5728;&#x4E8E;&#x5B83;&#x7684;&#x6BCF;&#x4E2A;&#x7ED3;&#x70B9;&#x62E5;&#x6709;&#x7EA2;&#x8272;&#x6216;&#x9ED1;&#x8272;&#x4E2D;&#x7684;&#x4E00;&#x79CD;&#x989C;&#x8272;&#xFF0C;&#x7136;&#x540E;&#x6309;&#x7167;&#x4E00;&#x5B9A;&#x7684;&#x89C4;&#x5219;&#x7EC4;&#x6210;&#x7EA2;&#x9ED1;&#x6811;&#xFF0C;&#x800C;&#x8FD9;&#x4E2A;&#x89C4;&#x5219;&#x5C31;&#x662F;&#x6211;&#x4EEC;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x6240;&#x60F3;&#x8981;&#x9610;&#x8FF0;&#x7684;&#x4E86;&#x3002;<br>&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x6027;&#x8D28;</p>
+<hr>
+<p>&#x7EA2;&#x9ED1;&#x6811;&#x9075;&#x5FAA;&#x4EE5;&#x4E0B;&#x4E94;&#x70B9;&#x6027;&#x8D28;&#xFF1A;</p>
+<ul>
+<li>&#x6027;&#x8D28;1 &#x7ED3;&#x70B9;&#x662F;&#x7EA2;&#x8272;&#x6216;&#x9ED1;&#x8272;&#x3002;</li>
+<li>&#x6027;&#x8D28;2 &#x6839;&#x7ED3;&#x70B9;&#x662F;&#x9ED1;&#x8272;&#x3002;</li>
+<li>&#x6027;&#x8D28;3 &#x6BCF;&#x4E2A;&#x53F6;&#x5B50;&#x7ED3;&#x70B9;&#xFF08;NIL&#x7ED3;&#x70B9;&#xFF0C;&#x7A7A;&#x7ED3;&#x70B9;&#xFF09;&#x662F;&#x9ED1;&#x8272;&#x7684;&#x3002;</li>
+<li>&#x6027;&#x8D28;4 &#x6BCF;&#x4E2A;&#x7EA2;&#x8272;&#x7ED3;&#x70B9;&#x7684;&#x4E24;&#x4E2A;&#x5B50;&#x7ED3;&#x70B9;&#x90FD;&#x662F;&#x9ED1;&#x8272;&#x3002;(&#x4ECE;&#x6BCF;&#x4E2A;&#x53F6;&#x5B50;&#x5230;&#x6839;&#x7684;&#x6240;&#x6709;&#x8DEF;&#x5F84;&#x4E0A;&#x4E0D;&#x80FD;&#x6709;&#x4E24;&#x4E2A;&#x8FDE;&#x7EED;&#x7684;&#x7EA2;&#x8272;&#x7ED3;&#x70B9;)</li>
+<li>&#x6027;&#x8D28;5 &#x4ECE;&#x4EFB;&#x4E00;&#x7ED3;&#x70B9;&#x5230;&#x5176;&#x6BCF;&#x4E2A;&#x53F6;&#x5B50;&#x7ED3;&#x70B9;&#x7684;&#x6240;&#x6709;&#x8DEF;&#x5F84;&#x90FD;&#x5305;&#x542B;&#x76F8;&#x540C;&#x6570;&#x76EE;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x3002;</li>
+</ul>
+<p>&#x4EE5;&#x4E0B;&#x6709;&#x51E0;&#x4E2A;&#x8FDD;&#x53CD;&#x4E0A;&#x8FF0;&#x89C4;&#x5219;&#x7684;&#x7ED3;&#x70B9;&#x793A;&#x4F8B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/45823141cc18c8964e7bce285496b7e12a905e016bcae4736ada967f671a79f1" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;1"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;1</p>
+<p><strong>&#x7ED3;&#x70B9;&#x5FC5;&#x987B;&#x662F;&#x7EA2;&#x8272;&#x6216;&#x9ED1;&#x8272;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/fe2fa0a0bc3a5d80be0a8b1a6ef63e215c981e648f619edd416072eaafe96359" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;2"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;2</p>
+<p><strong>&#x6839;&#x7ED3;&#x70B9;&#x5FC5;&#x987B;&#x662F;&#x9ED1;&#x8272;&#x7684;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3622f716686632a87794915d37695d3f6f44f6251dc5a255097670ab3efc2192" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;3"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;3</p>
+<p><strong>&#x53F6;&#x5B50;&#x7ED3;&#x70B9;&#x5FC5;&#x987B;&#x662F;&#x9ED1;&#x8272;&#x7684;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6447a8adbabdb097250e52429f0e51a4dee84eb66395eabe973aedbe86e3b769" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;4"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;4</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/4f693a25f831074152fdff6e544d978984446d4057102d09c6b71634ae000656" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;4"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;4</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/dc509986616efba760a9c49d470bc8ecbdf9509c77dbf0fe21945f2c28e87039" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;4"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;4</p>
+<p><strong>&#x4EE5;&#x4E0A;&#x4E09;&#x4E2A;&#x90FD;&#x662F;&#x9519;&#x8BEF;&#x7684;&#x7EA2;&#x9ED1;&#x6811;&#x793A;&#x4F8B;&#xFF0C;&#x6BCF;&#x4E2A;&#x7EA2;&#x8272;&#x7ED3;&#x70B9;&#x7684;&#x4E24;&#x4E2A;&#x5B50;&#x7ED3;&#x70B9;&#x90FD;&#x662F;&#x9ED1;&#x8272;&#xFF0C;&#x800C;&#x5982;&#x4E0B;&#x662F;&#x5408;&#x683C;&#x7684;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/aa82a8404a8b6ad7707ab6e63ef94279502b4ddc081fac7a615dfe2ecb2aeb16" alt="&#x9075;&#x5FAA;&#x6027;&#x8D28;4"></p>
+<p>&#x9075;&#x5FAA;&#x6027;&#x8D28;4</p>
+<p>&#x5F53;&#x7136;&#xFF0C;&#x7EC6;&#x5FC3;&#x7684;&#x8BFB;&#x8005;&#x5E94;&#x8BE5;&#x53D1;&#x73B0;&#x4E86;&#x6211;&#x53EA;&#x662F;&#x5C55;&#x793A;&#x4E86;&#x524D;&#x56DB;&#x6761;&#x6027;&#x8D28;&#x800C;&#x6CA1;&#x6709;&#x5C55;&#x793A;&#x7B2C;&#x4E94;&#x6761;&#x6027;&#x8D28;&#xFF0C;&#x6CA1;&#x6709;&#x4EC0;&#x4E48;&#x7406;&#x7531;&#xFF0C;&#x7B14;&#x8005;&#x5C31;&#x662F;&#x61D2;&#xFF0C;&#x7B2C;&#x4E94;&#x6761;&#x633A;&#x597D;&#x7406;&#x89E3;&#x7684;&#x3002;</p>
+<h2 id="&#x5DE6;&#x65CB;&#x3001;&#x53F3;&#x65CB;"><a href="#&#x5DE6;&#x65CB;&#x3001;&#x53F3;&#x65CB;" class="headerlink" title="&#x5DE6;&#x65CB;&#x3001;&#x53F3;&#x65CB;"></a>&#x5DE6;&#x65CB;&#x3001;&#x53F3;&#x65CB;</h2><p>&#x5728;&#x5B66;&#x4E60;&#x7EA2;&#x9ED1;&#x6811;&#x4E4B;&#x524D;&#x60F3;&#x8981;&#x4ECB;&#x7ECD;&#x4E00;&#x4E2A;&#x6982;&#x5FF5;&#x2014;&#x2014;&#x5DE6;&#x65CB;&#x3001;&#x53F3;&#x65CB;&#x3002;&#x8FD9;&#x662F;&#x4E00;&#x79CD;&#x7ED3;&#x70B9;&#x64CD;&#x4F5C;&#xFF0C;&#x662F;&#x7EA2;&#x9ED1;&#x6811;&#x91CC;&#x9762;&#x65F6;&#x5E38;&#x51FA;&#x73B0;&#x7684;&#x4E00;&#x4E2A;&#x64CD;&#x4F5C;&#xFF0C;&#x8BF7;&#x770B;&#x4E0B;&#x56FE; &#x2014;&#x2014;<br><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e20baa245b6f5e7d4a7b61fdcf8706bb6ee3b887821560c854d8eb3e4ef93daa" alt="&#x5DE6;&#x65CB;&#x53F3;&#x65CB;&#x6982;&#x5FF5;&#x56FE;"></p>
+<p>&#x5DE6;&#x65CB;&#x53F3;&#x65CB;&#x6982;&#x5FF5;&#x56FE;</p>
+<p>&#x8FD9;&#x91CC;&#x7684;&#x5DE6;&#x65CB;&#x53F3;&#x65CB;&#x90FD;&#x662F;&#x9488;&#x5BF9;&#x6839;&#x8282;&#x70B9;&#x800C;&#x8A00;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x5DE6;&#x56FE;&#x5230;&#x53F3;&#x56FE;&#x662F; y &#x7ED3;&#x70B9;&#x53F3;&#x65CB;&#xFF0C;&#x53F3;&#x56FE;&#x5230;&#x5DE6;&#x56FE;&#x662F; x &#x7ED3;&#x70B9;&#x5DE6;&#x65CB;&#x3002;</p>
+<ul>
+<li>&#x5DE6;&#x65CB;&#xFF1A;&#x6839;&#x7ED3;&#x70B9;&#x9000;&#x5C45;&#x53F3;&#x4F4D;&#xFF0C;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x4E0A;&#x4F4D;&#xFF0C;&#x540C;&#x65F6;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x53D8;&#x6210;&#x6839;&#x8282;&#x70B9;&#x5DE6;&#x7ED3;&#x70B9;&#x3002;</li>
+<li>&#x53F3;&#x65CB;&#xFF1A;&#x6839;&#x8282;&#x70B9;&#x9000;&#x5C45;&#x5DE6;&#x4F4D;&#xFF0C;&#x53F3;&#x5B50;&#x8282;&#x70B9;&#x4E0A;&#x4F4D;&#xFF0C;&#x540C;&#x65F6;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x7684;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x53D8;&#x6210;&#x6839;&#x8282;&#x70B9;&#x53F3;&#x7ED3;&#x70B9;&#x3002;</li>
+</ul>
+<p>&#x73B0;&#x5728;&#x4E0D;&#x7406;&#x89E3;&#x8FD9;&#x4FE9;&#x6982;&#x5FF5;&#x6709;&#x4EC0;&#x4E48;&#x7528;&#x4E0D;&#x91CD;&#x8981;&#xFF0C;&#x4F46;&#x662F;&#x5E0C;&#x671B;&#x8BFB;&#x8005;&#x80FD;&#x7406;&#x89E3;&#x5B83;&#x7684;&#x53D8;&#x5E7B;&#x8FC7;&#x7A0B;&#xFF0C;&#x5230;&#x540E;&#x9762;&#x4F1A;&#x6D89;&#x53CA;&#x5230;&#x3002;</p>
+<p>&#x8BF4;&#x8D77;&#x6765;&#x67AF;&#x71E5;&#x65E0;&#x610F;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x7ED3;&#x5408; TreeMap &#x6765;&#x770B;&#x770B;&#x5DE6;&#x65CB;&#x53F3;&#x65CB;&#x7684;&#x6E90;&#x7801; &#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/583b37c55ac3409d483c65f4e03b038ca54805af46c6eec584d700d88f8bd6ae" alt="&#x65B9;&#x6CD5;&#x56FE;"></p>
+<p>&#x65B9;&#x6CD5;&#x56FE;</p>
+<p>&#x5728;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x5C31;&#x9488;&#x5BF9;&#x5DE6;&#x65CB;&#x6E90;&#x7801;&#x770B;&#x770B; &#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f6275302df1f53610285210bb425ab28be5f240eb88dc9984168b769d7e7f473" alt="&#x5DE6;&#x65CB;&#x6E90;&#x7801;"></p>
+<p>&#x5DE6;&#x65CB;&#x6E90;&#x7801;</p>
+<p>&#x7B14;&#x8005;&#x5C31;&#x76F4;&#x63A5;&#x4E00;&#x884C;&#x4E00;&#x884C;&#x89E3;&#x91CA;&#x5427;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private void rotateLeft(Entry&lt;K,V&gt; p) {</span><br><span class="line">    if (p != null) {</span><br><span class="line">        Entry&lt;K,V&gt; r = p.right;         // r &#x662F;&#x6839;&#x7ED3;&#x70B9;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;</span><br><span class="line">        p.right = r.left;               // &#x4E3A;&#x6839;&#x7ED3;&#x70B9;&#x7684;&#x5DE6;&#x7ED3;&#x70B9;&#x6307;&#x5411;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#xFF08;&#x4E5F;&#x5C31;&#x662F; r&#xFF09;&#x7684;&#x5DE6;&#x7ED3;&#x70B9;</span><br><span class="line">        if (r.left != null)</span><br><span class="line">            r.left.parent = p;          // &#x610F;&#x4E49;&#x540C;&#x7B2C;&#x4E8C;&#x6B65;&#xFF0C;&#x8FD9;&#x6B65;&#x662F;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#xFF08;&#x4E5F;&#x5C31;&#x662F; r&#xFF09;&#x7684;&#x5DE6;&#x7ED3;&#x70B9;&#x5C06;&#x7236;&#x7ED3;&#x70B9;&#x5F15;&#x7528;&#x6307;&#x5411; p</span><br><span class="line">        r.parent = p.parent;            // &#x5C06; r &#x7ED3;&#x70B9;&#x7684;&#x7236;&#x5F15;&#x7528;&#x6307;&#x5411; p &#x7ED3;&#x70B9;&#x7684;&#x7236;&#x5F15;&#x7528;</span><br><span class="line">        if (p.parent == null)</span><br><span class="line">            root = r;                   // &#x5C06;&#x6839;&#x7ED3;&#x70B9;&#x66FF;&#x6362;&#x4E3A; r</span><br><span class="line">        else if (p.parent.left == p)</span><br><span class="line">            p.parent.left = r;          // &#x610F;&#x4E49;&#x540C;&#x4E0A;</span><br><span class="line">        else</span><br><span class="line">            p.parent.right = r;         // &#x610F;&#x4E49;&#x540C;&#x4E0A;</span><br><span class="line">        r.left = p;                     // r &#x5DE6;&#x7ED3;&#x70B9;&#x5F15;&#x7528;&#x6307;&#x5411; p &#x7ED3;&#x70B9;</span><br><span class="line">        p.parent = r;                   // p &#x7ED3;&#x70B9;&#x7236;&#x5F15;&#x7528;&#x6307;&#x5411; r &#x7ED3;&#x70B9;</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x589E;"><a href="#&#x589E;" class="headerlink" title="&#x589E;"></a>&#x589E;</h2><p>&#x5047;&#x8BBE;&#x73B0;&#x5728;&#x6211;&#x4EEC;&#x627E;&#x5230;&#x4E86;&#x76F8;&#x5E94;&#x7684;&#x7ED3;&#x70B9;&#x63D2;&#x5165;&#x4F4D;&#x7F6E;&#xFF0C;&#x90A3;&#x4E48;&#x6211;&#x4EEC;&#x63A5;&#x4E0B;&#x6765;&#x5C31;&#x53EF;&#x4EE5;&#x63D2;&#x5165;&#x76F8;&#x5E94;&#x7684;&#x7ED3;&#x70B9;&#x4E86;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x8FCE;&#x6765;&#x4E00;&#x4E2A;&#x5934;&#x75BC;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#x7EA2;&#x9ED1;&#x6811;&#x7ED3;&#x70B9;&#x662F;&#x6709;&#x989C;&#x8272;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x6211;&#x4EEC;&#x5E94;&#x8BE5;&#x7ED9;&#x5B83;&#x8BBE;&#x7F6E;&#x6210;&#x9ED1;&#x8272;&#x7684;&#x8FD8;&#x662F;&#x7EA2;&#x8272;&#x7684;&#x5462;&#xFF1F;<br>&#x8BBE;&#x7F6E;&#x6210;&#x9ED1;&#x8272;&#x7684;&#x5427;&#xFF0C;&#x5C31;&#x8FDD;&#x53CD;&#x4E86;&#x6027;&#x8D28;5&#xFF0C;&#x8BBE;&#x7F6E;&#x6210;&#x4E86;&#x7EA2;&#x8272;&#x7684;&#x5427;&#xFF0C;&#x5C31;&#x5BB9;&#x6613;&#x8FDD;&#x53CD;&#x4E86;&#x6027;&#x8D28;4&#x3002;&#x90A3;&#x600E;&#x4E48;&#x529E;&#xFF1F;&#x603B;&#x8981;&#x7ED9;&#x4E00;&#x4E2A;&#x989C;&#x8272;&#xFF0C;&#x90A3;&#x6211;&#x4EEC;&#x5C31;&#x7ED9;<strong>&#x7EA2;&#x8272;</strong>&#x7684;&#x5427;&#x3002;&#x4E3A;&#x4EC0;&#x4E48;&#xFF1F;&#x56E0;&#x4E3A;&#x5982;&#x679C;&#x8BBE;&#x7F6E;&#x6210;&#x9ED1;&#x8272;&#x7684;&#x8BDD;&#xFF0C;&#x8BE5;&#x5206;&#x652F;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x80AF;&#x5B9A;&#x6BD4;&#x5176;&#x4ED6;&#x5206;&#x652F;&#x591A;&#x4E00;&#x4E2A;&#xFF0C;&#x800C;&#x8FD9;&#x6837;&#x7684;&#x8BDD;&#x76F8;&#x5F53;&#x5730;&#x4E0D;&#x597D;&#x505A;&#x8C03;&#x6574;&#x3002;&#x5982;&#x679C;&#x5C06;&#x63D2;&#x5165;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#x7F6E;&#x4E3A;&#x7EA2;&#x8272;&#x7684;&#x8BDD;&#xFF0C;&#x8FD0;&#x6C14;&#x6BD4;&#x8F83;&#x597D;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x8BE5;&#x7236;&#x7ED3;&#x70B9;&#x5C31;&#x662F;&#x9ED1;&#x8272;&#x7684;&#xFF0C;&#x90A3;&#x8FD9;&#x6837;&#x5C31;&#x4E0D;&#x9700;&#x8981;&#x505A;&#x4EFB;&#x4F55;&#x8C03;&#x6574;&#x3002;&#x53E6;&#x4E00;&#x79CD;&#x60C5;&#x51B5;&#x662F;&#x63D2;&#x5165;&#x7ED3;&#x70B9;&#x7684;&#x7236;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#x662F;&#x7EA2;&#x8272;&#x7684;&#xFF0C;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x6211;&#x4EEC;&#x5C31;&#x9700;&#x8981;&#x8BE6;&#x7EC6;&#x8BA8;&#x8BBA;&#x4E86;&#xFF0C;&#x5177;&#x4F53;&#x5206;&#x4E3A;&#x4EE5;&#x4E0B;&#x4E24;&#x79CD;&#xFF08;&#x6B64;&#x5904;&#x6211;&#x4EEC;&#x4EE5;&#x63D2;&#x5165;&#x7ED3;&#x70B9;&#x7684;&#x7236;&#x7ED3;&#x70B9;&#x662F;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7684;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x4E3A;&#x4F8B;&#xFF08;&#x6709;&#x70B9;&#x62D7;&#x53E3;&#xFF09;&#xFF0C;&#x955C;&#x50CF;&#x64CD;&#x4F5C;&#x9053;&#x7406;&#x76F8;&#x540C;&#xFF09;&#xFF1A;</p>
+<ul>
+<li>1.&#x7236;&#x7ED3;&#x70B9;&#x4E0E;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x90FD;&#x4E3A;&#x7EA2;</li>
+</ul>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/59e40f6706f08899a86b33390e6a1018183763dcf3c592605f97db12a78eac2b" alt="&#x7236;&#x7ED3;&#x70B9;&#x4E0E;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x90FD;&#x4E3A;&#x7EA2;"></p>
+<p>&#x7236;&#x7ED3;&#x70B9;&#x4E0E;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x90FD;&#x4E3A;&#x7EA2;</p>
+<p>&#x7236;&#x7ED3;&#x70B9;&#x4E0E;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x90FD;&#x4E3A;&#x7EA2;&#x7684;&#x8BDD;&#x90A3;&#x4E48;&#x5FC5;&#x5B9A;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;&#xFF0C;&#x5B9E;&#x9645;&#x4E0A;&#x6B64;&#x65F6;&#x6211;&#x4EEC;&#x6700;&#x7B80;&#x5355;&#x7684;&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x5C06;&#x7236;&#x7ED3;&#x70B9;&#x548C;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x67D3;&#x9ED1;&#xFF0C;&#x5C06;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x67D3;&#x7EA2;&#xFF08;&#x5C06;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x67D3;&#x7EA2;&#x7684;&#x76EE;&#x7684;&#x662F;&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x8DEF;&#x5F84;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4E0D;&#x6539;&#x53D8;&#xFF09;&#xFF0C;&#x5982;&#x4E0B; &#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f5f5c5fca2ea93f79f02640aab23f5dedf1339154886ad348be3d512e35b75a3" alt="&#x67D3;&#x9ED1;"></p>
+<p>&#x67D3;&#x9ED1;</p>
+<p>&#x73B0;&#x5728;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x3001;&#x7236;&#x7ED3;&#x70B9;&#x3001;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x90FD;&#x7B26;&#x5408;&#x8981;&#x6C42;&#x4E86;&#xFF0C;&#x4F46;&#x662F;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7684;&#x7236;&#x7ED3;&#x70B9;&#x662F;&#x7EA2;&#x8272;&#x7684;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x51B2;&#x7A81;&#x4E86;&#xFF0C;&#x806A;&#x660E;&#x7684;&#x8BFB;&#x8005;&#x53EF;&#x80FD;&#x5DF2;&#x7ECF;&#x53D1;&#x73B0;&#x4E86;&#xFF0C;&#x6B64;&#x65F6;&#x7684;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x5C31;&#x76F8;&#x5F53;&#x4E8E;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#xFF0C;&#x6211;&#x4EEC;&#x4E0D;&#x59A8;&#x5C06;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7F6E;&#x6362;&#x4E3A;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#xFF0C;&#x518D;&#x8FDB;&#x884C;&#x9012;&#x5F52;&#x64CD;&#x4F5C;&#x5C31;&#x53EF;&#x4EE5;&#x8FBE;&#x5230;&#x89E3;&#x51B3;&#x51B2;&#x7A81;&#x7684;&#x76EE;&#x7684;&#x4E86;&#x3002;</p>
+<ul>
+<li>2.&#x7236;&#x7ED3;&#x70B9;&#x4E3A;&#x7EA2;&#xFF0C;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;</li>
+</ul>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/be6e4bcb253437aaa7b97fc15ef2998c6903e048815166d6be066517e8b46855" alt="&#x7236;&#x7ED3;&#x70B9;&#x4E3A;&#x7EA2;&#xFF0C;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;"></p>
+<p>&#x7236;&#x7ED3;&#x70B9;&#x4E3A;&#x7EA2;&#xFF0C;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;</p>
+<p>&#x4F46;&#x51E1;&#x6709;&#x4E00;&#x4E2A;&#x7ED3;&#x70B9;&#x662F;&#x7EA2;&#x8272;&#xFF0C;&#x90A3;&#x4E48;&#x5B83;&#x7684;&#x7236;&#x7ED3;&#x70B9;&#x5FC5;&#x5B9A;&#x662F;&#x9ED1;&#x8272;&#xFF08;&#x6027;&#x8D28;4&#xFF09;&#xFF0C;&#x6240;&#x4EE5;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x4E00;&#x5B9A;&#x662F;&#x9ED1;&#x8272;&#x7684;&#x3002;</p>
+<blockquote>
+<p>&#x6709;&#x7EC6;&#x5FC3;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#x53EF;&#x80FD;&#x89C9;&#x5BDF;&#x5230;&#xFF0C;&#x4E0A;&#x56FE;&#x8FDD;&#x53CD;&#x4E86;&#x6027;&#x8D28;&#x4E94;&#x3002;&#x5B9E;&#x9645;&#x4E0A;&#x4E0A;&#x56FE;&#x662F;&#x4E00;&#x5F20;&#x7B80;&#x5316;&#x540E;&#x7684;&#x56FE;&#xFF0C;&#x4E3A;&#x4E86;&#x6211;&#x4EEC;&#x540E;&#x9762;&#x7684;&#x5185;&#x5BB9;&#x66F4;&#x52A0;&#x4FBF;&#x4E8E;&#x7406;&#x89E3;&#xFF0C;&#x4E0A;&#x56FE;&#x7684;&#x539F;&#x56FE;&#x5E94;&#x8BE5;&#x662F;&#x4EE5;&#x4E0B;&#x6A21;&#x6837; &#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/27e5ff6eb46fbbc43f9f8c28f8e75a5ea4b586ebfa9843bb4411fc23be246e03" alt="&#x4E0A;&#x56FE;&#x539F;&#x56FE;"></p>
+<p>&#x4E0A;&#x56FE;&#x539F;&#x56FE;</p>
+<p>ps&#xFF1A;&#x4E0A;&#x56FE;&#x4E2D;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x548C;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x53EF;&#x4EE5;&#x7406;&#x89E3;&#x6210; java &#x4E2D;&#x7684; null &#x7ED3;&#x70B9;&#xFF0C;&#x7B14;&#x8005;&#x7279;&#x5730;&#x5C06;&#x5B83;&#x4EEC;&#x7684;&#x4E2A;&#x5934;&#x7F29;&#x5C0F;&#x4E86;&#xFF0C;&#x4EE5;&#x4FBF;&#x533A;&#x5206;&#x3002;</p>
+</blockquote>
+<p>&#x90A3;&#x4E48;&#x6B64;&#x65F6;&#x8BE5;&#x600E;&#x4E48;&#x64CD;&#x4F5C;&#x5462;&#xFF1F;<strong>&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x53F3;&#x65CB;&#xFF0C;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7F6E;&#x7EA2;&#xFF0C;&#x7236;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;&#x3002;</strong>&#x8FD9;&#x6761;&#x64CD;&#x4F5C;&#x8FC7;&#x540E;&#xFF0C;&#x6027;&#x8D28;4&#x3001;5&#x90FD;&#x6CA1;&#x6709;&#x8FDD;&#x53CD;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/49255fbef1be3ebf2319675aeee76541fb7ecf4f778b4f0f2973cd535765528f" alt="&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x53F3;&#x65CB;&#xFF0C;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7F6E;&#x7EA2;&#xFF0C;&#x7236;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;"></p>
+<p>&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x53F3;&#x65CB;&#xFF0C;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7F6E;&#x7EA2;&#xFF0C;&#x7236;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;</p>
+<blockquote>
+<p>&#x5F53;&#x7136;&#xFF0C;&#x4E0A;&#x56FE;&#x4E5F;&#x53EA;&#x662F;&#x4E00;&#x5F20;&#x7B80;&#x5316;&#x56FE;&#xFF0C;&#x5B9E;&#x9645;&#x4E0A;&#x539F;&#x56FE;&#x5982;&#x4E0B;&#xFF1A;  </p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f3a81be446f2b16bd3279bdfe0bc598742aa01efc1ff380272f5757e8863b855" alt="&#x4E0A;&#x56FE;&#x539F;&#x56FE;"></p>
+<p>&#x4E0A;&#x56FE;&#x539F;&#x56FE;</p>
+</blockquote>
+<p>&#x90A3;&#x4E48;&#x7ED3;&#x5408; TreeMap &#x6E90;&#x7801;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/82ac9724038652ff6127e5c078732ea9dec127bbc3614906736b7e878d420937" alt="&#x63D2;&#x5165;&#x8C03;&#x6574;&#x6E90;&#x7801;"></p>
+<p>&#x63D2;&#x5165;&#x8C03;&#x6574;&#x6E90;&#x7801;</p>
+<p>&#x7FFB;&#x8BD1;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private void fixAfterInsertion(Entry&lt;K,V&gt; x) {</span><br><span class="line">    x.color = RED;      // &#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#x8D4B;&#x7EA2;</span><br><span class="line"></span><br><span class="line">    // &#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x975E;&#x7A7A;&#xFF0C;&#x975E;&#x6839;&#xFF0C;&#x540C;&#x65F6;&#x7236;&#x7ED3;&#x70B9;&#x4E3A;&#x7EA2;&#xFF0C;&#x6B64;&#x65F6;&#x624D;&#x9700;&#x8981;&#x8C03;&#x6574;</span><br><span class="line">    while (x != null &amp;&amp; x != root &amp;&amp; x.parent.color == RED) {</span><br><span class="line">        // &#x7236;&#x7ED3;&#x70B9;&#x662F;&#x7237;&#x7237;&#x7684;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;</span><br><span class="line">        if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {</span><br><span class="line">            Entry&lt;K,V&gt; y = rightOf(parentOf(parentOf(x)));  // y &#x662F;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;</span><br><span class="line">            // &#x60C5;&#x51B5;1 &#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x4E5F;&#x4E3A;&#x7EA2;</span><br><span class="line">            if (colorOf(y) == RED) {</span><br><span class="line">                setColor(parentOf(x), BLACK);               // &#x7236;&#x7ED3;&#x70B9;&#x8D4B;&#x9ED1;</span><br><span class="line">                setColor(y, BLACK);                         // &#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x8D4B;&#x9ED1;</span><br><span class="line">                setColor(parentOf(parentOf(x)), RED);       // &#x7237;&#x7237;&#x7ED3;&#x70B9;&#x8D4B;&#x7EA2;</span><br><span class="line">                x = parentOf(parentOf(x));                  // &#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7F6E;&#x4E3A;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#xFF0C;&#x9012;&#x5F52;</span><br><span class="line">            } else {</span><br><span class="line">                // &#x60C5;&#x51B5;2 &#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;</span><br><span class="line">                // &#x5C0F;&#x63D2;&#x66F2;&#xFF0C;&#x5982;&#x679C;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x662F;&#x7236;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#xFF0C;&#x5DE6;&#x65CB;&#x7236;&#x7ED3;&#x70B9;</span><br><span class="line">                // &#x5F53;&#x7136;&#xFF0C;&#x6B64;&#x65F6;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x5E94;&#x6539;&#x4E3A;&#x7236;&#x7ED3;&#x70B9;</span><br><span class="line">                if (x == rightOf(parentOf(x))) {</span><br><span class="line">                    x = parentOf(x);</span><br><span class="line">                    rotateLeft(x);</span><br><span class="line">                }</span><br><span class="line">                setColor(parentOf(x), BLACK);               // &#x7236;&#x7ED3;&#x70B9;&#x8D4B;&#x9ED1;</span><br><span class="line">                setColor(parentOf(parentOf(x)), RED);       // &#x7237;&#x7237;&#x7ED3;&#x70B9;&#x8D4B;&#x7EA2;</span><br><span class="line">                rotateRight(parentOf(parentOf(x)));         // &#x7237;&#x7237;&#x7ED3;&#x70B9;&#x53F3;&#x65CB;</span><br><span class="line">            }</span><br><span class="line">        } else {</span><br><span class="line">            // &#x955C;&#x50CF;&#x64CD;&#x4F5C;&#xFF0C;&#x9053;&#x7406;&#x540C;&#x4E0A;</span><br><span class="line">            Entry&lt;K,V&gt; y = leftOf(parentOf(parentOf(x)));</span><br><span class="line">            if (colorOf(y) == RED) {</span><br><span class="line">                setColor(parentOf(x), BLACK);</span><br><span class="line">                setColor(y, BLACK);</span><br><span class="line">                setColor(parentOf(parentOf(x)), RED);</span><br><span class="line">                x = parentOf(parentOf(x));</span><br><span class="line">            } else {</span><br><span class="line">                if (x == leftOf(parentOf(x))) {</span><br><span class="line">                    x = parentOf(x);</span><br><span class="line">                    rotateRight(x);</span><br><span class="line">                }</span><br><span class="line">                setColor(parentOf(x), BLACK);</span><br><span class="line">                setColor(parentOf(parentOf(x)), RED);</span><br><span class="line">                rotateLeft(parentOf(parentOf(x)));</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">    root.color = BLACK;     // &#x6839;&#x7ED3;&#x70B9;&#x5FC5;&#x987B;&#x8D4B;&#x9ED1;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x770B;&#x5B8C;&#x4EE3;&#x7801;&#x6211;&#x4EEC;&#x53D1;&#x73B0;&#x6211;&#x4EEC;&#x597D;&#x50CF;&#x6F0F;&#x4E86;&#x4E00;&#x4E2A;&#x5C0F;&#x63D2;&#x66F2;&#xFF08;&#x5F53;&#x7136;&#xFF0C;&#x8FD9;&#x662F;&#x7B14;&#x8005;&#x6545;&#x610F;&#x7684;&#xFF09;&#xFF0C;&#x90A3;&#x4E48;&#x5C0F;&#x63D2;&#x66F2;&#x662F;&#x4E00;&#x4E2A;&#x4EC0;&#x4E48;&#x60C5;&#x51B5;&#x5462;&#xFF1F;&#x8A00;&#x8BED;&#x6765;&#x8BF4;&#xFF0C;&#x5728;&#x53D4;&#x53D4;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;&#x7684;&#x524D;&#x63D0;&#x4E0B;&#xFF0C;&#x5F53;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x662F;&#x7236;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x9700;&#x8981;&#x5BF9;&#x7236;&#x7ED3;&#x70B9;&#x8FDB;&#x884C;&#x5DE6;&#x65CB;&#x7136;&#x540E;&#x624D;&#x80FD;&#x63A5;&#x7EED;&#x4E0B;&#x4E00;&#x6B65;&#x64CD;&#x4F5C;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x4F1A;&#x8FD9;&#x6837;&#xFF0C;&#x6211;&#x4EEC;&#x4E00;&#x56FE;&#x80DC;&#x5343;&#x8A00; &#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/d65e8496bcd0c195596432298f9e456a4fde59112f99ee555f7096c5297bc57b" alt="&#x5C0F;&#x63D2;&#x66F2;"></p>
+<p>&#x5C0F;&#x63D2;&#x66F2;</p>
+<p>&#x5982;&#x679C;&#x5FFD;&#x7565;&#x4E0A;&#x8FF0;&#x60C5;&#x51B5;&#xFF0C;&#x90A3;&#x4E48;&#x6700;&#x7EC8;&#x4F1A;&#x5F97;&#x5230;&#x4EE5;&#x4E0B;&#x60C5;&#x51B5;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/be15a8fd4501839924ff9dc46d28fa69b827c1d8bc0bcbb3e1ac925698906646" alt="&#x5C0F;&#x63D2;&#x66F2;&#x5FFD;&#x7565;&#x60C5;&#x51B5;&#x4E0B;&#x5B9E;&#x73B0;"></p>
+<p>&#x5C0F;&#x63D2;&#x66F2;&#x5FFD;&#x7565;&#x60C5;&#x51B5;&#x4E0B;&#x5B9E;&#x73B0;</p>
+<p>&#x7531;&#x4E8E;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x662F;&#x7236;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x8282;&#x70B9;&#xFF0C;&#x5728;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x53F3;&#x65CB;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x5B83;&#x4F1A;&#x8F6C;&#x4E3A;&#x539F;&#x7237;&#x7237;&#x7ED3;&#x70B9;&#x7684;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#xFF0C;&#x8FD9;&#x6837;&#x7684;&#x8BDD;&#x5C31;&#x8FDD;&#x53CD;&#x4E86;&#x7279;&#x6027;4&#x548C;&#x7279;&#x6027;5&#x3002;&#x89E3;&#x51B3;&#x65B9;&#x6CD5;&#x5C31;&#x662F;&#x4E0A;&#x9762;&#x6240;&#x63D0;&#x5230;&#x7684;&#x5C06;&#x7236;&#x7ED3;&#x70B9;&#x5148;&#x8FDB;&#x884C;&#x5DE6;&#x65CB;&#x7136;&#x540E;&#x518D;&#x8FDB;&#x884C;&#x524D;&#x9762;&#x6240;&#x63D0;&#x5230;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x5982;&#x4E0B;&#x56FE; &#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/ef52e674e1bbbadc7278f6be775bc88506cebdbfdfce52a0eb1d38d84c782340" alt="&#x5C0F;&#x63D2;&#x66F2;&#x4FEE;&#x6B63;"></p>
+<p>&#x5C0F;&#x63D2;&#x66F2;&#x4FEE;&#x6B63;</p>
+<p>&#x5F53;&#x7136;&#xFF0C;&#x4E0D;&#x8981;&#x5FD8;&#x4E86;&#xFF0C;&#x73B0;&#x5728;&#x9700;&#x8981;&#x8C03;&#x6574;&#x7684;&#x7ED3;&#x70B9;&#x662F;&#x539F;&#x7236;&#x7ED3;&#x70B9;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8981;&#x5C06;&#x4E0A;&#x56FE;&#x5DE6;&#x4E0B;&#x89D2;&#x90A3;&#x4E2A;&#x7ED3;&#x70B9;&#x4F5C;&#x4E3A;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x8FDB;&#x884C;&#x8C03;&#x6574;&#x3002;</p>
+<p>&#x6240;&#x4EE5;&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x6DFB;&#x64CD;&#x4F5C;&#x5206;&#x4E3A;&#x4EE5;&#x4E0B;&#x4E09;&#x6B65;&#xFF1A;</p>
+<ul>
+<li>&#x627E;&#x5230;&#x76F8;&#x5E94;&#x7684;&#x63D2;&#x5165;&#x4F4D;&#x7F6E;</li>
+<li>&#x5C06;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x8BBE;&#x7F6E;&#x4E3A;&#x7EA2;&#x8272;&#x5E76;&#x63D2;&#x5165;</li>
+<li>&#x901A;&#x8FC7;&#x7740;&#x8272;&#x548C;&#x65CB;&#x8F6C;&#x7B49;&#x64CD;&#x4F5C;&#x4F7F;&#x4E4B;&#x91CD;&#x65B0;&#x6210;&#x4E3A;&#x4E00;&#x68F5;&#x4E8C;&#x53C9;&#x6811;</li>
+</ul>
+<h2 id="&#x5220;"><a href="#&#x5220;" class="headerlink" title="&#x5220;"></a>&#x5220;</h2><p>&#x8FD9;&#x4E00;&#x5C0F;&#x8282;&#x6211;&#x60F3;&#x5148; show &#x51FA;&#x6E90;&#x7801;&#x518D;&#x6765;&#x89E3;&#x91CA; &#x2014;&#x2014;<br><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2e4a697c438ab389826562f7653f8d1623f01b04c610126f828dc1af33f53781" alt="&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x6E90;&#x7801;"></p>
+<p>&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x6E90;&#x7801;</p>
+<p>&#x7FFB;&#x8BD1;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private void deleteEntry(Entry&lt;K,V&gt; p) {</span><br><span class="line">    // &#x4F18;&#x5148;&#x9009;&#x62E9;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x4F5C;&#x4E3A;&#x88AB;&#x5220;&#x7ED3;&#x70B9;&#x7684;&#x66FF;&#x4EE3;&#x7ED3;&#x70B9;</span><br><span class="line">    Entry&lt;K,V&gt; replacement = (p.left != null ? p.left : p.right);</span><br><span class="line"></span><br><span class="line">    // &#x5982;&#x679C;&#x66FF;&#x4EE3;&#x7ED3;&#x70B9;&#x4E0D;&#x4E3A;&#x7A7A;</span><br><span class="line">    if (replacement != null) {</span><br><span class="line">        replacement.parent = p.parent;</span><br><span class="line">        // &#x5982;&#x679C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x4E3A;&#x6839;&#x8282;&#x70B9;&#xFF0C;&#x90A3;&#x4E48;&#x6839;&#x8282;&#x70B9;&#x91CD;&#x5B9A;&#x5411;&#x5F15;&#x7528;&#x6307;&#x5411;&#x66FF;&#x4EE3;&#x7ED3;&#x70B9;</span><br><span class="line">        if (p.parent == null)</span><br><span class="line">            root = replacement;</span><br><span class="line">        else if (p == p.parent.left)</span><br><span class="line">            // &#x5982;&#x679C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x662F;&#x5176;&#x7236;&#x7ED3;&#x70B9;&#x7684;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#xFF0C;&#x66F4;&#x6539;&#x7236;&#x7ED3;&#x70B9;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x5F15;&#x7528;&#x6307;&#x5411;&#x66FF;&#x4EE3;&#x7ED3;&#x70B9;</span><br><span class="line">            p.parent.left  = replacement;</span><br><span class="line">        else</span><br><span class="line">            // &#x5982;&#x679C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x662F;&#x5176;&#x7236;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#xFF0C;&#x66F4;&#x6539;&#x7236;&#x7ED3;&#x70B9;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x5F15;&#x7528;&#x6307;&#x5411;&#x66FF;&#x4EE3;&#x7ED3;&#x70B9;</span><br><span class="line">            p.parent.right = replacement;</span><br><span class="line"></span><br><span class="line">        // &#x5C06;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x7684;&#x5404;&#x4E2A;&#x5F15;&#x7528;&#x7F6E; null</span><br><span class="line">        p.left = p.right = p.parent = null;</span><br><span class="line"></span><br><span class="line">        // &#x5982;&#x679C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#x4E3A;&#x9ED1;&#x8272;&#xFF0C;&#x90A3;&#x4E48;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x5220;&#x540E;&#x8C03;&#x6574;</span><br><span class="line">        if (p.color == BLACK)</span><br><span class="line">            fixAfterDeletion(replacement);</span><br><span class="line">    } else if (p.parent == null) {</span><br><span class="line">        // &#x5982;&#x679C;&#x66FF;&#x4EE3;&#x7ED3;&#x70B9;&#x4E3A;&#x7A7A;&#x4E14;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x4E3A; root &#x7ED3;&#x70B9;</span><br><span class="line">        root = null;</span><br><span class="line">    } else {</span><br><span class="line">        // &#x5982;&#x679C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x4E3A;&#x7A7A;&#x4E14;&#x4E0D;&#x662F; root &#x7ED3;&#x70B9;</span><br><span class="line">        // &#x5982;&#x679C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#x4E3A;&#x9ED1;&#x8272;&#xFF0C;&#x90A3;&#x4E48;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x5220;&#x540E;&#x8C03;&#x6574;</span><br><span class="line">        if (p.color == BLACK)</span><br><span class="line">            fixAfterDeletion(p);</span><br><span class="line"></span><br><span class="line">        // &#x5C06;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x7684;&#x5404;&#x4E2A;&#x5F15;&#x7528;&#x7F6E; null</span><br><span class="line">        if (p.parent != null) {</span><br><span class="line">            if (p == p.parent.left)</span><br><span class="line">                p.parent.left = null;</span><br><span class="line">            else if (p == p.parent.right)</span><br><span class="line">                p.parent.right = null;</span><br><span class="line">            p.parent = null;</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5220;&#x9664;&#x65F6;&#x53EF;&#x80FD;&#x5206;&#x4E3A;&#x4E09;&#x79CD;&#x60C5;&#x51B5;&#xFF0C;&#x5177;&#x4F53;&#x7684;&#x505A;&#x6CD5;&#x4E5F;&#x5728;&#x4E0A;&#x8FF0;&#x4EE3;&#x7801;&#x4E2D;&#x505A;&#x4E86;&#x6E05;&#x6670;&#x7684;&#x89E3;&#x91CA;&#xFF0C;&#x7B14;&#x8005;&#x5728;&#x6B64;&#x5C31;&#x4E0D;&#x6269;&#x5C55;&#x4E86;&#xFF0C;&#x7EC6;&#x5FC3;&#x7684;&#x8BFB;&#x8005;&#x53EF;&#x80FD;&#x53D1;&#x73B0;&#x4E86;&#xFF0C;&#x4E0A;&#x8FF0;&#x5220;&#x9664;&#x64CD;&#x4F5C;&#x51E1;&#x662F;&#x6D89;&#x53CA;&#x5230;&#x4E86;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x662F;&#x9ED1;&#x8272;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x90FD;&#x9700;&#x8981;&#x8C03;&#x7528; <code>fixAfterDeletion()</code> &#x65B9;&#x6CD5;&#x5BF9;&#x7EA2;&#x9ED1;&#x6811;&#x8FDB;&#x884C;&#x8C03;&#x6574;&#x3002;&#x8FD9;&#x662F;&#x56E0;&#x4E3A;&#x5982;&#x679C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x662F;&#x9ED1;&#x8272;&#x7684;&#xFF0C;&#x5F53;&#x5B83;&#x88AB;&#x5220;&#x9664;&#x540E;&#x5C31;&#x4F1A;&#x8FDD;&#x53CD;&#x6027;&#x8D28;5&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5BF9;&#x7EA2;&#x9ED1;&#x6811;&#x8FDB;&#x884C;&#x7ED3;&#x6784;&#x8C03;&#x6574;&#x3002;</p>
+<blockquote>
+<p>&#x4E3A;&#x4E86;&#x4FBF;&#x4E8E;&#x7406;&#x89E3;&#x7EA2;&#x8272;&#x7ED3;&#x70B9;&#x4E3A;&#x4EC0;&#x4E48;&#x4E0D;&#x4F1A;&#x5F71;&#x54CD;&#x7EA2;&#x9ED1;&#x6811;&#x6574;&#x4F53;&#x7ED3;&#x6784;&#xFF0C;&#x7B14;&#x8005;&#x8FD8;&#x662F;&#x4E3E;&#x4E86;&#x4E00;&#x4E2A;&#x4F8B;&#x5B50;&#x7ED9;&#x5404;&#x4F4D;&#x8BFB;&#x8005;&#x7406;&#x89E3;&#x4E00;&#x4E0B;&#xFF0C;&#x4E0B;&#x56FE;&#x662F;&#x5220;&#x9664;&#x524D;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0f2ab8dd966f0f30e990cb847cace858afd0e90a44d98c6f8151e752d4b02fbc" alt="&#x5220;&#x9664;&#x524D;"></p>
+<p>&#x5220;&#x9664;&#x524D;</p>
+<p>&#x4E0B;&#x56FE;&#x662F;&#x5220;&#x9664;&#x540E;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3079044a40b2c9d4b85b76ca66c888867a27c06866f50d6839e987369cf46cf3" alt="&#x5220;&#x9664;&#x540E;"></p>
+<p>&#x5220;&#x9664;&#x540E;</p>
+</blockquote>
+<p>&#x5B9E;&#x9645;&#x4E0A;&#x7EA2;&#x9ED1;&#x6811;&#x662F;&#x4F7F;&#x7528;&#x4EE5;&#x4E0B;2&#x70B9;&#x601D;&#x60F3;&#x6765;&#x8FDB;&#x884C;&#x8C03;&#x6574;&#x7684;&#xFF08;&#x7B14;&#x8005;&#x8BA4;&#x4E3A;&#xFF0C;&#x5728;&#x5206;&#x6790; <code>fixAfterDeletion()</code> &#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x4E4B;&#x524D;&#xFF0C;&#x4F5C;&#x4E3A;&#x5F00;&#x53D1;&#x8005;&#x5E94;&#x8BE5;&#x53BB;&#x81EA;&#x884C;&#x601D;&#x8003;&#x4E00;&#x4E0B;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x4F5C;&#x4E3A;&#x6E90;&#x7801;&#x8BBE;&#x8BA1;&#x8005;&#xFF0C;&#x6211;&#x4EEC;&#x4F1A;&#x5982;&#x4F55;&#x6765;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x3002;&#xFF09; &#x2014;&#x2014;</p>
+<p>1.&#x7ED9;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x7684;&#x8DEF;&#x5F84;&#x589E;&#x52A0;&#x4E00;&#x4E2A;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#xFF08;&#x5C06;&#x5144;&#x5F1F;&#x8DEF;&#x5F84;&#x7684;&#x4E00;&#x4E2A;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x79FB;&#x8FC7;&#x6765;&#xFF09;<br>2.&#x7ED9;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x7684;&#x5144;&#x5F1F;&#x8DEF;&#x5F84;&#x51CF;&#x5C11;&#x4E00;&#x4E2A;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#xFF08;&#x5C06;&#x5144;&#x5F1F;&#x8DEF;&#x5F84;&#x7684;&#x4E00;&#x4E2A;&#x7EA2;&#x8272;&#x7ED3;&#x70B9;&#x67D3;&#x9ED1;&#xFF09;</p>
+<blockquote>
+<p>ps:&#x540E;&#x9762;&#x6211;&#x4EEC;&#x4F1A;&#x9488;&#x5BF9;&#x7B2C;&#x4E00;&#x6761;&#x79F0;&#x4E3A;&#x601D;&#x60F3;1&#xFF0C;&#x7B2C;&#x4E8C;&#x6761;&#x79F0;&#x4E3A;&#x601D;&#x60F3;2&#x3002;</p>
+</blockquote>
+<p>&#x8BF4;&#x5B8C;&#x601D;&#x60F3;&#xFF0C;&#x6211;&#x4EEC;&#x8BA8;&#x8BBA;&#x4E00;&#x4E0B;&#x5177;&#x4F53;&#x5220;&#x9664;&#x64CD;&#x4F5C;&#x662F;&#x5982;&#x4F55;&#x8FDB;&#x884C;&#x7684;&#x3002;&#x7EA2;&#x9ED1;&#x6811;&#x5728;&#x4FDD;&#x969C;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x7684;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;&#x8272;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF08;&#x6CA1;&#x6709;&#x4EC0;&#x4E48;&#x7279;&#x6B8A;&#x7F18;&#x7531;&#xFF0C;&#x4EC5;&#x4EC5;&#x662F;&#x4E3A;&#x4E86;&#x540E;&#x671F;&#x597D;&#x64CD;&#x4F5C;&#xFF09;&#xFF0C;&#x5206;&#x4EE5;&#x4E0B;&#x4E24;&#x70B9;&#x6765;&#x8FDB;&#x884C;&#x5206;&#x6790;&#xFF1A;</p>
+<p>1.&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x4E24;&#x4E2A;&#x5B50;&#x7ED3;&#x70B9;&#x90FD;&#x662F;&#x9ED1;&#x8272;&#x7684;<br>2.&#x53E6;&#x4E00;&#x79CD;&#x60C5;&#x51B5;&#xFF08;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x4E24;&#x4E2A;&#x5B50;&#x7ED3;&#x70B9;&#x81F3;&#x591A;&#x4E00;&#x4E2A;&#x9ED1;&#x8272;&#x7684;&#xFF09;</p>
+<blockquote>
+<p>ps:&#x540E;&#x9762;&#x6211;&#x4EEC;&#x4F1A;&#x9488;&#x5BF9;&#x7B2C;&#x4E00;&#x6761;&#x79F0;&#x4E3A;&#x60C5;&#x51B5;1&#xFF0C;&#x7B2C;&#x4E8C;&#x6761;&#x79F0;&#x4E3A;&#x60C5;&#x51B5;2&#x3002;</p>
+</blockquote>
+<p>&#x5BF9;&#x4E8E;<a href="#item3">&#x60C5;&#x51B5;1</a>&#x6765;&#x8BF4;&#xFF0C;&#x7EA2;&#x9ED1;&#x6811;&#x91C7;&#x7528;<a href="#item2">&#x601D;&#x60F3;2</a>&#xFF0C;&#x5C06;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7F6E;&#x4E3A;&#x7EA2;&#x8272;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x6837;&#x5E26;&#x6765;&#x4E86;&#x4E24;&#x4E2A;&#x95EE;&#x9898;&#x2014;&#x2014;&#x5BF9;&#x4E8E;&#x7236;&#x8DEF;&#x5F84;&#x6765;&#x8BF4;&#xFF0C;&#x5B83;&#x4E0E;&#x5144;&#x5F1F;&#x8DEF;&#x5F84;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4E0D;&#x540C;&#xFF0C;&#x8FDD;&#x53CD;&#x6027;&#x8D28;5&#xFF1B;&#x4E14;&#x5982;&#x679C;&#x7236;&#x7ED3;&#x70B9;&#x4E5F;&#x662F;&#x7EA2;&#x8272;&#xFF0C;&#x90A3;&#x4E48;&#x5B83;&#x52BF;&#x5FC5;&#x4E0E;&#x5B69;&#x5B50;&#x7ED3;&#x70B9;&#x51B2;&#x7A81;&#xFF0C;&#x8FD8;&#x4F1A;&#x8FDD;&#x53CD;&#x6027;&#x8D28;4&#xFF0C;&#x5982;&#x4E0B;&#x56FE;&#x2014;&#x2014;</p>
+<blockquote>
+<p>&#x4E0B;&#x56FE;&#x793A;&#x4F8B;&#x8FDD;&#x53CD;&#x6027;&#x8D28;5&#xFF1A;  </p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/855cc7d4c698777003cd57c9c25827cfa78ac55cc7a5152fd7a9c77638318679" alt="&#x539F;&#x56FE;"></p>
+<p>&#x539F;&#x56FE;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6b5405d300c4ed37113657cee9300fc03ab14f38b460471d89b0a1e9c88c82b1" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;5"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;5</p>
+<p>&#x4E0B;&#x56FE;&#x793A;&#x4F8B;&#x8FDD;&#x53CD;&#x6027;&#x8D28;5&#x4E14;&#x8FDD;&#x53CD;&#x6027;&#x8D28;4&#xFF1A;  </p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/bcbde8fd842fbd43e97b30efaa2fe345cd52a96d12fdef162a724305660266aa" alt="&#x539F;&#x56FE;"></p>
+<p>&#x539F;&#x56FE;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/055659f168edba22096c49410222310ed6d4adc0b80f9d032921fd755ea16bf8" alt="&#x8FDD;&#x53CD;&#x6027;&#x8D28;4&#x3001;5"></p>
+<p>&#x8FDD;&#x53CD;&#x6027;&#x8D28;4&#x3001;5</p>
+</blockquote>
+<p>&#x5BF9;&#x4E8E;&#x524D;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#x7528;&#x9012;&#x5F52;&#x7684;&#x601D;&#x60F3;&#x6765;&#x89E3;&#x51B3;&#xFF0C;&#x5C06;&#x7236;&#x4EB2;&#x7ED3;&#x70B9;&#x7F6E;&#x4E3A;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#xFF0C;&#x8BA9;&#x7236;&#x4EB2;&#x7ED3;&#x70B9;&#x7684;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x4E5F;&#x8981;&#x51CF;&#x5C11;&#x4E00;&#x4E2A;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x5C31;&#x53EF;&#x4EE5;&#x4E86;&#xFF08;&#x501F;&#x9274;<a href="#item2">&#x601D;&#x60F3;2</a>&#xFF09;&#xFF1B;&#x800C;&#x5BF9;&#x4E8E;&#x540E;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x53EA;&#x9700;&#x8981;&#x5C06;&#x7236;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;&#x5373;&#x53EF;&#xFF08;&#x501F;&#x9274;<a href="#item2">&#x601D;&#x60F3;2</a>&#xFF09;&#x3002;jdk &#x4E2D;&#x76F8;&#x5173;&#x5B9E;&#x73B0;&#x6E90;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;while (x != root &amp;&amp; colorOf(x) == BLACK) {</span><br><span class="line">    Entry&lt;K,V&gt; sib = rightOf(parentOf(x));</span><br><span class="line">    if (colorOf(leftOf(sib))  == BLACK &amp;&amp;</span><br><span class="line">        colorOf(rightOf(sib)) == BLACK) {</span><br><span class="line">        setColor(sib, RED);</span><br><span class="line">        x = parentOf(x);</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">setColor(x, BLACK);</span><br></pre></td></tr></table></figure>
+
+<p>&#x524D;&#x9762;&#x9610;&#x8FF0;&#x7684;&#x662F;&#x9488;&#x5BF9;&#x60C5;&#x51B5;1&#x800C;&#x8A00;&#xFF0C;&#x9488;&#x5BF9;&#x4E8E;<a href="#item4">&#x60C5;&#x51B5;2</a>&#x800C;&#x8A00;&#xFF0C;&#x7EA2;&#x9ED1;&#x6811;&#x91C7;&#x7528;&#x7684;&#x662F;<a href="#item1">&#x601D;&#x60F3;1</a>&#xFF0C;&#x5177;&#x4F53;&#x505A;&#x6CD5;&#x5206;&#x4E3A;&#x53C8;&#x5F97;&#x5206;&#x4E3A;&#x4EE5;&#x4E0B;&#x4E24;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#xFF1A;</p>
+<ul>
+<li>&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x4E0D;&#x4E3A;&#x9ED1;</li>
+<li>&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;</li>
+</ul>
+<p>&#x5BF9;&#x4E8E;&#x7B2C;&#x4E00;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#xFF0C;&#x7EA2;&#x9ED1;&#x6811;&#x91C7;&#x7528;&#x4EE5;&#x4E0B;&#x64CD;&#x4F5C;&#xFF1A;</p>
+<p>1.&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7F6E;&#x7236;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#xFF08;&#x51C6;&#x5907;&#x8C0B;&#x6743;&#x7BE1;&#x4F4D;&#xFF09;<br>2.&#x7236;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;&#x3001;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x53F3;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;<br>3.&#x7236;&#x7ED3;&#x70B9;&#x5DE6;&#x65CB;</p>
+<p>&#x8BE5;&#x601D;&#x60F3;&#x4E0D;&#x4EC5;&#x4FDD;&#x8BC1;&#x4E86;&#x66F4;&#x65B0;&#x7ED3;&#x70B9;&#x540E;&#x4E0D;&#x4F1A;&#x51B2;&#x7A81;&#xFF08;&#x7236;&#x7ED3;&#x70B9;&#x4E0E;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x4E0D;&#x51B2;&#x7A81;&#xFF0C;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x4E0E;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x4E0D;&#x51B2;&#x7A81;&#xFF0C;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x4E0E;&#x7236;&#x7ED3;&#x70B9;&#x4E0D;&#x51B2;&#x7A81;&#xFF09;&#xFF0C;&#x5E76;&#x4E14;&#x4FDD;&#x8BC1;&#x4E86;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4E0D;&#x4F1A;&#x6539;&#x53D8;&#xFF0C;&#x4E00;&#x56FE;&#x80DC;&#x5343;&#x8A00;&#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/81f5515aaba5ada9af698fe5f5c84e59f3cf4b17576000b176c2fc6f2775f7ff" alt="&#x7B2C;&#x4E00;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x539F;&#x56FE;"></p>
+<p>&#x7B2C;&#x4E00;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x539F;&#x56FE;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/fd09dc2375dbb2ae32f8e0c40ee63a2dd32c1a3aee26521f0012c8e90efdb9d1" alt="&#x7B2C;&#x4E00;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x5220;&#x9664;&#x540E;&#x4FEE;&#x6B63;"></p>
+<p>&#x7B2C;&#x4E00;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x5220;&#x9664;&#x540E;&#x4FEE;&#x6B63;</p>
+<p>jdk &#x4E2D;&#x76F8;&#x5173;&#x6E90;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;while (x != root &amp;&amp; colorOf(x) == BLACK) {</span><br><span class="line">    setColor(sib, colorOf(parentOf(x)));</span><br><span class="line">    setColor(parentOf(x), BLACK);</span><br><span class="line">    setColor(rightOf(sib), BLACK);</span><br><span class="line">    rotateLeft(parentOf(x));</span><br><span class="line">    x = root;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">setColor(x, BLACK);</span><br></pre></td></tr></table></figure>
+
+<p>&#x800C;&#x5BF9;&#x4E8E;&#x7B2C;&#x4E8C;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#xFF0C;&#x7EA2;&#x9ED1;&#x6811;&#x91C7;&#x7528;&#x4EE5;&#x4E0B;&#x64CD;&#x4F5C;&#xFF1A;</p>
+<p>1.&#x5C06;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x67D3;&#x9ED1;<br>2.&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x67D3;&#x7EA2;<br>3.&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x53F3;&#x65CB;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e1d5c3721365c6f951decab014429be67942672ac4a8643109b9d6e3a3eefe66" alt="&#x7B2C;&#x4E8C;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x539F;&#x56FE;"></p>
+<p>&#x7B2C;&#x4E8C;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x539F;&#x56FE;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/f648daa62b754bd77c11b62addeace17f4e8847b91d3448a1c926c6e4bbbfe61" alt="&#x7B2C;&#x4E8C;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x5220;&#x9664;&#x540E;&#x4FEE;&#x6B63;"></p>
+<p>&#x7B2C;&#x4E8C;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x5220;&#x9664;&#x540E;&#x4FEE;&#x6B63;</p>
+<p>&#x5B9E;&#x9645;&#x4E0A;&#x7EC6;&#x5FC3;&#x7684;&#x8BFB;&#x8005;&#x53D1;&#x73B0;&#x4E86;&#xFF0C;&#x8F6C;&#x6362;&#x540E;&#x7684;&#x7ED3;&#x6784;&#x662F;&#x7B49;&#x540C;&#x4E8E;<a href="#item5">&#x7B2C;&#x4E00;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;</a>&#x7684;&#x521D;&#x59CB;&#x7ED3;&#x6784;&#xFF0C;&#x6240;&#x4EE5;&#x63A5;&#x4E0B;&#x6765;&#x5C31;&#x6309;&#x7167;&#x7B2C;&#x4E00;&#x79CD;&#x5C0F;&#x60C5;&#x51B5;&#x7684;&#x6B65;&#x9AA4;&#x53BB;&#x53D8;&#x6362;&#x7ED3;&#x6784;&#xFF0C;&#x76F8;&#x5173;&#x6E90;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;while (x != root &amp;&amp; colorOf(x) == BLACK) {</span><br><span class="line">    if (colorOf(rightOf(sib)) == BLACK) {   // &#x60C5;&#x51B5;2</span><br><span class="line">        setColor(leftOf(sib), BLACK);</span><br><span class="line">        setColor(sib, RED);</span><br><span class="line">        rotateRight(sib);</span><br><span class="line">        sib = rightOf(parentOf(x));</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x60C5;&#x51B5;1</span><br><span class="line">    setColor(sib, colorOf(parentOf(x)));</span><br><span class="line">    setColor(parentOf(x), BLACK);</span><br><span class="line">    setColor(rightOf(sib), BLACK);</span><br><span class="line">    rotateLeft(parentOf(x));</span><br><span class="line">    x = root;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">setColor(x, BLACK);</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x4E00;&#x5757;&#x53EF;&#x80FD;&#x6709;&#x4E00;&#x4E9B;&#x590D;&#x6742;&#xFF0C;&#x4F46;&#x8BB0;&#x4F4F;&#x4EE5;&#x4E0B;<strong>&#x4E09;&#x70B9;&#x6838;&#x5FC3;&#x601D;&#x60F3;</strong>&#x95EE;&#x9898;&#x5C31;&#x4E0D;&#x662F;&#x5F88;&#x5927;&#x4E86;&#xFF1A;</p>
+<ul>
+<li>&#x7236;&#x7ED3;&#x70B9;&#x66FF;&#x6362;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#xFF08;&#x4FDD;&#x969C;&#x4E86;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x8DEF;&#x5F84;&#x4E0A;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4E0D;&#x53D8;&#xFF09;</li>
+<li>&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x66FF;&#x6362;&#x7236;&#x7ED3;&#x70B9;&#xFF08;&#x4FDD;&#x969C;&#x4E86;&#x7236;&#x7ED3;&#x70B9;&#x8DEF;&#x5F84;&#x4E0A;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4E0D;&#x53D8;&#xFF09;</li>
+<li>&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#xFF08;&#x7ED3;&#x6784;&#x53D8;&#x5316;&#x524D;&#x4E00;&#x5B9A;&#x662F;&#x7EA2;&#x8272;&#x7684;&#xFF0C;&#x53D8;&#x6362;&#x540E;&#x7F6E;&#x9ED1;&#xFF09;&#x66FF;&#x6362;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#xFF08;&#x4FDD;&#x969C;&#x4E86;&#x5144;&#x5F1F;&#x8DEF;&#x5F84;&#x4E0A;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4E0D;&#x53D8;&#xFF09;</li>
+</ul>
+<p>&#x90A3;&#x4E48;&#x63A5;&#x4E0B;&#x6765;&#x5C31;&#x662F;&#x770B;&#x770B; <code>fixAfterDeletion()</code> &#x7684;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x4E86; &#x2014;&#x2014;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/94ec8d0754a4ecd455a91d6e40095165afc5910c5b2d94b8c905639f7612fc50" alt="&#x7ED3;&#x70B9;&#x5220;&#x9664;&#x8C03;&#x6574;&#x6E90;&#x7801;"></p>
+<p>&#x7ED3;&#x70B9;&#x5220;&#x9664;&#x8C03;&#x6574;&#x6E90;&#x7801;</p>
+<p>&#x89E3;&#x91CA;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private void fixAfterDeletion(Entry&lt;K,V&gt; x) {</span><br><span class="line">    while (x != root &amp;&amp; colorOf(x) == BLACK) {</span><br><span class="line">        // &#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x662F;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;</span><br><span class="line">        if (x == leftOf(parentOf(x))) {</span><br><span class="line">            // &#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x7684;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;</span><br><span class="line">            Entry&lt;K,V&gt; sib = rightOf(parentOf(x));</span><br><span class="line"></span><br><span class="line">            // &#x5C0F;&#x63D2;&#x66F2;1&#xFF0C;&#x5982;&#x679C;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x4E3A;&#x7EA2;</span><br><span class="line">            // &#x8FD9;&#x6B65;&#x662F;&#x4FDD;&#x969C;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x4E00;&#x5B9A;&#x4E3A;&#x9ED1;</span><br><span class="line">            if (colorOf(sib) == RED) {</span><br><span class="line">                setColor(sib, BLACK);           // &#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;</span><br><span class="line">                setColor(parentOf(x), RED);     // &#x7236;&#x7ED3;&#x70B9;&#x7F6E;&#x7EA2;</span><br><span class="line">                rotateLeft(parentOf(x));        // &#x7236;&#x7ED3;&#x70B9;&#x5DE6;&#x65CB;</span><br><span class="line">                sib = rightOf(parentOf(x));     // &#x91CD;&#x5B9A;&#x5411;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            // &#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x4E24;&#x4E2A;&#x5B50;&#x7ED3;&#x70B9;&#x662F;&#x9ED1;&#x8272;</span><br><span class="line">            if (colorOf(leftOf(sib))  == BLACK &amp;&amp;</span><br><span class="line">                colorOf(rightOf(sib)) == BLACK) {</span><br><span class="line">                setColor(sib, RED);             // &#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7F6E;&#x7EA2;</span><br><span class="line">                x = parentOf(x);                // &#x91CD;&#x5B9A;&#x5411;&#x76EE;&#x6807;&#x7ED3;&#x70B9;&#x4E3A;&#x7236;&#x7ED3;&#x70B9;</span><br><span class="line">            } else {</span><br><span class="line">                // &#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x5B50;&#x7ED3;&#x70B9;&#x81F3;&#x591A;&#x4E00;&#x4E2A;&#x662F;&#x9ED1;&#x8272;&#x7684;</span><br><span class="line"></span><br><span class="line">                // &#x5C0F;&#x63D2;&#x66F2;2&#xFF0C;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x5DE6;&#x5B50;&#x7ED3;&#x70B9;&#x4E3A;&#x7EA2;&#xFF0C;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x4E3A;&#x9ED1;&#x7684;&#x60C5;&#x51B5;</span><br><span class="line">                // &#x8FD9;&#x6B65;&#x7684;&#x610F;&#x4E49;&#x662F;&#x8BA9;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x7684;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x7684;&#x6570;&#x91CF;&#x591A;&#x4E00;&#x4E2A;</span><br><span class="line">                if (colorOf(rightOf(sib)) == BLACK) {</span><br><span class="line">                    setColor(leftOf(sib), BLACK);</span><br><span class="line">                    setColor(sib, RED);</span><br><span class="line">                    rotateRight(sib);</span><br><span class="line">                    sib = rightOf(parentOf(x));</span><br><span class="line">                }</span><br><span class="line">                // &#x5C06;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#x7F6E;&#x4E3A;&#x7236;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#xFF08;&#x8A00;&#x5916;&#x4E4B;&#x610F;&#x80AF;&#x5B9A;&#x662F;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x8981;&#x66FF;&#x6362;&#x7236;&#x7ED3;&#x70B9;&#x7684;&#x4F4D;&#x7F6E;&#xFF09;</span><br><span class="line">                setColor(sib, colorOf(parentOf(x)));</span><br><span class="line">                // &#x5C06;&#x7236;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;</span><br><span class="line">                setColor(parentOf(x), BLACK);</span><br><span class="line">                // &#x5C06;&#x5144;&#x5F1F;&#x7ED3;&#x70B9;&#x53F3;&#x5B50;&#x7ED3;&#x70B9;&#x7F6E;&#x9ED1;</span><br><span class="line">                setColor(rightOf(sib), BLACK);</span><br><span class="line">                // &#x5DE6;&#x65CB;&#x7236;&#x7ED3;&#x70B9;</span><br><span class="line">                rotateLeft(parentOf(x));</span><br><span class="line">                x = root;</span><br><span class="line">            }</span><br><span class="line">        } else { // &#x955C;&#x50CF;&#x64CD;&#x4F5C;</span><br><span class="line">            Entry&lt;K,V&gt; sib = leftOf(parentOf(x));</span><br><span class="line"></span><br><span class="line">            if (colorOf(sib) == RED) {</span><br><span class="line">                setColor(sib, BLACK);</span><br><span class="line">                setColor(parentOf(x), RED);</span><br><span class="line">                rotateRight(parentOf(x));</span><br><span class="line">                sib = leftOf(parentOf(x));</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            if (colorOf(rightOf(sib)) == BLACK &amp;&amp;</span><br><span class="line">                colorOf(leftOf(sib)) == BLACK) {</span><br><span class="line">                setColor(sib, RED);</span><br><span class="line">                x = parentOf(x);</span><br><span class="line">            } else {</span><br><span class="line">                if (colorOf(leftOf(sib)) == BLACK) {</span><br><span class="line">                    setColor(rightOf(sib), BLACK);</span><br><span class="line">                    setColor(sib, RED);</span><br><span class="line">                    rotateLeft(sib);</span><br><span class="line">                    sib = leftOf(parentOf(x));</span><br><span class="line">                }</span><br><span class="line">                setColor(sib, colorOf(parentOf(x)));</span><br><span class="line">                setColor(parentOf(x), BLACK);</span><br><span class="line">                setColor(leftOf(sib), BLACK);</span><br><span class="line">                rotateRight(parentOf(x));</span><br><span class="line">                x = root;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    setColor(x, BLACK);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x7EA2;&#x9ED1;&#x6811;&#x7684;&#x63D2;&#x5165;&#x64CD;&#x4F5C;&#x662F;&#x57FA;&#x4E8E;&#x63D2;&#x5165;&#x7ED3;&#x70B9;&#x989C;&#x8272;&#x4E3A;&#x7EA2;&#x8272;&#xFF0C;&#x539F;&#x56E0;&#x662F;&#x5982;&#x679C;&#x63D2;&#x5165;&#x7ED3;&#x70B9;&#x662F;&#x9ED1;&#x8272;&#x7684;&#x8BDD;&#xFF0C;&#x4F1A;&#x5BFC;&#x81F4;&#x6D89;&#x53CA;&#x5230;&#x8BE5;&#x7ED3;&#x70B9;&#x7684;&#x8DEF;&#x5F84;&#x4E0A;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4F1A;&#x6BD4;&#x5144;&#x5F1F;&#x8DEF;&#x5F84;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x591A;&#x4E00;&#x4E2A;&#xFF0C;&#x90A3;&#x4E48;&#x6574;&#x4F53;&#x8C03;&#x8282;&#x8D77;&#x6765;&#x52BF;&#x5FC5;&#x5F88;&#x4E0D;&#x65B9;&#x4FBF;&#x3002;&#x800C;&#x5220;&#x9664;&#x64CD;&#x4F5C;&#x662F;&#x57FA;&#x4E8E;&#x5220;&#x9664;&#x7ED3;&#x70B9;&#x5982;&#x679C;&#x662F;&#x9ED1;&#x8272;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x624D;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x8C03;&#x6574;&#xFF0C;&#x56E0;&#x4E3A;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x7684;&#x5220;&#x9664;&#x4F1A;&#x5BFC;&#x81F4;&#x6D89;&#x53CA;&#x5230;&#x8BE5;&#x7ED3;&#x70B9;&#x7684;&#x8DEF;&#x5F84;&#x4E0A;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x4F1A;&#x6BD4;&#x5144;&#x5F1F;&#x8DEF;&#x5F84;&#x7684;&#x9ED1;&#x8272;&#x7ED3;&#x70B9;&#x6570;&#x91CF;&#x5C11;&#x4E00;&#x4E2A;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x6574;&#x4F53;&#x8C03;&#x8282;&#x3002;<br>&#x7EA2;&#x9ED1;&#x6811;&#x5728; java &#x4E2D;&#x7684;&#x8FD0;&#x7528;&#x5B9E;&#x9645;&#x4E0A;&#x8FD8;&#x662F;&#x633A;&#x591A;&#x7684;&#xFF0C;&#x4F8B;&#x5982; <code>TreeSet</code> &#x7684;&#x9ED8;&#x8BA4;&#x5E95;&#x5C42;&#x5B9E;&#x73B0;&#x5B9E;&#x9645;&#x4E0A;&#x4E5F;&#x662F; <code>TreeMap</code>&#xFF1B;jdk 8&#x4E2D;&#x7684; <code>HashMap</code> &#x5B9E;&#x73B0;&#x4E5F;&#x7531;&#x539F;&#x6765;&#x7684;&#x6570;&#x7EC4;+&#x94FE;&#x8868;&#x66F4;&#x6539;&#x4E3A;&#x4E86;&#x6570;&#x7EC4;+&#x94FE;&#x8868;/&#x7EA2;&#x9ED1;&#x6811;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/92acc3b176cd1f60a23a85fcad5eb640.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/源码/" rel="tag"># 源码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903510404759565.html" rel="next" title="几种分布式调用链监控组件的实践与比较（一）实践">
+                <i class="fa fa-chevron-left"></i> 几种分布式调用链监控组件的实践与比较（一）实践
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903510480257037.html" rel="prev" title="【Java并发系列】 1Java并发机制的底层实现">
+                【Java并发系列】 1Java并发机制的底层实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#红黑树的意义"><span class="nav-number">1.</span> <span class="nav-text">红黑树的意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#左旋、右旋"><span class="nav-number">2.</span> <span class="nav-text">左旋、右旋</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#增"><span class="nav-number">3.</span> <span class="nav-text">增</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删"><span class="nav-number">4.</span> <span class="nav-text">删</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

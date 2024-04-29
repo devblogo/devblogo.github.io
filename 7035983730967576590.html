@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,DNS,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="DNS&amp;#x534F;&amp;#x8BAE;&amp;#x521D;&amp;#x63A2;&amp;#x672C;&amp;#x6587;&amp;#x6B63;&amp;#x5728;&amp;#x53C2;&amp;#x4E0E; &amp;#x201C;&amp;#x7F51;&amp;#x7EDC;&amp;#x534F;&amp;#x8BAE;&amp;#x5FC5;&amp;#x77E5;&amp;#x5FC5;&amp;#x4F1A;&amp;#x201D;&amp;#x5F81;&amp;#x6587;&amp;#x6D3B;&amp;#x52A8;  DN">
+<meta name="keywords" content="Go,DNS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DNS网络协议初探 DNS协议初探">
+<meta property="og:url" content="https://dev.newban.cn/7035983730967576590.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="DNS&amp;#x534F;&amp;#x8BAE;&amp;#x521D;&amp;#x63A2;&amp;#x672C;&amp;#x6587;&amp;#x6B63;&amp;#x5728;&amp;#x53C2;&amp;#x4E0E; &amp;#x201C;&amp;#x7F51;&amp;#x7EDC;&amp;#x534F;&amp;#x8BAE;&amp;#x5FC5;&amp;#x77E5;&amp;#x5FC5;&amp;#x4F1A;&amp;#x201D;&amp;#x5F81;&amp;#x6587;&amp;#x6D3B;&amp;#x52A8;  DN">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/7781948c18aa7b1d5c7f24b0f3294c6430f893d485f305047c597552a1a4a83a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/7c48e284f10ee35ab37837749cfb4fd454aec64de63e3b008b0f85263696633e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/91f7a05d2b1e2e1e2441e0c6c57129ef21e2b03afcb7c4586e2d7be7a3dbef81">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/3cf7e1e243c0afe0d0ffc82b6d59e784757ecf122b97c91d4b454c22925cc41f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/d5f9033ec584431365423135236dd669bf6d6cc1a015040d590f96ba569de0c8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/98b0f13837556a0a1033f8a89cc6b1be00bde2a37bed1941d795c1cfec9b9392">
+<meta property="og:updated_time" content="2024-04-28T08:25:35.695Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DNS网络协议初探 DNS协议初探">
+<meta name="twitter:description" content="DNS&amp;#x534F;&amp;#x8BAE;&amp;#x521D;&amp;#x63A2;&amp;#x672C;&amp;#x6587;&amp;#x6B63;&amp;#x5728;&amp;#x53C2;&amp;#x4E0E; &amp;#x201C;&amp;#x7F51;&amp;#x7EDC;&amp;#x534F;&amp;#x8BAE;&amp;#x5FC5;&amp;#x77E5;&amp;#x5FC5;&amp;#x4F1A;&amp;#x201D;&amp;#x5F81;&amp;#x6587;&amp;#x6D3B;&amp;#x52A8;  DN">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/7781948c18aa7b1d5c7f24b0f3294c6430f893d485f305047c597552a1a4a83a">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035983730967576590.html">
+
+
+
+
+
+  <title>DNS网络协议初探 DNS协议初探 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DNS网络协议初探 DNS协议初探</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-29T21:31:55+08:00">
+                2021-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="DNS&#x534F;&#x8BAE;&#x521D;&#x63A2;"><a href="#DNS&#x534F;&#x8BAE;&#x521D;&#x63A2;" class="headerlink" title="DNS&#x534F;&#x8BAE;&#x521D;&#x63A2;"></a>DNS&#x534F;&#x8BAE;&#x521D;&#x63A2;</h1><p><strong>&#x672C;&#x6587;&#x6B63;&#x5728;&#x53C2;&#x4E0E; &#x201C;<a href="https://dev.newban.cn/7033976124547792927">&#x7F51;&#x7EDC;&#x534F;&#x8BAE;&#x5FC5;&#x77E5;&#x5FC5;&#x4F1A;</a>&#x201D;&#x5F81;&#x6587;&#x6D3B;&#x52A8;</strong></p>
+<blockquote>
+<p>DNS &#x4F7F;&#x7528;TCP&#x8FD8;&#x662F;UDP&#x534F;&#x8BAE;&#xFF1F;</p>
+<p>DNS &#x8FED;&#x4EE3;&#x67E5;&#x8BE2; &#x548C; &#x9012;&#x5F52;&#x67E5;&#x8BE2; &#x662F;&#x4EC0;&#x4E48;&#xFF1F;</p>
+<p>&#x5982;&#x4F55;&#x6784;&#x5EFA;DNS&#x62A5;&#x6587;&#xFF1F;</p>
+</blockquote>
+<ol>
+<li>&#x4EC0;&#x4E48;&#x662F;DNS</li>
+</ol>
+<hr>
+<p>&#x200B; DNS: (Domain Name System) &#x57DF;&#x540D;&#x7CFB;&#x7EDF;&#xFF0C; &#x7528;&#x6237;&#x5728;&#x4F7F;&#x7528;&#x5E38;&#x7528;&#x7F51;&#x7EDC;&#x8F6F;&#x4EF6;&#xFF0C;&#x4F8B;&#x5982;: &#x6D4F;&#x89C8;&#x5668;&#xFF0C;&#x90AE;&#x4EF6; &#x7B49;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E9B;&#x670D;&#x52A1;&#x9700;&#x8981;&#x6307;&#x5B9A;&#x670D;&#x52A1;&#x5668;&#x7684;ip&#x5730;&#x5740;&#x548C;&#x7AEF;&#x53E3;&#x53F7;&#xFF0C;&#x8FD9;&#x4E2A;&#x96BE;&#x4EE5;&#x8BB0;&#x5FC6;&#xFF0C;&#x5927;&#x5BB6;&#x66F4;&#x559C;&#x6B22;&#x6613;&#x8BFB;&#x3001;&#x6709;&#x4E00;&#x5B9A;&#x542B;&#x4E49;&#x7684;&#x540D;&#x5B57;&#xFF0C;DNS&#x5C31;&#x80FD;&#x6EE1;&#x8DB3;&#x8FD9;&#x4E2A;&#x8981;&#x6C42;&#xFF0C;&#x5B9E;&#x73B0;&#x5C06;&#x57DF;&#x540D;&#x6620;&#x5C04;&#x4E3A;IP&#x5730;&#x5740;&#xFF0C;&#x8FD9;&#x4E2A;&#x5C31;&#x79F0;&#x4E3A;&#x57DF;&#x540D;&#x89E3;&#x6790;&#x3002;&#x76EE;&#x524D;&#x4E92;&#x8054;&#x7F51; DNS&#x4E3A;&#x5206;&#x5E03;&#x5F0F;&#x6570;&#x636E;&#x5E93;, &#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x5206;&#x5E03;&#x5728;&#x4E16;&#x754C;&#x5404;&#x5730;&#xFF0C;&#x6BCF;&#x4E2A;&#x670D;&#x52A1;&#x5668;&#x4E5F;&#x53EA;&#x5B58;&#x50A8;&#x4E86;&#x90E8;&#x5206;&#x57DF;&#x540D;&#x4FE1;&#x606F;&#x3002;</p>
+<h3 id="1-1-&#x57DF;&#x540D;&#x5C42;&#x6B21;&#x5316;"><a href="#1-1-&#x57DF;&#x540D;&#x5C42;&#x6B21;&#x5316;" class="headerlink" title="1.1 &#x57DF;&#x540D;&#x5C42;&#x6B21;&#x5316;"></a>1.1 &#x57DF;&#x540D;&#x5C42;&#x6B21;&#x5316;</h3><p>&#x200B; &#x57DF;&#x540D;&#x7ED3;&#x6784;&#x7531;&#x6807;&#x53F7;&#x5E8F;&#x5217;&#x7EC4;&#x6210;&#xFF0C;&#x6807;&#x70B9;&#x7B26;&#x53F7;&#x7528;&#x70B9;&#x9694;&#x5F00;, &#x4F8B;&#x5982;: <code>juejin.cn.</code> <code>www.jd.com.</code> &#x53EF;&#x603B;&#x7ED3;&#x4E3A;: <code>....&#x4E09;&#x7EA7;&#x57DF;&#x540D;.&#x4E8C;&#x7EA7;&#x57DF;&#x540D;.&#x9876;&#x7EA7;&#x57DF;&#x540D;.&#x6839;&#x57DF;&#x540D;(&#x53EF;&#x7701;&#x7565;)</code></p>
+<p>&#x6839;</p>
+<p>&#x622A;&#x6B62;&#x76EE;&#x524D;&#x4E3A;&#x6B62;&#xFF0C;&#x5168;&#x7403;&#x4E0A;&#x5171;&#x6709;13&#x4E2A;&#x6839;&#x670D;&#x52A1;&#x5668; &#xFF0C;&#x4ECE; a - m</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;# yum -y install bind-utils</span><br><span class="line"># dig | grep root | awk &apos;{print $NF}&apos; | sort</span><br><span class="line">a.root-servers.net.</span><br><span class="line">b.root-servers.net.</span><br><span class="line">c.root-servers.net.</span><br><span class="line">d.root-servers.net.</span><br><span class="line">e.root-servers.net.</span><br><span class="line">f.root-servers.net.</span><br><span class="line">g.root-servers.net.</span><br><span class="line">h.root-servers.net.</span><br><span class="line">i.root-servers.net.</span><br><span class="line">j.root-servers.net.</span><br><span class="line">k.root-servers.net.</span><br><span class="line">l.root-servers.net.</span><br><span class="line">m.root-servers.net.</span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+
+<p>&#x9876;&#x7EA7;&#x57DF;&#x540D;&#x5206;&#x7C7B;:</p>
+<ul>
+<li>&#x56FD;&#x5BB6;&#x9876;&#x7EA7;&#x57DF;&#x540D;nTLD<ul>
+<li>cn: &#x8868;&#x793A;&#x4E2D;&#x56FD;</li>
+<li>us: &#x8868;&#x793A;&#x7F8E;&#x56FD;</li>
+<li>jp: &#x8868;&#x793A;&#x65E5;&#x672C;</li>
+<li>&#x2026;</li>
+</ul>
+</li>
+<li>&#x901A;&#x7528;&#x9876;&#x7EA7;&#x57DF;&#x540D;gTLD<ul>
+<li>com: &#x8868;&#x793A;&#x5DE5;&#x5546;&#x4F01;&#x4E1A;</li>
+<li>net: &#x8868;&#x793A;&#x7F51;&#x7EDC;&#x63D0;&#x4F9B;&#x5546;</li>
+<li>gov: &#x653F;&#x5E9C;&#x4E13;&#x7528;</li>
+<li>&#x2026;</li>
+</ul>
+</li>
+<li>&#x57FA;&#x7840;&#x7ED3;&#x6784;&#x57DF;&#x540D;<ul>
+<li>arpa</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;"><a href="#1-2-&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;" class="headerlink" title="1.2 &#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;"></a>1.2 &#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;</h3><p>&#x200B; &#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x4EE5;&#x533A;&#x4E3A;&#x5355;&#x4F4D;&#xFF0C;&#x53EF;&#x4EE5;&#x5206;&#x4E3A;: 1. &#x6839;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668; 2. &#x9876;&#x7EA7;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668; 3. &#x6743;&#x5A01;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668; 4. &#x4E2D;&#x95F4;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;</p>
+<p><strong>&#x6839;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;</strong></p>
+<p>&#x5168;&#x7403;&#x5171;&#x6709;13&#x4E2A;&#x6839;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x53EF;&#x901A;&#x8FC7; <code>dig</code> &#x83B7;&#x53D6;&#x3002;</p>
+<p><strong>&#x9876;&#x7EA7;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;</strong></p>
+<p>TLD&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x8D1F;&#x8D23;&#x7BA1;&#x7406;&#x8BE5;&#x9876;&#x7EA7;&#x57DF;&#x540D;&#x4E0B;&#x7684;&#x4E8C;&#x7EA7;&#x57DF;&#x540D;&#x3002;</p>
+<p><strong>&#x6743;&#x5A01;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;</strong></p>
+<p>&#x8D1F;&#x8F7D;&#x4E00;&#x4E2A;&#x533A;&#x7684;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x4FDD;&#x5B58;&#x8BE5;&#x533A;&#x7684;&#x57DF;&#x540D; &#x548C; IP&#x5730;&#x5740;&#x6620;&#x5C04;&#x5173;&#x7CFB;&#x3002;</p>
+<p><strong>&#x4E2D;&#x95F4;&#x670D;&#x52A1;&#x5668;</strong></p>
+<p>&#x4E0D;&#x5C5E;&#x4E8E;&#x5982;&#x4E0A;&#x4E09;&#x79CD;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x5C31;&#x662F;&#x4E2D;&#x95F4;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x3002;</p>
+<h3 id="1-3-&#x901A;&#x8FC7;&#x5B9E;&#x4F8B;&#x6765;&#x5224;&#x65AD;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;"><a href="#1-3-&#x901A;&#x8FC7;&#x5B9E;&#x4F8B;&#x6765;&#x5224;&#x65AD;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;" class="headerlink" title="1.3 &#x901A;&#x8FC7;&#x5B9E;&#x4F8B;&#x6765;&#x5224;&#x65AD;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;"></a>1.3 &#x901A;&#x8FC7;&#x5B9E;&#x4F8B;&#x6765;&#x5224;&#x65AD;&#x670D;&#x52A1;&#x5668;&#x5206;&#x7C7B;</h3><p>&#x672C;&#x6B21;&#x67E5;&#x8BE2;&#xFF0C;DNS&#x670D;&#x52A1;&#x5668;&#x4FE1;&#x606F;&#x5982;&#x4E0B;</p>
+<ul>
+<li>&#x672C;&#x5730;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;: 61.139.2.69</li>
+<li>&#x6839;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;: a.root-servers.net (198.41.0.4#53)</li>
+<li>&#x9876;&#x7EA7;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;: g.dns.cn (66.198.183.65#53)</li>
+<li>&#x6743;&#x5A01;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;: vip4.alidns.com (47.113.183.36#53)</li>
+</ul>
+<p>&#x5229;&#x7528;dig&#x8FFD;&#x8E2A;&#x65E5;&#x5FD7;&#x5982;&#x4E0B;</p>
+<blockquote>
+<p>dig +trace &#x53EF;&#x4EE5;&#x8FFD;&#x8E2A;&#x8BF7;&#x6C42;</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;# dig +trace juejin.cn. @61.139.2.69 </span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.11.4-P2-RedHat-9.11.4-26.P2.el7_9.7 &lt;&lt;&gt;&gt; +trace juejin.cn. @61.139.2.69</span><br><span class="line">;; global options: +cmd</span><br><span class="line">.                       28351   IN      NS      a.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      b.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      c.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      d.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      e.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      f.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      g.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      h.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      i.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      j.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      k.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      l.root-servers.net.</span><br><span class="line">.                       28351   IN      NS      m.root-servers.net.</span><br><span class="line">;; Received 228 bytes from 61.139.2.69#53(61.139.2.69) in 3 ms</span><br><span class="line"></span><br><span class="line">cn.                     172800  IN      NS      c.dns.cn.</span><br><span class="line">cn.                     172800  IN      NS      g.dns.cn.</span><br><span class="line">cn.                     172800  IN      NS      b.dns.cn.</span><br><span class="line">cn.                     172800  IN      NS      ns.cernet.net.</span><br><span class="line">cn.                     172800  IN      NS      e.dns.cn.</span><br><span class="line">cn.                     172800  IN      NS      f.dns.cn.</span><br><span class="line">cn.                     172800  IN      NS      a.dns.cn.</span><br><span class="line">cn.                     172800  IN      NS      d.dns.cn.</span><br><span class="line">cn.                     86400   IN      DS      57724 8 2 5D0423633EB24A499BE78AA22D1C0C9BA36218FF49FD95A4CDF1A4AD 97C67044</span><br><span class="line">cn.                     86400   IN      RRSIG   DS 8 1 86400 20211211170000 20211128160000 14748 . gM8pprqRpkmDpcu6kNU5kffmW1jo9dmT/CjK7g9dUH4F2purVO1Txiyr RszAgzMWe7HmxeLLEN1s0p2vxbQvQ0uQZn7DMA5eJWbNf/rINyT6vmMK BndvUuTJ74wnEkiXY8Cviim597TEFWl5w7Z9Bn0FwM2nzt5OHBDben24 Fca3vbIXK3Q2n1cDbpO01We/VbiUrgcxlNAxm68wC8gWwLypFNFDXw5V tHVwwX4NsKG1si6n5lyuKramPj+GM9YV/htDNSZKzjEyHTrp/lfwQoxX Eju+cOhmFvnnSFRLS+9EyVmil+i822M2QyVbLhmwjkW8pdER+RxXd+pv vrm6gA==</span><br><span class="line">;; Received 700 bytes from 198.41.0.4#53(a.root-servers.net) in 223 ms</span><br><span class="line"></span><br><span class="line">juejin.cn.              86400   IN      NS      vip3.alidns.com.</span><br><span class="line">juejin.cn.              86400   IN      NS      vip4.alidns.com.</span><br><span class="line">3QDAQA092EE5BELP64A74EBNB8J53D7E.cn. 21600 IN NSEC3 1 1 10 AEF123AB 3QM14FQ32F1CJFTP8D3J5BCTNP5BIELO NS SOA RRSIG DNSKEY NSEC3PARAM</span><br><span class="line">3QDAQA092EE5BELP64A74EBNB8J53D7E.cn. 21600 IN RRSIG NSEC3 8 2 21600 20211225190654 20211125181736 38388 cn. B735xzQYqVTspNxPes9yYW+EnnN1GuaKhRhI4UuowLiDdRqwrk1I/+3F aqzWerS2SUO+nhzcSzl+NeiIwBBuOjyh/NgF15e1WBHvc8PR2cG3HXSo rD3usJlX1rlaOZH6EP5k/VkMSktveAeJo3foOF104UXuljG0yRQqp+4v sh0=</span><br><span class="line">DEFPMSCATA3DEUN2HJMIGDHN15FBH1AM.cn. 21600 IN NSEC3 1 1 10 AEF123AB DGCV05BN5EJCBB4F86S87BCR5CJOA3IC NS DS RRSIG</span><br><span class="line">DEFPMSCATA3DEUN2HJMIGDHN15FBH1AM.cn. 21600 IN RRSIG NSEC3 8 2 21600 20211225184833 20211125181738 38388 cn. ghEDLlzom97T/4SL7znLbN5PKD0qyInh6VgcDw6dZPmoDy7eDd0Gk1Vw VoSSnn7dBp7AK8zEkAygKg28QiNFgPlWDlUtM37R3H3OGqfnJRiJ7R85 n/HSMchAunBtMgkSrtmXUVryzUm5inyi/FxH2iVc4fgGQZlLNmZr5BG+ lqQ=</span><br><span class="line">;; Received 577 bytes from 66.198.183.65#53(g.dns.cn) in 274 ms</span><br><span class="line"></span><br><span class="line">juejin.cn.              600     IN      CNAME   juejin.cn.w.cdngslb.com.</span><br><span class="line">;; Received 75 bytes from 47.113.183.36#53(vip4.alidns.com) in 46 ms</span><br><span class="line"></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+
+<p>&#x89E3;&#x6790;&#x8BF7;&#x6C42;&#x56FE;&#x5927;&#x81F4;&#x5982;&#x4E0B;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/7781948c18aa7b1d5c7f24b0f3294c6430f893d485f305047c597552a1a4a83a" alt="image.png"></p>
+<h3 id="1-4-DNS&#x9012;&#x5F52;&#x89E3;&#x6790;&#x548C;&#x8FED;&#x4EE3;&#x89E3;&#x6790;"><a href="#1-4-DNS&#x9012;&#x5F52;&#x89E3;&#x6790;&#x548C;&#x8FED;&#x4EE3;&#x89E3;&#x6790;" class="headerlink" title="1.4 DNS&#x9012;&#x5F52;&#x89E3;&#x6790;&#x548C;&#x8FED;&#x4EE3;&#x89E3;&#x6790;"></a>1.4 DNS&#x9012;&#x5F52;&#x89E3;&#x6790;&#x548C;&#x8FED;&#x4EE3;&#x89E3;&#x6790;</h3><p>&#x9012;&#x5F52;&#x67E5;&#x8BE2;: &#x5728;&#x8FDB;&#x884C;&#x67E5;&#x8BE2;&#x65F6;&#xFF0C;&#x82E5;&#x6CA1;&#x6709;&#x88AB;&#x67E5;&#x8BE2;&#x7684;&#x57DF;&#x540D;&#x4FE1;&#x606F;&#xFF0C;&#x5219;&#x8FDB;&#x884C;&#x4EE3;&#x7406;&#x67E5;&#x8BE2;&#xFF0C;&#x76F4;&#x81F3;&#x67E5;&#x8BE2;&#x5230;IP&#x5730;&#x5740;/&#x6216;&#x8005;&#x662F;&#x67E5;&#x8BE2;&#x5931;&#x8D25; &#xFF0C; &#x7136;&#x540E;&#x8FD4;&#x56DE;&#x7ED9;&#x672C;&#x5730;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x3002;</p>
+<p>&#x8FED;&#x4EE3;&#x67E5;&#x8BE2;: &#x4E0D;&#x4F1A;&#x8FDB;&#x884C;&#x4EE3;&#x7406;&#x67E5;&#x8BE2;&#x8BF7;&#x6C42;&#xFF0C;&#x800C;&#x662F;&#x5C06;&#x7ED3;&#x679C;&#x6216;&#x8005;&#x662F;&#x4E0B;&#x4E00;&#x8DF3;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x8FD4;&#x56DE;&#x7ED9;&#x672C;&#x5730;&#x57DF;&#x540D;&#x670D;&#x52A1;&#x5668;&#x3002;</p>
+<p>&#x56FE;&#x793A;</p>
+<p>&#x8FED;&#x4EE3;&#x67E5;&#x8BE2;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/7c48e284f10ee35ab37837749cfb4fd454aec64de63e3b008b0f85263696633e" alt="image.png"></p>
+<p>&#x9012;&#x5F52;&#x67E5;&#x8BE2;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/91f7a05d2b1e2e1e2441e0c6c57129ef21e2b03afcb7c4586e2d7be7a3dbef81" alt="image.png"></p>
+<ol start="2">
+<li>DNS&#x62A5;&#x6587;&#x89E3;&#x6790;</li>
+</ol>
+<hr>
+<blockquote>
+<p>&#x53C2;&#x8003; rfc1035 <a href="/external_links/b4efd23528fdb249e1a9fd94e508189b.html" target="blank" rel="noopener">datatracker.ietf.org/doc/html/rf&#x2026;</a></p>
+</blockquote>
+<p><strong>&#x8BF7;&#x6C42;&#x62A5;&#x6587;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/3cf7e1e243c0afe0d0ffc82b6d59e784757ecf122b97c91d4b454c22925cc41f" alt="image.png"></p>
+<p><strong>&#x54CD;&#x5E94;&#x62A5;&#x6587;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/d5f9033ec584431365423135236dd669bf6d6cc1a015040d590f96ba569de0c8" alt="image.png"></p>
+<h3 id="2-1-DNS-&#x6574;&#x4E2A;&#x62A5;&#x6587;&#x683C;&#x5F0F;"><a href="#2-1-DNS-&#x6574;&#x4E2A;&#x62A5;&#x6587;&#x683C;&#x5F0F;" class="headerlink" title="2.1 DNS &#x6574;&#x4E2A;&#x62A5;&#x6587;&#x683C;&#x5F0F;"></a>2.1 DNS &#x6574;&#x4E2A;&#x62A5;&#x6587;&#x683C;&#x5F0F;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;    +---------------------+</span><br><span class="line">    |        Header       |</span><br><span class="line">    +---------------------+</span><br><span class="line">    |       Question      | the question for the name server</span><br><span class="line">    +---------------------+</span><br><span class="line">    |        Answer       | RRs answering the question</span><br><span class="line">    +---------------------+</span><br><span class="line">    |      Authority      | RRs pointing toward an authority</span><br><span class="line">    +---------------------+</span><br><span class="line">    |      Additional     | RRs holding additional information</span><br><span class="line">    +---------------------+</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-Head-&#x8BF7;&#x6C42;&#x5934;"><a href="#2-2-Head-&#x8BF7;&#x6C42;&#x5934;" class="headerlink" title="2.2 Head: &#x8BF7;&#x6C42;&#x5934;"></a>2.2 Head: &#x8BF7;&#x6C42;&#x5934;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;                                    1  1  1  1  1  1</span><br><span class="line">      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                      ID                       |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                    QDCOUNT                    |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                    ANCOUNT                    |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                    NSCOUNT                    |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                    ARCOUNT                    |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<p><strong>ID: 16bit &#x67E5;&#x8BE2;/&#x54CD;&#x5E94;&#x7F16;&#x53F7;</strong></p>
+<p>&#x4F5C;&#x4E3A; &#x67E5;&#x8BE2; &#x548C; &#x5E94;&#x7B54;&#x6807;&#x8BC6;ID</p>
+<p><strong>QR: 1bit &#x62A5;&#x6587;&#x7C7B;&#x578B;</strong></p>
+<p>0: &#x67E5;&#x8BE2;</p>
+<p>1: &#x54CD;&#x5E94;</p>
+<p><strong>Opcode: 4bit &#x67E5;&#x8BE2;&#x7684;&#x7C7B;&#x578B;</strong></p>
+<p>0: &#x6807;&#x51C6;&#x67E5;&#x8BE2;</p>
+<p>1: &#x53CD;&#x67E5;&#x8BE2;</p>
+<p>2: &#x670D;&#x52A1;&#x5668;&#x72B6;&#x6001;&#x8BF7;&#x6C42;</p>
+<p>3-15: &#x6682;&#x65F6;&#x95F2;&#x7F6E;</p>
+<p><strong>AA: 1bit &#x6743;&#x5A01;&#x5E94;&#x7B54;</strong></p>
+<p>1: &#x662F;</p>
+<p>0: &#x5426;</p>
+<p><strong>TC: 1bit &#x8D85;&#x51FA;&#x6700;&#x5927;&#x5141;&#x8BB8;&#x7684;&#x957F;&#x5EA6;(UDP&#x5305;&#x4E3A;512&#x5B57;&#x8282;)</strong></p>
+<blockquote>
+<p>UDP &#x5305;&#x4E3A; 512 &#x5B57;&#x8282;&#xFF0C;&#x82E5;&#x8FD4;&#x56DE;&#x62A5;&#x6587;&#x8D85;&#x8FC7;512&#x4E2A;&#x5B57;&#x8282;&#xFF0C;&#x5219;&#x9700;&#x8981;&#x5C06;&#x72B6;&#x6001;&#x6807;&#x5FD7;&#x4F4D; TC &#x7F6E;&#x4E3A;1 &#x7136;&#x540E;&#x5C06;&#x62A5;&#x6587;&#x8FD4;&#x56DE;&#x7ED9;&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x6536;&#x5230;&#x540E;&#x4F1A;&#x518D;&#x6B21;&#x4F7F;&#x7528; TCP &#x8FDB;&#x884C;&#x67E5;&#x8BE2;&#x8BF7;&#x6C42;</p>
+</blockquote>
+<p>1: &#x8D85;&#x51FA;&#x6700;&#x5927;&#x957F;&#x5EA6;&#xFF0C;&#x622A;&#x65AD;</p>
+<p>0: &#x6B63;&#x5E38;</p>
+<p><strong>RD: 1bit &#x671F;&#x671B;&#x9012;&#x5F52;&#x67E5;&#x8BE2;</strong></p>
+<p>1: &#x9700;&#x8981;&#x9012;&#x5F52;&#x67E5;&#x8BE2;</p>
+<p>0: &#x4E0D;&#x9700;&#x8981;&#x9012;&#x5F52;&#x67E5;&#x8BE2;</p>
+<p><strong>RA: 1bit &#x53EF;&#x7528;&#x9012;&#x5F52; &#xFF0C; &#x7528;&#x4E8E;&#x54CD;&#x5E94;&#x62A5;&#x6587;&#x4E2D;</strong></p>
+<p>1: &#x652F;&#x6301;&#x9012;&#x5F52;</p>
+<p>0: &#x4E0D;&#x652F;&#x6301;&#x9012;&#x5F52;</p>
+<p><strong>Z: 3bit</strong></p>
+<p>&#x4FDD;&#x7559;</p>
+<p><strong>RCODE: 4bit &#x54CD;&#x5E94;&#x4EE3;&#x7801;</strong></p>
+<p>0: &#x6CA1;&#x6709;&#x9519;&#x8BEF;</p>
+<p>1: &#x683C;&#x5F0F;&#x9519;&#x8BEF;</p>
+<p>2: &#x670D;&#x52A1;&#x5668;&#x6545;&#x969C;</p>
+<p>3: &#x540D;&#x79F0;&#x9519;&#x8BEF;</p>
+<p>4: &#x4E0D;&#x652F;&#x6301;&#x8BF7;&#x6C42;&#x7C7B;&#x578B;&#x7684;&#x67E5;&#x8BE2;</p>
+<p>5: &#x670D;&#x52A1;&#x5668;&#x62D2;&#x7EDD;&#x67E5;&#x8BE2;</p>
+<p>6-15: &#x5907;&#x7528;</p>
+<h3 id="2-3-Question-&#x67E5;&#x8BE2;&#x8BF7;&#x6C42;"><a href="#2-3-Question-&#x67E5;&#x8BE2;&#x8BF7;&#x6C42;" class="headerlink" title="2.3 Question &#x67E5;&#x8BE2;&#x8BF7;&#x6C42;"></a>2.3 Question &#x67E5;&#x8BE2;&#x8BF7;&#x6C42;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;                                    1  1  1  1  1  1</span><br><span class="line">      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                                               |</span><br><span class="line">    /                     QNAME                     /</span><br><span class="line">    /                                               /</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                     QTYPE                     |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                     QCLASS                    |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<p><strong>QNAME: &#x8868;&#x793A;&#x67E5;&#x8BE2;&#x7684;&#x57DF;&#x540D;</strong></p>
+<p>&#x6BCF;&#x4E2A;&#x6807;&#x7B7E;&#x7531;&#x4E00;&#x4E2A;8&#x5B57;&#x8282;&#x7684;&#x957F;&#x5EA6; &#x548C; &#x54CD;&#x5E94;&#x7684;&#x5B57;&#x7B26;&#x7EC4;&#x6210;</p>
+<p>&#x4F8B;&#x5982; juejin.com</p>
+<p>&#x5728;&#x62A5;&#x6587;&#x4E2D;QNAME&#x5E94;&#x8BE5;&#x5C55;&#x793A;&#x4E3A;</p>
+<p>6 <code>j u e j in</code> 3 <code>c o m</code> 0</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/98b0f13837556a0a1033f8a89cc6b1be00bde2a37bed1941d795c1cfec9b9392" alt="image.png"></p>
+<p><strong>QTYPE: 16bit &#x8BF7;&#x6C42;&#x7684;&#x7C7B;&#x578B;</strong></p>
+<p>1: A</p>
+<p>2: NS</p>
+<p>3: MD</p>
+<p>4: MF</p>
+<p>5: CNAME</p>
+<p>6: SOA</p>
+<p>7: MB</p>
+<p>8: MG</p>
+<p>9: MR</p>
+<p>10: NULL</p>
+<p>11: WKS</p>
+<p>12: PTR</p>
+<p>13: HINFO</p>
+<p>14: MINFO</p>
+<p>15: MX</p>
+<p>16: TXT</p>
+<p><strong>QCLASS: 16bit &#x8BF7;&#x6C42;&#x7684;&#x65B9;&#x5F0F;</strong></p>
+<p>1: &#x4E00;&#x822C;&#x7F51;&#x7EDC;&#x8BF7;&#x6C42;</p>
+<p>2: CSNET</p>
+<p>3: CHAOS</p>
+<p>4: Hesiod</p>
+<h3 id="2-4-Answer-&#x54CD;&#x5E94;&#x62A5;&#x6587;"><a href="#2-4-Answer-&#x54CD;&#x5E94;&#x62A5;&#x6587;" class="headerlink" title="2.4 Answer &#x54CD;&#x5E94;&#x62A5;&#x6587;"></a>2.4 Answer &#x54CD;&#x5E94;&#x62A5;&#x6587;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;                                    1  1  1  1  1  1</span><br><span class="line">      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                                               |</span><br><span class="line">    /                                               /</span><br><span class="line">    /                      NAME                     /</span><br><span class="line">    |                                               |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                      TYPE                     |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                     CLASS                     |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                      TTL                      |</span><br><span class="line">    |                                               |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    |                   RDLENGTH                    |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|</span><br><span class="line">    /                     RDATA                     /</span><br><span class="line">    /                                               /</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<p>**NAEM: 16bit **</p>
+<p>&#x8D44;&#x6E90;&#x8BB0;&#x5F55;&#x57DF;&#x540D; &#xFF0C; &#x91C7;&#x7528; 2&#x4E2A;byte &#x6765;&#x8868;&#x793A; , CO &#x4E3A;&#x56FA;&#x5B9A;&#x6807;&#x8BB0;&#x4F4D;,&#x4EE3;&#x8868;&#x540E;&#x9762;&#x7684;&#x503C;&#x4E3A;&#x504F;&#x79FB;&#x91CF;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br><span class="line">    | 1  1|                OFFSET                   |</span><br><span class="line">    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</span><br></pre></td></tr></table></figure>
+
+<p><strong>TYPE 16bit</strong></p>
+<p>RDATA&#x8D44;&#x6E90;&#x7C7B;&#x578B;</p>
+<p><strong>CLASS: 16bit</strong></p>
+<p>&#x8BF7;&#x6C42;&#x7C7B;&#x578B;</p>
+<p><strong>TTL&#xFF1A; 32bit</strong></p>
+<p>&#x7F13;&#x5B58;&#x65F6;&#x95F4;&#xFF0C;&#x4E3A;0&#x5219;&#x4E0D;&#x80FD;&#x7F13;&#x5B58;</p>
+<p><strong>RDLENGTH: 16bit</strong></p>
+<p>RDATA&#x5B57;&#x8282;&#x6570;</p>
+<p><strong>RDATA: RDLENGTH byte</strong></p>
+<p>&#x8D44;&#x6E90;&#x8BB0;&#x5F55;&#x503C;</p>
+<ol start="3">
+<li>DNS golang &#x4EE3;&#x7801;&#x6848;&#x4F8B;</li>
+</ol>
+<hr>
+<h3 id="3-1-&#x83B7;&#x53D6;&#x8BF7;&#x6C42;&#x62A5;&#x6587;"><a href="#3-1-&#x83B7;&#x53D6;&#x8BF7;&#x6C42;&#x62A5;&#x6587;" class="headerlink" title="3.1 &#x83B7;&#x53D6;&#x8BF7;&#x6C42;&#x62A5;&#x6587;"></a>3.1 &#x83B7;&#x53D6;&#x8BF7;&#x6C42;&#x62A5;&#x6587;</h3><p>&#x83B7;&#x53D6;/&#x751F;&#x6210;A&#x8BB0;&#x5F55;&#x62A5;&#x6587;Demo &#x4EE3;&#x7801;&#x653E;&#x5728;&#x4E86; gitee &#x4E0A; <a href="/external_links/ec78dd902f441811864658db28e5bf1b.html" target="blank" rel="noopener">gitee.com/pdudo/Sampl&#x2026;</a></p>
+<p>&#x4EE3;&#x7801;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">golang&#x590D;&#x5236;&#x4EE3;&#x7801;package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;gitee.com/pdudo/SampleDNSTool&quot;</span><br><span class="line">	&quot;log&quot;</span><br><span class="line">	&quot;net&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() {</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	var dnsInfo SampleDNSTool.DNSInfo</span><br><span class="line"></span><br><span class="line">	udpconn ,err := net.ListenUDP(&quot;udp&quot;,&amp;net.UDPAddr{</span><br><span class="line">		IP: net.IPv4(0,0,0,0),</span><br><span class="line">		Port: 53,</span><br><span class="line">	})</span><br><span class="line">	</span><br><span class="line">	if err != nil {</span><br><span class="line">		log.Fatal(&quot;listen udp error&quot; , err)</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	for {</span><br><span class="line">		buf := make([]byte,1024)</span><br><span class="line">		n , err := udpconn.Read(buf[:])</span><br><span class="line">		if err != nil {</span><br><span class="line">			log.Println(&quot;udpconn error &quot; , err)</span><br><span class="line">		}</span><br><span class="line"></span><br><span class="line">		dnsInfo.GetHeader(buf[:n])</span><br><span class="line">		dnsInfo.GetQuestion(buf[:n])</span><br><span class="line"></span><br><span class="line">		fmt.Println(&quot;DNS &#x67E5;&#x8BE2;ID&#xFF1A; &quot; ,dnsInfo.Header.ID ,</span><br><span class="line">			&quot;HeaderStatus:&quot; , dnsInfo.Header.HeaderStatus ,</span><br><span class="line">			&quot;QCount:&quot; , dnsInfo.Header.QCOUNT,</span><br><span class="line">			&quot;Qname:&quot; , dnsInfo.QueryInfo.QNAMEString ,</span><br><span class="line">			&quot;QTYPE:&quot;,dnsInfo.QueryInfo.QTYPE ,</span><br><span class="line">			&quot;QCLASS:&quot;,dnsInfo.QueryInfo.QCLASS)</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x542F;&#x52A8;&#x670D;&#x52A1;&#x5668; &#x5E76;&#x4E14; &#x4F7F;&#x7528;nslookup&#x6A21;&#x62DF;&#x8BF7;&#x6C42;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;# go build</span><br><span class="line"># ./testDNSQuery</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BA2;&#x6237;&#x7AEF;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;# nslookup juejin.com 127.0.0.1</span><br><span class="line">;; connection timed out; no servers could be reached</span><br><span class="line"></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+
+<p>&#x7A0B;&#x5E8F;&#x8F93;&#x51FA;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;# ./testDNSQuery</span><br><span class="line">DNS &#x67E5;&#x8BE2;ID&#xFF1A;  27284 HeaderStatus: {0 0 0 0 1 0 0 0} QCount: 1 Qname: juejin.com QTYPE: 1 QCLASS: 1</span><br><span class="line">DNS &#x67E5;&#x8BE2;ID&#xFF1A;  27284 HeaderStatus: {0 0 0 0 1 0 0 0} QCount: 1 Qname: juejin.com QTYPE: 1 QCLASS: 1</span><br><span class="line">DNS &#x67E5;&#x8BE2;ID&#xFF1A;  27284 HeaderStatus: {0 0 0 0 1 0 0 0} QCount: 1 Qname: juejin.com QTYPE: 1 QCLASS: 1</span><br></pre></td></tr></table></figure>
+
+<p>&#x751F;&#x6210;&#x54CD;&#x5E94;&#x62A5;&#x6587;</p>
+<p>&#x4FEE;&#x6539;&#x4EE3;&#x7801;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">golang&#x590D;&#x5236;&#x4EE3;&#x7801;package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    &quot;fmt&quot;</span><br><span class="line">    &quot;gitee.com/pdudo/SampleDNSTool&quot;</span><br><span class="line">    &quot;log&quot;</span><br><span class="line">    &quot;net&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() {</span><br><span class="line"></span><br><span class="line">    var dnsInfo SampleDNSTool.DNSInfo</span><br><span class="line"></span><br><span class="line">    udpconn ,err := net.ListenUDP(&quot;udp&quot;,&amp;net.UDPAddr{</span><br><span class="line">        IP: net.IPv4(0,0,0,0),</span><br><span class="line">        Port: 53,</span><br><span class="line">    })</span><br><span class="line"></span><br><span class="line">    if err != nil {</span><br><span class="line">        log.Fatal(&quot;listen udp error&quot; , err)</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    for {</span><br><span class="line">        buf := make([]byte,1024)</span><br><span class="line">        n , fromudpaddr , err := udpconn.ReadFromUDP(buf[:])</span><br><span class="line">        if err != nil {</span><br><span class="line">            log.Println(&quot;udpconn error &quot; , err)</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        dnsInfo.GetHeader(buf[:n])</span><br><span class="line">        dnsInfo.GetQuestion(buf[:n])</span><br><span class="line"></span><br><span class="line">        fmt.Println(&quot;DNS&#x6536;&#x5230;&#x8BF7;&#x6C42; &#xFF0C; &#x67E5;&#x8BE2;ID&#xFF1A; &quot; ,dnsInfo.Header.ID ,</span><br><span class="line">            &quot;HeaderStatus:&quot; , dnsInfo.Header.HeaderStatus ,</span><br><span class="line">            &quot;QCount:&quot; , dnsInfo.Header.QCOUNT,</span><br><span class="line">            &quot;Qname:&quot; , dnsInfo.QueryInfo.QNAMEString ,</span><br><span class="line">            &quot;QTYPE:&quot;,dnsInfo.QueryInfo.QTYPE ,</span><br><span class="line">            &quot;QCLASS:&quot;,dnsInfo.QueryInfo.QCLASS)</span><br><span class="line"></span><br><span class="line">        // &#x6784;&#x5EFA;&#x56DE;&#x590D;&#x62A5;&#x6587;</span><br><span class="line">        if (1 == dnsInfo.QueryInfo.QTYPE) {</span><br><span class="line">            ip := make([]byte,4)</span><br><span class="line">            ip[0] = 192</span><br><span class="line">            ip[1] = 168</span><br><span class="line">            ip[2] = 111</span><br><span class="line">            ip[3] = 129</span><br><span class="line">            res :=  dnsInfo.GenerateAnswers(buf[:n],ip,0,1)</span><br><span class="line"></span><br><span class="line">            //udpconn.Write(res)</span><br><span class="line">            udpconn.WriteToUDP(res,fromudpaddr)</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5229;&#x7528;nslookup&#x67E5;&#x770B;&#x6548;&#x679C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;# nslookup juejin.com 127.0.0.1</span><br><span class="line">Server:         127.0.0.1</span><br><span class="line">Address:        127.0.0.1#53</span><br><span class="line"></span><br><span class="line">Non-authoritative answer:</span><br><span class="line">Name:   juejin.com</span><br><span class="line">Address: 192.168.111.129</span><br><span class="line">;; connection timed out; no servers could be reached</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;var code = &quot;df7cfb57-4300-4caa-a3bc-3a489833b53c&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x5B8C;</strong></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/6c9c29c7c45908d2840629a83312f904.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Go-DNS/" rel="tag"># Go,DNS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035979455809978376.html" rel="next" title="关于knife4j的文档自动注册功能的解决 1 存在问题 2">
+                <i class="fa fa-chevron-left"></i> 关于knife4j的文档自动注册功能的解决 1 存在问题 2
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035983899788312589.html" rel="prev" title="【kafka】 丢消息处理总结 丢消息">
+                【kafka】 丢消息处理总结 丢消息 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DNS协议初探"><span class="nav-number">1.</span> <span class="nav-text">DNS协议初探</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-域名层次化"><span class="nav-number">1.0.1.</span> <span class="nav-text">1.1 域名层次化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-域名服务器分类"><span class="nav-number">1.0.2.</span> <span class="nav-text">1.2 域名服务器分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-通过实例来判断服务器分类"><span class="nav-number">1.0.3.</span> <span class="nav-text">1.3 通过实例来判断服务器分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-DNS递归解析和迭代解析"><span class="nav-number">1.0.4.</span> <span class="nav-text">1.4 DNS递归解析和迭代解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-DNS-整个报文格式"><span class="nav-number">1.0.5.</span> <span class="nav-text">2.1 DNS 整个报文格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Head-请求头"><span class="nav-number">1.0.6.</span> <span class="nav-text">2.2 Head: 请求头</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Question-查询请求"><span class="nav-number">1.0.7.</span> <span class="nav-text">2.3 Question 查询请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-Answer-响应报文"><span class="nav-number">1.0.8.</span> <span class="nav-text">2.4 Answer 响应报文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-获取请求报文"><span class="nav-number">1.0.9.</span> <span class="nav-text">3.1 获取请求报文</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

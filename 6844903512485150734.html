@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,后端,服务器,数据库,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="At RapidLoop, we use Go for nearly everything, including our server, service and uptime monitoring product OpsDash. Go is quite good at asynchronous processing &amp;#x2013; goroutines and channels are arg">
+<meta name="keywords" content="Go,后端,服务器,数据库">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 中任务队列的简单实现">
+<meta property="og:url" content="https://dev.newban.cn/6844903512485150734.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="At RapidLoop, we use Go for nearly everything, including our server, service and uptime monitoring product OpsDash. Go is quite good at asynchronous processing &amp;#x2013; goroutines and channels are arg">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T05:39:35.017Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 中任务队列的简单实现">
+<meta name="twitter:description" content="At RapidLoop, we use Go for nearly everything, including our server, service and uptime monitoring product OpsDash. Go is quite good at asynchronous processing &amp;#x2013; goroutines and channels are arg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903512485150734.html">
+
+
+
+
+
+  <title>Go 中任务队列的简单实现 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Go 中任务队列的简单实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-20T12:03:08+08:00">
+                2017-11-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>At <a href="/external_links/3b9924111f4b4e42a6f5b355ace6c8a8.html" target="blank" rel="noopener">RapidLoop</a>, we use <a href="/external_links/f81accd2393b67eb852f5cd56ba50885.html" target="blank" rel="noopener">Go</a> for nearly everything, including our server, service and uptime monitoring product <a href="/external_links/d9639ec177271421876919d33f4f6b44.html" target="blank" rel="noopener">OpsDash</a>.</p>
+<p>Go is quite good at asynchronous processing &#x2013; goroutines and channels are arguably simpler, less error-prone and yet as powerful compared to async/awaits, promises and futures from other languages. Read on to see some interesting Go code around <em>job queues</em>.</p>
+<h4 id="The-&#x201C;No-Job-Queue&#x201D;-Job-Queue"><a href="#The-&#x201C;No-Job-Queue&#x201D;-Job-Queue" class="headerlink" title="The &#x201C;No-Job-Queue&#x201D; Job Queue"></a>The &#x201C;No-Job-Queue&#x201D; Job Queue</h4><p>Let&#x2019;s start with a bit of Zen &#x2013; sometimes you just don&#x2019;t need a job queue. Processing a job asynchronously can be done with:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;go process(job)</span><br></pre></td></tr></table></figure>
+
+<p>This is indeed the best option for some needs, like firing off an email while handling an HTTP request. Whether you need a more elaborate infrastructure to deal with job processing depends mostly on scale and complexity. Queuing up your jobs and processing<br> them in a controlled manner allows you to add more functionality like bounding the number of concurrent jobs, producer throttling and so on.</p>
+<h4 id="The-Simplest-Job-Queue"><a href="#The-Simplest-Job-Queue" class="headerlink" title="The Simplest Job Queue"></a>The Simplest Job Queue</h4><p>Here is a simple queue and a worker that processes jobs off the queue. Goroutines and channels are just the right abstractions needed to code this into an elegant, tight piece.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;func worker(jobChan &lt;-chan Job) {</span><br><span class="line">    for job := range jobChan {</span><br><span class="line">        process(job)</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// make a channel with a capacity of 100.</span><br><span class="line">jobChan := make(chan Job, 100)</span><br><span class="line"></span><br><span class="line">// start the worker</span><br><span class="line">go worker(jobChan)</span><br><span class="line"></span><br><span class="line">// enqueue a job</span><br><span class="line">jobChan &lt;- job</span><br></pre></td></tr></table></figure>
+
+<p>The code basically creates a channel of <code>Job</code> objects, with a capacity of 100. It then starts a worker goroutine called <code>worker</code>. The worker pops jobs off the channel and processes them, one at a time. Jobs can be enqueued by pushing<br> a <code>Job</code> object into the channel.</p>
+<p>Although there are just a few lines of code, there&#x2019;s a lot going on. First off, you have safe, correct, race-free code without having to mess with threads and mutexes.</p>
+<p>Another feature is producer throttling.</p>
+<h4 id="Producer-Throttling"><a href="#Producer-Throttling" class="headerlink" title="Producer Throttling"></a>Producer Throttling</h4><p>The channel is created with a capacity of 100:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// make a channel with a capacity of 100.</span><br><span class="line">jobChan := make(chan Job, 100)</span><br></pre></td></tr></table></figure>
+
+<p>which means that the enqueuing of a job like so:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// enqueue a job</span><br><span class="line">jobChan &lt;- job</span><br></pre></td></tr></table></figure>
+
+<p>will block, if there already are 100 jobs in the channel that the worker hasn&#x2019;t got around to servicing. This is usually a good thing. You don&#x2019;t want the backlog of jobs to grow too big if there is a SLA/QoS constraint, or even a reasonable assumption,<br> that a job must finish within a certain amount of time. For example, if a job takes 1 second to finish in the worst case, with a channel capacity of 100 you&#x2019;re looking at a worst case job finish time of 100 seconds.</p>
+<p>If the channel is full, you&#x2019;ll want your caller to back off for a while, typically. For example, it this were a REST API call, you might return a 503 (service unavailable) error code and document that the caller has to retry after a wait. This way, you&#x2019;re<br> applying <strong>backpressure</strong> up the caller chain to maintain a predictable quality of service.</p>
+<h4 id="Enqueueing-Without-Blocking"><a href="#Enqueueing-Without-Blocking" class="headerlink" title="Enqueueing Without Blocking"></a>Enqueueing Without Blocking</h4><p>So how would you only <em>try</em> to enqueue, and fail if the operation would block? That way you can fail the job submission operation, and say return a 503. The trick is to use a <code>select</code> with a <code>default</code> clause:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// TryEnqueue tries to enqueue a job to the given job channel. Returns true if</span><br><span class="line">// the operation was successful, and false if enqueuing would not have been</span><br><span class="line">// possible without blocking. Job is not enqueued in the latter case.</span><br><span class="line">func TryEnqueue(job Job, jobChan &lt;-chan Job) bool {</span><br><span class="line">    select {</span><br><span class="line">    case jobChan &lt;- job:</span><br><span class="line">        return true</span><br><span class="line">    default:</span><br><span class="line">        return false</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>With this, you can fail the submission this way:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;if !TryEnqueue(job, chan) {</span><br><span class="line">    http.Error(w, &quot;max capacity reached&quot;, 503)</span><br><span class="line">    return</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="Stopping-the-Worker"><a href="#Stopping-the-Worker" class="headerlink" title="Stopping the Worker"></a>Stopping the Worker</h4><p>OK, so far so good. Now how can we stop the worker gracefully? Assuming that we&#x2019;ve decided not to enqueue any more jobs and we want to let all the enqueued jobs finish, we can simply do:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;close(jobChan)</span><br></pre></td></tr></table></figure>
+
+<p>Yes, that&#x2019;s all there is. This works because the worker pops jobs off the queue with a for..range loop:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;for job := range jobChan {...}</span><br></pre></td></tr></table></figure>
+
+<p>and this loop will exit when the channel is closed. All jobs enqueued into the channel before the channel was closed, will be popped out by the worker and processed as usual.</p>
+<h4 id="Waiting-for-the-Worker"><a href="#Waiting-for-the-Worker" class="headerlink" title="Waiting for the Worker"></a>Waiting for the Worker</h4><p>That was pretty easy. But <code>close(jobChan)</code> will not wait for the goroutine to exit. For that, we&#x2019;ll use a <code>sync.WaitGroup</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// use a WaitGroup </span><br><span class="line">var wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">func worker(jobChan &lt;-chan Job) {</span><br><span class="line">    defer wg.Done()</span><br><span class="line"></span><br><span class="line">    for job := range jobChan {</span><br><span class="line">        process(job)</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// increment the WaitGroup before starting the worker</span><br><span class="line">wg.Add(1)</span><br><span class="line">go worker(jobChan)</span><br><span class="line"></span><br><span class="line">// to stop the worker, first close the job channel</span><br><span class="line">close(jobChan)</span><br><span class="line"></span><br><span class="line">// then wait using the WaitGroup</span><br><span class="line">wg.Wait()</span><br></pre></td></tr></table></figure>
+
+<p>With this, we&#x2019;ll signal the worker to stop by closing the channel, and then wait for the worker goroutine to end with the <code>wg.Wait()</code>.</p>
+<p>Note that we&#x2019;ve to increment the wait group <em>before</em> starting the goroutine, and decrement it <em>once</em> from <em>within</em> the goroutine when it exits, irrespective of the return path.</p>
+<h4 id="Waiting-with-a-Timeout"><a href="#Waiting-with-a-Timeout" class="headerlink" title="Waiting with a Timeout"></a>Waiting with a Timeout</h4><p>The <code>wg.Wait()</code> will wait forever for the goroutine to exit. But what if we can&#x2019;t afford to wait indefinitely?</p>
+<p>Here&#x2019;s a helper function that wraps <code>wg.Wait</code> and adds a timeout:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// WaitTimeout does a Wait on a sync.WaitGroup object but with a specified</span><br><span class="line">// timeout. Returns true if the wait completed without timing out, false</span><br><span class="line">// otherwise.</span><br><span class="line">func WaitTimeout(wg *sync.WaitGroup, timeout time.Duration) bool {</span><br><span class="line">    ch := make(chan struct{})</span><br><span class="line">    go func() {</span><br><span class="line">        wg.Wait()</span><br><span class="line">        close(ch)</span><br><span class="line">    }()</span><br><span class="line">    select {</span><br><span class="line">    case &lt;-ch:</span><br><span class="line">            return true</span><br><span class="line">    case &lt;-time.After(timeout):</span><br><span class="line">            return false</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// now use the WaitTimeout instead of wg.Wait()</span><br><span class="line">WaitTimeout(&amp;wg, 5 * time.Second)</span><br></pre></td></tr></table></figure>
+
+<p>This now let&#x2019;s you wait for your worker to exit, but places a bound on the amount of time it may take to do so.</p>
+<h4 id="Cancelling-Workers"><a href="#Cancelling-Workers" class="headerlink" title="Cancelling Workers"></a>Cancelling Workers</h4><p>So far we have allowed our worker the liberty to finish processing it&#x2019;s jobs even after we signalled it to stop. What if we need to say: &#x201C;drop the rest, let&#x2019;s get out of here!&#x201D; to the worker?</p>
+<p>Here&#x2019;s how to do it with <code>context.Context</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// create a context that can be cancelled</span><br><span class="line">ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line"></span><br><span class="line">// start the goroutine passing it the context</span><br><span class="line">go worker(ctx, jobChan)</span><br><span class="line"></span><br><span class="line">func worker(ctx context.Context, jobChan &lt;-chan Job) {</span><br><span class="line">    for {</span><br><span class="line">        select {</span><br><span class="line">        case &lt;-ctx.Done():</span><br><span class="line">            return</span><br><span class="line"></span><br><span class="line">        case job := &lt;-jobChan:</span><br><span class="line">            process(job)</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// Invoke cancel when the worker needs to be stopped. This *does not* wait</span><br><span class="line">// for the worker to exit.</span><br><span class="line">cancel()</span><br></pre></td></tr></table></figure>
+
+<p>Basically, we create a &#x201C;cancellable context&#x201D;, and pass this to the worker. The worker waits on this, in addition to the job channel. The <code>ctx.Done()</code> becomes readable when <code>cancel</code> is invoked.</p>
+<p>Like with the closing of the job channel, the <code>cancel()</code> will only signal, and does not wait. You&#x2019;ll have to add the wait group code if you need to wait for the worker to exit &#x2013; although the wait should be shorter as the worker will not process<br> the remaining jobs.</p>
+<p>However, there is a bit of a gotcha with this code. Consider the case when you have a backlog in the channel (so that &lt;-jobChan will not block), and cancel() has been invoked (so that &lt;-ctx.Done() also will not block). Since neither cases will block,<br> the <code>select</code> has to choose between them. Fairly, one hopes.</p>
+<p>Alas, in practice, this is not true. Not only is it plausible that &#x201C;&lt;-jobChan&#x201D; is selected despite &#x201C;&lt;-ctx.Done()&#x201D; also being non-blocking, it happens disconcertingly easily in practice. Even after a job is popped despite the cancellation and there<br> are more pending, the situation remains the same &#x2013; and the runtime is free to make the same &#x201C;mistake&#x201D; again.</p>
+<p>To be fair (uh!), what we need is not fairness, but priority. The context cancellation case should have a higher priority than the other. However, there is no easy, built-in way to do this.</p>
+<p>A flag might help:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;var flag uint64</span><br><span class="line"></span><br><span class="line">func worker(ctx context.Context, jobChan &lt;-chan Job) {</span><br><span class="line">    for {</span><br><span class="line">        select {</span><br><span class="line">        case &lt;-ctx.Done():</span><br><span class="line">            return</span><br><span class="line"></span><br><span class="line">        case job := &lt;-jobChan:</span><br><span class="line">            process(job)</span><br><span class="line">            if atomic.LoadUint64(&amp;flag) == 1 {</span><br><span class="line">                return</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// set the flag first, before cancelling</span><br><span class="line">atomic.StoreUint64(&amp;flag, 1)</span><br><span class="line">cancel()</span><br></pre></td></tr></table></figure>
+
+<p>We don&#x2019;t check the flag before processing because since we popped the job, we might as well service it, to be consistent. Of course, if bailing out is a higher priority the check can be moved before the processing.</p>
+<p>Bottom line? Either live with the fact that your worker might process a few extra jobs before exiting, or design your code carefully to work around the gotchas.</p>
+<h4 id="Cancelling-Workers-Without-Context"><a href="#Cancelling-Workers-Without-Context" class="headerlink" title="Cancelling Workers Without Context"></a>Cancelling Workers Without Context</h4><p><code>context.Context</code> is not magic. In fact, for this particular case, not having the context makes the code cleaner and clearer:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// create a cancel channel</span><br><span class="line">cancelChan := make(chan struct{})</span><br><span class="line"></span><br><span class="line">// start the goroutine passing it the cancel channel </span><br><span class="line">go worker(jobChan, cancelChan)</span><br><span class="line"></span><br><span class="line">func worker(jobChan &lt;-chan Job, cancelChan &lt;-chan struct{}) {</span><br><span class="line">    for {</span><br><span class="line">        select {</span><br><span class="line">        case &lt;-cancelChan:</span><br><span class="line">            return</span><br><span class="line"></span><br><span class="line">        case job := &lt;-jobChan:</span><br><span class="line">            process(job)</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// to cancel the worker, close the cancel channel</span><br><span class="line">close(cancelChan)</span><br></pre></td></tr></table></figure>
+
+<p>This is essentially what (simple, non-hierarchical) context cancellation does behind the scenes too. The same gotchas exist, unfortunately.</p>
+<h4 id="A-Pool-of-Workers"><a href="#A-Pool-of-Workers" class="headerlink" title="A Pool of Workers"></a>A Pool of Workers</h4><p>And finally, having multiple workers lets you increase your job concurrency. The easiest way is to simply spawn multiple workers and have them read off the same job channel:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;for i:=0; i&lt;workerCount; i++ {</span><br><span class="line">    go worker(jobChan)</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>The rest of the code does not change. There will be multiple workers trying to read from the same channel &#x2013; this is valid, and safe. Only one of the workers will successfully read, and the rest will block.</p>
+<p>Again, there is a question of fairness. Ideally, if 100 jobs were processed by 4 workers, each would do 25. However, this may or may not be the case, and your code should not assume fairness.</p>
+<p>To wait for workers to exit, add a wait group as usual:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;for i:=0; i&lt;workerCount; i++ {</span><br><span class="line">    wg.Add(1)</span><br><span class="line">    go worker(jobChan)</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// wait for all workers to exit</span><br><span class="line">wg.Wait()</span><br></pre></td></tr></table></figure>
+
+<p>For cancelling, you&#x2019;ll have to use a cancel channel per worker, then close all of them.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// create cancel channels</span><br><span class="line">cancelChans := make([]chan struct{}, workerCount)</span><br><span class="line"></span><br><span class="line">for i:=0; i&lt;workerCount; i++ {</span><br><span class="line">    go worker(jobChan, cancelChans[i])</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">for i:=0; i&lt;workerCount; i++ {</span><br><span class="line">    close(cancelChans[i])</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="A-Generic-Job-Queue-Library"><a href="#A-Generic-Job-Queue-Library" class="headerlink" title="A Generic Job Queue Library?"></a>A Generic Job Queue Library?</h4><p>On the face of it, job queues appear simple, and wonderfully suited to spinning off into a generic, reusable component. In reality though, the nitty-gritty details for each different place you&#x2019;d want to use it will likely add to the complexity of the<br> &#x201C;generic&#x201D; component. Couple this with the fact that it&#x2019;s easier to write out a job queue in Go than in most other languages, you&#x2019;re <em>probably</em> better off writing job queues tailored to each requirement.</p>
+<h4 id="License"><a href="#License" class="headerlink" title="License"></a>License</h4><p>All code listed above is published under the MIT license:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;Copyright (c) 2017 RapidLoop, Inc.</span><br><span class="line"></span><br><span class="line">Permission is hereby granted, free of charge, to any person obtaining a copy</span><br><span class="line">of this software and associated documentation files (the &quot;Software&quot;), to deal</span><br><span class="line">in the Software without restriction, including without limitation the rights</span><br><span class="line">to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span><br><span class="line">copies of the Software, and to permit persons to whom the Software is</span><br><span class="line">furnished to do so, subject to the following conditions:</span><br><span class="line"></span><br><span class="line">The above copyright notice and this permission notice shall be included in</span><br><span class="line">all copies or substantial portions of the Software.</span><br><span class="line"></span><br><span class="line">THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span><br><span class="line">IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span><br><span class="line">FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span><br><span class="line">AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span><br><span class="line">LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span><br><span class="line">OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span><br><span class="line">THE SOFTWARE.</span><br></pre></td></tr></table></figure>
+
+<h5 id="New-Here"><a href="#New-Here" class="headerlink" title="New Here?"></a>New Here?</h5><p>OpsDash is a server monitoring, service monitoring, and database monitoring solution for monitoring Docker, MySQL, PostgreSQL, MongoDB, memcache, Redis, Apache, Nginx, Elasticsearch and more. It provides intelligent, customizable dashboards and rule-based<br> alerting via email, HipChat, Slack, PagerDuty, OpsGenie, VictorOps and Webhooks. Send in your custom metrics with StatsD and Graphite interfaces built into each agent.</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/835ee0618f5094cde1d1469e940e65a9.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Go-后端-服务器-数据库/" rel="tag"># Go,后端,服务器,数据库</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903512413831181.html" rel="next" title="redis源码分析之有序集SortedSet">
+                <i class="fa fa-chevron-left"></i> redis源码分析之有序集SortedSet
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903512325750797.html" rel="prev" title="linux namespace and cgroup nam">
+                linux namespace and cgroup nam <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#The-“No-Job-Queue”-Job-Queue"><span class="nav-number">1.</span> <span class="nav-text">The “No-Job-Queue” Job Queue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-Simplest-Job-Queue"><span class="nav-number">2.</span> <span class="nav-text">The Simplest Job Queue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-Throttling"><span class="nav-number">3.</span> <span class="nav-text">Producer Throttling</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Enqueueing-Without-Blocking"><span class="nav-number">4.</span> <span class="nav-text">Enqueueing Without Blocking</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stopping-the-Worker"><span class="nav-number">5.</span> <span class="nav-text">Stopping the Worker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Waiting-for-the-Worker"><span class="nav-number">6.</span> <span class="nav-text">Waiting for the Worker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Waiting-with-a-Timeout"><span class="nav-number">7.</span> <span class="nav-text">Waiting with a Timeout</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cancelling-Workers"><span class="nav-number">8.</span> <span class="nav-text">Cancelling Workers</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cancelling-Workers-Without-Context"><span class="nav-number">9.</span> <span class="nav-text">Cancelling Workers Without Context</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#A-Pool-of-Workers"><span class="nav-number">10.</span> <span class="nav-text">A Pool of Workers</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#A-Generic-Job-Queue-Library"><span class="nav-number">11.</span> <span class="nav-text">A Generic Job Queue Library?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#License"><span class="nav-number">12.</span> <span class="nav-text">License</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#New-Here"><span class="nav-number">12.1.</span> <span class="nav-text">New Here?</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

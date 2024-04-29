@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x3000;&amp;#x3000;&amp;#x5B9E;&amp;#x9645;&amp;#x9879;&amp;#x76EE;&amp;#x4E2D;&amp;#xFF0C;pythoner&amp;#x66F4;&amp;#x52A0;&amp;#x5173;&amp;#x6CE8;&amp;#x7684;&amp;#x662F;Python&amp;#x7684;&amp;#x6027;&amp;#x80FD;&amp;#x95EE;&amp;#x9898;&amp;#xFF0C;&amp;#x4E4B;&amp;#x524D;&amp;#x4E5F;&amp;#">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python内存优化：Profile，slots，compa">
+<meta property="og:url" content="https://dev.newban.cn/6844903519095357454.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x3000;&amp;#x3000;&amp;#x5B9E;&amp;#x9645;&amp;#x9879;&amp;#x76EE;&amp;#x4E2D;&amp;#xFF0C;pythoner&amp;#x66F4;&amp;#x52A0;&amp;#x5173;&amp;#x6CE8;&amp;#x7684;&amp;#x662F;Python&amp;#x7684;&amp;#x6027;&amp;#x80FD;&amp;#x95EE;&amp;#x9898;&amp;#xFF0C;&amp;#x4E4B;&amp;#x524D;&amp;#x4E5F;&amp;#">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2f55eeb79ea0a132ad2b85a8ce9bc53bc59a1b89412fd68c2d63392e890b3fc4">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0585ce1e49208f68055231fd483ca413d797e650b442397849d69729f22e2a68">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/03583ae694490a61b3af0b90d63bcf943ff4e3cde01082f95f7907866d02159b">
+<meta property="og:updated_time" content="2024-04-28T04:38:34.669Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python内存优化：Profile，slots，compa">
+<meta name="twitter:description" content="&amp;#x3000;&amp;#x3000;&amp;#x5B9E;&amp;#x9645;&amp;#x9879;&amp;#x76EE;&amp;#x4E2D;&amp;#xFF0C;pythoner&amp;#x66F4;&amp;#x52A0;&amp;#x5173;&amp;#x6CE8;&amp;#x7684;&amp;#x662F;Python&amp;#x7684;&amp;#x6027;&amp;#x80FD;&amp;#x95EE;&amp;#x9898;&amp;#xFF0C;&amp;#x4E4B;&amp;#x524D;&amp;#x4E5F;&amp;#">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2f55eeb79ea0a132ad2b85a8ce9bc53bc59a1b89412fd68c2d63392e890b3fc4">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903519095357454.html">
+
+
+
+
+
+  <title>Python内存优化：Profile，slots，compa | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python内存优化：Profile，slots，compa</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-05T13:20:01+08:00">
+                2017-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x3000;&#x3000;&#x5B9E;&#x9645;&#x9879;&#x76EE;&#x4E2D;&#xFF0C;pythoner&#x66F4;&#x52A0;&#x5173;&#x6CE8;&#x7684;&#x662F;Python&#x7684;&#x6027;&#x80FD;&#x95EE;&#x9898;&#xFF0C;&#x4E4B;&#x524D;&#x4E5F;&#x5199;&#x8FC7;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x300A;<a href="/external_links/1dacbad0278caa722af95c02f5ace2dd.html" target="blank" rel="noopener">Python&#x6027;&#x80FD;&#x4F18;&#x5316;</a>&#x300B;&#x4ECB;&#x7ECD;Python&#x6027;&#x80FD;&#x4F18;&#x5316;&#x7684;&#x4E00;&#x4E9B;&#x65B9;&#x6CD5;&#x3002;&#x800C;&#x672C;&#x6587;&#xFF0C;&#x5173;&#x6CE8;&#x7684;&#x662F;Python&#x7684;&#x5185;&#x5B58;&#x4F18;&#x5316;&#xFF0C;&#x4E00;&#x822C;&#x8BF4;&#x6765;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x53D1;&#x751F;&#x5185;&#x5B58;&#x6CC4;&#x9732;&#xFF0C;&#x8FD0;&#x884C;&#x5728;&#x670D;&#x52A1;&#x7AEF;&#x7684;Python&#x4EE3;&#x7801;&#x4E0D;&#x7528;&#x592A;&#x5173;&#x5FC3;&#x5185;&#x5B58;&#xFF0C;&#x4F46;&#x662F;&#x5982;&#x679C;&#x8FD0;&#x884C;&#x5728;&#x5BA2;&#x6237;&#x7AEF;&#xFF08;&#x6BD4;&#x5982;&#x79FB;&#x52A8;&#x5E73;&#x53F0;&#x4E0A;&#xFF09;&#xFF0C;&#x90A3;&#x8FD8;&#x662F;&#x6709;&#x4F18;&#x5316;&#x7684;&#x5FC5;&#x8981;&#x3002;&#x5177;&#x4F53;&#x800C;&#x8A00;&#xFF0C;&#x672C;&#x6587;&#x4E3B;&#x8981;&#x9488;&#x5BF9;&#x7684;Cpython&#xFF0C;&#x800C;&#x4E14;&#x4E0D;&#x6D89;&#x53CA;C&#x6269;&#x5C55;&#x3002;&#x3000;&#x3000;</p>
+<p>&#x3000;&#x3000;&#x6211;&#x4EEC;&#x77E5;&#x9053;&#xFF0C;Python&#x4F7F;&#x7528;&#x5F15;&#x7528;&#x6280;&#x672F;&#x548C;&#x5783;&#x573E;&#x56DE;&#x6536;&#x6765;&#x7BA1;&#x7406;&#x5185;&#x5B58;&#xFF0C;&#x5E95;&#x5C42;&#x4E5F;&#x6709;&#x5404;&#x79CD;&#x7C7B;&#x578B;&#x7684;&#x5185;&#x5B58;&#x6C60;&#xFF0C;&#x90A3;&#x6211;&#x4EEC;&#x600E;&#x4E48;&#x5F97;&#x77E5;&#x4E00;&#x6BB5;&#x4EE3;&#x7801;&#x4F7F;&#x7528;&#x7684;&#x5185;&#x5B58;&#x60C5;&#x51B5;&#x5462;&#xFF1F;&#x5DE5;&#x6B32;&#x5584;&#x5176;&#x4E8B;&#x5FC5;&#x5148;&#x5229;&#x5176;&#x5668;&#xFF0C;&#x76F4;&#x63A5;&#x770B;windows&#x4E0B;&#x7684;&#x4EFB;&#x52A1;&#x7BA1;&#x7406;&#x5668;&#x6216;&#x8005;linux&#x4E0B;&#x7684;top&#x80AF;&#x5B9A;&#x662F;&#x4E0D;&#x51C6;&#x7684;&#x3002;</p>
+<p>&#x3000;&#x3000;&#x672C;&#x6587;&#x5730;&#x5740;&#xFF1A;<a href="/external_links/01c520bc322fdcebb91863965f99a3ed.html" target="blank" rel="noopener">www.cnblogs.com/xybaby/p/74&#x2026;</a></p>
+<h1 id="Pytracemalloc"><a href="#Pytracemalloc" class="headerlink" title="Pytracemalloc"></a>Pytracemalloc</h1><p>&#x3000;&#x3000;&#x5BF9;&#x4E8E;&#x57FA;&#x672C;&#x7C7B;&#x578B;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;sys.getsizeof()&#x6765;&#x67E5;&#x770B;&#x5BF9;&#x8C61;&#x5360;&#x7528;&#x7684;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x3002;&#x4EE5;&#x4E0B;&#x662F;&#x5728;64&#x4F4D;Linux&#x4E0B;&#x7684;&#x4E00;&#x4E9B;&#x7ED3;&#x679C;&#xFF1A;</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>import sys</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>sys.getsizeof(1) 24 &gt;&gt;&gt; sys.getsizeof([]) 72 &gt;&gt;&gt; sys.getsizeof(()) 56 &gt;&gt;&gt; sys.getsizeof({}) 280 &gt;&gt;&gt; sys.getsizeof(True) 24</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>&#x3000;&#x3000;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5373;&#x4F7F;&#x662F;&#x4E00;&#x4E2A;int&#x7C7B;&#x578B;(1)&#x4E5F;&#x9700;&#x8981;&#x5360;&#x7528;24&#x4E2A;&#x5B57;&#x8282;&#xFF0C;&#x8FDC;&#x8FDC;&#x9AD8;&#x4E8E;C&#x8BED;&#x8A00;&#x4E2D;int&#x7684;&#x8303;&#x56F4;&#x3002;&#x56E0;&#x4E3A;Python&#x4E2D;&#x4E00;&#x5207;&#x90FD;&#x662F;&#x5BF9;&#x8C61;&#xFF0C;int&#x4E5F;&#x4E0D;&#x4F8B;&#x5916;&#xFF08;&#x4E8B;&#x5B9E;&#x4E0A;&#x662F;PyIntObject&#xFF09;&#xFF0C;&#x9664;&#x4E86;&#x771F;&#x6B63;&#x5B58;&#x50A8;&#x7684;&#x6570;&#x503C;&#xFF0C;&#x8FD8;&#x9700;&#x8981;&#x4FDD;&#x5B58;&#x5F15;&#x7528;&#x8BA1;&#x6570;&#x4FE1;&#x606F;&#x3001;&#x7C7B;&#x578B;&#x4FE1;&#x606F;&#xFF0C;&#x66F4;&#x5177;&#x4F53;&#x7684;&#x53EF;&#x4EE5;&#x53C2;&#x89C1;&#x300A;Python&#x6E90;&#x7801;&#x5256;&#x6790;&#x300B;&#x3002;</p>
+<p>&#x3000;&#x3000; &#x800C;&#x5BF9;&#x4E8E;&#x66F4;&#x590D;&#x6742;&#x7684;&#x7EC4;&#x5408;&#x7C7B;&#x578B;&#xFF0C;&#x590D;&#x6742;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x4F7F;&#x7528;getsizeof&#x6765;&#x67E5;&#x770B;&#x5C31;&#x4E0D;&#x51C6;&#x786E;&#x4E86;&#xFF0C;&#x56E0;&#x4E3A;&#x5728;Python&#x4E2D;&#x53D8;&#x91CF;&#x4EC5;&#x4EC5;&#x6307;&#x5411;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x5C31;&#x9700;&#x8981;&#x66F4;&#x9AD8;&#x7EA7;&#x7684;&#x5DE5;&#x5177;&#xFF0C;&#x6BD4;&#x5982;<a href="/external_links/62cb000ed547baa0c4c7c5990545784a.html" target="blank" rel="noopener">guppy</a>&#xFF0C;<a href="/external_links/512f08b578933bcf0b6da8e46fba179b.html" target="blank" rel="noopener">pysizer</a>&#xFF0C;<a href="/external_links/0689c4bac87c439c7c954a8ab4946f23.html" target="blank" rel="noopener">pytracemalloc</a>&#xFF0C;<br> <a href="/external_links/babe82e05874cba11c8535528418576d.html" target="blank" rel="noopener">objgraph</a>&#x3002;&#x5728;&#x8FD9;&#x91CC;&#x91CD;&#x70B9;&#x4ECB;&#x7ECD;pytracemalloc&#x3002;</p>
+<p>&#x3000;&#x3000;&#x5728;Python3.4&#x4E2D;&#xFF0C;&#x5DF2;&#x7ECF;&#x652F;&#x6301;&#x4E86;pytracemalloc&#xFF0C;&#x5982;&#x679C;&#x4F7F;&#x7528;python2.7&#x7248;&#x672C;&#xFF0C;&#x5219;&#x9700;&#x8981;&#x5BF9;&#x6E90;&#x7801;&#x6253;&#x8865;&#x4E01;&#xFF0C;&#x7136;&#x540E;&#x91CD;&#x65B0;&#x7F16;&#x8BD1;&#x3002;pytracemalloc&#x5728;<a href="/external_links/ab846f71178e484db3fb79e5912187c2.html" target="blank" rel="noopener">pep454</a>&#x4E2D;&#x63D0;&#x51FA;&#xFF0C;&#x4E3B;&#x8981;&#x6709;&#x4EE5;&#x4E0B;&#x51E0;&#x4E2A;&#x7279;&#x70B9;&#xFF1A;</p>
+<ul>
+<li>Traceback where an object was allocated</li>
+<li>Statistics on allocated memory blocks per filename and per line number: total size, number and average size of allocated memory blocks</li>
+<li>Compute the differences between two snapshots to detect memory leaks</li>
+</ul>
+<p>&#x3000;&#x3000;&#x7B80;&#x5355;&#x6765;&#x8BF4;&#xFF0C;pytracemalloc hook&#x4F4F;&#x4E86;python&#x7533;&#x8BF7;&#x548C;&#x91CA;&#x653E;&#x5185;&#x5B58;&#x7684;&#x63A5;&#x53E3;&#xFF0C;&#x4ECE;&#x800C;&#x80FD;&#x591F;&#x8FFD;&#x8E2A;&#x5BF9;&#x8C61;&#x7684;&#x5206;&#x914D;&#x548C;&#x56DE;&#x6536;&#x60C5;&#x51B5;&#x3002;&#x5BF9;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7684;&#x7EDF;&#x8BA1;&#x6570;&#x636E;&#x53EF;&#x4EE5;&#x7CBE;&#x786E;&#x5230;&#x6BCF;&#x4E2A;&#x6587;&#x4EF6;&#x3001;&#x6BCF;&#x4E00;&#x884C;&#x4EE3;&#x7801;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x6309;&#x7167;&#x8C03;&#x7528;&#x6808;&#x505A;&#x805A;&#x5408;&#x5206;&#x6790;&#x3002;&#x800C;&#x4E14;&#x8FD8;&#x652F;&#x6301;&#x5FEB;&#x7167;&#xFF08;snapshot&#xFF09;&#x529F;&#x80FD;&#xFF0C;&#x6BD4;&#x8F83;&#x4E24;&#x4E2A;&#x5FEB;&#x7167;&#x4E4B;&#x95F4;&#x7684;&#x5DEE;&#x5F02;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#x6F5C;&#x5728;&#x7684;&#x5185;&#x5B58;&#x6CC4;&#x9732;&#x3002;</p>
+<p>&#x3000;&#x3000;&#x4E0B;&#x9762;&#x901A;&#x8FC7;&#x4E00;&#x4E2A;&#x4F8B;&#x5B50;&#x6765;&#x7B80;&#x5355;&#x4ECB;&#x7ECD;pytracemalloc&#x7684;&#x7528;&#x6CD5;&#x548C;&#x63A5;&#x53E3;&#xFF0C;&#x5173;&#x4E8E;&#x66F4;&#x8BE6;&#x7EC6;&#x7528;&#x6CD5;&#x548C;API&#xFF0C;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x8FD9;&#x4EFD;&#x8BE6;&#x5C3D;&#x7684;<a href="/external_links/0689c4bac87c439c7c954a8ab4946f23.html" target="blank" rel="noopener">&#x6587;&#x6863;</a>&#x6216;&#x8005;pytracemalloc&#x7684;&#x4F5C;&#x8005;&#x5728;pycon&#x4E0A;&#x7684;<a href="/external_links/a9a5ef89f33b06726f44467cb24caf68.html" target="blank" rel="noopener">&#x6F14;&#x8BB2;ppt</a>&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801; 1 import tracemalloc</span><br><span class="line"> 2 </span><br><span class="line"> 3 NUM_OF_ATTR =  10</span><br><span class="line"> 4 NUM_OF_INSTANCE = 100</span><br><span class="line"> 5  </span><br><span class="line"> 6 class Slots(object):</span><br><span class="line"> 7     __slots__ = [&apos;attr%s&apos;%i for i in range(NUM_OF_ATTR)]</span><br><span class="line"> 8     def __init__(self):</span><br><span class="line"> 9         value_lst = (1.0, True, [], {}, ())</span><br><span class="line">10         for i in range(NUM_OF_ATTR):</span><br><span class="line">11             setattr(self, &apos;attr%s&apos;%i, value_lst[i % len(value_lst)])</span><br><span class="line">12 </span><br><span class="line">13 </span><br><span class="line">14 class NoSlots(object):</span><br><span class="line">15     def __init__(self):</span><br><span class="line">16         value_lst = (1.0, True, [], {}, ())</span><br><span class="line">17         for i in range(NUM_OF_ATTR):</span><br><span class="line">18             setattr(self, &apos;attr%s&apos;%i, value_lst[i % len(value_lst)])</span><br><span class="line">19 </span><br><span class="line">20 </span><br><span class="line">21 </span><br><span class="line">22 def generate_some_objs():</span><br><span class="line">23     lst = []</span><br><span class="line">24     for i in range(NUM_OF_INSTANCE):</span><br><span class="line">25         o = Slots() if i % 2 else NoSlots()</span><br><span class="line">26         lst.append(o)</span><br><span class="line">27     return lst</span><br><span class="line">28 </span><br><span class="line">29 </span><br><span class="line">30 if __name__ == &apos;__main__&apos;:</span><br><span class="line">31     tracemalloc.start(3)</span><br><span class="line">32 </span><br><span class="line">33     t = generate_some_objs() </span><br><span class="line">34 </span><br><span class="line">35     snapshot = tracemalloc.take_snapshot()</span><br><span class="line">36     top_stats = snapshot.statistics(&apos;lineno&apos;) # lineno filename traceback</span><br><span class="line">37 </span><br><span class="line">38     print(tracemalloc.get_traced_memory())</span><br><span class="line">39     for stat in top_stats[:10]:</span><br><span class="line">40         print(stat)</span><br></pre></td></tr></table></figure>
+
+
+
+
+<p>&#x3000;&#x3000;&#x5728;&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x4E2D;&#xFF0C;&#x7528;&#x5230;&#x4E86;pytracemalloc&#x51E0;&#x4E2A;&#x6838;&#x5FC3;&#x7684;API&#xFF1A;</p>
+<p>&#x3000;&#x3000;<code>start</code>(<em>nframe: int=1</em>)&#x3000;&#x3000;</p>
+<p>&#x3000;&#x3000;&#x3000;&#x3000;pytracemalloc&#x7684;&#x4E00;&#x5927;&#x597D;&#x5904;&#x5C31;&#x662F;&#x53EF;&#x4EE5;&#x968F;&#x65F6;&#x542F;&#x505C;&#xFF0C;start&#x51FD;&#x6570;&#x5373;&#x5F00;&#x59CB;&#x8FFD;&#x8E2A;&#x5185;&#x5B58;&#x5206;&#x914D;&#xFF0C;&#x76F8;&#x5E94;&#x7684;stop&#x4F1A;&#x505C;&#x6B62;&#x8FFD;&#x8E2A;&#x3002;start&#x51FD;&#x6570;&#x6709;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#xFF0C;nframes : &#x5185;&#x5B58;&#x5206;&#x914D;&#x65F6;&#x8BB0;&#x5F55;&#x7684;&#x6808;&#x7684;&#x6DF1;&#x5EA6;&#xFF0C;&#x8FD9;&#x4E2A;&#x503C;&#x8D8A;&#x5927;&#xFF0C;pytracemalloc&#x672C;&#x8EAB;&#x6D88;&#x8017;&#x7684;&#x5185;&#x5B58;&#x8D8A;&#x591A;&#xFF0C;&#x5728;&#x8BA1;&#x7B97;cumulative&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x6709;&#x7528;&#x3002;</p>
+<p>&#x3000;&#x3000;<code>get_traced_memory</code>() </p>
+<p>&#x3000;&#x3000;&#x3000;&#x3000;&#x8FD4;&#x56DE;&#x503C;&#x662F;&#x62E5;&#x6709;&#x4E24;&#x4E2A;&#x5143;&#x7D20;&#x7684;tuple&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x5143;&#x7D20;&#x662F;&#x5F53;&#x524D;&#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x7B2C;&#x4E8C;&#x4E2A;&#x5143;&#x7D20;&#x662F;&#x81EA;&#x5185;&#x5B58;&#x8FFD;&#x8E2A;&#x542F;&#x52A8;&#x4EE5;&#x6765;&#x7684;&#x5185;&#x5B58;&#x5CF0;&#x503C;&#x3002;</p>
+<p>&#x3000;&#x3000;<code>take_snapshot</code>()&#x3000;&#x3000;&#x3000;&#x3000;</p>
+<p>&#x3000;&#x3000;&#x3000;&#x3000;&#x8FD4;&#x56DE;&#x5F53;&#x524D;&#x5185;&#x5B58;&#x5206;&#x914D;&#x5FEB;&#x7167;&#xFF0C;&#x8FD4;&#x56DE;&#x503C;&#x662F;Snapshot&#x5BF9;&#x8C61;&#xFF0C;&#x8BE5;&#x5BF9;&#x8C61;&#x53EF;&#x4EE5;&#x6309;&#x7167;&#x5355;&#x4E2A;&#x6587;&#x4EF6;&#x3001;&#x5355;&#x884C;&#x3001;&#x5355;&#x4E2A;&#x8C03;&#x7528;&#x6808;&#x7EDF;&#x8BA1;&#x5185;&#x5B58;&#x5206;&#x914D;&#x60C5;&#x51B5;&#x3000;&#x3000;&#x3000;&#x3000;</p>
+<p>&#x3000;&#x3000;&#x8FD0;&#x884C;&#x73AF;&#x5883;&#xFF1A;windows 64&#x4F4D;python3.4</p>
+<blockquote>
+<p>(62280, 62920)</p>
+<p> test_pytracemalloc_use_py3.4.py:10: size=16.8 KiB, count=144, average=120 B test_pytracemalloc_use_py3.4.py:17: size=16.7 KiB, count=142, average=120 B test_pytracemalloc_use_py3.4.py:19: size=9952 B, count=100, average=100 B<br> test_pytracemalloc_use_py3.4.py:26: size=9792 B, count=102, average=96 B test_pytracemalloc_use_py3.4.py:27: size=848 B, count=1, average=848 B test_pytracemalloc_use_py3.4.py:34: size=456 B, count=1, average=456 B<br> test_pytracemalloc_use_py3.4.py:36: size=448 B, count=1, average=448 B D:\Python3.4\lib\tracemalloc.py:474: size=64 B, count=1, average=64 B</p>
+</blockquote>
+<p>&#x3000;&#x3000;&#x5982;&#x679C;&#x5C06;&#x7B2C;36&#x884C;&#x7684;&#x201C;lineno&#x201C;&#x6539;&#x6210;&#x201C;filename&#x201D;&#xFF0C;&#x90A3;&#x4E48;&#x7ED3;&#x679C;&#x5982;&#x4E0B;</p>
+<blockquote>
+<p>(62136, 62764)</p>
+<p> test_pytracemalloc_use_py3.4.py:0: size=54.5 KiB, count=491, average=114 B D:\Python3.4\lib\tracemalloc.py:0: size=64 B, count=1, average=64 B</p>
+</blockquote>
+<p> &#x3000;&#x3000;</p>
+<p>&#x3000;&#x3000;&#x6709;&#x4E86;Profile&#x7ED3;&#x679C;&#x4E4B;&#x540E;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x6765;&#x5728;&#x54EA;&#x4E2A;&#x6587;&#x4EF6;&#x4E2D;&#x6709;&#x5927;&#x91CF;&#x7684;&#x5185;&#x5B58;&#x5206;&#x914D;&#x3002;&#x4E0E;&#x6027;&#x80FD;&#x4F18;&#x5316;&#x76F8;&#x540C;&#xFF0C;&#x9020;&#x6210;&#x74F6;&#x9888;&#x7684;&#x6709;&#x4E24;&#x79CD;&#x60C5;&#x51B5;&#xFF1A;&#x5355;&#x4E2A;&#x5BF9;&#x8C61;&#x5360;&#x7528;&#x4E86;&#x5927;&#x91CF;&#x7684;&#x5185;&#x5B58;&#xFF1B;&#x540C;&#x65F6;&#x5927;&#x91CF;&#x5B58;&#x5728;&#x7684;&#x5C0F;&#x5BF9;&#x8C61;&#x3002;&#x5BF9;&#x4E8E;&#x524D;&#x8005;&#xFF0C;&#x4F18;&#x5316;&#x7684;&#x624B;&#x6BB5;&#x5E76;&#x4E0D;&#x591A;&#xFF0C;&#x60F0;&#x6027;&#x521D;&#x59CB;&#x5316;&#x5C5E;&#x6027;&#x53EF;&#x80FD;&#x6709;&#x4E00;&#x4E9B;&#x5E2E;&#x52A9;&#xFF1B;&#x800C;&#x5BF9;&#x4E8E;&#x540E;&#x8005;&#xFF0C;&#x5F53;&#x540C;&#x6837;&#x7C7B;&#x578B;&#x7684;&#x5BF9;&#x8C61;&#x5927;&#x91CF;&#x5B58;&#x5728;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;slots&#x8FDB;&#x884C;&#x4F18;&#x5316;&#x3002;</p>
+<h1 id="Slots"><a href="#Slots" class="headerlink" title="Slots"></a>Slots</h1><p>&#x3000;&#x3000;&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x5BF9;&#x8C61;&#x90FD;&#x4F7F;&#x7528;dict&#x6765;&#x5B58;&#x50A8;&#x5C5E;&#x6027;&#xFF08;&#x901A;&#x8FC7;obj.__dict__&#x67E5;&#x770B;&#xFF09;&#xFF0C;&#x800C;python&#x4E2D;&#x7684;dict&#x5927;&#x5C0F;&#x4E00;&#x822C;&#x6BD4;&#x5B9E;&#x9645;&#x5B58;&#x50A8;&#x7684;&#x5143;&#x7D20;&#x4E2A;&#x6570;&#x8981;&#x5927;&#xFF08;&#x4EE5;&#x6B64;&#x964D;&#x4F4E;hash&#x51B2;&#x7A81;&#x6982;&#x7387;&#xFF09;&#xFF0C;&#x56E0;&#x6B64;&#x4F1A;&#x6D6A;&#x8D39;&#x4E00;&#x5B9A;&#x7684;&#x7A7A;&#x95F4;&#x3002;&#x5728;&#x65B0;&#x5F0F;&#x7C7B;&#x4E2D;&#x4F7F;&#x7528;__slots__&#xFF0C;&#x5C31;&#x662F;&#x544A;&#x8BC9;Python&#x865A;&#x62DF;&#x673A;&#xFF0C;&#x8FD9;&#x79CD;&#x7C7B;&#x578B;&#x7684;&#x5BF9;&#x8C61;&#x53EA;&#x4F1A;&#x7528;&#x5230;&#x8FD9;&#x4E9B;&#x5C5E;&#x6027;&#xFF0C;&#x56E0;&#x6B64;&#x865A;&#x62DF;&#x673A;&#x9884;&#x7559;&#x8DB3;&#x591F;&#x7684;&#x7A7A;&#x95F4;&#x5C31;&#x884C;&#x4E86;&#xFF0C;&#x5982;&#x679C;&#x58F0;&#x660E;&#x4E86;__slots__&#xFF0C;&#x90A3;&#x4E48;&#x5BF9;&#x8C61;&#x5C31;&#x4E0D;&#x4F1A;&#x518D;&#x6709;__dict__&#x5C5E;&#x6027;&#x3002;</p>
+<p>&#x3000;&#x3000;&#x4F7F;&#x7528;slots&#x5230;&#x5E95;&#x80FD;&#x5E26;&#x6765;&#x591A;&#x5C11;&#x5185;&#x5B58;&#x4F18;&#x5316;&#x5462;&#xFF0C;&#x9996;&#x5148;&#x770B;&#x770B;<a href="/external_links/5cb532d7c0dcfb8d6f1e86672e66fd5e.html" target="blank" rel="noopener">&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;</a>&#xFF0C;&#x5BF9;&#x4E8E;&#x4E00;&#x4E2A;&#x53EA;&#x6709;&#x4E09;&#x4E2A;&#x5C5E;&#x6027;&#x7684;Image&#x7C7B;&#xFF0C;&#x4F7F;&#x7528;__slots__&#x4E4B;&#x540E;&#x5185;&#x5B58;&#x4ECE;25.5G&#x4E0B;&#x964D;&#x5230;16.2G&#xFF0C;&#x8282;&#x7701;&#x4E86;9G&#x7684;&#x7A7A;&#x95F4;&#xFF01;</p>
+<p>&#x3000;&#x3000;<img src alt>)<img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/2f55eeb79ea0a132ad2b85a8ce9bc53bc59a1b89412fd68c2d63392e890b3fc4" alt></p>
+<p>&#x3000;&#x3000;&#x5230;&#x5E95;&#x80FD;&#x7701;&#x591A;&#x5C11;&#xFF0C;&#x53D6;&#x51B3;&#x4E8E;&#x7C7B;&#x81EA;&#x8EAB;&#x6709;&#x591A;&#x5C11;&#x5C5E;&#x6027;&#x3001;&#x5C5E;&#x6027;&#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x4EE5;&#x53CA;&#x540C;&#x65F6;&#x5B58;&#x5728;&#x591A;&#x5C11;&#x4E2A;&#x7C7B;&#x7684;&#x5B9E;&#x4F8B;&#x3002;&#x4E0B;&#x9762;&#x901A;&#x8FC7;&#x4E00;&#x6BB5;&#x7B80;&#x5355;&#x4EE3;&#x7801;&#x6D4B;&#x8BD5;&#x4E00;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801; 1 # -*- coding: utf-8 -*-</span><br><span class="line"> 2 import sys</span><br><span class="line"> 3 import tracemalloc</span><br><span class="line"> 4 </span><br><span class="line"> 5 NUM_OF_ATTR =  3 #3 # 10 # 30 #90</span><br><span class="line"> 6 NUM_OF_INSTANCE = 10 # 10 # 100</span><br><span class="line"> 7  </span><br><span class="line"> 8 class Slots(object):</span><br><span class="line"> 9     __slots__ = [&apos;attr%s&apos;%i for i in range(NUM_OF_ATTR)]</span><br><span class="line">10     def __init__(self):</span><br><span class="line">11         value_lst = (1.0, True, [], {}, ())</span><br><span class="line">12         for i in range(NUM_OF_ATTR):</span><br><span class="line">13             setattr(self, &apos;attr%s&apos;%i, value_lst[i % len(value_lst)])</span><br><span class="line">14 </span><br><span class="line">15 </span><br><span class="line">16 class NoSlots(object):</span><br><span class="line">17     def __init__(self):</span><br><span class="line">18         value_lst = (1.0, True, [], {}, ())</span><br><span class="line">19         for i in range(NUM_OF_ATTR):</span><br><span class="line">20             setattr(self, &apos;attr%s&apos;%i, value_lst[i % len(value_lst)])</span><br><span class="line">21 </span><br><span class="line">22 if __name__ == &apos;__main__&apos;:</span><br><span class="line">23     clz = Slots if len(sys.argv) &gt; 1 else NoSlots</span><br><span class="line">24     tracemalloc.start()</span><br><span class="line">25     objs = [clz() for i in range(NUM_OF_INSTANCE)]</span><br><span class="line">26     print(tracemalloc.get_traced_memory()[0])</span><br></pre></td></tr></table></figure>
+
+<p>&#x3000;&#x3000;</p>
+<p>&#x3000;&#x3000;&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x4E3B;&#x8981;&#x662F;&#x5728;&#x6BCF;&#x4E2A;&#x5B9E;&#x4F8B;&#x7684;&#x5C5E;&#x6027;&#x6570;&#x76EE;&#x3001;&#x5E76;&#x53D1;&#x5B58;&#x5728;&#x7684;&#x5B9E;&#x4F8B;&#x6570;&#x76EE;&#x4E24;&#x4E2A;&#x7EF4;&#x5EA6;&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#xFF0C;&#x5E76;&#x6CA1;&#x6709;&#x6D4B;&#x8BD5;&#x4E0D;&#x540C;&#x7684;&#x5C5E;&#x6027;&#x7C7B;&#x578B;&#x3002;&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#x8868;&#xFF1A;</p>
+<p>&#x3000;&#x3000;<img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/0585ce1e49208f68055231fd483ca413d797e650b442397849d69729f22e2a68" alt></p>
+<p>&#x3000;&#x3000;&#x767E;&#x5206;&#x6BD4;&#x4E3A;&#x5185;&#x5B58;&#x4F18;&#x5316;&#x767E;&#x5206;&#x6BD4;&#xFF0C;&#x8BA1;&#x7B97;&#x516C;&#x5F0F;&#x4E3A;(b - a) / b&#xFF0C; &#x5176;&#x4E2D;b&#x4E3A;&#x6CA1;&#x6709;&#x4F7F;&#x7528;__slots__&#x65F6;&#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#xFF0C; a&#x4E3A;&#x4F7F;&#x7528;&#x4E86;__slots__&#x65F6;&#x5206;&#x914D;&#x7684;&#x5185;&#x5B58;&#x3002;</p>
+<p>&#x3000;&#x3000;</p>
+<h2 id="&#x6CE8;&#x610F;&#x4E8B;&#x9879;"><a href="#&#x6CE8;&#x610F;&#x4E8B;&#x9879;" class="headerlink" title="&#x6CE8;&#x610F;&#x4E8B;&#x9879;"></a>&#x6CE8;&#x610F;&#x4E8B;&#x9879;</h2><p>&#x3000;&#x3000;&#x5173;&#x4E8E;__slots__&#xFF0C;Python&#x6587;&#x6863;&#x6709;&#x975E;&#x5E38;&#x8BE6;&#x5C3D;&#x7684;&#x4ECB;&#x7ECD;&#xFF0C;&#x8FD9;&#x91CC;&#x53EA;&#x5F3A;&#x8C03;&#x51E0;&#x70B9;&#x6CE8;&#x610F;&#x4E8B;&#x9879;</p>
+<p>&#x3000;&#x3000;<strong>&#x7B2C;&#x4E00;</strong>&#xFF1A;&#x57FA;&#x7C7B;&#x548C;&#x5B50;&#x7C7B;&#x90FD;&#x5FC5;&#x987B;__slots__&#xFF0C;&#x5373;&#x4F7F;&#x57FA;&#x7C7B;&#x6216;&#x8005;&#x5B50;&#x7C7B;&#x6CA1;&#x6709;&#x5C5E;&#x6027;</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>class Base(object):</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p> &#x2026;     pass &#x2026; &gt;&gt;&gt; class Derived(Base): &#x2026;     __slots__ = (&#x2018;a&#x2019;, ) &#x2026; &gt;&gt;&gt; d.__slots__ (&#x2018;a&#x2019;,) &gt;&gt;&gt; getattr(d, &#x2018;__dict__&#x2018;, &#x2018;No Dict&#x2019;)<br> {}</p>
+</blockquote>
+<p>&#x3000;&#x3000;&#x4ECE;&#x4E0A;&#x9762;&#x7684;&#x793A;&#x4F8B;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5B50;&#x7C7B;&#x7684;&#x5BF9;&#x8C61;&#x8FD8;&#x662F;&#x6709;__dict__&#x5C5E;&#x6027;&#xFF0C;&#x539F;&#x56E0;&#x5C31;&#x5728;&#x4E8E;&#x57FA;&#x7C7B;&#x6CA1;&#x6709;&#x58F0;&#x660E;__slots__&#x3002;&#x56E0;&#x6B64;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x770B;&#x5B50;&#x7C7B;&#x7684;&#x5B9E;&#x4F8B;&#x6709;&#x6CA1;&#x6709;__dict__&#x5C5E;&#x6027;&#x6765;&#x5224;&#x65AD;slots&#x7684;&#x4F7F;&#x7528;&#x662F;&#x5426;&#x6B63;&#x786E;</p>
+<p>&#x3000;&#x3000;<strong>&#x7B2C;&#x4E8C;</strong>&#xFF1A;&#x5B50;&#x7C7B;&#x4F1A;&#x7EE7;&#x627F;&#x57FA;&#x7C7B;&#x7684;__slots__</p>
+<p> &#x3000;&#x3000;&#x66F4;&#x51C6;&#x786E;&#x7684;&#x8BF4;&#xFF0C;&#x5982;&#x679C;&#x8BBF;&#x95EE;&#x5C5E;&#x6027;&#x7684;&#x65F6;&#x5019;&#x6CA1;&#x6709;&#x5728;&#x5B50;&#x7C7B;&#x7684;__slots__&#x627E;&#x5230;&#xFF0C;&#x4F1A;&#x7EE7;&#x7EED;&#x5728;&#x57FA;&#x7C7B;&#x7684;__slots__&#x67E5;&#x627E;&#xFF0C;&#x56E0;&#x4E3A;Python&#x4F7F;&#x7528;descriptor&#x5728;&#x7C7B;&#x8FD9;&#x4E2A;&#x5C42;&#x7EA7;&#x5B9E;&#x73B0;__slots__&#x7684;&#xFF0C;&#x5177;&#x4F53;&#x53EF;&#x4EE5;&#x53C2;&#x89C1;&#x300A;<a href="/external_links/b47011a263c4772416632026209e128c.html" target="blank" rel="noopener">python&#x5C5E;&#x6027;&#x67E5;&#x627E; &#x6DF1;&#x5165;&#x7406;&#x89E3;</a>&#x300B;&#x4E00;&#x6587;</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>class Base(object):</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p> &#x2026;     __slots__ = (&#x2018;a&#x2019;,) &#x2026; &gt;&gt;&gt; class Derived(Base): &#x2026;     __slots__ = (&#x2018;b&#x2019;, ) &#x2026; &gt;&gt;&gt; d = Derived()</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>d.__slots__ (&#x2018;b&#x2019;,) &gt;&gt;&gt; getattr(d, &#x2018;__dict__&#x2018;, &#x2018;No Dict&#x2019;) &#x2018;No Dict&#x2019; &gt;&gt;&gt; d.a = 1 &gt;&gt;&gt; d.c = 0 Traceback (most recent call last):<br>   File &#x201C;<stdin>&#x201C;, line 1, in <module> AttributeError: &#x2018;Derived&#x2019; object has no attribute &#x2018;c&#x2019;</module></stdin></p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+<h2 id="objgraph"><a href="#objgraph" class="headerlink" title="objgraph"></a>objgraph</h2><p> &#x3000;&#x3000;&#x5728;&#x5927;&#x578B;&#x5DE5;&#x7A0B;&#x4E2D;&#xFF0C;&#x600E;&#x4E48;&#x6392;&#x67E5;&#x6709;&#x54EA;&#x4E9B;&#x5927;&#x91CF;&#x5B58;&#x5728;&#x7684;&#x5BF9;&#x8C61;&#x5462;&#xFF0C;&#x6BD5;&#x7ADF;&#x540C;&#x4E00;&#x4E2A;&#x7C7B;&#x578B;&#x5B58;&#x5728;&#x7684;&#x5BF9;&#x8C61;&#x8D8A;&#x591A;&#xFF0C;&#x4F18;&#x5316;&#x8D8A;&#x6709;&#x6548;&#x679C;&#x3002;&#x9664;&#x4E86;&#x76F4;&#x63A5;&#x770B;&#x4EE3;&#x7801;&#xFF0C;&#x6700;&#x597D;&#x4F7F;&#x7684;&#x5C31;&#x662F;&#x4F7F;&#x7528;objgraph.py&#x7684;show_most_common_types(N)&#x51FD;&#x6570;&#xFF0C;&#x8BE5;&#x51FD;&#x6570;&#x8FD4;&#x56DE;Python gc&#x7BA1;&#x7406;&#x7684;&#x6240;&#x6709;&#x5BF9;&#x8C61;&#x4E2D;&#xFF0C;&#x6570;&#x76EE;&#x524D;N&#x591A;&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x5728;&#x6392;&#x9664;&#x6389;python builtin&#x5BF9;&#x8C61;&#x4E4B;&#x540E;&#xFF0C;&#x5269;&#x4E0B;&#x7684;&#x5C31;&#x662F;&#x53EF;&#x4F18;&#x5316;&#x7684;&#x5BF9;&#x8C61;&#x3002;&#x6BD4;&#x5982;&#x5728;&#x6700;&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x4E2D;&#xFF1A;&#x5728;&#x6700;&#x540E;&#x52A0;&#x4E0A;&#x8FD9;&#x4E48;&#x4E24;&#x53E5;&#xFF1A;</p>
+<blockquote>
+<p>import objgraph</p>
+<p> objgraph.show_most_common_types(25)</p>
+</blockquote>
+<p> &#x3000;&#x3000;&#x8F93;&#x51FA;&#x5982;&#x4E0B;&#xFF1A;<br> &#x3000;&#x3000;<img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/03583ae694490a61b3af0b90d63bcf943ff4e3cde01082f95f7907866d02159b" alt></p>
+<h1 id="&#x518D;&#x8BBA;Python-dict"><a href="#&#x518D;&#x8BBA;Python-dict" class="headerlink" title="&#x518D;&#x8BBA;Python dict"></a>&#x518D;&#x8BBA;Python dict</h1><p>&#x3000;&#x3000;&#x524D;&#x9762;&#x4ECB;&#x7ECD;slots&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C31;&#x63D0;&#x5230;Python&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x5BF9;&#x8C61;&#x4E2D;&#x901A;&#x8FC7;dict&#x6765;&#x7BA1;&#x7406;&#x5C5E;&#x6027;&#x3002;&#x8FD9;&#x79CD;&#x673A;&#x5236;&#x6781;&#x5927;&#x7684;&#x63D0;&#x9AD8;&#x4E86;Python&#x7684;&#x7075;&#x6D3B;&#x6027; &#x2013; &#x53EF;&#x4EE5;&#x968F;&#x65F6;&#x7ED9;&#x5BF9;&#x8C61;&#x589E;&#x52A0;&#x5C5E;&#x6027;&#xFF0C;&#x4F46;&#x662F;&#x5176;&#x5B9E;&#x73B0;&#x673A;&#x5236;&#x4E5F;&#x5E26;&#x6765;&#x4E86;&#x5185;&#x5B58;&#x4E0A;&#x7684;&#x6D6A;&#x8D39;&#x3002;&#x4E0D;&#x7BA1;&#x662F;python&#x6E90;&#x7801;&#xFF0C;&#x8FD8;&#x662F;Python&#x7A0B;&#x5E8F;&#xFF0C;&#x90FD;&#x5927;&#x91CF;&#x4F7F;&#x7528;&#x4E86;dict&#xFF0C;&#x56E0;&#x6B64;&#x8FD9;&#x90E8;&#x5206;&#x5185;&#x5B58;&#x6D6A;&#x8D39;&#x4E0D;&#x5BB9;&#x5C0F;&#x89C6;&#x3002;</p>
+<p>&#x3000;&#x3000;python&#x4E2D;&#x7684;dict&#x4F7F;&#x7528;&#x7684;&#x662F;&#x6563;&#x5217;&#x8868;&#xFF08;&#x7C7B;&#x4F3C;C++&#x4E2D;&#x7684;std::unordered_map&#xFF09;&#xFF0C;&#x5F53;&#x8BA1;&#x7B97;&#x51FA;&#x7684;hash&#x503C;&#x51B2;&#x7A81;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x91C7;&#x7528;&#x5F00;&#x653E;&#x5730;&#x5740;&#x6CD5;&#x89E3;&#x51B3;&#x51B2;&#x7A81;&#xFF08;&#x53E6;&#x4E00;&#x79CD;&#x5E38;&#x89C1;&#x7684;&#x51B2;&#x7A81;&#x89E3;&#x51B3;&#x7B97;&#x6CD5;&#x662F;&#x94FE;&#x8868;&#x6CD5;&#xFF09;&#x3002;&#x4E3A;&#x4E86;&#x964D;&#x4F4E;&#x51B2;&#x7A81;&#x6982;&#x7387;&#xFF0C;&#x5F53;&#x88C5;&#x586B;&#x56E0;&#x5B50;&#xFF08;&#x5B9E;&#x9645;&#x5B58;&#x50A8;&#x7684;&#x5143;&#x7D20;&#x4E0E;&#x6563;&#x5217;&#x8868;&#x957F;&#x5EA6;&#x7684;&#x6BD4;&#x503C;&#xFF09;&#x8D85;&#x8FC7;2/3&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x5BF9;&#x6563;&#x5217;&#x8868;&#x8FDB;&#x884C;&#x6269;&#x5BB9;&#xFF0C;&#x56E0;&#x6B64;&#x6563;&#x5217;&#x8868;&#x4E2D;&#x4E00;&#x5B9A;&#x4F1A;&#x5B58;&#x5728;&#x4E00;&#x4E9B;&#x672A;&#x4F7F;&#x7528;&#x7684;&#x69FD;&#x3002;</p>
+<p>&#x3000;&#x3000;&#x4E0B;&#x9762;&#x7B80;&#x5355;&#x770B;&#x770B;PyDictObject&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF08;python2.7.3 dictobject.h&#xFF09;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801; 1 #define PyDict_MINSIZE 8</span><br><span class="line"> 2 </span><br><span class="line"> 3 typedef struct {</span><br><span class="line"> 4     /* Cached hash code of me_key.  Note that hash codes are C longs.</span><br><span class="line"> 5      * We have to use Py_ssize_t instead because dict_popitem() abuses</span><br><span class="line"> 6      * me_hash to hold a search finger.</span><br><span class="line"> 7      */</span><br><span class="line"> 8     Py_ssize_t me_hash;</span><br><span class="line"> 9     PyObject *me_key;</span><br><span class="line">10     PyObject *me_value;</span><br><span class="line">11 } PyDictEntry;</span><br><span class="line">12 </span><br><span class="line">13 </span><br><span class="line">14 typedef struct _dictobject PyDictObject;</span><br><span class="line">15 struct _dictobject {</span><br><span class="line">16     PyObject_HEAD</span><br><span class="line">17     Py_ssize_t ma_fill;  /* # Active + # Dummy */</span><br><span class="line">18     Py_ssize_t ma_used;  /* # Active */</span><br><span class="line">19 </span><br><span class="line">20     /* The table contains ma_mask + 1 slots, and that&apos;s a power of 2.</span><br><span class="line">21      * We store the mask instead of the size because the mask is more</span><br><span class="line">22      * frequently needed.</span><br><span class="line">23      */</span><br><span class="line">24     Py_ssize_t ma_mask;</span><br><span class="line">25 </span><br><span class="line">26     /* ma_table points to ma_smalltable for small tables, else to</span><br><span class="line">27      * additional malloc&apos;ed memory.  ma_table is never NULL!  This rule</span><br><span class="line">28      * saves repeated runtime null-tests in the workhorse getitem and</span><br><span class="line">29      * setitem calls.</span><br><span class="line">30      */</span><br><span class="line">31     PyDictEntry *ma_table;</span><br><span class="line">32     PyDictEntry *(*ma_lookup)(PyDictObject *mp, PyObject *key, long hash);</span><br><span class="line">33     PyDictEntry ma_smalltable[PyDict_MINSIZE];</span><br><span class="line">34 };</span><br></pre></td></tr></table></figure>
+
+<p> &#x3000;&#x3000;&#x4ECE;&#x5B9A;&#x4E49;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x9664;&#x4E86;&#x56FA;&#x5B9A;&#x7684;&#x90E8;&#x5206;&#xFF08;&#x51E0;&#x4E2A;Py_ssize_t&#xFF09;&#xFF0C;PyDictObject&#x4E2D;&#x4E3B;&#x8981;&#x662F;PyDictEntry&#x5BF9;&#x8C61;&#xFF0C;PyDictEntrty&#x5305;&#x542B;&#x4E00;&#x4E2A;Py_ssize_t&#xFF08;int&#xFF09;&#x548C;&#x4E24;&#x4E2A;&#x6307;&#x9488;&#x3002;&#x4E0A;&#x9762;&#x6E90;&#x7801;&#x4E2D;&#x7684;&#x6CE8;&#x91CA;&#xFF08;&#x7B2C;26&#x884C;&#xFF09;&#x6307;&#x51FA;&#xFF0C;&#x5F53;dict&#x7684;&#x5143;&#x7D20;&#x6BD4;&#x8F83;&#x5C11;&#x65F6;&#xFF0C;ma_table&#x6307;&#x5411;ma_smalltable&#xFF0C;&#x5F53;&#x5143;&#x7D20;&#x589E;&#x591A;&#x65F6;&#xFF0C;ma_table&#x4F1A;&#x6307;&#x5411;&#x65B0;&#x7533;&#x8BF7;&#x7684;&#x7A7A;&#x95F4;&#x3002;ma_smalltable&#x7684;&#x4F5C;&#x7528;&#x5728;&#x4E8E;Python&#xFF08;&#x4E0D;&#x7BA1;&#x662F;&#x6E90;&#x7801;&#x8FD8;&#x662F;&#x4EE3;&#x7801;&#xFF09;&#x90FD;&#x5927;&#x91CF;&#x4F7F;&#x7528;dict&#xFF0C;&#x4E00;&#x822C;&#x6765;&#x8BF4;&#xFF0C;&#x5B58;&#x50A8;&#x7684;&#x5143;&#x7D20;&#x4E5F;&#x4E0D;&#x4F1A;&#x592A;&#x591A;&#xFF0C;&#x56E0;&#x6B64;Python&#x5C31;&#x5148;&#x5F00;&#x8F9F;&#x597D;PyDict_MINSIZE(&#x9ED8;&#x8BA4;&#x4E3A;8)&#x4E2A;&#x7A7A;&#x95F4;&#x3002;</p>
+<p>&#x3000;&#x3000;&#x4E3A;&#x4EC0;&#x4E48;&#x8BF4;PyDictObject&#x5B58;&#x5728;&#x6D6A;&#x8D39;&#x5462;&#xFF0C;PyDictEntry&#x5728;32&#x4F4D;&#x4E0B;&#x4E5F;&#x6709;12&#x4E2A;&#x5B57;&#x8282;&#xFF0C;&#x90A3;&#x4E48;&#x5373;&#x4F7F;&#x5728;ma_smalltable&#xFF08;ma_table&#xFF09;&#x4E2D;&#x5927;&#x91CF;&#x7684;&#x4F4D;&#x7F6E;&#x6CA1;&#x6709;&#x88AB;&#x4F7F;&#x7528;&#x65F6;&#xFF0C;&#x4E5F;&#x8981;&#x5360;&#x7528;&#x8FD9;&#x4E48;&#x591A;&#x5B57;&#x8282;&#x3002;&#x7528;<a href="/external_links/7d46e1c4ee1852a28588cf0ab0e51116.html" target="blank" rel="noopener">&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;</a>&#x4E2D;&#x7684;&#x4F8B;&#x5B50;&#xFF1A;</p>
+<p>&#x3000;&#x3000;&#x5047;&#x8BBE;&#x6709;&#x8FD9;&#x4E48;&#x4E00;&#x4E2A;dict&#xFF1A; &#x3000;&#x3000;d = {&#x2018;timmy&#x2019;: &#x2018;red&#x2019;, &#x2018;barry&#x2019;: &#x2018;green&#x2019;, &#x2018;guido&#x2019;: &#x2018;blue&#x2019;}</p>
+<p>&#x3000;&#x3000;&#x5728;Python&#x6E90;&#x7801;&#x4E2D;&#x7684;&#x89C6;&#x56FE;&#x5C31;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;</p>
+<blockquote>
+<h1 id="&#x4E0B;&#x9762;&#x7684;entries&#x5C31;&#x662F;ma-smalltable"><a href="#&#x4E0B;&#x9762;&#x7684;entries&#x5C31;&#x662F;ma-smalltable" class="headerlink" title="&#x3000;&#x4E0B;&#x9762;&#x7684;entries&#x5C31;&#x662F;ma_smalltable"></a>&#x3000;&#x4E0B;&#x9762;&#x7684;entries&#x5C31;&#x662F;ma_smalltable</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt; &#x590D;&#x5236;&#x4EE3;&#x7801;entries = [[&apos;--&apos;, &apos;--&apos;, &apos;--&apos;],</span><br><span class="line">&gt;            [-8522787127447073495, &apos;barry&apos;, &apos;green&apos;],</span><br><span class="line">&gt;            [&apos;--&apos;, &apos;--&apos;, &apos;--&apos;],</span><br><span class="line">&gt;            [&apos;--&apos;, &apos;--&apos;, &apos;--&apos;],</span><br><span class="line">&gt;            [&apos;--&apos;, &apos;--&apos;, &apos;--&apos;],</span><br><span class="line">&gt;            [-9092791511155847987, &apos;timmy&apos;, &apos;red&apos;],</span><br><span class="line">&gt;            [&apos;--&apos;, &apos;--&apos;, &apos;--&apos;],</span><br><span class="line">&gt;            [-6480567542315338377, &apos;guido&apos;, &apos;blue&apos;]]</span><br><span class="line">&gt; </span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p> &#x3000;&#x3000;&#x7136;&#x800C;&#xFF0C;&#x5B8C;&#x5168;&#x53EF;&#x4EE5;&#x8FD9;&#x4E48;&#x5B58;&#x50A8;&#xFF1A;</p>
+<blockquote>
+<p>indices = [None, 1, None, None, None, 0, None, 2]</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; &#x590D;&#x5236;&#x4EE3;&#x7801;entries =  [[-9092791511155847987, &apos;timmy&apos;, &apos;red&apos;],</span><br><span class="line">&gt;                 [-8522787127447073495, &apos;barry&apos;, &apos;green&apos;],</span><br><span class="line">&gt;                 [-6480567542315338377, &apos;guido&apos;, &apos;blue&apos;]]</span><br><span class="line">&gt; </span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>&#x3000;&#x3000;indices&#x7684;&#x4F5C;&#x7528;&#x7C7B;&#x4F3C;ma_smalltable&#xFF0C;&#x4F46;&#x53EA;&#x5B58;&#x50A8;&#x4E00;&#x4E2A;&#x6570;&#x7EC4;&#x7684;&#x7D22;&#x5F15;&#x503C;&#xFF0C;&#x6570;&#x7EC4;&#x53EA;&#x5B58;&#x50A8;&#x5B9E;&#x9645;&#x5B58;&#x5728;&#x7684;&#x5143;&#x7D20;&#xFF08;PyDictEntry&#xFF09;&#xFF0C;&#x5F53;dict&#x4E2D;&#x7684;&#x5143;&#x7D20;&#x8D8A;&#x7A00;&#x758F;&#xFF0C;&#x76F8;&#x6BD4;&#x4E0A;&#x4E00;&#x79CD;&#x5B58;&#x50A8;&#x65B9;&#x5F0F;&#x4F7F;&#x7528;&#x7684;&#x5185;&#x5B58;&#x8D8A;&#x5C11;&#x3002;&#x800C;&#x4E14;&#xFF0C;&#x8FD9;&#x79CD;&#x5B9E;&#x73B0;&#xFF0C; dict&#x5C31;&#x662F;&#x6709;&#x5E8F;&#x7684;&#xFF08;&#x6309;&#x63D2;&#x5165;&#x65F6;&#x95F4;&#x6392;&#x5E8F;&#xFF09;</p>
+<p>&#x3000;&#x3000;&#x8FD9;&#x5C31;&#x662F;python3.6&#x4E2D;&#x65B0;&#x7684;dict&#x5B9E;&#x73B0;&#xFF0C;Compact dict! Stackoverflow&#x4E0A;&#x4E5F;&#x6709;&#x76F8;&#x5173;<a href="/external_links/fbd7927005013d754151c26667349f18.html" target="blank" rel="noopener">&#x8BA8;&#x8BBA;</a>&#x3002;</p>
+<h1 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h1><p> &#x3000;&#x3000;&#x672C;&#x6587;&#x4E2D;&#x4ECB;&#x7ECD;&#x4E86;Python&#x5185;&#x5B58;&#x4F18;&#x5316;&#x7684;Profile&#x5DE5;&#x5177;&#xFF0C;&#x6700;&#x6709;&#x6548;&#x7684;&#x4F18;&#x5316;&#x65B9;&#x6CD5;&#xFF1A;&#x4F7F;&#x7528;slots&#xFF0C;&#x4E5F;&#x4ECB;&#x7ECD;&#x4E86;&#x5728;python3.6&#x4E2D;&#x65B0;&#x7684;dict&#x5B9E;&#x73B0;&#x3002;</p>
+<p>&#x3000;&#x3000;&#x5F53;&#x7136;&#xFF0C;&#x8FD8;&#x6709;&#x4E00;&#x4E9B;&#x826F;&#x597D;&#x7684;&#x7F16;&#x7801;&#x4E60;&#x60EF;&#x3002;&#x6BD4;&#x5982;&#x5C3D;&#x91CF;&#x4F7F;&#x7528;immutable&#x800C;&#x4E0D;&#x662F;mutable&#x5BF9;&#x8C61;&#xFF1A;&#x4F7F;&#x7528;tuple&#x800C;&#x4E0D;&#x662F;list&#xFF0C;&#x4F7F;&#x7528;frozenset&#x800C;&#x4E0D;&#x662F;set&#xFF1B;&#x53E6;&#x5916;&#xFF0C;&#x5C31;&#x662F;&#x5C3D;&#x91CF;&#x4F7F;&#x7528;&#x8FED;&#x4EE3;&#x5668;&#xFF0C;&#x6BD4;&#x5982;python2.7&#x4E2D;&#xFF0C;&#x4F7F;&#x7528;xrange&#x800C;&#x4E0D;&#x662F;range&#xFF0C;dict&#x7684;iterxx&#x7248;&#x672C;&#x3002;</p>
+<h1 id="references"><a href="#references" class="headerlink" title="references"></a>references</h1><p><a href="/external_links/0689c4bac87c439c7c954a8ab4946f23.html" target="blank" rel="noopener">pytracemalloc</a></p>
+<p><a href="/external_links/ab846f71178e484db3fb79e5912187c2.html" target="blank" rel="noopener">pep454&#xFF1A; Add a new tracemalloc module to trace Python memory allocations</a>&#x3000;</p>
+<p><a href="/external_links/5cb532d7c0dcfb8d6f1e86672e66fd5e.html" target="blank" rel="noopener">save-ram-with-python-slots/</a></p>
+<p><a href="/external_links/411d44b6826caea1ced22d3ee3140501.html" target="blank" rel="noopener">Python&#x6E90;&#x7801;&#x5206;&#x6790;-PyDictObject</a></p>
+<p><a href="/external_links/7d46e1c4ee1852a28588cf0ab0e51116.html" target="blank" rel="noopener">More compact dictionaries with faster iteration</a></p>
+<p> &#x672C;&#x6587;&#x7248;&#x6743;&#x5F52;&#x4F5C;&#x8005;xybaby&#xFF08;&#x535A;&#x6587;&#x5730;&#x5740;&#xFF1A;<a href="/external_links/708c26ba5c5c4c8a1251b8f1fa0f7ba6.html" target="blank" rel="noopener">http://www.cnblogs.com/xybaby/&#xFF09;&#x6240;&#x6709;&#xFF0C;&#x6B22;&#x8FCE;&#x8F6C;&#x8F7D;&#x548C;&#x5546;&#x7528;&#xFF0C;&#x8BF7;&#x5728;&#x6587;&#x7AE0;&#x9875;&#x9762;&#x660E;&#x663E;&#x4F4D;&#x7F6E;&#x7ED9;&#x51FA;&#x539F;&#x6587;&#x94FE;&#x63A5;&#x5E76;&#x4FDD;&#x7559;&#x6B64;&#x6BB5;&#x58F0;&#x660E;&#xFF0C;&#x5426;&#x5219;&#x4FDD;&#x7559;&#x8FFD;&#x7A76;&#x6CD5;&#x5F8B;&#x8D23;&#x4EFB;&#x7684;&#x6743;&#x5229;&#xFF0C;&#x5176;&#x4ED6;&#x4E8B;&#x9879;&#xFF0C;&#x53EF;&#x7559;&#x8A00;&#x54A8;&#x8BE2;&#x3002;</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/eb96e9b7443e356a2f3d3f1091298f5b.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Python/" rel="tag"># Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903519066193927.html" rel="next" title="RandomAccess 这个空架子有何用？">
+                <i class="fa fa-chevron-left"></i> RandomAccess 这个空架子有何用？
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903519116328974.html" rel="prev" title="Funtainer：容器即函数之美">
+                Funtainer：容器即函数之美 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Pytracemalloc"><span class="nav-number">1.</span> <span class="nav-text">Pytracemalloc</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Slots"><span class="nav-number">2.</span> <span class="nav-text">Slots</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#注意事项"><span class="nav-number">2.1.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#objgraph"><span class="nav-number">2.2.</span> <span class="nav-text">objgraph</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#再论Python-dict"><span class="nav-number">3.</span> <span class="nav-text">再论Python dict</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下面的entries就是ma-smalltable"><span class="nav-number">4.</span> <span class="nav-text">　下面的entries就是ma_smalltable</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#references"><span class="nav-number">6.</span> <span class="nav-text">references</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

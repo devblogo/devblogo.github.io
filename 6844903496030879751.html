@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="MySQL,源码,后端,SQL,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x7B80;&amp;#x4ECB;MySQL Replication&amp;#x4E3A;MySQL&amp;#x7528;&amp;#x6237;&amp;#x63D0;&amp;#x4F9B;&amp;#x4E86;&amp;#x9AD8;&amp;#x53EF;&amp;#x7528;&amp;#x6027;&amp;#x548C;&amp;#x53EF;&amp;#x6269;&amp;#x5C55;&amp;#x6027;&amp;#x89E3;&amp;#x51B3;&amp;#x65B9;&amp;#x6848;&amp;#x3002;&amp;#">
+<meta name="keywords" content="MySQL,源码,后端,SQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL · 源码分析 · MySQL 半同步复制数据一致">
+<meta property="og:url" content="https://dev.newban.cn/6844903496030879751.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x7B80;&amp;#x4ECB;MySQL Replication&amp;#x4E3A;MySQL&amp;#x7528;&amp;#x6237;&amp;#x63D0;&amp;#x4F9B;&amp;#x4E86;&amp;#x9AD8;&amp;#x53EF;&amp;#x7528;&amp;#x6027;&amp;#x548C;&amp;#x53EF;&amp;#x6269;&amp;#x5C55;&amp;#x6027;&amp;#x89E3;&amp;#x51B3;&amp;#x65B9;&amp;#x6848;&amp;#x3002;&amp;#">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/96c61b8a80810ba2fa603c5e6c4c93624740e4d976e1d9670a89ab1a7e26998e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/5413d80e3eaa994922e6f5b3e67ad7cb5819ddfaf2090b48d4e26d121cd69b9e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/ebcf38dfdc392e98053c55f87f5ed8c10c66c9d33a05012999b5629fb6838943">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/f4437670979587bc26d37808c17c2a0229d9f87939d4ea85970f86e7dd7fad8c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/1ec17e4bf11c9ed8695197e4b721bf803a61fe4b82d211103872356f8a856871">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/c8c9a81977f8f4fe2b5a861568cea497ba70fcbe92e14eba0c81dda11c1c0611">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/9271506db8155b75c93d210fb127b058979118affac2a7fa0a3ed9756e78efb8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/150f8756b4a57e816bc34e32200fee2e57e30a7b3bebcfd416efc2921f062368">
+<meta property="og:updated_time" content="2024-04-28T06:16:14.214Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL · 源码分析 · MySQL 半同步复制数据一致">
+<meta name="twitter:description" content="&amp;#x7B80;&amp;#x4ECB;MySQL Replication&amp;#x4E3A;MySQL&amp;#x7528;&amp;#x6237;&amp;#x63D0;&amp;#x4F9B;&amp;#x4E86;&amp;#x9AD8;&amp;#x53EF;&amp;#x7528;&amp;#x6027;&amp;#x548C;&amp;#x53EF;&amp;#x6269;&amp;#x5C55;&amp;#x6027;&amp;#x89E3;&amp;#x51B3;&amp;#x65B9;&amp;#x6848;&amp;#x3002;&amp;#">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/96c61b8a80810ba2fa603c5e6c4c93624740e4d976e1d9670a89ab1a7e26998e">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903496030879751.html">
+
+
+
+
+
+  <title>MySQL · 源码分析 · MySQL 半同步复制数据一致 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL · 源码分析 · MySQL 半同步复制数据一致</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-18T10:24:01+08:00">
+                2017-09-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x7B80;&#x4ECB;"><a href="#&#x7B80;&#x4ECB;" class="headerlink" title="&#x7B80;&#x4ECB;"></a>&#x7B80;&#x4ECB;</h2><p>MySQL Replication&#x4E3A;MySQL&#x7528;&#x6237;&#x63D0;&#x4F9B;&#x4E86;&#x9AD8;&#x53EF;&#x7528;&#x6027;&#x548C;&#x53EF;&#x6269;&#x5C55;&#x6027;&#x89E3;&#x51B3;&#x65B9;&#x6848;&#x3002;&#x672C;&#x6587;&#x4ECB;&#x7ECD;&#x4E86;MySQL Replication&#x7684;&#x4E3B;&#x8981;&#x53D1;&#x5C55;&#x5386;&#x7A0B;&#xFF0C;&#x7136;&#x540E;&#x901A;&#x8FC7;&#x4E09;&#x4E2A;&#x53C2;&#x6570;rpl_semi_sync_master_wait_point&#x3001;sync_binlog&#x3001;sync_relay_log&#x7684;&#x914D;&#x7F6E;&#x7B80;&#x8981;&#x5206;&#x6790;&#x4E86;MySQL&#x534A;&#x540C;&#x6B65;&#x7684;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;&#x3002;</p>
+<h2 id="MySQL-Replication&#x7684;&#x53D1;&#x5C55;"><a href="#MySQL-Replication&#x7684;&#x53D1;&#x5C55;" class="headerlink" title="MySQL Replication&#x7684;&#x53D1;&#x5C55;"></a>MySQL Replication&#x7684;&#x53D1;&#x5C55;</h2><p>&#x5728;2000&#x5E74;&#xFF0C;MySQL 3.23.15&#x7248;&#x672C;&#x5F15;&#x5165;&#x4E86;Replication&#x3002;Replication&#x4F5C;&#x4E3A;&#x4E00;&#x79CD;&#x51C6;&#x5B9E;&#x65F6;&#x540C;&#x6B65;&#x65B9;&#x5F0F;&#xFF0C;&#x5F97;&#x5230;&#x5E7F;&#x6CDB;&#x5E94;&#x7528;&#x3002;</p>
+<p>&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x7684;Replicaton&#x7684;&#x5B9E;&#x73B0;&#x6D89;&#x53CA;&#x5230;&#x4E24;&#x4E2A;&#x7EBF;&#x7A0B;&#xFF0C;&#x4E00;&#x4E2A;&#x5728;Master&#xFF0C;&#x4E00;&#x4E2A;&#x5728;Slave&#x3002;Slave&#x7684;I/O&#x548C;SQL&#x529F;&#x80FD;&#x662F;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#xFF0C;&#x4ECE;Master&#x83B7;&#x53D6;&#x5230;event&#x540E;&#x76F4;&#x63A5;apply&#xFF0C;&#x6CA1;&#x6709;relay log&#x3002;&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x4F7F;&#x5F97;&#x8BFB;&#x53D6;event&#x7684;&#x901F;&#x5EA6;&#x4F1A;&#x88AB;Slave replay&#x901F;&#x5EA6;&#x62D6;&#x6162;&#xFF0C;&#x5F53;&#x4E3B;&#x5907;&#x5B58;&#x5728;&#x8F83;&#x5927;&#x5EF6;&#x8FDF;&#x65F6;&#x5019;&#xFF0C;&#x4F1A;&#x5BFC;&#x81F4;&#x5927;&#x91CF;binary log&#x6CA1;&#x6709;&#x5907;&#x4EFD;&#x5230;Slave&#x7AEF;&#x3002;</p>
+<p>&#x5728;2002&#x5E74;&#xFF0C;MySQL 4.0.2&#x7248;&#x672C;&#x5C06;Slave&#x7AEF;event&#x8BFB;&#x53D6;&#x548C;&#x6267;&#x884C;&#x72EC;&#x7ACB;&#x6210;&#x4E24;&#x4E2A;&#x7EBF;&#x7A0B;&#xFF08;IO&#x7EBF;&#x7A0B;&#x548C;SQL&#x7EBF;&#x7A0B;&#xFF09;&#xFF0C;&#x540C;&#x65F6;&#x5F15;&#x5165;&#x4E86;relay log&#x3002;IO&#x7EBF;&#x7A0B;&#x8BFB;&#x53D6;event&#x540E;&#x5199;&#x5165;relay log&#xFF0C;SQL&#x7EBF;&#x7A0B;&#x4ECE;relay log&#x4E2D;&#x8BFB;&#x53D6;event&#x7136;&#x540E;&#x6267;&#x884C;&#x3002;&#x8FD9;&#x6837;&#x5373;&#x4F7F;SQL&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x6162;&#xFF0C;Master&#x7684;binary log&#x4E5F;&#x4F1A;&#x5C3D;&#x53EF;&#x80FD;&#x7684;&#x540C;&#x6B65;&#x5230;Slave&#x3002;&#x5F53;Master&#x5B95;&#x673A;&#xFF0C;&#x5207;&#x6362;&#x5230;Slave&#xFF0C;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0;&#x5927;&#x91CF;&#x6570;&#x636E;&#x4E22;&#x5931;&#x3002;</p>
+<p>MySQL&#x5728;2010&#x5E74;5.5&#x7248;&#x672C;&#x4E4B;&#x524D;&#xFF0C;&#x4E00;&#x76F4;&#x91C7;&#x7528;&#x7684;&#x662F;&#x5F02;&#x6B65;&#x590D;&#x5236;&#x3002;&#x4E3B;&#x5E93;&#x7684;&#x4E8B;&#x52A1;&#x6267;&#x884C;&#x4E0D;&#x4F1A;&#x7BA1;&#x5907;&#x5E93;&#x7684;&#x540C;&#x6B65;&#x8FDB;&#x5EA6;&#xFF0C;&#x5982;&#x679C;&#x5907;&#x5E93;&#x843D;&#x540E;&#xFF0C;&#x4E3B;&#x5E93;&#x4E0D;&#x5E78;crash&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x4F1A;&#x5BFC;&#x81F4;&#x6570;&#x636E;&#x4E22;&#x5931;&#x3002;</p>
+<p>MySQL&#x5728;5.5&#x4E2D;&#x5F15;&#x5165;&#x4E86;&#x534A;&#x540C;&#x6B65;&#x590D;&#x5236;&#xFF0C;&#x4E3B;&#x5E93;&#x5728;&#x5E94;&#x7B54;&#x5BA2;&#x6237;&#x7AEF;&#x63D0;&#x4EA4;&#x7684;&#x4E8B;&#x52A1;&#x524D;&#x9700;&#x8981;&#x4FDD;&#x8BC1;&#x81F3;&#x5C11;&#x4E00;&#x4E2A;&#x4ECE;&#x5E93;&#x63A5;&#x6536;&#x5E76;&#x5199;&#x5230;relay log&#x4E2D;&#x3002;&#x90A3;&#x4E48;&#x534A;&#x540C;&#x6B65;&#x590D;&#x5236;&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x505A;&#x5230;&#x4E0D;&#x4E22;&#x5931;&#x6570;&#x636E;&#x5462;&#x3002;</p>
+<p>&#x5728;2016&#x5E74;&#xFF0C;MySQL&#x5728;5.7.17&#x4E2D;&#x5F15;&#x5165;&#x4E86;Group Replication&#x3002;</p>
+<h2 id="MySQL-&#x534A;&#x540C;&#x6B65;&#x590D;&#x5236;&#x7684;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;"><a href="#MySQL-&#x534A;&#x540C;&#x6B65;&#x590D;&#x5236;&#x7684;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;" class="headerlink" title="MySQL &#x534A;&#x540C;&#x6B65;&#x590D;&#x5236;&#x7684;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;"></a>MySQL &#x534A;&#x540C;&#x6B65;&#x590D;&#x5236;&#x7684;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;</h2><h3 id="&#x6E90;&#x7801;&#x5256;&#x6790;"><a href="#&#x6E90;&#x7801;&#x5256;&#x6790;" class="headerlink" title="&#x6E90;&#x7801;&#x5256;&#x6790;"></a>&#x6E90;&#x7801;&#x5256;&#x6790;</h3><p>&#x4EE5;&#x4E0B;&#x6E90;&#x7801;&#x7248;&#x672C;&#x5747;&#x4E3A;&#x5B98;&#x65B9;MySQL 5.7&#x3002;<br> MySQL semi-sync&#x662F;&#x4EE5;&#x63D2;&#x4EF6;&#x65B9;&#x5F0F;&#x5F15;&#x5165;&#xFF0C;&#x5728;plugin/semisync&#x76EE;&#x5F55;&#x4E0B;&#x3002;&#x8FD9;&#x91CC;&#x4EE5;semi-sync&#x4E3B;&#x8981;&#x7684;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x4E3A;&#x5165;&#x53E3;&#xFF0C;&#x5B66;&#x4E60;semi-sync&#x6E90;&#x7801;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;plugin/semisync/semisync_master.cc</span><br><span class="line">403 /*******************************************************************************</span><br><span class="line">404  *</span><br><span class="line">405  * &lt;ReplSemiSyncMaster&gt; class: the basic code layer for sync-replication master.</span><br><span class="line">406  * &lt;ReplSemiSyncSlave&gt;  class: the basic code layer for sync-replication slave.</span><br><span class="line">407  *</span><br><span class="line">408  * The most important functions during semi-syn replication listed:</span><br><span class="line">409  *</span><br><span class="line">410  * Master:</span><br><span class="line">          //&#x5B9E;&#x9645;&#x7531;Ack_receiver&#x7EBF;&#x7A0B;&#x8C03;&#x7528;&#xFF0C;&#x5904;&#x7406;semi-sync&#x590D;&#x5236;&#x72B6;&#x6001;&#xFF0C;&#x83B7;&#x53D6;&#x5907;&#x5E93;&#x6700;&#x65B0;binlog&#x4F4D;&#x70B9;&#xFF0C;&#x5524;&#x9192;&#x5BF9;&#x5E94;&#x7EBF;&#x7A0B;</span><br><span class="line">411  *  . reportReplyBinlog():  called by the binlog dump thread when it receives</span><br><span class="line">412  *                          the slave&apos;s status information.</span><br><span class="line">          //&#x6839;&#x636E;semi-sync&#x8FD0;&#x884C;&#x72B6;&#x6001;&#x8BBE;&#x7F6E;&#x6570;&#x636E;&#x5305;&#x5934;semi-sync&#x6807;&#x8BB0;</span><br><span class="line">413  *  . updateSyncHeader():   based on transaction waiting information, decide</span><br><span class="line">414  *                          whether to request the slave to reply.</span><br><span class="line">          //&#x5B58;&#x50A8;&#x5F53;&#x524D;binlog &#x6587;&#x4EF6;&#x540D;&#x548C;&#x504F;&#x79FB;&#x91CF;&#xFF0C;&#x66F4;&#x65B0;&#x5F53;&#x524D;&#x6700;&#x5927;&#x7684;&#x4E8B;&#x52A1; binlog &#x4F4D;&#x7F6E;</span><br><span class="line">415  *  . writeTranxInBinlog(): called by the transaction thread when it finishes</span><br><span class="line">416  *                          writing all transaction events in binlog.</span><br><span class="line">          //&#x5B9E;&#x73B0;&#x5BA2;&#x6237;&#x7AEF;&#x540C;&#x6B65;&#x7B49;&#x5F85;&#x903B;&#x8F91;</span><br><span class="line">417  *  . commitTrx():          transaction thread wait for the slave reply.</span><br><span class="line">418  *</span><br><span class="line">419  * Slave:</span><br><span class="line">          //&#x786E;&#x8BA4;&#x7F51;&#x7EDC;&#x5305;&#x5934;&#x662F;&#x5426;&#x6709;semi-sync&#x6807;&#x8BB0;</span><br><span class="line">420  *  . slaveReadSyncHeader(): read the semi-sync header from the master, get the</span><br><span class="line">421  *                           sync status and get the payload for events.</span><br><span class="line">          //&#x7ED9;Master&#x53D1;&#x9001;ACK&#x62A5;&#x6587;</span><br><span class="line">422  *  . slaveReply():          reply to the master about the replication progress.</span><br><span class="line">423  *</span><br><span class="line">424  ******************************************************************************/</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;Ack_receiver&#x7EBF;&#x7A0B;&#xFF0C;&#x4E0D;&#x65AD;&#x904D;&#x5386;slave&#xFF0C;&#x901A;&#x8FC7;select&#x76D1;&#x542C;slave&#x7F51;&#x7EDC;&#x5305;&#xFF0C;&#x5904;&#x7406;semi-sync&#x590D;&#x5236;&#x72B6;&#x6001;&#xFF0C;&#x5524;&#x9192;&#x7B49;&#x5F85;&#x7EBF;&#x7A0B;&#x3002;</span><br><span class="line">plugin/semisync/semisync_master_ack_receiver.cc Ack_receiver::run()</span><br><span class="line">-&gt;plugin/semisync/semisync_master.cc ReplSemiSyncMaster::reportReplyPacket</span><br><span class="line">  -&gt;plugin/semisync/semisync_master.cc ReplSemiSyncMaster::reportReplyBinlog</span><br><span class="line"></span><br><span class="line">binlog Dump&#x7EBF;&#x7A0B;&#x3002;&#x5982;&#x679C;slave&#x662F;semi-slave&#xFF0C;&#x901A;&#x8FC7;add_slave&#x5C06;slave&#x6DFB;&#x52A0;&#x5230;&#x76D1;&#x542C;&#x961F;&#x5217;&#xFF0C;&#x5728;&#x53D1;&#x9001;&#x7F51;&#x7EDC;&#x5305;&#x65F6;&#x6839;&#x636E;semi-sync&#x8FD0;&#x884C;&#x72B6;&#x6001;&#x8BBE;&#x7F6E;&#x5305;&#x5934;&#x7684;semi-sync&#x6807;&#x8BB0;&#x3002;</span><br><span class="line">sql/rpl_binlog_sender.cc Binlog_sender::run()</span><br><span class="line">-&gt;sql/rpl_binlog_sender.cc Binlog_sender::send_binlog</span><br><span class="line">  -&gt;sql/rpl_binlog_sender.cc Binlog_sender::send_events</span><br><span class="line">    -&gt;sql/rpl_binlog_sender.cc Binlog_sender::before_send_hook</span><br><span class="line">      -&gt;plugin/semisync/semisync_master_plugin.cc repl_semi_before_send_event</span><br><span class="line">        -&gt;plugin/semisync/semisync_master.cc ReplSemiSyncMaster::updateSyncHeader</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;&#x63D0;&#x4EA4;&#x9636;&#x6BB5;&#xFF0C;&#x5728;flush binlog&#x540E;&#xFF0C;&#x5B58;&#x50A8;&#x5F53;&#x524D;binlog &#x6587;&#x4EF6;&#x540D;&#x548C;&#x504F;&#x79FB;&#x91CF;&#xFF0C;&#x66F4;&#x65B0;&#x5F53;&#x524D;&#x6700;&#x5927;&#x7684;&#x4E8B;&#x52A1; binlog &#x4F4D;&#x7F6E;&#x3002;</span><br><span class="line">sql/binlog.cc MYSQL_BIN_LOG::ordered_commit</span><br><span class="line"> -&gt;plugin/semisync/semisync_master_plugin.cc repl_semi_report_binlog_update//after_flush</span><br><span class="line">   -&gt;plugin/semisync/semisync_master.cc repl_semisync.writeTranxInBinlog</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;&#x63D0;&#x4EA4;&#x9636;&#x6BB5;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x7B49;&#x5F85;&#x5904;&#x7406;&#x903B;&#x8F91;&#xFF0C;&#x5206;&#x4E3A;after_sync&#x548C;after_commit&#x4E24;&#x79CD;&#x60C5;&#x51B5;</span><br><span class="line">sql/binlog.cc MYSQL_BIN_LOG::ordered_commit</span><br><span class="line">  -&gt;sql/binlog.cc process_after_commit_stage_queue || call_after_sync_hook</span><br><span class="line">    -&gt;plugin/semisync/semisync_master_plugin.cc repl_semi_report_commit || repl_semi_report_binlog_sync</span><br><span class="line">      -&gt;plugin/semisync/semisync_master.cc ReplSemiSyncMaster::commitTrx</span><br><span class="line"></span><br><span class="line">Slave IO&#x7EBF;&#x7A0B;&#xFF0C;&#x8BFB;&#x53D6;&#x6570;&#x636E;&#x540E;&#x540E;&#x68C0;&#x67E5;&#x5305;&#x5934;&#x662F;&#x5426;&#x6709;semi-sync&#x6807;&#x8BB0;&#x3002;</span><br><span class="line">sql/rpl_slave.cc handle_slave_io</span><br><span class="line">  -&gt;plugin/semisync/semisync_slave_plugin.cc repl_semi_slave_read_event</span><br><span class="line">    -&gt;plugin/semisync/semisync_slave.cc ReplSemiSyncSlave::slaveReadSyncHeader</span><br><span class="line"></span><br><span class="line">Slave IO&#x7EBF;&#x7A0B;&#xFF0C;&#x5728;queue event&#x540E;&#xFF0C;&#x5728;&#x9700;&#x8981;&#x56DE;&#x590D;Master ACK&#x62A5;&#x6587;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x56DE;&#x590D;Master ACK&#x62A5;&#x6587;&#x3002;</span><br><span class="line">sql/rpl_slave.cc handle_slave_io</span><br><span class="line">  -&gt;plugin/semisync/semisync_slave_plugin.cc repl_semi_slave_queue_event</span><br><span class="line">    -&gt;plugin/semisync/semisync_slave.cc ReplSemiSyncSlave::slaveReply</span><br></pre></td></tr></table></figure>
+
+<p>&#x9996;&#x5148;&#x534A;&#x540C;&#x6B65;&#x65B9;&#x5F0F;&#xFF0C;&#x4E3B;&#x5E93;&#x5728;&#x7B49;&#x5F85;&#x5907;&#x5E93;ack&#x65F6;&#x5019;&#xFF0C;&#x5982;&#x679C;&#x8D85;&#x65F6;&#x4F1A;&#x9000;&#x5316;&#x4E3A;&#x5F02;&#x6B65;&#xFF0C;&#x8FD9;&#x5C31;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x6570;&#x636E;&#x4E22;&#x5931;&#x3002;&#x5728;&#x63A5;&#x4E0B;&#x6765;&#x5206;&#x6790;&#x4E2D;&#xFF0C;&#x5148;&#x5047;&#x8BBE;rpl_semi_sync_master_timeout&#x8DB3;&#x591F;&#x5927;&#xFF0C;&#x4E0D;&#x4F1A;&#x9000;&#x5316;&#x4E3A;&#x5F02;&#x6B65;&#x65B9;&#x5F0F;&#x3002;</p>
+<p>&#x8FD9;&#x91CC;&#x901A;&#x8FC7;&#x4E09;&#x4E2A;&#x53C2;&#x6570;rpl_semi_sync_master_wait_point&#x3001;sync_binlog&#x3001;sync_relay_log&#x7684;&#x914D;&#x7F6E;&#x6765;&#x5BF9;semi-sync&#x505A;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;&#x7684;&#x5206;&#x6790;&#x3002;</p>
+<h3 id="rpl-semi-sync-master-wait-point&#x7684;&#x914D;&#x7F6E;"><a href="#rpl-semi-sync-master-wait-point&#x7684;&#x914D;&#x7F6E;" class="headerlink" title="rpl_semi_sync_master_wait_point&#x7684;&#x914D;&#x7F6E;"></a>rpl_semi_sync_master_wait_point&#x7684;&#x914D;&#x7F6E;</h3><h4 id="&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;"><a href="#&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;" class="headerlink" title="&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;"></a>&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;plugin/semisync/semisync_master_plugin.cc</span><br><span class="line"></span><br><span class="line">68 int repl_semi_report_binlog_sync(Binlog_storage_param *param,</span><br><span class="line">69                                  const char *log_file,</span><br><span class="line">70                                  my_off_t log_pos)</span><br><span class="line">71 {</span><br><span class="line">72   if (rpl_semi_sync_master_wait_point == WAIT_AFTER_SYNC)</span><br><span class="line">73     return repl_semisync.commitTrx(log_file, log_pos);</span><br><span class="line">74   return 0;</span><br><span class="line">75 }</span><br><span class="line"></span><br><span class="line">97 int repl_semi_report_commit(Trans_param *param)</span><br><span class="line">   ...</span><br><span class="line">102   if (rpl_semi_sync_master_wait_point == WAIT_AFTER_COMMIT &amp;&amp;</span><br><span class="line">106     return repl_semisync.commitTrx(binlog_name, param-&gt;log_pos);</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x914D;&#x7F6E;&#x4E3A;WAIT-AFTER-COMMIT"><a href="#&#x914D;&#x7F6E;&#x4E3A;WAIT-AFTER-COMMIT" class="headerlink" title="&#x914D;&#x7F6E;&#x4E3A;WAIT_AFTER_COMMIT"></a>&#x914D;&#x7F6E;&#x4E3A;WAIT_AFTER_COMMIT</h4><p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/96c61b8a80810ba2fa603c5e6c4c93624740e4d976e1d9670a89ab1a7e26998e" alt="after_commit.png"><br> &#x5F53;rpl_semi_sync_master_wait_point&#x4E3A;WAIT_AFTER_COMMIT&#x65F6;&#xFF0C;commitTrx&#x7684;&#x8C03;&#x7528;&#x5728;engine&#x5C42;commit&#x4E4B;&#x540E;&#xFF08;&#x5728;ordered_commit&#x51FD;&#x6570;&#x4E2D;process_after_commit_stage_queue&#x8C03;&#x7528;&#xFF09;&#xFF0C;&#x5982;&#x4E0A;&#x56FE;&#x6240;&#x793A;&#x3002;&#x5373;&#x5728;&#x7B49;&#x5F85;Slave<br> ACK&#x65F6;&#x5019;&#xFF0C;&#x867D;&#x7136;&#x6CA1;&#x6709;&#x8FD4;&#x56DE;&#x5F53;&#x524D;&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;&#x4F46;&#x4E8B;&#x52A1;&#x5DF2;&#x7ECF;&#x63D0;&#x4EA4;&#xFF0C;&#x5176;&#x4ED6;&#x5BA2;&#x6237;&#x7AEF;&#x4F1A;&#x8BFB;&#x53D6;&#x5230;&#x5DF2;&#x63D0;&#x4EA4;&#x4E8B;&#x52A1;&#x3002;&#x5982;&#x679C;Slave&#x7AEF;&#x8FD8;&#x6CA1;&#x6709;&#x8BFB;&#x5230;&#x8BE5;&#x4E8B;&#x52A1;&#x7684;events&#xFF0C;&#x540C;&#x65F6;&#x4E3B;&#x5E93;&#x53D1;&#x751F;&#x4E86;crash&#xFF0C;&#x7136;&#x540E;&#x5207;&#x6362;&#x5230;&#x5907;&#x5E93;&#x3002;&#x90A3;&#x4E48;&#x4E4B;&#x524D;&#x8BFB;&#x5230;&#x7684;&#x4E8B;&#x52A1;&#x5C31;&#x4E0D;&#x89C1;&#x4E86;&#xFF0C;&#x51FA;&#x73B0;&#x4E86;&#x5E7B;&#x8BFB;&#xFF0C;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#x3002;&#x56FE;&#x7247;&#x5F15;&#x81EA;<a href="/external_links/ff466af020a7222242213c6ecff440c7.html" target="blank" rel="noopener">Loss-less Semi-Synchronous Replication on MySQL 5.7.2</a> &#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/5413d80e3eaa994922e6f5b3e67ad7cb5819ddfaf2090b48d4e26d121cd69b9e" alt="failover.png"></p>
+<h4 id="&#x914D;&#x7F6E;&#x4E3A;WAIT-AFTER-SYNC"><a href="#&#x914D;&#x7F6E;&#x4E3A;WAIT-AFTER-SYNC" class="headerlink" title="&#x914D;&#x7F6E;&#x4E3A;WAIT_AFTER_SYNC"></a>&#x914D;&#x7F6E;&#x4E3A;WAIT_AFTER_SYNC</h4><p>MySQL&#x9488;&#x5BF9;&#x4E0A;&#x8FF0;&#x95EE;&#x9898;&#xFF0C;&#x5728;5.7.2&#x5F15;&#x5165;&#x4E86;Loss-less Semi-Synchronous&#xFF0C;&#x5728;&#x8C03;&#x7528;binlog sync&#x4E4B;&#x540E;&#xFF0C;engine&#x5C42;commit&#x4E4B;&#x524D;&#x7B49;&#x5F85;Slave ACK&#x3002;&#x8FD9;&#x6837;&#x53EA;&#x6709;&#x5728;&#x786E;&#x8BA4;Slave&#x6536;&#x5230;&#x4E8B;&#x52A1;events&#x540E;&#xFF0C;&#x4E8B;&#x52A1;&#x624D;&#x4F1A;&#x63D0;&#x4EA4;&#x3002;&#x5728;commit&#x4E4B;&#x524D;&#x7B49;&#x5F85;Slave ACK&#xFF0C;&#x540C;&#x65F6;&#x53EF;&#x4EE5;&#x5806;&#x79EF;&#x4E8B;&#x52A1;&#xFF0C;&#x5229;&#x4E8E;group commit&#xFF0C;&#x6709;&#x5229;&#x4E8E;&#x63D0;&#x5347;&#x6027;&#x80FD;&#x3002;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#xFF0C;&#x56FE;&#x7247;&#x5F15;&#x81EA;<a href="/external_links/ff466af020a7222242213c6ecff440c7.html" target="blank" rel="noopener">Loss-less Semi-Synchronous Replication on MySQL 5.7.2</a> &#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/ebcf38dfdc392e98053c55f87f5ed8c10c66c9d33a05012999b5629fb6838943" alt="after_sync.png"></p>
+<p>&#x5176;&#x5B9E;&#x4E0A;&#x56FE;&#x6D41;&#x7A0B;&#x4E2D;&#x5B58;&#x5728;&#x7740;&#x4F1A;&#x5BFC;&#x81F4;&#x4E3B;&#x5907;&#x6570;&#x636E;&#x4E0D;&#x4E00;&#x81F4;&#xFF0C;&#x4F7F;&#x4E3B;&#x5907;&#x540C;&#x6B65;&#x5931;&#x8D25;&#x7684;&#x60C5;&#x5F62;&#x3002;&#x89C1;&#x4E0B;&#x9762;sync_binlog&#x914D;&#x7F6E;&#x7684;&#x5206;&#x6790;&#x3002;</p>
+<h3 id="sync-binlog&#x7684;&#x914D;&#x7F6E;"><a href="#sync-binlog&#x7684;&#x914D;&#x7F6E;" class="headerlink" title="sync_binlog&#x7684;&#x914D;&#x7F6E;"></a>sync_binlog&#x7684;&#x914D;&#x7F6E;</h3><h4 id="&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;-1"><a href="#&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;-1" class="headerlink" title="&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;"></a>&#x6E90;&#x7801;&#x5256;&#x6790;&#xFF1A;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;sql/binlog.cc ordered_commit</span><br><span class="line">       //&#x5F53;sync_period(sync_binlog)&#x4E3A;1&#x65F6;&#xFF0C;&#x5728;sync&#x4E4B;&#x540E;update binlog end pos</span><br><span class="line">9002   update_binlog_end_pos_after_sync= (get_sync_period() == 1);</span><br><span class="line">       ...</span><br><span class="line">9021     if (!update_binlog_end_pos_after_sync)</span><br><span class="line">           //&#x66F4;&#x65B0;binlog end position,dump&#x7EBF;&#x7A0B;&#x4F1A;&#x53D1;&#x9001;&#x66F4;&#x65B0;&#x540E;&#x7684;events</span><br><span class="line">9022       update_binlog_end_pos();</span><br><span class="line">       ...</span><br><span class="line">         //</span><br><span class="line">9057     std::pair&lt;bool, bool&gt; result= sync_binlog_file(false);</span><br><span class="line">       ...</span><br><span class="line">9061   if (update_binlog_end_pos_after_sync)</span><br><span class="line">9062   {</span><br><span class="line">       ...</span><br><span class="line">9068       update_binlog_end_pos(tmp_thd-&gt;get_trans_pos());</span><br><span class="line">9069   }</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sql/binlog.cc sync_binlog_file</span><br><span class="line">8618 std::pair&lt;bool, bool&gt;</span><br><span class="line">8619 MYSQL_BIN_LOG::sync_binlog_file(bool force)</span><br><span class="line">8620 {</span><br><span class="line">8621   bool synced= false;</span><br><span class="line">8622   unsigned int sync_period= get_sync_period();//sync_binlog&#x503C;</span><br><span class="line">       //sync_period&#x4E3A;0&#x4E0D;&#x505A;sync&#x64CD;&#x4F5C;&#xFF0C;&#x5176;&#x4ED6;&#x503C;&#x4E3A;&#x8FBE;&#x5230;sync&#x8C03;&#x7528;&#x6B21;&#x6570;&#x540E;sync</span><br><span class="line">8623   if (force || (sync_period &amp;&amp; ++sync_counter &gt;= sync_period))</span><br><span class="line">8624   {</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x914D;&#x7F6E;&#x5206;&#x6790;"><a href="#&#x914D;&#x7F6E;&#x5206;&#x6790;" class="headerlink" title="&#x914D;&#x7F6E;&#x5206;&#x6790;"></a>&#x914D;&#x7F6E;&#x5206;&#x6790;</h4><p>&#x5F53;sync_binlog&#x4E3A;0&#x7684;&#x65F6;&#x5019;&#xFF0C;binlog sync&#x78C1;&#x76D8;&#x7531;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x8D1F;&#x8D23;&#x3002;&#x5F53;&#x4E0D;&#x4E3A;0&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5176;&#x6570;&#x503C;&#x4E3A;&#x5B9A;&#x671F;sync&#x78C1;&#x76D8;&#x7684;binlog commit group&#x6570;&#x3002;&#x5F53;sync_binlog&#x503C;&#x5927;&#x4E8E;1&#x7684;&#x65F6;&#x5019;&#xFF0C;sync binlog&#x64CD;&#x4F5C;&#x53EF;&#x80FD;&#x5E76;&#x6CA1;&#x6709;&#x4F7F;binlog&#x843D;&#x76D8;&#x3002;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x843D;&#x76D8;&#xFF0C;&#x4E8B;&#x52A1;&#x5728;&#x63D0;&#x4EA4;&#x524D;&#xFF0C;Master&#x6389;&#x7535;&#xFF0C;&#x7136;&#x540E;&#x6062;&#x590D;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x8BE5;&#x4E8B;&#x52A1;&#x88AB;&#x56DE;&#x6EDA;&#x3002;&#x4F46;&#x662F;Slave&#x4E0A;&#x53EF;&#x80FD;&#x5DF2;&#x7ECF;&#x6536;&#x5230;&#x4E86;&#x8BE5;&#x4E8B;&#x52A1;&#x7684;events&#x5E76;&#x4E14;&#x6267;&#x884C;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x51FA;&#x73B0;Slave&#x4E8B;&#x52A1;&#x6BD4;Master&#x591A;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x4E3B;&#x5907;&#x540C;&#x6B65;&#x4F1A;&#x5931;&#x8D25;&#x3002;&#x6240;&#x4EE5;&#x5982;&#x679C;&#x8981;&#x4FDD;&#x6301;&#x4E3B;&#x5907;&#x4E00;&#x81F4;&#xFF0C;&#x9700;&#x8981;&#x8BBE;&#x7F6E;sync_binlog&#x4E3A;1&#x3002;</p>
+<p>WAIT_AFTER_SYNC&#x548C;WAIT_AFTER_COMMIT&#x4E24;&#x56FE;&#x4E2D;Send Events&#x7684;&#x4F4D;&#x7F6E;&#xFF0C;&#x4E5F;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x4E3B;&#x5907;&#x6570;&#x636E;&#x4E0D;&#x4E00;&#x81F4;&#xFF0C;&#x51FA;&#x73B0;&#x540C;&#x6B65;&#x5931;&#x8D25;&#x7684;&#x60C5;&#x5F62;&#x3002;&#x5B9E;&#x9645;&#x5728;rpl_semi_sync_master_wait_point&#x5206;&#x6790;&#x7684;&#x56FE;&#x4E2D;&#x662F;sync binlog&#x5927;&#x4E8E;1&#x7684;&#x60C5;&#x51B5;&#x3002;&#x6839;&#x636E;&#x4E0A;&#x9762;&#x6E90;&#x7801;&#xFF0C;&#x6D41;&#x7A0B;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#x3002;Master&#x4F9D;&#x6B21;&#x6267;&#x884C;flush binlog&#xFF0C; update binlog position&#xFF0C; sync binlog&#x3002;&#x5982;&#x679C;Master&#x5728;update binlog position&#x540E;&#xFF0C;sync binlog&#x524D;&#x6389;&#x7535;&#xFF0C;Master&#x518D;&#x6B21;&#x542F;&#x52A8;&#x540E;&#x539F;&#x4E8B;&#x52A1;&#x5C31;&#x4F1A;&#x88AB;&#x56DE;&#x6EDA;&#x3002;&#x4F46;&#x53EF;&#x80FD;&#x51FA;&#x73B0;Slave&#x83B7;&#x53D6;&#x5230;Events&#xFF0C;&#x8FD9;&#x4E5F;&#x4F1A;&#x5BFC;&#x81F4;Slave&#x6570;&#x636E;&#x6BD4;Master&#x591A;&#xFF0C;&#x4E3B;&#x5907;&#x540C;&#x6B65;&#x5931;&#x8D25;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/f4437670979587bc26d37808c17c2a0229d9f87939d4ea85970f86e7dd7fad8c" alt="sync_after_update.png"></p>
+<p>&#x7531;&#x4E8E;&#x4E0A;&#x9762;&#x7684;&#x539F;&#x56E0;&#xFF0C;sync_binlog&#x8BBE;&#x7F6E;&#x4E3A;1&#x7684;&#x65F6;&#x5019;&#xFF0C;MySQL&#x4F1A;update binlog end pos after sync&#x3002;&#x6D41;&#x7A0B;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#x3002;&#x8FD9;&#x65F6;&#x5019;&#xFF0C;&#x5BF9;&#x4E8E;&#x6BCF;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x90FD;&#x9700;&#x8981;sync binlog&#xFF0C;&#x540C;&#x65F6;sync binlog&#x548C;&#x7F51;&#x7EDC;&#x53D1;&#x9001;events&#x4F1A;&#x662F;&#x4E00;&#x4E2A;&#x4E32;&#x884C;&#x7684;&#x8FC7;&#x7A0B;&#xFF0C;&#x6027;&#x80FD;&#x4E0B;&#x964D;&#x660E;&#x663E;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/1ec17e4bf11c9ed8695197e4b721bf803a61fe4b82d211103872356f8a856871" alt="update_after_sync.png"></p>
+<h3 id="sync-relay-log&#x7684;&#x914D;&#x7F6E;"><a href="#sync-relay-log&#x7684;&#x914D;&#x7F6E;" class="headerlink" title="sync_relay_log&#x7684;&#x914D;&#x7F6E;"></a>sync_relay_log&#x7684;&#x914D;&#x7F6E;</h3><h4 id="&#x6E90;&#x7801;&#x5256;&#x6790;-1"><a href="#&#x6E90;&#x7801;&#x5256;&#x6790;-1" class="headerlink" title="&#x6E90;&#x7801;&#x5256;&#x6790;"></a>&#x6E90;&#x7801;&#x5256;&#x6790;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;sql/rpl_slave.cc handle_slave_io</span><br><span class="line"></span><br><span class="line">5764       if (queue_event(mi, event_buf, event_len))</span><br><span class="line">           ...</span><br><span class="line">5771       if (RUN_HOOK(binlog_relay_io, after_queue_event,</span><br><span class="line">5772                    (thd, mi, event_buf, event_len, synced)))</span><br><span class="line"></span><br><span class="line">after_queue_event</span><br><span class="line">-&gt;plugin/semisync/semisync_slave_plugin.cc repl_semi_slave_queue_event</span><br><span class="line">-&gt;plugin/semisync/semisync_slave.cc ReplSemiSyncSlave::slaveReply</span><br><span class="line"></span><br><span class="line">queue_event</span><br><span class="line">-&gt;sql/binlog.cc MYSQL_BIN_LOG::append_buffer(const char* buf, uint len, Master_info *mi)</span><br><span class="line">-&gt;sql/binlog.cc after_append_to_relay_log(mi);</span><br><span class="line">-&gt;sql/binlog.cc flush_and_sync(0)</span><br><span class="line">-&gt;sql/binlog.cc sync_binlog_file(force)</span><br></pre></td></tr></table></figure>
+
+<h4 id="&#x914D;&#x7F6E;&#x5206;&#x6790;-1"><a href="#&#x914D;&#x7F6E;&#x5206;&#x6790;-1" class="headerlink" title="&#x914D;&#x7F6E;&#x5206;&#x6790;"></a>&#x914D;&#x7F6E;&#x5206;&#x6790;</h4><p>&#x5728;Slave&#x7684;IO&#x7EBF;&#x7A0B;&#x4E2D;get_sync_period&#x83B7;&#x5F97;&#x7684;&#x662F;sync_relay_log&#x7684;&#x503C;&#xFF0C;&#x4E0E;sync_binlog&#x5BF9;sync&#x63A7;&#x5236;&#x4E00;&#x6837;&#x3002;&#x5F53;sync_relay_log&#x4E0D;&#x662F;1&#x7684;&#x65F6;&#x5019;&#xFF0C;semisync&#x8FD4;&#x56DE;&#x7ED9;Master&#x7684;position&#x53EF;&#x80FD;&#x6CA1;&#x6709;sync&#x5230;&#x78C1;&#x76D8;&#x3002;&#x5728;gtid_mode&#x4E0B;&#xFF0C;&#x5728;&#x4FDD;&#x8BC1;&#x524D;&#x9762;&#x4E24;&#x4E2A;&#x914D;&#x7F6E;&#x6B63;&#x786E;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;sync_relay_log&#x4E0D;&#x662F;1&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4EC5;&#x53D1;&#x751F;Master&#x6216;Slave&#x7684;&#x4E00;&#x6B21;Crash&#x5E76;&#x4E0D;&#x4F1A;&#x53D1;&#x751F;&#x6570;&#x636E;&#x4E22;&#x5931;&#x6216;&#x8005;&#x4E3B;&#x5907;&#x540C;&#x6B65;&#x5931;&#x8D25;&#x60C5;&#x51B5;&#x3002;&#x5982;&#x679C;&#x53D1;&#x751F;Slave&#x6CA1;&#x6709;sync relay log&#xFF0C;Master&#x7AEF;&#x4E8B;&#x52A1;&#x63D0;&#x4EA4;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x89C2;&#x5BDF;&#x5230;&#x4E8B;&#x52A1;&#x63D0;&#x4EA4;&#xFF0C;&#x7136;&#x540E;Slave&#x7AEF;Crash&#x3002;&#x8FD9;&#x6837;Slave&#x7AEF;&#x5C31;&#x4F1A;&#x4E22;&#x5931;&#x6389;&#x5DF2;&#x7ECF;&#x56DE;&#x590D;Master<br> ACK&#x7684;&#x4E8B;&#x52A1;events&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/c8c9a81977f8f4fe2b5a861568cea497ba70fcbe92e14eba0c81dda11c1c0611" alt="slave_crash.png"></p>
+<p>&#x4F46;&#x5F53;Slave&#x518D;&#x6B21;&#x542F;&#x52A8;&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x6765;&#x5F97;&#x53CA;&#x4ECE;Master&#x7AEF;&#x540C;&#x6B65;&#x4E22;&#x5931;&#x7684;&#x4E8B;&#x52A1;Events&#xFF0C;Master&#x5C31;Crash&#x3002;&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#xFF0C;&#x7528;&#x6237;&#x8BBF;&#x95EE;Slave&#x5C31;&#x4F1A;&#x53D1;&#x73B0;&#x6570;&#x636E;&#x4E22;&#x5931;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/9271506db8155b75c93d210fb127b058979118affac2a7fa0a3ed9756e78efb8" alt="slave_up_master_down.png"></p>
+<p>&#x901A;&#x8FC7;&#x4E0A;&#x9762;&#x8FD9;&#x4E2A;Case&#xFF0C;MySQL semisync&#x5982;&#x679C;&#x8981;&#x4FDD;&#x8BC1;&#x4EFB;&#x610F;&#x65F6;&#x523B;&#x53D1;&#x751F;&#x4E00;&#x53F0;&#x673A;&#x5668;&#x5B95;&#x673A;&#x90FD;&#x4E0D;&#x4E22;&#x5931;&#x6570;&#x636E;&#xFF0C;&#x9700;&#x8981;&#x540C;&#x65F6;&#x8BBE;&#x7F6E;sync_relay_log&#x4E3A;1&#x3002;&#x5BF9;relay log&#x7684;sync&#x64CD;&#x4F5C;&#x662F;&#x5728;queue_event&#x4E2D;&#xFF0C;&#x5BF9;&#x6BCF;&#x4E2A;event&#x90FD;&#x8981;sync&#xFF0C;&#x6240;&#x4EE5;sync_relay_log&#x8BBE;&#x7F6E;&#x4E3A;1&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4E8B;&#x52A1;&#x54CD;&#x5E94;&#x65F6;&#x95F4;&#x4F1A;&#x53D7;&#x5230;&#x5F71;&#x54CD;&#xFF0C;&#x5BF9;&#x4E8E;&#x6D89;&#x53CA;&#x6570;&#x636E;&#x6BD4;&#x8F83;&#x591A;&#x7684;&#x4E8B;&#x52A1;&#x5EF6;&#x8FDF;&#x4F1A;&#x589E;&#x52A0;&#x5F88;&#x591A;&#x3002;</p>
+<h2 id="MySQL-&#x4E09;&#x8282;&#x70B9;"><a href="#MySQL-&#x4E09;&#x8282;&#x70B9;" class="headerlink" title="MySQL &#x4E09;&#x8282;&#x70B9;"></a>MySQL &#x4E09;&#x8282;&#x70B9;</h2><p>&#x5728;&#x4E00;&#x4E3B;&#x4E00;&#x4ECE;&#x7684;&#x4E3B;&#x5907;semisync&#x7684;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;&#x5206;&#x6790;&#x4E2D;&#x653E;&#x5F03;&#x4E86;&#x9AD8;&#x53EF;&#x7528;&#xFF0C;&#x5F53;&#x4E3B;&#x5907;&#x4E4B;&#x95F4;&#x7F51;&#x7EDC;&#x6296;&#x52A8;&#x6216;&#x8005;&#x4E00;&#x53F0;&#x5B95;&#x673A;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x505C;&#x6B62;&#x63D0;&#x4F9B;&#x670D;&#x52A1;&#x3002;&#x8981;&#x505A;&#x5230;&#x9AD8;&#x53EF;&#x7528;&#xFF0C;&#x5F88;&#x81EA;&#x7136;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x60F3;&#x5230;&#x4E00;&#x4E3B;&#x4E24;&#x4ECE;&#xFF0C;&#x8FD9;&#x6837;&#x89E3;&#x51B3;&#x67D0;&#x4E00;&#x7F51;&#x7EDC;&#x6296;&#x52A8;&#x6216;&#x4E00;&#x53F0;&#x5B95;&#x673A;&#x65F6;&#x5019;&#x7684;&#x53EF;&#x7528;&#x6027;&#x95EE;&#x9898;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x524D;&#x6587;&#x53D9;&#x8FF0;&#x8981;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;&#x914D;&#x7F6E;&#x8981;&#x6C42;&#x4F9D;&#x7136;&#x5B58;&#x5728;&#xFF0C;&#x5373;&#x6B63;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#x7684;&#x6027;&#x80FD;&#x4E0D;&#x4F1A;&#x6709;&#x6539;&#x5584;&#x3002;&#x540C;&#x65F6;&#x9700;&#x8981;&#x89E3;&#x51B3;Master&#x5B95;&#x673A;&#x65F6;&#x5019;&#xFF0C;&#x5982;&#x4F55;&#x9009;&#x53D6;&#x65B0;&#x4E3B;&#x673A;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x5982;&#x4F55;&#x907F;&#x514D;&#x591A;&#x4E3B;&#x7684;&#x60C5;&#x5F62;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/150f8756b4a57e816bc34e32200fee2e57e30a7b3bebcfd416efc2921f062368" alt="tri_nodes.png"></p>
+<p>&#x9009;&#x53D6;&#x65B0;&#x4E3B;&#x673A;&#x65F6;&#x4E00;&#x5B9A;&#x8981;&#x8BFB;&#x53D6;&#x4E24;&#x4E2A;&#x4ECE;&#x673A;&#xFF0C;&#x770B;&#x54EA;&#x4E00;&#x4E2A;&#x4ECE;&#x673A;&#x6709;&#x6700;&#x65B0;&#x7684;&#x65E5;&#x5FD7;&#xFF0C;&#x5426;&#x5219;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x6570;&#x636E;&#x4E22;&#x5931;&#x3002;&#x8FD9;&#x6837;&#x7684;&#x4E09;&#x8282;&#x70B9;&#x65B9;&#x6848;&#x5C31;&#x7C7B;&#x4F3C;&#x5206;&#x5E03;&#x5F0F;Quorum&#x673A;&#x5236;&#xFF0C;&#x5199;&#x7684;&#x65F6;&#x5019;&#x9700;&#x8981;&#x4FDD;&#x8BC1;&#x5199;&#x6210;&#x529F;&#x4E09;&#x8282;&#x70B9;&#x4E2D;&#x7684;&#x6CD5;&#x5B9A;&#x96C6;&#x5408;&#xFF0C;&#x786E;&#x5B9A;&#x65B0;&#x4E3B;&#x7684;&#x65F6;&#x5019;&#x9700;&#x8981;&#x8BFB;&#x53D6;&#x6CD5;&#x5B9A;&#x96C6;&#x5408;&#x3002;&#x5229;&#x7528;&#x5206;&#x5E03;&#x5F0F;&#x4E00;&#x81F4;&#x6027;&#x534F;&#x8BAE;Paxos/Raft&#x53EF;&#x4EE5;&#x89E3;&#x51B3;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;&#x95EE;&#x9898;&#xFF0C;&#x9009;&#x4E3B;&#x95EE;&#x9898;&#x548C;&#x591A;&#x4E3B;&#x95EE;&#x9898;&#xFF0C;&#x56E0;&#x6B64;&#x8FD1;&#x4E9B;&#x5E74;&#xFF0C;&#x56FD;&#x5185;&#x6570;&#x636E;&#x5E93;&#x56E2;&#x961F;&#x5927;&#x591A;&#x5B9E;&#x73B0;&#x4E86;&#x57FA;&#x4E8E;Paxos/Raft&#x7684;&#x4E09;&#x8282;&#x70B9;&#x65B9;&#x6848;&#x3002;&#x8FD1;&#x6765;MySQL&#x5B98;&#x65B9;&#x4E5F;&#x4EE5;&#x63D2;&#x4EF6;&#x5F62;&#x5F0F;&#x5F15;&#x5165;&#x4E86;&#x652F;&#x6301;&#x591A;&#x4E3B;&#x96C6;&#x7FA4;&#x7684;Group Replication&#x65B9;&#x6848;&#x3002;</p>
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x4ECE;replication&#x529F;&#x80FD;&#x5F15;&#x5165;&#x540E;&#xFF0C;&#x5B98;&#x65B9;MySQL&#x4E00;&#x76F4;&#x5728;&#x4E0D;&#x505C;&#x7684;&#x5B8C;&#x5584;&#xFF0C;&#x524D;&#x8FDB;&#x3002;&#x540C;&#x65F6;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#x5F53;&#x524D;&#x539F;&#x751F;&#x7684;MySQL&#x4E3B;&#x5907;&#x590D;&#x5236;&#x5B9E;&#x73B0;&#x5B9E;&#x9645;&#x4E0A;&#x5F88;&#x96BE;&#x5728;&#x6EE1;&#x8DB3;&#x6570;&#x636E;&#x4E00;&#x81F4;&#x6027;&#x7684;&#x524D;&#x63D0;&#x4E0B;&#x505A;&#x5230;&#x9AD8;&#x53EF;&#x7528;&#x3001;&#x9AD8;&#x6027;&#x80FD;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/871c56ef8e2da283ee8c18c53f54ae70.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/MySQL-源码-后端-SQL/" rel="tag"># MySQL,源码,后端,SQL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903495263322119.html" rel="next" title="Vuex 源码分析">
+                <i class="fa fa-chevron-left"></i> Vuex 源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903496597127181.html" rel="prev" title="吴恩达Coursera Deep Learning学习笔记">
+                吴恩达Coursera Deep Learning学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL-Replication的发展"><span class="nav-number">2.</span> <span class="nav-text">MySQL Replication的发展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL-半同步复制的数据一致性"><span class="nav-number">3.</span> <span class="nav-text">MySQL 半同步复制的数据一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#源码剖析"><span class="nav-number">3.1.</span> <span class="nav-text">源码剖析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rpl-semi-sync-master-wait-point的配置"><span class="nav-number">3.2.</span> <span class="nav-text">rpl_semi_sync_master_wait_point的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#源码剖析："><span class="nav-number">3.2.1.</span> <span class="nav-text">源码剖析：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置为WAIT-AFTER-COMMIT"><span class="nav-number">3.2.2.</span> <span class="nav-text">配置为WAIT_AFTER_COMMIT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置为WAIT-AFTER-SYNC"><span class="nav-number">3.2.3.</span> <span class="nav-text">配置为WAIT_AFTER_SYNC</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sync-binlog的配置"><span class="nav-number">3.3.</span> <span class="nav-text">sync_binlog的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#源码剖析：-1"><span class="nav-number">3.3.1.</span> <span class="nav-text">源码剖析：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置分析"><span class="nav-number">3.3.2.</span> <span class="nav-text">配置分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sync-relay-log的配置"><span class="nav-number">3.4.</span> <span class="nav-text">sync_relay_log的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#源码剖析-1"><span class="nav-number">3.4.1.</span> <span class="nav-text">源码剖析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置分析-1"><span class="nav-number">3.4.2.</span> <span class="nav-text">配置分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL-三节点"><span class="nav-number">4.</span> <span class="nav-text">MySQL 三节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,Spring Cloud,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="1.&amp;#x524D;&amp;#x7F6E;&amp;#x77E5;&amp;#x8BC6; &amp;#x672C;&amp;#x6587;&amp;#x662F;&amp;#x9488;&amp;#x5BF9;springMVC&amp;#x8BF7;&amp;#x6C42;&amp;#x6267;&amp;#x884C;&amp;#x6D41;&amp;#x7A0B;&amp;#x6765;&amp;#x5206;&amp;#x6790;&amp;#xFF0C;&amp;#x5E76;&amp;#x4E0D;&amp;#x4F1A;&amp;#x8BBE;&amp;#x8">
+<meta name="keywords" content="后端,Spring Cloud">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringMvc-DispatcherServlet原理分">
+<meta property="og:url" content="https://dev.newban.cn/7036038345062875149.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="1.&amp;#x524D;&amp;#x7F6E;&amp;#x77E5;&amp;#x8BC6; &amp;#x672C;&amp;#x6587;&amp;#x662F;&amp;#x9488;&amp;#x5BF9;springMVC&amp;#x8BF7;&amp;#x6C42;&amp;#x6267;&amp;#x884C;&amp;#x6D41;&amp;#x7A0B;&amp;#x6765;&amp;#x5206;&amp;#x6790;&amp;#xFF0C;&amp;#x5E76;&amp;#x4E0D;&amp;#x4F1A;&amp;#x8BBE;&amp;#x8">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/c10f4eef7c7761f7992a57303ae21cc7f80bdd9f6454830f9b3a390439d215ed">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/602641705ed914dc00ccf664dc73163ac76b3a785f8f87dabf9f86eb81bdfe4b">
+<meta property="og:updated_time" content="2024-04-28T10:13:23.914Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringMvc-DispatcherServlet原理分">
+<meta name="twitter:description" content="1.&amp;#x524D;&amp;#x7F6E;&amp;#x77E5;&amp;#x8BC6; &amp;#x672C;&amp;#x6587;&amp;#x662F;&amp;#x9488;&amp;#x5BF9;springMVC&amp;#x8BF7;&amp;#x6C42;&amp;#x6267;&amp;#x884C;&amp;#x6D41;&amp;#x7A0B;&amp;#x6765;&amp;#x5206;&amp;#x6790;&amp;#xFF0C;&amp;#x5E76;&amp;#x4E0D;&amp;#x4F1A;&amp;#x8BBE;&amp;#x8">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/c10f4eef7c7761f7992a57303ae21cc7f80bdd9f6454830f9b3a390439d215ed">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7036038345062875149.html">
+
+
+
+
+
+  <title>SpringMvc-DispatcherServlet原理分 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SpringMvc-DispatcherServlet原理分</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-30T01:37:07+08:00">
+                2021-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-&#x524D;&#x7F6E;&#x77E5;&#x8BC6;"><a href="#1-&#x524D;&#x7F6E;&#x77E5;&#x8BC6;" class="headerlink" title="1.&#x524D;&#x7F6E;&#x77E5;&#x8BC6;"></a>1.&#x524D;&#x7F6E;&#x77E5;&#x8BC6;</h2><ul>
+<li>&#x672C;&#x6587;&#x662F;&#x9488;&#x5BF9;springMVC&#x8BF7;&#x6C42;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x6765;&#x5206;&#x6790;&#xFF0C;&#x5E76;&#x4E0D;&#x4F1A;&#x8BBE;&#x8BA1;&#x5230;&#x5982;&#x4F55;&#x4F7F;&#x7528;</li>
+<li>SpringMVC&#x5927;&#x4F53;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x56FE;&#xFF0C;&#x7F51;&#x4E0A;&#x5F88;&#x591A;&#x56FE;&#xFF0C;&#x4ECE;&#x6267;&#x884C;&#x5927;&#x5C40;&#x770B;&#x57FA;&#x672C;&#x4E0A;&#x662F;&#x4E00;&#x81F4;&#xFF0C;&#x672C;&#x6587;&#x662F;&#x57FA;&#x4E8E;&#x5927;&#x56FE;&#x5206;&#x6790;&#x6BCF;&#x4E00;&#x6B65;&#x662F;&#x5982;&#x4F55;&#x6267;&#x884C;&#xFF0C;&#x5904;&#x7406;&#x4EC0;&#x4E48;&#x6765;&#x8FDB;&#x884C;&#x5206;&#x6790;&#x3002;<br>&#x4E0B;&#x56FE;&#x6765;&#x6E90;&#x4E8E;&#x7F51;&#x7EDC;&#xFF1A;</li>
+</ul>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/c10f4eef7c7761f7992a57303ae21cc7f80bdd9f6454830f9b3a390439d215ed" alt="image.png"></p>
+<ul>
+<li>&#x51E0;&#x4E2A;&#x4E3B;&#x8981;&#x7684;&#x7C7B;&#x8BF4;&#x660E;&#xFF1A;<ul>
+<li>DispatcherServlet&#xFF1A;&#x524D;&#x7AEF;&#x63A7;&#x5236;&#x5668;&#xFF0C;&#x662F;SpringMVC&#x5168;&#x5C40;&#x8BF7;&#x6C42;&#x5206;&#x53D1;&#x5668;&#xFF0C;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x5339;&#x914D;&#x524D;&#x7AEF;&#x63A7;&#x5236;&#x5668; DispatcherServlet &#x7684;&#x8BF7;&#x6C42;&#x6620;&#x5C04;&#x8DEF;&#x5F84;(&#x5728; web.xml&#x4E2D;&#x6307;&#x5B9A;), WEB &#x5BB9;&#x5668;&#x5C06;&#x8BE5;&#x8BF7;&#x6C42;&#x8F6C;&#x4EA4;&#x7ED9; DispatcherServlet &#x5904;&#x7406;</li>
+<li>DispatcherServlet &#x63A5;&#x6536;&#x5230;&#x8BF7;&#x6C42;&#x540E;, &#x5C06;&#x6839;&#x636E; &#x8BF7;&#x6C42;&#x4FE1;&#x606F; &#x4EA4;&#x7ED9; &#x5904;&#x7406;&#x5668;&#x6620;&#x5C04;&#x5668; &#xFF08;HandlerMapping&#xFF09;</li>
+<li>HandlerMapping &#x6839;&#x636E;&#x7528;&#x6237;&#x7684;url&#x8BF7;&#x6C42; &#x67E5;&#x627E;&#x5339;&#x914D;&#x8BE5;url&#x7684; Handler&#xFF0C;&#x5E76;&#x8FD4;&#x56DE;&#x4E00;&#x4E2A;&#x6267;&#x884C;&#x94FE;</li>
+<li>DispatcherServlet &#x518D;&#x8BF7;&#x6C42; &#x5904;&#x7406;&#x5668;&#x9002;&#x914D;&#x5668;(HandlerAdapter) &#x8C03;&#x7528;&#x76F8;&#x5E94;&#x7684; Handler &#x8FDB;&#x884C;&#x5904;&#x7406;&#x5E76;&#x8FD4;&#x56DE; ModelAndView &#x7ED9; DispatcherServlet</li>
+<li>DispatcherServlet &#x5C06; ModelAndView &#x8BF7;&#x6C42; ViewReslover&#xFF08;&#x89C6;&#x56FE;&#x89E3;&#x6790;&#x5668;&#xFF09;&#x89E3;&#x6790;&#xFF0C;&#x8FD4;&#x56DE;&#x5177;&#x4F53; View</li>
+<li>DispatcherServlet &#x5BF9; View &#x8FDB;&#x884C;&#x6E32;&#x67D3;&#x89C6;&#x56FE;&#xFF08;&#x5373;&#x5C06;&#x6A21;&#x578B;&#x6570;&#x636E;&#x586B;&#x5145;&#x81F3;&#x89C6;&#x56FE;&#x4E2D;&#xFF09;</li>
+</ul>
+</li>
+<li>&#x76F8;&#x5173;&#x7C7B;&#x8BF4;&#x660E;&#xFF1A;<ul>
+<li>DispatcherServlet &#x5C06;&#x9875;&#x9762;&#x54CD;&#x5E94;&#x7ED9;&#x7528;&#x6237;</li>
+<li>DispatcherServlet&#xFF1A;&#x524D;&#x7AEF;&#x63A7;&#x5236;&#x5668;</li>
+<li>HandlerMapping&#xFF1A;&#x5904;&#x7406;&#x5668;&#x6620;&#x5C04;&#x5668;</li>
+<li>Handler&#xFF1A;&#x5904;&#x7406;&#x5668;</li>
+<li>HandlAdapter&#xFF1A;&#x5904;&#x7406;&#x5668;&#x9002;&#x914D;&#x5668;</li>
+<li>ViewResolver&#xFF1A;&#x89C6;&#x56FE;&#x89E3;&#x6790;&#x5668;</li>
+<li>View&#xFF1A;&#x89C6;&#x56FE;</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-&#x6E90;&#x7801;&#x5206;&#x6790;&#x6D41;&#x7A0B;&#x56FE;"><a href="#2-&#x6E90;&#x7801;&#x5206;&#x6790;&#x6D41;&#x7A0B;&#x56FE;" class="headerlink" title="2.&#x6E90;&#x7801;&#x5206;&#x6790;&#x6D41;&#x7A0B;&#x56FE;"></a>2.&#x6E90;&#x7801;&#x5206;&#x6790;&#x6D41;&#x7A0B;&#x56FE;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/602641705ed914dc00ccf664dc73163ac76b3a785f8f87dabf9f86eb81bdfe4b" alt="SpringMvc&#x8BF7;&#x6C42;&#x6267;&#x884C;.png"><br>&#x4E0A;&#x56FE;&#x662F;&#x540E;&#x7EED;&#x672C;&#x6587;&#x5206;&#x6790;&#x6E90;&#x7801;&#x7684;&#x6D41;&#x7A0B;</p>
+<h2 id="3-&#x6E90;&#x7801;&#x5206;&#x6790;"><a href="#3-&#x6E90;&#x7801;&#x5206;&#x6790;" class="headerlink" title="3.&#x6E90;&#x7801;&#x5206;&#x6790;"></a>3.&#x6E90;&#x7801;&#x5206;&#x6790;</h2><h4 id="3-1-SpringMVC&#x5165;&#x53E3;&#x5206;&#x6790;"><a href="#3-1-SpringMVC&#x5165;&#x53E3;&#x5206;&#x6790;" class="headerlink" title="3.1 SpringMVC&#x5165;&#x53E3;&#x5206;&#x6790;"></a>3.1 SpringMVC&#x5165;&#x53E3;&#x5206;&#x6790;</h4><p>&#x9996;&#x5148;&#x8BF7;&#x6C42;&#x8FDB;&#x6765;&#xFF0C;&#x4F1A;&#x5148;&#x7ECF;&#x8FC7;&#x4E00;&#x7CFB;&#x5217;&#x8FC7;&#x6EE4;&#x5668;&#xFF0C;&#x6700;&#x540E;&#x5230;&#x5E95;FrameworkServlet&#x7684;service&#x65B9;&#x6CD5;&#xFF0C;&#x8BE5;&#x7C7B;&#x662F;DispatcherServlet&#x7684;&#x7236;&#x7C7B;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x8BF4;&#x662F;&#x5148;&#x5230;DispatcherServlet,&#x4E0B;&#x9762;&#x770B;&#x4EE5;&#x4E0B;service&#x65B9;&#x6CD5;&#x5230;&#x5E95;&#x4F1A;&#x505A;&#x90A3;&#x4E9B;&#x64CD;&#x4F5C;&#xFF1A;</p>
+<ol>
+<li>&#x5224;&#x65AD;&#x8BF7;&#x6C42;&#x7C7B;&#x578B;&#x662F;&#x5426;&#x662F;null&#x3001;PATCH&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5219;&#x76F4;&#x63A5;&#x8FDB;&#x5165;processRequest&#x65B9;&#x6CD5;&#xFF0C;&#x5426;&#x5219;&#x8C03;&#x7528;&#x7236;&#x7C7B;service&#x5373;httpServlet</li>
+</ol>
+<p>FrameworkServlet:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Override</span><br><span class="line">protected void service(HttpServletRequest request, HttpServletResponse response)</span><br><span class="line">      throws ServletException, IOException {</span><br><span class="line">   //&#x8FD9;&#x91CC;&#x83B7;&#x53D6;&#x8BF7;&#x6C42;&#x7684;&#x7C7B;&#x578B;&#xFF0C;&#x5224;&#x65AD;&#x8BF7;&#x6C42;&#x662F;&#x5426;&#x662F;null&#x6216;&#x8005;Patch&#x5982;&#x679C;&#x662F;&#x76F4;&#x63A5;&#x8FDB;&#x5165;ProcessRequest&#x65B9;&#x6CD5;,&#x5426;&#x5219;&#x8C03;&#x7528;&#x7236;&#x7C7B;&#x7684;service&#x65B9;&#x6CD5;</span><br><span class="line">   HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());</span><br><span class="line">   if (httpMethod == HttpMethod.PATCH || httpMethod == null) {</span><br><span class="line">      processRequest(request, response);</span><br><span class="line">   }</span><br><span class="line">   else {</span><br><span class="line">   //&#x8C03;&#x7528;&#x7236;&#x7C7B;HttpServlet</span><br><span class="line">      super.service(request, response);</span><br><span class="line">   }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>HttpServlet&#x4E2D;&#x7684;service&#xFF1A;<br>HttpServlet&#x7684;service&#x4E3B;&#x8981;&#x64CD;&#x4F5C;&#xFF1A;<br>1.&#x5224;&#x65AD;&#x8BF7;&#x6C42;&#x7C7B;&#x578B;&#xFF0C;&#x8FDB;&#x884C;&#x8C03;&#x7528;&#x4E0D;&#x540C;&#x7684;&#x8BF7;&#x6C42;&#x7C7B;&#x578B;&#x7684;&#x5904;&#x7406;&#x65B9;&#x6CD5;doGet&#x3001;doPost&#x7B49;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;protected void service(HttpServletRequest req, HttpServletResponse resp)</span><br><span class="line">    throws ServletException, IOException {</span><br><span class="line">    //&#x83B7;&#x53D6;&#x8BF7;&#x6C42;&#x65B9;&#x6CD5;</span><br><span class="line">    String method = req.getMethod();</span><br><span class="line">    //&#x5224;&#x65AD;&#x7C7B;&#x578B;&#x5982;&#x679C;&#x662F;get&#x8BF7;&#x6C42;&#x5219;&#x8C03;doGet</span><br><span class="line">    if (method.equals(METHOD_GET)) {</span><br><span class="line">        long lastModified = getLastModified(req);</span><br><span class="line">        if (lastModified == -1) {</span><br><span class="line">            doGet(req, resp);</span><br><span class="line">        } else {</span><br><span class="line">            long ifModifiedSince;</span><br><span class="line">            try {</span><br><span class="line">                ifModifiedSince = req.getDateHeader(HEADER_IFMODSINCE);</span><br><span class="line">            } catch (IllegalArgumentException iae) {</span><br><span class="line">                ifModifiedSince = -1;</span><br><span class="line">            }</span><br><span class="line">            if (ifModifiedSince &lt; (lastModified / 1000 * 1000)) {</span><br><span class="line">                maybeSetLastModified(resp, lastModified);</span><br><span class="line">                doGet(req, resp);</span><br><span class="line">            } else {</span><br><span class="line">                resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"> //&#x5224;&#x65AD;&#x7C7B;&#x578B;&#x5982;&#x679C;&#x662F;HEAD&#x8BF7;&#x6C42;&#x5219;&#x8C03;doHead</span><br><span class="line">    } else if (method.equals(METHOD_HEAD)) {</span><br><span class="line">        long lastModified = getLastModified(req);</span><br><span class="line">        maybeSetLastModified(resp, lastModified);</span><br><span class="line">        doHead(req, resp);</span><br><span class="line"></span><br><span class="line">    } else if (method.equals(METHOD_POST)) {</span><br><span class="line">        doPost(req, resp);</span><br><span class="line">    }</span><br><span class="line">    &#x7701;&#x7565;&#x90E8;&#x5206;....</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5177;&#x4F53;&#x7684;doPost&#x3001;doGet&#x7B49;&#x65B9;&#x6CD5;&#x5176;&#x5B9E;&#x5728;FrameworkServlet&#x4E2D;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x6700;&#x7EC8;&#x4E0D;&#x540C;&#x7684;&#x8BF7;&#x6C42;&#x7C7B;&#x578B;&#x8C03;&#x7528;&#x4E0D;&#x540C;&#x65B9;&#x6CD5;&#x505A;&#x5B8C;&#x5904;&#x7406;&#x4E4B;&#x540E;&#x90FD;&#x4F1A;&#x8C03;&#x7528;processReqest&#x65B9;&#x6CD5;<br>&#x4E0B;&#x9762;&#x7B80;&#x5355;&#x770B;FrameworkServlet&#x4E2D;doGet&#x548C;doPost&#x4E2D;&#x7684;&#x5B9E;&#x73B0;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Override</span><br><span class="line">protected final void doGet(HttpServletRequest request, HttpServletResponse response)</span><br><span class="line">      throws ServletException, IOException {</span><br><span class="line">//&#x6700;&#x7EC8;&#x8C03;&#x7528;processRequest&#x65B9;&#x6CD5;</span><br><span class="line">   processRequest(request, response);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Delegate POST requests to {@link #processRequest}.</span><br><span class="line"> * @see #doService</span><br><span class="line"> */</span><br><span class="line">@Override</span><br><span class="line">protected final void doPost(HttpServletRequest request, HttpServletResponse response)</span><br><span class="line">      throws ServletException, IOException {</span><br><span class="line">//&#x6700;&#x7EC8;&#x8C03;&#x7528;processRequest&#x65B9;&#x6CD5;</span><br><span class="line">   processRequest(request, response);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-2-ProcessRequest&#x65B9;&#x6CD5;&#x5206;&#x6790;"><a href="#3-2-ProcessRequest&#x65B9;&#x6CD5;&#x5206;&#x6790;" class="headerlink" title="3.2 ProcessRequest&#x65B9;&#x6CD5;&#x5206;&#x6790;"></a>3.2 ProcessRequest&#x65B9;&#x6CD5;&#x5206;&#x6790;</h4><p>&#x8BE5;&#x65B9;&#x6CD5;&#x4E3B;&#x8981;&#x4E09;&#x4EF6;&#x4E8B;&#xFF1A;</p>
+<ol>
+<li>&#x521D;&#x59CB;&#x5316;web&#x7BA1;&#x7406;&#x5668;&#x4EE5;&#x53CA;&#x6CE8;&#x518C;&#x56DE;&#x8C03;&#x62E6;&#x622A;&#x5668;</li>
+<li>&#x8C03;&#x7528;doService&#x6267;&#x884C;&#x5177;&#x4F53;&#x903B;&#x8F91;</li>
+<li>&#x901A;&#x8FC7;&#x4E8B;&#x4EF6;&#x63A8;&#x9001;&#x5427;&#x7ED3;&#x679C;&#x8F93;&#x51FA;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;protected final void processRequest(HttpServletRequest request, HttpServletResponse response)</span><br><span class="line">      throws ServletException, IOException {</span><br><span class="line"></span><br><span class="line">   long startTime = System.currentTimeMillis();</span><br><span class="line">   Throwable failureCause = null;</span><br><span class="line"></span><br><span class="line">   LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();</span><br><span class="line">   LocaleContext localeContext = buildLocaleContext(request);</span><br><span class="line"></span><br><span class="line">   RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();</span><br><span class="line">   ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);</span><br><span class="line"></span><br><span class="line">   WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);</span><br><span class="line">   asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());</span><br><span class="line"></span><br><span class="line">   initContextHolders(request, localeContext, requestAttributes);</span><br><span class="line"></span><br><span class="line">   try {</span><br><span class="line">   //&#x8BE5;&#x65B9;&#x6CD5;&#x4E3B;&#x8981;&#x64CD;&#x4F5C;&#x5728;&#x4E8E;doService&#x65B9;&#x6CD5;</span><br><span class="line">      doService(request, response);</span><br><span class="line">   }</span><br><span class="line">   catch (ServletException | IOException ex) {</span><br><span class="line">      failureCause = ex;</span><br><span class="line">      throw ex;</span><br><span class="line">   }</span><br><span class="line">   catch (Throwable ex) {</span><br><span class="line">      failureCause = ex;</span><br><span class="line">      throw new NestedServletException(&quot;Request processing failed&quot;, ex);</span><br><span class="line">   }</span><br><span class="line"></span><br><span class="line">   finally {</span><br><span class="line">      resetContextHolders(request, previousLocaleContext, previousAttributes);</span><br><span class="line">      if (requestAttributes != null) {</span><br><span class="line">         requestAttributes.requestCompleted();</span><br><span class="line">      }</span><br><span class="line">      logResult(request, response, failureCause, asyncManager);</span><br><span class="line">      //&#x6267;&#x884C;&#x5B8C;&#x6210;&#x540E;&#x8FDB;&#x884C;&#x76F8;&#x5173;&#x7ED3;&#x679C;&#x5904;&#x7406;</span><br><span class="line">      publishRequestHandledEvent(request, response, startTime, failureCause);</span><br><span class="line">   }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x8C03;&#x7528;&#x7684;doService&#x65B9;&#x6CD5;&#x6838;&#x5FC3;&#x903B;&#x8F91;&#xFF1A;<br>1.&#x521D;&#x59CB;&#x5316;&#x4E00;&#x4E9B;&#x53EF;&#x7528;&#x7684;&#x5904;&#x7406;&#x5668;&#x4EE5;&#x53CA;&#x89C6;&#x56FE;&#x5BF9;&#x8C61;<br>2.&#x8C03;&#x7528;&#x771F;&#x6B63;&#x5206;&#x53D1;&#x7684;doDispatch&#x65B9;&#x6CD5;<br>&#x4E0B;&#x9762;&#x76F4;&#x63A5;&#x770B;doDispatch&#x65B9;&#x6CD5;&#xFF1A;<br>doDispatch&#x65B9;&#x6CD5;&#x4F5C;&#x7528;&#xFF1A;</p>
+<p>1.&#x901A;&#x8FC7;&#x8C03;&#x7528;getHandler&#x65B9;&#x6CD5;&#x83B7;&#x53D6;&#x5305;&#x542B;&#x4E86;HandlerMapping&#x7684;HandlerExecutionChain&#x5BF9;&#x8C61;</p>
+<p>2.&#x4ECE;HandlerExecutionChain&#x5BF9;&#x8C61;&#x4E2D;&#x901A;&#x8FC7;getHandler&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;handlerMethod&#xFF0C;&#x7136;&#x540E;&#x6839;&#x636E;handlerMethod&#x83B7;&#x53D6;handlerAdapter</p>
+<p>3.&#x6267;&#x884C;HandlerExecutionChain&#x7684;&#x6240;&#x6709;&#x62E6;&#x622A;&#x5668;&#x7684;&#x524D;&#x7F6E;&#x65B9;&#x6CD5;preHandle</p>
+<p>4.&#x901A;&#x8FC7;handlerAdapter&#x8C03;&#x7528;handle&#x53BB;&#x6267;&#x884C;&#x5177;&#x4F53;&#x5904;&#x7406;&#x65B9;&#x6CD5;&#xFF0C;&#x6700;&#x7EC8;&#x662F;&#x8C03;&#x7528;&#x5230;&#x67D0;&#x4E2A;controller&#x65B9;&#x6CD5;</p>
+<p>5.&#x6267;&#x884C;handlerExecutionChain&#x4E2D;&#x7684;&#x6240;&#x6709;&#x62E6;&#x622A;&#x5668;&#x7684;&#x540E;&#x7F6E;&#x5904;&#x7406;&#x65B9;&#x6CD5;applyPostHandle</p>
+<p>6.&#x8C03;&#x7528;processDispatchResult&#x65B9;&#x6CD5;&#x5904;&#x7406;&#x8BF7;&#x6C42;&#x5206;&#x53D1;&#x7ED3;&#x679C;&#xFF0C;&#x4E3B;&#x8981;&#x662F;&#x5904;&#x7406;&#x89C6;&#x56FE;&#x89E3;&#x6790;&#x7B49;&#x64CD;&#x4F5C;</p>
+<p>7.&#x6700;&#x540E;&#x5904;&#x7406;&#x8D44;&#x6E90;&#x6E05;&#x7406;&#x5DE5;&#x4F5C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {</span><br><span class="line">   HttpServletRequest processedRequest = request;</span><br><span class="line">   //&#x5E76;&#x4E0D;&#x662F;&#x76F4;&#x63A5;&#x5904;&#x7406;&#x7684;handler&#xFF0C;&#x800C;&#x662F;handler&#x7684;&#x6267;&#x884C;&#x94FE;&#xFF0C;&#x91CC;&#x9762;&#x4F1A;&#x6709;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x7684;&#x62E6;&#x622A;&#x5668;</span><br><span class="line">   HandlerExecutionChain mappedHandler = null;</span><br><span class="line">   boolean multipartRequestParsed = false;</span><br><span class="line"></span><br><span class="line">   WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);</span><br><span class="line"></span><br><span class="line">   try {</span><br><span class="line">      ModelAndView mv = null;</span><br><span class="line">      Exception dispatchException = null;</span><br><span class="line"></span><br><span class="line">      try {</span><br><span class="line">         processedRequest = checkMultipart(request);</span><br><span class="line">         multipartRequestParsed = (processedRequest != request);</span><br><span class="line"></span><br><span class="line">         // &#x8FD9;&#x4E2A;&#x662F;&#x6838;&#x5FC3;&#x64CD;&#x4F5C;&#xFF0C;&#x5B83;&#x4E3B;&#x8981;&#x6839;&#x636E;&#x8BF7;&#x6C42;url&#x53BB;&#x5339;&#x914D;&#x5BF9;&#x5E94;&#x7684;handlerMapping&#xFF0C;&#x7136;&#x540E;&#x7ECF;&#x8FC7;&#x4E00;&#x7CFB;&#x5217;&#x5904;&#x7406;&#x83B7;&#x53D6;&#x5230;handler&#x6267;&#x884C;&#x94FE;</span><br><span class="line">         mappedHandler = getHandler(processedRequest);</span><br><span class="line">         if (mappedHandler == null) {</span><br><span class="line">            noHandlerFound(processedRequest, response);</span><br><span class="line">            return;</span><br><span class="line">         }</span><br><span class="line"></span><br><span class="line">         // &#x6B64;&#x5904;&#x8C03;&#x7528;&#x4E3B;&#x8981;&#x662F;&#x5BFB;&#x627E;handler&#x7684;&#x9002;&#x914D;&#x5668;</span><br><span class="line">         HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());</span><br><span class="line"></span><br><span class="line">         // Process last-modified header, if supported by the handler.</span><br><span class="line">         String method = request.getMethod();</span><br><span class="line">         boolean isGet = &quot;GET&quot;.equals(method);</span><br><span class="line">         if (isGet || &quot;HEAD&quot;.equals(method)) {</span><br><span class="line">            long lastModified = ha.getLastModified(request, mappedHandler.getHandler());</span><br><span class="line">            if (new ServletWebRequest(request, response).checkNotModified(lastModified) &amp;&amp; isGet) {</span><br><span class="line">               return;</span><br><span class="line">            }</span><br><span class="line">         }</span><br><span class="line">         //&#x8C03;&#x7528;handler&#x6267;&#x884C;&#x94FE;&#x7684;&#x6240;&#x6709;&#x62E6;&#x622A;&#x5668;&#x7684;&#x524D;&#x7F6E;&#x5904;&#x7406;</span><br><span class="line">         if (!mappedHandler.applyPreHandle(processedRequest, response)) {</span><br><span class="line">            return;</span><br><span class="line">         }</span><br><span class="line"></span><br><span class="line">         // handler&#x6B63;&#x5728;&#x6267;&#x884C;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x5373;&#x67D0;&#x4E2A;controller&#x4E2D;&#x7684;&#x67D0;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x7136;&#x540E;&#x5904;&#x7406;&#x7ED3;&#x679C;&#x8FD4;&#x56DE;&#x4E00;&#x4E2A;ModelAndView</span><br><span class="line">         mv = ha.handle(processedRequest, response, mappedHandler.getHandler());</span><br><span class="line"></span><br><span class="line">         if (asyncManager.isConcurrentHandlingStarted()) {</span><br><span class="line">            return;</span><br><span class="line">         }</span><br><span class="line">        //&#x6267;&#x884C;handler&#x6267;&#x884C;&#x94FE;&#x7684;&#x6240;&#x6709;&#x62E6;&#x622A;&#x5668;&#x7684;&#x540E;&#x7F6E;&#x5904;&#x7406;&#x5668;</span><br><span class="line">         applyDefaultViewName(processedRequest, mv);</span><br><span class="line">         mappedHandler.applyPostHandle(processedRequest, response, mv);</span><br><span class="line">      }</span><br><span class="line">      catch (Exception ex) {</span><br><span class="line">         dispatchException = ex;</span><br><span class="line">      }</span><br><span class="line">      catch (Throwable err) {</span><br><span class="line"></span><br><span class="line">         dispatchException = new NestedServletException(&quot;Handler dispatch failed&quot;, err);</span><br><span class="line">      }</span><br><span class="line">      //&#x5904;&#x7406;&#x8BF7;&#x6C42;&#x5206;&#x53D1;&#x6267;&#x884C;&#x540E;&#x7684;&#x7ED3;&#x679C;&#xFF0C;&#x4E3B;&#x8981;&#x662F;&#x89C6;&#x56FE;&#x89E3;&#x6790;&#x7B49;&#x4E00;&#x7CFB;&#x5217;&#x64CD;&#x4F5C;</span><br><span class="line">      processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);</span><br><span class="line">   }</span><br><span class="line">   catch (Exception ex) {</span><br><span class="line">      triggerAfterCompletion(processedRequest, response, mappedHandler, ex);</span><br><span class="line">   }</span><br><span class="line">   catch (Throwable err) {</span><br><span class="line">      triggerAfterCompletion(processedRequest, response, mappedHandler,</span><br><span class="line">            new NestedServletException(&quot;Handler processing failed&quot;, err));</span><br><span class="line">   }</span><br><span class="line">   //&#x6700;&#x540E;&#x5904;&#x7406;&#x8D44;&#x6E90;&#x6E05;&#x695A;&#x5DE5;&#x4F5C;</span><br><span class="line">   finally {</span><br><span class="line">      if (asyncManager.isConcurrentHandlingStarted()) {</span><br><span class="line">         // Instead of postHandle and afterCompletion</span><br><span class="line">         if (mappedHandler != null) {</span><br><span class="line">            mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);</span><br><span class="line">         }</span><br><span class="line">      }</span><br><span class="line">      else {</span><br><span class="line">         // Clean up any resources used by a multipart request.</span><br><span class="line">         if (multipartRequestParsed) {</span><br><span class="line">            cleanupMultipart(processedRequest);</span><br><span class="line">         }</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x90A3;&#x4E48;getHandler&#x662F;&#x5982;&#x4F55;&#x83B7;&#x53D6;&#x5230;handler&#x6267;&#x884C;&#x94FE;&#x7684;&#xFF1F;<br>&#x5B83;&#x5176;&#x5B9E;&#x662F;&#x901A;&#x8FC7;&#x904D;&#x5386;DispatcherServlet&#x4E2D;&#x6240;&#x6709;&#x7684;HandlerMapping&#xFF0C;&#x7136;&#x540E;&#x901A;&#x8FC7;handlerMapping&#x4E2D;&#x7684;getHandler&#x83B7;&#x53D6;handler&#x6267;&#x884C;&#x94FE;,&#x4F46;handlerMapping&#x4E3B;&#x8981;&#x5206;&#x4E3A;&#x4E24;&#x79CD;:</p>
+<ul>
+<li>AbstractUrlHandlerMapping:&#x5E94;&#x5BF9;xml&#x4E2D;&#x7F16;&#x5199;&#x7684;url</li>
+<li>AbstractHandlerMethodMapping &#x5E94;&#x5BF9;&#x6CE8;&#x89E3;&#x5F62;&#x5F0F;&#x7684;controller</li>
+</ul>
+<p>&#x800C;handlerMapping&#x4E2D;getHandler&#x65B9;&#x6CD5;&#x4E2D;&#x4E3B;&#x8981;&#x662F;&#x8FDB;&#x884C;&#x51E0;&#x4E2A;&#x64CD;&#x4F5C;&#xFF1A;</p>
+<ul>
+<li>&#x8C03;&#x7528;getHandlerInternal&#x65B9;&#x6CD5;&#xFF0C;&#x8BE5;&#x65B9;&#x6CD5;&#x662F;&#x62BD;&#x8C61;&#x65B9;&#x6CD5;&#xFF0C;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x5728;&#x5BF9;&#x5E94;&#x7684;handlermapping&#x5B50;&#x7C7B;&#x4E2D;&#xFF0C;&#x4E3B;&#x8981;&#x5206;&#x4E3A;&#x4E24;&#x7C7B;&#xFF1A;AbstractHandlerMethodMapping&#x8FD9;&#x4E2A;&#x662F;&#x57FA;&#x4E8E;@RequetMapping&#x7B49;&#x6CE8;&#x89E3;&#x5F62;&#x5F0F;&#x7684;handlerMapping&#xFF0C;AbstractUrlHandlerMapping&#x7C7B;&#x4E3B;&#x8981;&#x662F;&#x5904;&#x7406;&#x53EF;&#x914D;&#x7F6E;&#x7684;url&#x67E5;&#x627E;&#x3001;&#x7A0B;&#x5E8F;&#x6620;&#x5C04;&#x5230;url&#x7684;&#x7B49;&#x64CD;&#x4F5C;&#x6BD4;XML&#x91CC;&#x914D;&#x7F6E;&#x4E00;&#x4E2A;/hello&#x5230;&#x5BF9;&#x5E94;&#x5B9E;&#x73B0;&#x7C7B;&#x7B49;&#x53EF;&#x914D;&#x7F6E;url&#x5904;&#x7406;&#x3002;&#x6839;&#x636E;reuqest&#x7684;url&#x8C03;&#x7528;AbstractUrlHandlerMapping&#x83B7;&#x53D6;handler&#x540D;&#x79F0;&#x6216;&#x8005;&#x5BF9;&#x5E94;&#x7684;handler&#x7684;Bean&#x540D;&#x79F0;,&#x8FD9;&#x79CD;&#x662F;&#x57FA;&#x4E8E;&#x53EF;&#x914D;&#x7F6E;&#x7684;url,&#x53E6;&#x5916;&#x4E00;&#x79CD;&#x662F;&#x57FA;&#x4E8E;&#x65B9;&#x6CD5;&#x5339;&#x914D;&#x5373;controller&#x4E2D;&#x5B9A;&#x4E49;&#x7684;&#x6BCF;&#x4E2A;&#x65B9;&#x6CD5;&#x4F1A;&#x8C03;&#x7528;AbstractHandlerMethodMapping</li>
+<li>&#x8C03;&#x7528;getHhandlerInternal&#x540E;&#x83B7;&#x53D6;&#x5230;&#x5BF9;&#x5E94;handler&#x7684;bean&#x540D;&#x79F0;&#x6216;&#x8005;&#x5B9E;&#x4F8B;&#x5BF9;&#x8C61;,&#x8C03;&#x7528;getHandlerExecutionChain&#x6784;&#x5EFA;&#x6210;HandlerExecutionChain</li>
+<li>&#x628A;&#x83B7;&#x53D6;&#x5230;&#x7684;handler&#x653E;&#x5230;handlerExecutionChain&#x6267;&#x884C;&#x94FE;&#x4E0A;</li>
+<li>&#x5224;&#x65AD;&#x662F;&#x5426;&#x9700;&#x8981;&#x5904;&#x7406;&#x8DE8;&#x8D8A;&#x95EE;&#x9898;&#xFF0C;&#x5982;&#x679C;&#x9700;&#x8981;&#x5219;&#x6839;&#x636E;&#x8DE8;&#x57DF;&#x914D;&#x7F6E;&#x4EE5;&#x53CA;&#x73B0;&#x6709;&#x7684;handler&#x6267;&#x884C;&#x94FE;&#x91CD;&#x65B0;&#x6784;&#x5EFA;&#x83B7;&#x53D6;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x6267;&#x884C;&#x94FE;<br>&#x7136;&#x540E;HandlerMaping&#x4E2D;&#x7684;getHandler&#x65B9;&#x6CD5;&#x6E90;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {</span><br><span class="line">   //&#x83B7;&#x53D6;handler</span><br><span class="line">   Object handler = getHandlerInternal(request);</span><br><span class="line">   if (handler == null) {</span><br><span class="line">      handler = getDefaultHandler();</span><br><span class="line">   }</span><br><span class="line">   if (handler == null) {</span><br><span class="line">      return null;</span><br><span class="line">   }</span><br><span class="line">   // Bean name or resolved handler?</span><br><span class="line">   if (handler instanceof String) {</span><br><span class="line">      String handlerName = (String) handler;</span><br><span class="line">      handler = obtainApplicationContext().getBean(handlerName);</span><br><span class="line">   }</span><br><span class="line">    //&#x6839;&#x636E;handler&#x548C;request&#x83B7;&#x53D6;&#x5230;&#x5177;&#x4F53;&#x7684;handler&#x6267;&#x884C;&#x94FE;</span><br><span class="line">   HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);</span><br><span class="line"></span><br><span class="line">   if (logger.isTraceEnabled()) {</span><br><span class="line">      logger.trace(&quot;Mapped to &quot; + handler);</span><br><span class="line">   }</span><br><span class="line">   else if (logger.isDebugEnabled() &amp;&amp; !request.getDispatcherType().equals(DispatcherType.ASYNC)) {</span><br><span class="line">      logger.debug(&quot;Mapped to &quot; + executionChain.getHandler());</span><br><span class="line">   }</span><br><span class="line">//&#x8DE8;&#x57DF;&#x5904;&#x7406;</span><br><span class="line">   if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {</span><br><span class="line">      CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(request) : null);</span><br><span class="line">      CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);</span><br><span class="line">      config = (config != null ? config.combine(handlerConfig) : handlerConfig);</span><br><span class="line">      executionChain = getCorsHandlerExecutionChain(request, executionChain, config);</span><br><span class="line">   }</span><br><span class="line"></span><br><span class="line">   return executionChain;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0B;&#x9762;&#x5206;&#x6790;&#x4E00;&#x4E9B;&#x57FA;&#x4E8E;&#x6CE8;&#x89E3;&#x5F62;&#x5F0F;&#x7684;handler&#x83B7;&#x53D6;&#xFF1A;<br>AbstractHandlerMethodMapping&#x7684;getHandlerInternal&#x65B9;&#x6CD5;&#x4F5C;&#x7528;&#xFF1A;<br>1.&#x901A;&#x8FC7;UrlPathHelper&#x5DE5;&#x5177;&#x7C7B;&#x6839;&#x636E;request&#x83B7;&#x53D6;(url)lookupPath&#x5373;&#x83B7;&#x53D6;handler&#x7684;key<br>2.&#x83B7;&#x53D6;mappingRegistry&#x5BF9;&#x8C61;&#x7684;&#x8BFB;&#x9501;&#xFF0C;&#x907F;&#x514D;&#x5E76;&#x53D1;&#x95EE;&#x9898;&#x8FD8;&#x5728;&#x6CE8;&#x518C;Mapping&#x6620;&#x5C04;&#x65F6;&#xFF0C;&#x51FA;&#x73B0;&#x5728;&#x83B7;&#x53D6;handler&#x7684;&#x60C5;&#x51B5;&#xFF08;&#x4E0D;&#x77E5;&#x9053;&#x6709;&#x6CA1;&#x6709;&#x7406;&#x89E3;&#x9519;&#x8BEF;&#xFF09;<br>3.&#x8C03;&#x7528;lookupHandlerMethod(lookupPath, request);&#x83B7;&#x53D6;handlerMethod&#x5BF9;&#x8C61;&#xFF0C;&#x8BE5;&#x5BF9;&#x8C61;&#x5305;&#x542B;&#x4E86;&#x65B9;&#x6CD5;&#x7684;&#x53C2;&#x6570;&#x3001;&#x8FD4;&#x56DE;&#x503C;&#x3001;&#x6CE8;&#x89E3;&#x7B49;&#x3002;&#x8BE5;&#x65B9;&#x6CD5;&#x4E3B;&#x8981;&#x662F;&#x6839;&#x636E;lookupPath&#x5373;url&#x4ECE;MappingRegistry&#x4E2D;&#x83B7;&#x53D6;&#x5BF9;&#x5E94;&#x7684;RequetsMappingInfo&#x4FE1;&#x606F;,&#x7136;&#x540E;&#x6839;&#x636E;&#x6620;&#x5C04;&#x4FE1;&#x606F;&#x4EE5;&#x53CA;url&#x7B49;&#x4E00;&#x4E9B;&#x5217;&#x64CD;&#x4F5C;&#x83B7;&#x53D6;&#x5230;&#x6700;&#x4F73;&#x5339;&#x914D;&#x7684;handlerMethod<br>4.&#x6839;&#x636E;&#x83B7;&#x53D6;&#x5230;&#x7684;HandlerMethod&#x5BF9;&#x8C61;&#x521B;&#x5EFA;&#x5BF9;&#x5E94;&#x7684;&#x89E3;&#x6790;&#x5668;Bean,&#x7136;&#x540E;&#x8FD4;&#x56DE;<br>5.&#x89E3;&#x9501;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Override</span><br><span class="line">protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {</span><br><span class="line">//&#x901A;&#x8FC7;&#x5DE5;&#x5177;&#x7C7B;&#x83B7;&#x53D6;&#x7684;url&#x8FD9;&#x91CC;&#x662F;lookupPath</span><br><span class="line">   String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);</span><br><span class="line">   request.setAttribute(LOOKUP_PATH, lookupPath);</span><br><span class="line">   //&#x83B7;&#x53D6;&#x8BFB;&#x9501;&#xFF0C;&#x907F;&#x514D;&#x8FD8;&#x65E9;&#x6CE8;&#x518C;&#xFF0C;&#x7136;&#x540E;&#x8FD9;&#x8FB9;&#x5728;&#x8BFB;&#x53D6;</span><br><span class="line">   this.mappingRegistry.acquireReadLock();</span><br><span class="line">   try {</span><br><span class="line">   //&#x901A;&#x8FC7;lookupPath&#x6E56;&#x533A;&#x54E6;&#x5230;&#x5BF9;&#x5E94;&#x7684;handlerMethod,handlerMetho&#x91CC;&#x5305;&#x542B;handler</span><br><span class="line">      HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);</span><br><span class="line">      //</span><br><span class="line">      return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);</span><br><span class="line">   }</span><br><span class="line">   finally {</span><br><span class="line">   //&#x7136;&#x540E;&#x91CA;&#x653E;&#x9501;</span><br><span class="line">      this.mappingRegistry.releaseReadLock();</span><br><span class="line">   }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A5;&#x7740;&#x770B;&#x4E00;&#x4E0B;getHandlerExecutionChain&#x662F;&#x5982;&#x4F55;&#x751F;&#x6210;handler&#x6267;&#x884C;&#x94FE;&#x7684;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {</span><br><span class="line">   HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?</span><br><span class="line">         (HandlerExecutionChain) handler : new HandlerExecutionChain(handler));</span><br><span class="line"></span><br><span class="line">   String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);</span><br><span class="line">   //&#x904D;&#x5386;&#x6240;&#x6709;&#x62E6;&#x622A;&#x5668;</span><br><span class="line">   for (HandlerInterceptor interceptor : this.adaptedInterceptors) {</span><br><span class="line">      if (interceptor instanceof MappedInterceptor) {</span><br><span class="line">      //&#x901A;&#x8FC7;&#x5339;&#x914D;&#x7684;&#x533A;&#x522B;&#x589E;&#x52A0;&#x5230;&#x62E6;&#x622A;&#x5668;&#x7684;list&#x91CC;&#x4FDD;&#x5B58;&#x8D77;&#x6765;,&#x7136;&#x540E;&#x8FD4;&#x56DE;</span><br><span class="line">         MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;</span><br><span class="line">         if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {</span><br><span class="line">            chain.addInterceptor(mappedInterceptor.getInterceptor());</span><br><span class="line">         }</span><br><span class="line">      }</span><br><span class="line">      else {</span><br><span class="line">         chain.addInterceptor(interceptor);</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line">   return chain;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>handler&#x6267;&#x884C;&#x94FE;&#x83B7;&#x53D6;&#x5230;&#x4E4B;&#x540E;&#xFF0C;&#x7136;&#x540E;&#x8FDB;&#x884C;&#x83B7;&#x53D6;handler&#x7684;&#x9002;&#x914D;&#x5668;:<br>&#x904D;&#x5386;&#x6240;&#x6709;&#x7684;handlerAdapters&#x627E;&#x5230;&#x5BF9;&#x5E94;&#x7684;adapter&#xFF0C;&#x4E00;&#x822C;&#x662F;RequestMappingHandlerAdapter</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {</span><br><span class="line">   if (this.handlerAdapters != null) {</span><br><span class="line">      for (HandlerAdapter adapter : this.handlerAdapters) {</span><br><span class="line">      //&#x5982;&#x679C;&#x652F;&#x6301;&#x5219;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;</span><br><span class="line">         if (adapter.supports(handler)) {</span><br><span class="line">            return adapter;</span><br><span class="line">         }</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line">   throw new ServletException(&quot;No adapter for handler [&quot; + handler +</span><br><span class="line">         &quot;]: The DispatcherServlet configuration needs to include a HandlerAdapter that supports this handler&quot;);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A5;&#x7740;&#x5C31;&#x662F;&#x6267;&#x884C;&#x62E6;&#x622A;&#x5668;&#x7684;&#x524D;&#x7F6E;&#x5904;&#x7406;&#x4E86;&#xFF0C;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x904D;&#x5386;&#x8BE5;handler&#x6267;&#x884C;&#x94FE;&#x4E0A;&#x7684;&#x6240;&#x6709;&#x62E6;&#x622A;&#x5668;&#x7684;&#x524D;&#x7F6E;&#x5904;&#x7406;&#x65B9;&#x6CD5;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {</span><br><span class="line">   HandlerInterceptor[] interceptors = getInterceptors();</span><br><span class="line">   if (!ObjectUtils.isEmpty(interceptors)) {</span><br><span class="line">   //&#x904D;&#x5386;&#x6267;&#x884C;</span><br><span class="line">      for (int i = 0; i &lt; interceptors.length; i++) {</span><br><span class="line">         HandlerInterceptor interceptor = interceptors[i];</span><br><span class="line">         if (!interceptor.preHandle(request, response, this.handler)) {</span><br><span class="line">            triggerAfterCompletion(request, response, null);</span><br><span class="line">            return false;</span><br><span class="line">         }</span><br><span class="line">         this.interceptorIndex = i;</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line">   return true;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A5;&#x7740;&#x662F;handler&#x6267;&#x884C;handle&#x65B9;&#x6CD5;&#x505A;&#x5177;&#x4F53;&#x903B;&#x8F91;&#x65B9;&#x6CD5;&#x8C03;&#x7528;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;AbstractHandlerMethodAdapter&#xFF1A;</span><br><span class="line">@Override</span><br><span class="line">@Nullable</span><br><span class="line">public final ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)</span><br><span class="line">      throws Exception {</span><br><span class="line">&#x8C03;&#x7528;&#x5B50;&#x7C7B;&#x7684;&#x65B9;&#x6CD5;</span><br><span class="line">   return handleInternal(request, response, (HandlerMethod) handler);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">RequestMappingHandlerAdapter:</span><br><span class="line">1.&#x8C03;&#x7528;invokeHandlerMethod&#x65B9;&#x6CD5;&#x6267;&#x884C;&#x5904;&#x7406;</span><br><span class="line"></span><br><span class="line">2.&#x5224;&#x65AD;&#x8BF7;&#x6C42;&#x5934;&#x6709;&#x6CA1;&#x6709;&#x7F13;&#x5B58;&#x63A7;&#x5236;&#xFF0C;&#x6709;&#x5219;&#x8FDB;&#x884C;&#x7F13;&#x5B58;&#x5904;&#x7406;</span><br><span class="line">@Override</span><br><span class="line">protected ModelAndView handleInternal(HttpServletRequest request,</span><br><span class="line">      HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {</span><br><span class="line"></span><br><span class="line">   ModelAndView mav;</span><br><span class="line">   checkRequest(request);</span><br><span class="line"></span><br><span class="line">   // Execute invokeHandlerMethod in synchronized block if required.</span><br><span class="line">   if (this.synchronizeOnSession) {</span><br><span class="line">      HttpSession session = request.getSession(false);</span><br><span class="line">      if (session != null) {</span><br><span class="line">         Object mutex = WebUtils.getSessionMutex(session);</span><br><span class="line">         synchronized (mutex) {</span><br><span class="line">         //&#x6838;&#x5FC3;&#x5904;&#x7406;&#x903B;&#x8F91;&#x65B9;&#x6CD5;</span><br><span class="line">            mav = invokeHandlerMethod(request, response, handlerMethod);</span><br><span class="line">         }</span><br><span class="line">      }</span><br><span class="line">      else {</span><br><span class="line">         //&#x6838;&#x5FC3;&#x5904;&#x7406;&#x903B;&#x8F91;&#x65B9;&#x6CD5;</span><br><span class="line">         mav = invokeHandlerMethod(request, response, handlerMethod);</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line">   else {</span><br><span class="line">      //&#x6838;&#x5FC3;&#x5904;&#x7406;&#x903B;&#x8F91;&#x65B9;&#x6CD5;</span><br><span class="line">      mav = invokeHandlerMethod(request, response, handlerMethod);</span><br><span class="line">   }</span><br><span class="line"></span><br><span class="line">   if (!response.containsHeader(HEADER_CACHE_CONTROL)) {</span><br><span class="line">      if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {</span><br><span class="line">         applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);</span><br><span class="line">      }</span><br><span class="line">      else {</span><br><span class="line">      </span><br><span class="line">         prepareResponse(response);</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line"></span><br><span class="line">   return mav;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0B;&#x9762;&#x65B9;&#x6CD5;&#x662F;&#x5177;&#x4F53;handler&#x6267;&#x884C;&#x5E76;&#x4E14;&#x8FD4;&#x56DE;ModelAndView&#xFF0C;&#x4E3B;&#x8981;&#x505A;&#x4E86;&#x4EE5;&#x4E0B;&#x51E0;&#x4E2A;&#x64CD;&#x4F5C;&#xFF1A;<br>&#x8BE5;&#x65B9;&#x6CD5;&#x662F;&#x4E3B;&#x8981;handler&#x5904;&#x7406;&#x903B;&#x8F91;:<br>1.&#x5148;handlerMethod&#x83B7;&#x53D6;&#x5230;web&#x6570;&#x636E;&#x7ED1;&#x5B9A;&#x5DE5;&#x5382;<br>2.&#x83B7;&#x53D6;&#x6A21;&#x578B;&#x5DE5;&#x5382;<br>3.&#x6839;&#x636E;handlerMethod&#x521B;&#x5EFA;&#x51FA;ServletInvocableHandlerMethod&#x5BF9;&#x8C61;&#xFF0C;&#x8BE5;&#x5BF9;&#x8C61;&#x8FD8;&#x9700;&#x8981;&#x8BBE;&#x7F6E;&#x4E00;&#x4E0B;handlerMethod&#x7684;&#x53C2;&#x6570;&#x89E3;&#x6790;&#x5668;&#x3001;&#x8FD4;&#x56DE;&#x503C;&#x5904;&#x7406;&#x5668;&#x3001;&#x6570;&#x636E;&#x7ED1;&#x5B9A;&#x5DE5;&#x5382;&#x3001;&#x53C2;&#x6570;&#x540D;&#x5904;&#x7406;&#x5BF9;&#x8C61;&#xFF0C;&#x662F;&#x4E00;&#x4E2A;&#x5177;&#x6709;&#x6267;&#x884C;&#x3001;&#x89E3;&#x6790;&#x3001;&#x5904;&#x7406;&#x53C2;&#x6570;&#x4E00;&#x4E2A;&#x6267;&#x884C;&#x65B9;&#x6CD5;&#x5BF9;&#x8C61;.<br>4.servletInvocableHandlerMethod&#x5BF9;&#x8C61;&#x8C03;&#x7528;invokeAndHandle&#x65B9;&#x6CD5;&#x6267;&#x884C;&#xFF0C;&#x6700;&#x5E95;&#x5C42;&#x662F;&#x57FA;&#x4E8E;&#x53CD;&#x5C04;&#x6267;&#x884C;Method&#x6765;&#x5904;&#x7406;&#x7684;<br>5.&#x6267;&#x884C;&#x5B8C;&#x6210;&#x540E;&#x901A;&#x8FC7;&#x8FD4;&#x56DE;&#x503C;&#x5904;&#x7406;&#x5668;returnValueHandlers&#x5904;&#x7406;&#x8FD4;&#x56DE;&#x503C;&#xFF0C;&#x7136;&#x540E;&#x8C03;&#x7528;getModelAndView&#x65B9;&#x6CD5;&#x83B7;&#x53D6;&#x5230;ModelAndView</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;@Nullable</span><br><span class="line">protected ModelAndView invokeHandlerMethod(HttpServletRequest request,</span><br><span class="line">      HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {</span><br><span class="line">     //&#x83B7;&#x53D6;&#x6570;&#x636E;&#x7ED1;&#x5B9A;&#x5DE5;&#x5382;\&#x6A21;&#x578B;&#x89E3;&#x6790;&#x4EE5;&#x53CA;&#x53C2;&#x6570;&#x89E3;&#x6790;&#x5668;&#x3001;&#x8FD4;&#x56DE;&#x503C;&#x5904;&#x7406;handler&#x7B49;&#x7B49;</span><br><span class="line">   ServletWebRequest webRequest = new ServletWebRequest(request, response);</span><br><span class="line">   try {</span><br><span class="line">      WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);</span><br><span class="line">      ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);</span><br><span class="line"></span><br><span class="line">      ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);</span><br><span class="line">      if (this.argumentResolvers != null) {</span><br><span class="line">         invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);</span><br><span class="line">      }</span><br><span class="line">      if (this.returnValueHandlers != null) {</span><br><span class="line">         invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);</span><br><span class="line">      }</span><br><span class="line">      invocableMethod.setDataBinderFactory(binderFactory);</span><br><span class="line">      invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);</span><br><span class="line"></span><br><span class="line">      ModelAndViewContainer mavContainer = new ModelAndViewContainer();</span><br><span class="line">      mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));</span><br><span class="line">      modelFactory.initModel(webRequest, mavContainer, invocableMethod);</span><br><span class="line">      mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);</span><br><span class="line"></span><br><span class="line">      AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);</span><br><span class="line">      asyncWebRequest.setTimeout(this.asyncRequestTimeout);</span><br><span class="line"></span><br><span class="line">      WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);</span><br><span class="line">      asyncManager.setTaskExecutor(this.taskExecutor);</span><br><span class="line">      asyncManager.setAsyncWebRequest(asyncWebRequest);</span><br><span class="line">      asyncManager.registerCallableInterceptors(this.callableInterceptors);</span><br><span class="line">      asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);</span><br><span class="line"></span><br><span class="line">      if (asyncManager.hasConcurrentResult()) {</span><br><span class="line">         Object result = asyncManager.getConcurrentResult();</span><br><span class="line">         mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];</span><br><span class="line">         asyncManager.clearConcurrentResult();</span><br><span class="line">         LogFormatUtils.traceDebug(logger, traceOn -&gt; {</span><br><span class="line">            String formatted = LogFormatUtils.formatValue(result, !traceOn);</span><br><span class="line">            return &quot;Resume with async result [&quot; + formatted + &quot;]&quot;;</span><br><span class="line">         });</span><br><span class="line">         invocableMethod = invocableMethod.wrapConcurrentResult(result);</span><br><span class="line">      }</span><br><span class="line">       //&#x5177;&#x4F53;&#x6267;&#x884C;&#x8BF7;&#x6C42;&#x65B9;&#x6CD5;,&#x5E95;&#x5C42;&#x57FA;&#x4E8E;&#x53CD;&#x5C04;&#x8C03;&#x7528;&#x5177;&#x4F53;&#x7684;&#x4E1A;&#x52A1;&#x903B;&#x8F91;&#x65B9;&#x6CD5;&#x53BB;&#x5904;&#x7406;</span><br><span class="line">      invocableMethod.invokeAndHandle(webRequest, mavContainer);</span><br><span class="line">      if (asyncManager.isConcurrentHandlingStarted()) {</span><br><span class="line">         return null;</span><br><span class="line">      }</span><br><span class="line">       //&#x5904;&#x7406;&#x7ED3;&#x679C;&#x5E76;&#x4E14;&#x8FD4;&#x56DE;&#x5BF9;&#x5E94;&#x7684;ModelAndView</span><br><span class="line">      return getModelAndView(mavContainer, modelFactory, webRequest);</span><br><span class="line">   }</span><br><span class="line">   finally {</span><br><span class="line">      webRequest.requestCompleted();</span><br><span class="line">   }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD4;&#x56DE;&#x5BF9;&#x5E94;&#x7684;ModelAndView&#x4E4B;&#x540E;&#xFF0C;&#x63A5;&#x7740;&#x5C31;&#x662F;&#x6267;&#x884C;&#x5BF9;&#x5E94;&#x62E6;&#x622A;&#x5668;&#x7684;&#x540E;&#x7F6E;&#x5904;&#x7406;&#x65B9;&#x6CD5;&#xFF0C;<br>&#x6700;&#x540E;&#x5C31;&#x662F;&#x8C03;&#x7528;processDispatchResult&#x65B9;&#x6CD5;&#x5904;&#x7406;&#x7ED3;&#x679C;&#xFF0C;&#x8BE5;&#x65B9;&#x6CD5;&#x5927;&#x81F4;&#x505A;&#x4E86;&#x4EE5;&#x4E0B;&#x51E0;&#x70B9;&#xFF1A;<br>&#x8BE5;&#x65B9;&#x6CD5;&#x4E3B;&#x8981;&#x505A;&#x4E24;&#x4EF6;&#x4E8B;:</p>
+<p>1.&#x5224;&#x65AD;&#x524D;&#x9762;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#x6709;&#x6CA1;&#x6709;&#x5F02;&#x5E38;&#xFF0C;&#x5219;&#x904D;&#x5386;&#x8C03;&#x7528;DispatcherServlet&#x4E2D;&#x6240;&#x6709;&#x7684;&#x5F02;&#x5E38;&#x89E3;&#x6790;&#x5904;&#x7406;&#x5668;HandlerExceptionResolver&#x7684;resolveException&#xFF08;&#x6240;&#x6709;&#x7684;&#x5F02;&#x5E38;&#x89E3;&#x6790;&#x5904;&#x7406;&#x5668;&#x90FD;&#x5FC5;&#x987B;&#x5B9E;&#x73B0;&#x6539;&#x63A5;&#x53E3;&#x6216;&#x8005;&#x5B9E;&#x73B0;AbstractHandlerExceptionResolver&#x7684;&#x62BD;&#x8C61;&#x5B50;&#x7C7B;&#xFF0C;&#x5E73;&#x5E38;&#x81EA;&#x5B9A;&#x4E49;&#x5F02;&#x5E38;&#x89E3;&#x6790;&#x53EF;&#x4EE5;&#x57FA;&#x4E8E;&#x4E0A;&#x9762;&#x8005;&#x4E24;&#x4E2A;&#x7C7B;&#x505A;&#x6269;&#x5C55;&#xFF09;</p>
+<p>2.&#x6CA1;&#x6709;&#x5F02;&#x5E38;&#x7684;&#x901A;&#x8FC7;&#x8C03;&#x7528;render&#x65B9;&#x6CD5;&#x5904;&#x7406;&#x89C6;&#x56FE;&#xFF0C;&#x5206;&#x4E24;&#x79CD;&#x8BF7;&#x60C5;&#x51B5;&#xFF0C;&#x524D;&#x9762;&#x83B7;&#x5F97;&#x7684;modeAndViews&#x662F;&#x5426;&#x6307;&#x5B9A;&#x4E86;&#x89C6;&#x56FE;&#x540D;&#x79F0;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x5219;&#x901A;&#x8FC7;&#x89C6;&#x56FE;&#x89E3;&#x6790;&#x5668;&#x5904;&#x7406;&#x6BD4;&#x5982;&#xFF1A;BeanNameViewResolver\FreeMarkerViewResolver&#x3001;InternalResourceViewResolver&#x7B49;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x662F;&#x5219;&#x4ECE;ModeAndView&#x83B7;&#x53D6;&#x5230;&#x5BF9;&#x5E94;&#x7684;&#x89C6;&#x56FE;&#xFF0C;&#x91CC;&#x9762;&#x6709;&#x591A;&#x79CD;&#x89C6;&#x56FE;&#x5305;&#x62EC;&#x5904;&#x7406;json&#x7684;MappingJackson2JsonView&#x4EE5;&#x53CA;&#x6A21;&#x677F;&#x5F15;&#x64CE;&#x7684;FreeMarkerView&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x81EA;&#x5B9A;&#x4E49;&#x89C6;&#x56FE;&#x5904;&#x7406;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5B9E;&#x73B0;AbstractView&#x6216;&#x8005;&#x60F3;&#x7B80;&#x5355;&#x6269;&#x5C55;json&#x89C6;&#x56FE;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x7EE7;&#x627F;AbstractJackson2View&#x6765;&#x5B9E;&#x73B0;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">less&#x590D;&#x5236;&#x4EE3;&#x7801;private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,</span><br><span class="line">      @Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,</span><br><span class="line">      @Nullable Exception exception) throws Exception {</span><br><span class="line">   boolean errorView = false;</span><br><span class="line">   //&#x5F02;&#x5E38;&#x89C6;&#x56FE;&#x5904;&#x7406;</span><br><span class="line">   if (exception != null) {</span><br><span class="line">      if (exception instanceof ModelAndViewDefiningException) {</span><br><span class="line">         logger.debug(&quot;ModelAndViewDefiningException encountered&quot;, exception);</span><br><span class="line">         mv = ((ModelAndViewDefiningException) exception).getModelAndView();</span><br><span class="line">      }</span><br><span class="line">      else {</span><br><span class="line">         Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);</span><br><span class="line">         mv = processHandlerException(request, response, handler, exception);</span><br><span class="line">         errorView = (mv != null);</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line"></span><br><span class="line">   //&#x8FD9;&#x91CC;&#x662F;&#x6B63;&#x5E38;&#x89C6;&#x56FE;&#x5904;&#x7406;</span><br><span class="line">   if (mv != null &amp;&amp; !mv.wasCleared()) {</span><br><span class="line">      render(mv, request, response);</span><br><span class="line">      if (errorView) {</span><br><span class="line">         WebUtils.clearErrorRequestAttributes(request);</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line">   else {</span><br><span class="line">      if (logger.isTraceEnabled()) {</span><br><span class="line">         logger.trace(&quot;No view rendering, null ModelAndView returned.&quot;);</span><br><span class="line">      }</span><br><span class="line">   }</span><br><span class="line">   if (WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {</span><br><span class="line">      // Concurrent handling started during a forward</span><br><span class="line">      return;</span><br><span class="line">   }</span><br><span class="line">  </span><br><span class="line">   if (mappedHandler != null) {</span><br><span class="line">      // Exception (if any) is already handled..</span><br><span class="line">      mappedHandler.triggerAfterCompletion(request, response, null);</span><br><span class="line">   }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7531;&#x4E8E;&#x7BC7;&#x5E45;&#x6709;&#x9650;&#xFF0C;&#x5176;&#x4ED6;&#x4E00;&#x4E9B;&#x65B9;&#x6CD5;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x6D41;&#x7A0B;&#x56FE;&#x4EE5;&#x53CA;&#x5177;&#x4F53;&#x6E90;&#x7801;&#x7C7B;&#x53BB;&#x4E86;&#x89E3;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/12e0d1aaf71b0424ae962c4bd4acefdc.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-Spring-Cloud/" rel="tag"># 后端,Spring Cloud</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7036021349134893087.html" rel="next" title="【Redis】重学哨兵模式">
+                <i class="fa fa-chevron-left"></i> 【Redis】重学哨兵模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7036044818467782692.html" rel="prev" title="APScheduler原理分析">
+                APScheduler原理分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-前置知识"><span class="nav-number">1.</span> <span class="nav-text">1.前置知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-源码分析流程图"><span class="nav-number">2.</span> <span class="nav-text">2.源码分析流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-源码分析"><span class="nav-number">3.</span> <span class="nav-text">3.源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-SpringMVC入口分析"><span class="nav-number">3.0.1.</span> <span class="nav-text">3.1 SpringMVC入口分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-ProcessRequest方法分析"><span class="nav-number">3.0.2.</span> <span class="nav-text">3.2 ProcessRequest方法分析</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

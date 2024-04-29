@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="监控,大数据,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x672C;&amp;#x6587;&amp;#x63CF;&amp;#x8FF0;&amp;#x4E86; Snuba &amp;#x67E5;&amp;#x8BE2;&amp;#x8BED;&amp;#x8A00; (SnQL)&amp;#x3002; &amp;#x7CFB;&amp;#x5217; 1 &amp;#x5206;&amp;#x949F;&amp;#x5FEB;&amp;#x901F;&amp;#x4F7F;&amp;#x7528; Docker &amp;#x4E0A;&amp;#x624B;&amp;#x6700;&amp;#x65B">
+<meta name="keywords" content="监控,大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sentry 监控 - Snuba 数据中台架构(SnQL">
+<meta property="og:url" content="https://dev.newban.cn/7035811556390600741.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x672C;&amp;#x6587;&amp;#x63CF;&amp;#x8FF0;&amp;#x4E86; Snuba &amp;#x67E5;&amp;#x8BE2;&amp;#x8BED;&amp;#x8A00; (SnQL)&amp;#x3002; &amp;#x7CFB;&amp;#x5217; 1 &amp;#x5206;&amp;#x949F;&amp;#x5FEB;&amp;#x901F;&amp;#x4F7F;&amp;#x7528; Docker &amp;#x4E0A;&amp;#x624B;&amp;#x6700;&amp;#x65B">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T12:13:48.655Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sentry 监控 - Snuba 数据中台架构(SnQL">
+<meta name="twitter:description" content="&amp;#x672C;&amp;#x6587;&amp;#x63CF;&amp;#x8FF0;&amp;#x4E86; Snuba &amp;#x67E5;&amp;#x8BE2;&amp;#x8BED;&amp;#x8A00; (SnQL)&amp;#x3002; &amp;#x7CFB;&amp;#x5217; 1 &amp;#x5206;&amp;#x949F;&amp;#x5FEB;&amp;#x901F;&amp;#x4F7F;&amp;#x7528; Docker &amp;#x4E0A;&amp;#x624B;&amp;#x6700;&amp;#x65B">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035811556390600741.html">
+
+
+
+
+
+  <title>Sentry 监控 - Snuba 数据中台架构(SnQL | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Sentry 监控 - Snuba 数据中台架构(SnQL</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-29T10:23:40+08:00">
+                2021-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x672C;&#x6587;&#x63CF;&#x8FF0;&#x4E86; <code>Snuba</code> &#x67E5;&#x8BE2;&#x8BED;&#x8A00; (<code>SnQL</code>)&#x3002;</p>
+<h2 id="&#x7CFB;&#x5217;"><a href="#&#x7CFB;&#x5217;" class="headerlink" title="&#x7CFB;&#x5217;"></a>&#x7CFB;&#x5217;</h2><ul>
+<li><a href="/external_links/d5d212bb3d972f0e170cbc7380138e29.html" target="blank" rel="noopener">1 &#x5206;&#x949F;&#x5FEB;&#x901F;&#x4F7F;&#x7528; Docker &#x4E0A;&#x624B;&#x6700;&#x65B0;&#x7248; Sentry-CLI - &#x521B;&#x5EFA;&#x7248;&#x672C;</a></li>
+<li><a href="/external_links/b6577177e0320ed837c2582380f8270c.html" target="blank" rel="noopener">&#x5FEB;&#x901F;&#x4F7F;&#x7528; Docker &#x4E0A;&#x624B; Sentry-CLI - 30 &#x79D2;&#x4E0A;&#x624B; Source Maps</a></li>
+<li><a href="/external_links/3fb30b9a01d73ac3e40eb2dfe1d61165.html" target="blank" rel="noopener">Sentry For React &#x5B8C;&#x6574;&#x63A5;&#x5165;&#x8BE6;&#x89E3;</a></li>
+<li><a href="/external_links/b874ef05d654f192fd9d8013cd96b40f.html" target="blank" rel="noopener">Sentry For Vue &#x5B8C;&#x6574;&#x63A5;&#x5165;&#x8BE6;&#x89E3;</a></li>
+<li><a href="/external_links/537558f387b01a684d93e5cacd6af4f7.html" target="blank" rel="noopener">Sentry-CLI &#x4F7F;&#x7528;&#x8BE6;&#x89E3;</a></li>
+<li><a href="/external_links/c6fc7d32bca8aa3a567396a2a61b9ec1.html" target="blank" rel="noopener">Sentry Web &#x6027;&#x80FD;&#x76D1;&#x63A7; - Web Vitals</a></li>
+<li><a href="/external_links/259e3a7dc1627bf38528a19c23baac13.html" target="blank" rel="noopener">Sentry Web &#x6027;&#x80FD;&#x76D1;&#x63A7; - Metrics</a></li>
+<li><a href="/external_links/c62236a85f389e0f0b5c1c5c54304f7a.html" target="blank" rel="noopener">Sentry Web &#x6027;&#x80FD;&#x76D1;&#x63A7; - Trends</a></li>
+<li><a href="/external_links/af511cf6f95aab2dc68115227378a826.html" target="blank" rel="noopener">Sentry Web &#x524D;&#x7AEF;&#x76D1;&#x63A7; - &#x6700;&#x4F73;&#x5B9E;&#x8DF5;(&#x5B98;&#x65B9;&#x6559;&#x7A0B;)</a></li>
+<li><a href="/external_links/40b526e5ac5bce3098df3d4e24f205f9.html" target="blank" rel="noopener">Sentry &#x540E;&#x7AEF;&#x76D1;&#x63A7; - &#x6700;&#x4F73;&#x5B9E;&#x8DF5;(&#x5B98;&#x65B9;&#x6559;&#x7A0B;)</a></li>
+<li><a href="/external_links/6d597284deca42137797031729a67189.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Discover &#x5927;&#x6570;&#x636E;&#x67E5;&#x8BE2;&#x5206;&#x6790;&#x5F15;&#x64CE;</a></li>
+<li><a href="/external_links/1e592ea930c25a4726bfaf4b5853a428.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Dashboards &#x6570;&#x636E;&#x53EF;&#x89C6;&#x5316;&#x5927;&#x5C4F;</a></li>
+<li><a href="/external_links/efd1f30b5b224058cbd329a0f470f3ad.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Environments &#x533A;&#x5206;&#x4E0D;&#x540C;&#x90E8;&#x7F72;&#x73AF;&#x5883;&#x7684;&#x4E8B;&#x4EF6;&#x6570;&#x636E;</a></li>
+<li><a href="/external_links/c61014081421cd0c42eae161d20d7ecf.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Security Policy &#x5B89;&#x5168;&#x7B56;&#x7565;&#x62A5;&#x544A;</a></li>
+<li><a href="/external_links/1cb8cd91186ed4cead579b650d15847e.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Search &#x641C;&#x7D22;&#x67E5;&#x8BE2;&#x5B9E;&#x6218;</a></li>
+<li><a href="/external_links/07d9cbcc98152a2d4c1f6ea6b117de6c.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Alerts &#x544A;&#x8B66;</a></li>
+<li><a href="/external_links/1cf7d47649630cf34b81ebff9540024a.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Distributed Tracing &#x5206;&#x5E03;&#x5F0F;&#x8DDF;&#x8E2A;</a></li>
+<li><a href="/external_links/544be9249ec38c291067ba2f687dcb6a.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - &#x9762;&#x5411;&#x5168;&#x6808;&#x5F00;&#x53D1;&#x4EBA;&#x5458;&#x7684;&#x5206;&#x5E03;&#x5F0F;&#x8DDF;&#x8E2A; 101 &#x7CFB;&#x5217;&#x6559;&#x7A0B;(&#x4E00;)</a></li>
+<li><a href="/external_links/4d8164fb27de9be95ff5c199e42b428c.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Snuba &#x6570;&#x636E;&#x4E2D;&#x53F0;&#x67B6;&#x6784;&#x7B80;&#x4ECB;(Kafka+Clickhouse)</a></li>
+<li><a href="/external_links/1efbb08965ba503e9fb91e19c5c020c0.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Snuba &#x6570;&#x636E;&#x4E2D;&#x53F0;&#x67B6;&#x6784;(Data Model &#x7B80;&#x4ECB;)</a></li>
+<li><a href="/external_links/d7623a57c037b1ac5d20cfbc8935cecb.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Snuba &#x6570;&#x636E;&#x4E2D;&#x53F0;&#x67B6;&#x6784;(Query Processing &#x7B80;&#x4ECB;)</a></li>
+<li><a href="/external_links/12aa8920ecf585bdd70c1f067e324595.html" target="blank" rel="noopener">Sentry &#x5B98;&#x65B9; JavaScript SDK &#x7B80;&#x4ECB;&#x4E0E;&#x8C03;&#x8BD5;&#x6307;&#x5357;</a></li>
+<li><a href="/external_links/f9c9c4fde2956e1e9bb8f67aa0e34105.html" target="blank" rel="noopener">Sentry &#x76D1;&#x63A7; - Snuba &#x6570;&#x636E;&#x4E2D;&#x53F0;&#x67B6;&#x6784;(&#x7F16;&#x5199;&#x548C;&#x6D4B;&#x8BD5; Snuba &#x67E5;&#x8BE2;)</a></li>
+</ul>
+<p>&#x4EE5;&#x4E0B;&#x662F; <code>SnQL</code> &#x7684;&#x67E5;&#x8BE2;&#x7ED3;&#x6784;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;MATCH simple | join | subquery</span><br><span class="line">SELECT [expressions] | [aggregations BY expressions]</span><br><span class="line">ARRAY JOIN [column]</span><br><span class="line">WHERE condition [[AND | OR] condition]*</span><br><span class="line">HAVING condition [[AND | OR] condition]*</span><br><span class="line">ORDER BY expressions ASC|DESC [, expressions ASC|DESC]*</span><br><span class="line">LIMIT expression BY n</span><br><span class="line">LIMIT n</span><br><span class="line">OFFSET n</span><br><span class="line">GRANULARITY n</span><br><span class="line">TOTALS boolean</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x4E9B;&#x67E5;&#x8BE2;&#x4F5C;&#x4E3A;&#x5B57;&#x7B26;&#x4E32;&#x53D1;&#x9001;&#x5230; <code>/:dataset/snql</code> &#x7AEF;&#x70B9;&#xFF0C;&#x7F16;&#x7801;&#x4E3A;&#x4EE5;&#x4E0B;&#x683C;&#x5F0F;&#x7684; <code>JSON body</code>&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">json&#x590D;&#x5236;&#x4EE3;&#x7801;{</span><br><span class="line">    &quot;query&quot;: &quot;&lt;query&gt;&quot;,</span><br><span class="line">    &quot;dataset&quot;: &quot;&lt;dataset&gt;&quot;,</span><br><span class="line">    &quot;consistent&quot;: bool,</span><br><span class="line">    &quot;turbo&quot;: bool,</span><br><span class="line">    &quot;debug&quot;: bool,</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x6570;&#x636E;&#x96C6;(dataset)</code>&#x901A;&#x8FC7;&#x67E5;&#x8BE2;&#x4F7F;&#x7528;&#x7684; <code>url</code> &#x9690;&#x542B;&#x3002;&#x5728; <code>JSON</code> &#x4E3B;&#x4F53;&#x4E2D;&#xFF0C;&#x9664;&#x4E86; <code>query</code> &#x4E4B;&#x5916;&#x7684;&#x6240;&#x6709;&#x5B57;&#x6BB5;&#x90FD;&#x662F;&#x53EF;&#x9009;&#x7684;&#x3002;</p>
+<h2 id="MATCH"><a href="#MATCH" class="headerlink" title="MATCH"></a>MATCH</h2><p>&#x6211;&#x4EEC;&#x7684;&#x6570;&#x636E;&#x6A21;&#x578B;&#x7531;&#x5B9E;&#x4F53;&#x56FE;&#x8868;&#x793A;&#x3002;&#x8BE5;&#x5B50;&#x53E5;&#x6807;&#x8BC6;&#x4E86;&#x6211;&#x4EEC;&#x6B63;&#x5728;&#x67E5;&#x8BE2;&#x7684;<code>&#x5B50;&#x56FE;(subgraphs)</code>&#x7684;&#x6A21;&#x5F0F;&#x3002;&#x76EE;&#x524D;&#x652F;&#x6301;&#x4E09;&#x79CD;&#x7C7B;&#x578B;&#x7684; <code>MATCH</code> &#x5B50;&#x53E5;&#xFF1A;</p>
+<p><strong>Simple:</strong></p>
+<p><code>MATCH (&lt;entity&gt; [SAMPLE n])</code></p>
+<p>&#x8FD9;&#x76F8;&#x5F53;&#x4E8E;&#x6211;&#x4EEC;&#x5F53;&#x524D;&#x7684;&#x6240;&#x6709;&#x67E5;&#x8BE2;&#x3002; &#x8FD9;&#x662F;&#x4ECE;&#x5355;&#x4E2A;&#x5B9E;&#x4F53;&#xFF08;&#x4E8B;&#x4EF6;&#x3001;&#x4E8B;&#x52A1;&#x7B49;&#xFF09;&#x67E5;&#x8BE2;&#x6570;&#x636E;&#x3002;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5C06;&#x5176;&#x4E0E;&#x5B9E;&#x4F53;&#x4E00;&#x8D77;&#x6DFB;&#x52A0;&#x6765;&#x5411;&#x67E5;&#x8BE2;&#x6DFB;&#x52A0;&#x53EF;&#x9009; <code>sample</code>&#x3002;</p>
+<p>&#x4F8B;&#x5982;&#xFF1A;<code>MATCH (events)</code></p>
+<p><strong>Subquery:</strong></p>
+<p><code>MATCH { &lt;query&gt; }</code></p>
+<p>&#x82B1;&#x62EC;&#x53F7;&#x5185;&#x53EF;&#x4EE5;&#x662F;&#x53E6;&#x4E00;&#x4E2A;&#x5B8C;&#x6574;&#x7684; <code>SQL</code> &#x67E5;&#x8BE2;&#x3002;&#x5B50;&#x67E5;&#x8BE2;&#x7684; <code>SELECT/BY</code> &#x5B50;&#x53E5;&#x4E2D;&#x7684;&#x4EFB;&#x4F55;&#x5185;&#x5BB9;&#x90FD;&#x5C06;&#x4F7F;&#x7528;&#x6307;&#x5B9A;&#x7684;&#x522B;&#x540D;&#x5728;&#x5916;&#x90E8;&#x67E5;&#x8BE2;&#x4E2D;&#x516C;&#x5F00;&#x3002;</p>
+<p>&#x4F8B;&#x5982;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;MATCH {</span><br><span class="line">    MATCH (transactions)</span><br><span class="line">    SELECT avg(duration) AS avg_d BY transaction</span><br><span class="line">}</span><br><span class="line">SELECT max(avg_d)</span><br></pre></td></tr></table></figure>
+
+<p><strong>Join(&#x8FDE;&#x63A5;):</strong></p>
+<p><code>MATCH (&lt;alias&gt;: &lt;entity&gt; [SAMPLE n]) -[&lt;join&gt;]-&gt; (&lt;alias&gt;: &lt;entity&gt; [SAMPLE n])</code></p>
+<p>&#x4E00;&#x4E2A; <code>join</code> &#x4EE3;&#x8868;&#x4E00;&#x4E2A;&#x591A;&#x8282;&#x70B9;<code>&#x5B50;&#x56FE;(subgraph)</code>&#xFF0C;&#x662F;&#x4E00;&#x4E2A;&#x5305;&#x542B;&#x4E0D;&#x540C;&#x8282;&#x70B9;&#x4E4B;&#x95F4;&#x7684;&#x591A;&#x4E2A;&#x5173;&#x7CFB;&#x7684;&#x5B50;&#x56FE;&#x3002;&#x76EE;&#x524D;&#x652F;&#x6301;&#x8282;&#x70B9;&#x4E4B;&#x95F4;&#x7684; <code>1..n</code>&#x3001;<code>n..1</code> &#x548C; <code>1..1</code> &#x6709;&#x5411;&#x5173;&#x7CFB;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E; <code>JOIN</code>&#xFF0C;&#x6BCF;&#x4E2A;&#x5B9E;&#x4F53;&#x90FD;&#x5FC5;&#x987B;&#x6709;&#x4E00;&#x4E2A;&#x522B;&#x540D;&#xFF0C;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x552F;&#x4E00;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x3002; <code>&#x62BD;&#x6837;(Sampling)</code>&#x4E5F;&#x53EF;&#x4EE5;&#x5E94;&#x7528;&#x4E8E; <code>join</code> &#x4E2D;&#x7684;&#x4EFB;&#x4F55;&#x5B9E;&#x4F53;&#x3002;<code>&lt;join&gt;</code> &#x662F;&#x5728; <code>Snuba</code> &#x4E2D;&#x7684; <code>Entity</code> &#x4E2D;&#x6307;&#x5B9A;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;&#x662F;&#x4E00;&#x7EC4; <code>join</code> &#x6761;&#x4EF6;&#x7684;&#x7B80;&#x5199;&#x3002;&#x53EF;&#x4EE5;&#x6709;&#x591A;&#x4E2A; <code>join</code> &#x5B50;&#x53E5;&#xFF0C;&#x7528;&#x9017;&#x53F7;&#x5206;&#x9694;&#x3002;</p>
+<p>&#x4F8B;&#x5982;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;MATCH</span><br><span class="line">    (e: events) -[grouped]-&gt; (g: groupedmessage),</span><br><span class="line">    (e: events) -[assigned]-&gt; (a: groupassignee)</span><br><span class="line">SELECT count() AS tot BY e.project_id, g.id</span><br><span class="line">WHERE a.user_id = &quot;somebody&quot;</span><br></pre></td></tr></table></figure>
+
+<p><code>join</code> &#x7C7B;&#x578B;&#xFF08;<code>left/inner</code>&#xFF09;&#x548C; <code>join key</code> &#x662F;&#x6570;&#x636E;&#x6A21;&#x578B;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x67E5;&#x8BE2;&#x7684;&#x4E00;&#x90E8;&#x5206;&#x3002;&#x5B83;&#x4EEC;&#x88AB;&#x786C;&#x7F16;&#x7801;&#x5728;&#x5B9E;&#x4F53;&#x4EE3;&#x7801;&#x4E2D;&#x3002; &#x8FD9;&#x662F;&#x56E0;&#x4E3A;&#x6CA1;&#x6709;&#x5B9E;&#x4F53;&#x53EF;&#x4EE5;&#x5B89;&#x5168;&#x5730;&#x4E0E;&#x5E95;&#x5C42;&#x6570;&#x636E;&#x5E93;&#x7684;&#x5206;&#x5E03;&#x5F0F;&#x7248;&#x672C;&#x4E2D;&#x7684;&#x4EFB;&#x4F55;&#x5176;&#x4ED6;&#x5B9E;&#x4F53;&#x8FDE;&#x63A5;&#x3002;</p>
+<p><code>match</code> &#x5B50;&#x53E5;&#x63D0;&#x4F9B;&#x7ED9; <code>where</code> &#x5B50;&#x53E5;&#x7684;<code>&#x5143;&#x7EC4;(tuple)</code>&#x770B;&#x8D77;&#x6765;&#x4E0E;&#x4F20;&#x7EDF; <code>join</code> &#x5B50;&#x53E5;&#x751F;&#x6210;&#x7684;&#x5143;&#x7EC4;&#x5B8C;&#x5168;&#x4E00;&#x6837;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">json&#x590D;&#x5236;&#x4EE3;&#x7801;[</span><br><span class="line">    {&quot;e.project_id&quot;: 1,  &quot;g.id&quot;: 10}</span><br><span class="line">    {&quot;e.project_id&quot;: 1,  &quot;g.id&quot;: 11}</span><br><span class="line">    {&quot;e.project_id&quot;: 2,  &quot;g.id&quot;: 20}</span><br><span class="line">    ...</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<h2 id="SELECT-BY"><a href="#SELECT-BY" class="headerlink" title="SELECT .. BY"></a>SELECT .. BY</h2><p>&#x8BE5;&#x5B50;&#x53E5;&#x6307;&#x5B9A;&#x5E94;&#x5728;&#x8F93;&#x51FA;&#x4E2D;&#x8FD4;&#x56DE;&#x54EA;&#x4E9B;&#x7ED3;&#x679C;&#x3002;&#x5982;&#x679C;&#x5B58;&#x5728;&#x805A;&#x5408;(<code>aggregation</code>)&#xFF0C;&#x5219; <code>BY</code> &#x5B50;&#x53E5;&#x4E2D;&#x7684;&#x6240;&#x6709;&#x5185;&#x5BB9;&#x90FD;&#x88AB;&#x89C6;&#x4E3A;&#x5206;&#x7EC4; <code>key</code>&#x3002; &#x5982;&#x679C;&#x6211;&#x4EEC;&#x60F3;&#x8981;&#x805A;&#x5408;&#x6574;&#x4E2A;&#x7ED3;&#x679C;&#x96C6;&#xFF0C;&#x5219;&#x53EF;&#x4EE5;&#x5728;&#x6CA1;&#x6709; <code>BY</code> &#x5B50;&#x53E5;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x8FDB;&#x884C;&#x805A;&#x5408;&#xFF0C;&#x4F46;&#x5728;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;<code>SELECT</code> &#x4E2D;&#x53EA;&#x80FD;&#x5305;&#x542B;&#x805A;&#x5408;&#x3002;&#x5373;&#x4F7F;&#x6709; <code>BY</code> &#x5B50;&#x53E5;&#xFF0C;&#x7A7A;&#x7684; <code>SELECT</code> &#x5B50;&#x53E5;&#x4E5F;&#x662F;&#x65E0;&#x6548;&#x7684;&#x3002;</p>
+<p><code>SELECT</code> &#x5B50;&#x53E5;&#x4E2D;&#x7684;<code>&#x8868;&#x8FBE;&#x5F0F;</code>&#x53EF;&#x4EE5;&#x662F;<code>&#x5217;</code>&#x3001;<code>&#x7B97;&#x672F;</code>&#x3001;<code>&#x51FD;&#x6570;</code>&#x6216;<code>&#x4E09;</code>&#x8005;&#x7684;&#x4EFB;&#x610F;&#x7EC4;&#x5408;&#x3002; &#x5982;&#x679C;&#x67E5;&#x8BE2;&#x662F; <code>join</code>&#xFF0C;&#x5219;&#x6BCF;&#x4E00;&#x5217;&#x90FD;&#x5FC5;&#x987B;&#x6709;&#x4E00;&#x4E2A;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x7684;&#x522B;&#x540D;&#xFF0C;&#x8BE5;&#x522B;&#x540D;&#x4E0E; <code>MATCH</code> &#x5B50;&#x53E5;&#x4E2D;&#x7684;&#x5B9E;&#x4F53;&#x522B;&#x540D;&#x4E4B;&#x4E00;&#x5339;&#x914D;&#x3002;</p>
+<h2 id="WHERE"><a href="#WHERE" class="headerlink" title="WHERE"></a>WHERE</h2><p>&#x8FD9;&#x662F;&#x5728;&#x805A;&#x5408;&#x4E4B;&#x524D;&#x53D1;&#x751F;&#x7684;&#x67E5;&#x8BE2;&#x7684;&#x8FC7;&#x6EE4;&#x5668;&#xFF08;&#x5982; <code>SQL</code> &#x4E2D;&#x7684; <code>WHERE</code>&#xFF09;&#x3002;</p>
+<p>&#x6761;&#x4EF6;&#x662F; <code>LHS OP RHS*</code> &#x5F62;&#x5F0F;&#x7684;&#x4E2D;&#x7F00;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;&#x5176;&#x4E2D; <code>LHS</code> &#x548C; <code>RHS</code> &#x662F;<code>&#x5B57;&#x9762;&#x503C;</code>&#x6216;<code>&#x8868;&#x8FBE;&#x5F0F;</code>&#x3002;<code>OP</code> &#x6307;&#x7684;&#x662F;&#x4E00;&#x4E2A;&#x7279;&#x5B9A;&#x7684;<code>&#x8FD0;&#x7B97;&#x7B26;</code>&#x6765;<code>&#x6BD4;&#x8F83;</code>&#x4E24;&#x4E2A;&#x503C;&#x3002; &#x8FD9;&#x4E9B;&#x8FD0;&#x7B97;&#x7B26;&#x662F; <code>=</code>&#x3001;<code>!=</code>&#x3001;<code>&lt;</code>&#x3001;<code>&lt;=</code>&#x3001;<code>&gt;</code>&#x3001;<code>&gt;=</code>&#x3001;<code>IN</code>&#x3001;<code>NOT IN</code>&#x3001;<code>LIKE</code>&#x3001;<code>NOT LIKE</code>&#x3001;<code>IS NULL</code>&#x3001;<code>IS NOT NULL</code> &#x4E4B;&#x4E00;&#x3002;&#x8BF7;&#x6CE8;&#x610F;&#xFF0C;&#x5F53;&#x4F7F;&#x7528;&#x50CF; <code>IS NULL</code> &#x8FD9;&#x6837;&#x7684;&#x8FD0;&#x7B97;&#x7B26;&#x65F6;&#xFF0C;<code>RHS</code> &#x662F;&#x53EF;&#x9009;&#x7684;&#x3002;</p>
+<p>&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x5E03;&#x5C14;&#x5173;&#x952E;&#x5B57; <code>AND</code> &#x6216; <code>OR</code> &#x7EC4;&#x5408;&#x6761;&#x4EF6;&#x3002;&#x5B83;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528; <code>()</code> &#x8FDB;&#x884C;&#x5206;&#x7EC4;&#x3002;</p>
+<h2 id="HAVING"><a href="#HAVING" class="headerlink" title="HAVING"></a>HAVING</h2><p>&#x50CF; <code>WHERE</code> &#x5B50;&#x53E5;&#x4E00;&#x6837;&#x5DE5;&#x4F5C;&#xFF0C;&#x4F46;&#x5B83;&#x5728; <code>SELECT</code> &#x5B50;&#x53E5;&#x4E2D;&#x58F0;&#x660E;&#x7684;&#x805A;&#x5408;&#x4E4B;&#x540E;&#x5E94;&#x7528;&#x3002; &#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5728;&#x8FD9;&#x91CC;&#x5BF9;&#x805A;&#x5408;&#x51FD;&#x6570;&#x7684;&#x7ED3;&#x679C;&#x5E94;&#x7528;&#x6761;&#x4EF6;&#x3002;</p>
+<h2 id="ORDER-BY"><a href="#ORDER-BY" class="headerlink" title="ORDER BY"></a>ORDER BY</h2><p>&#x6307;&#x5B9A;&#x5BF9;&#x7ED3;&#x679C;&#x96C6;&#x8FDB;&#x884C;&#x6392;&#x5E8F;&#x7684;&#x8868;&#x8FBE;&#x5F0F;&#x3002;</p>
+<h2 id="LIMIT-BY-LIMIT-OFFSET"><a href="#LIMIT-BY-LIMIT-OFFSET" class="headerlink" title="LIMIT BY/LIMIT/OFFSET"></a>LIMIT BY/LIMIT/OFFSET</h2><p>&#x4E0D;&#x8A00;&#x81EA;&#x660E;&#xFF0C;&#x5B83;&#x4EEC;&#x91C7;&#x7528;&#x6574;&#x6570;&#x5E76;&#x5728; <code>Clickhouse</code> &#x67E5;&#x8BE2;&#x4E2D;&#x8BBE;&#x7F6E;&#x76F8;&#x5E94;&#x7684;&#x503C;&#x3002; &#x5982;&#x679C;&#x67E5;&#x8BE2;&#x672A;&#x6307;&#x5B9A; <code>limit</code> &#x6216; <code>offset</code>&#xFF0C;&#x5B83;&#x4EEC;&#x5C06;&#x5206;&#x522B;&#x9ED8;&#x8BA4;&#x4E3A; <code>1000</code> &#x548C; <code>0</code>&#x3002;</p>
+<h2 id="GRANULARITY"><a href="#GRANULARITY" class="headerlink" title="GRANULARITY"></a>GRANULARITY</h2><p>&#x4E00;&#x4E2A;&#x6574;&#x6570;&#xFF0C;&#x8868;&#x793A;&#x5BF9;&#x57FA;&#x4E8E;&#x65F6;&#x95F4;&#x7684;&#x7ED3;&#x679C;&#x8FDB;&#x884C;&#x5206;&#x7EC4;&#x7684;&#x7C92;&#x5EA6;&#x3002;</p>
+<h2 id="TOTALS"><a href="#TOTALS" class="headerlink" title="TOTALS"></a>TOTALS</h2><p>&#x5982;&#x679C;&#x8BBE;&#x7F6E;&#x4E3A; <code>True</code>&#xFF0C;&#x6765;&#x81EA; <code>Snuba</code> &#x7684;&#x54CD;&#x5E94;&#x5C06;&#x6709;&#x4E00;&#x4E2A; <code>&#x201C;totals&#x201D;</code> <em>key</em>&#xFF0C;&#x5176;&#x4E2D;&#x5305;&#x542B;&#x6240;&#x6709;&#x9009;&#x5B9A;&#x884C;&#x7684;&#x603B;&#x503C;&#x3002;</p>
+<h2 id="SAMPLE"><a href="#SAMPLE" class="headerlink" title="SAMPLE"></a>SAMPLE</h2><p>&#x5982;&#x679C; <code>MATCH</code> &#x5B50;&#x53E5;&#x4E2D;&#x7684;&#x8282;&#x70B9;&#x672A;&#x63D0;&#x4F9B;<code>&#x91C7;&#x6837;&#x7387;</code>&#xFF0C;&#x5219;&#x53EF;&#x4EE5;&#x5728;&#x6B64;&#x5904;&#x6307;&#x5B9A;&#x3002; &#x5728;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;<code>Snuba</code> &#x4F1A;&#x5C06; <code>sample right</code> &#x5206;&#x914D;&#x7ED9;&#x67E5;&#x8BE2;&#x4E2D;&#x7684;&#x8282;&#x70B9;&#x4E4B;&#x4E00;&#x3002;<code>sample</code> &#x53EF;&#x4EE5;&#x662F;&#x4ECB;&#x4E8E; <code>0</code> &#x548C; <code>1</code> &#x4E4B;&#x95F4;&#x7684;&#x6D6E;&#x70B9;&#x6570;&#xFF0C;&#x8868;&#x793A;&#x8981;&#x91C7;&#x6837;&#x7684;&#x884C;&#x7684;&#x767E;&#x5206;&#x6BD4;&#x3002;</p>
+<p>&#x6216;&#x8005;&#x5B83;&#x53EF;&#x4EE5;&#x662F;&#x4E00;&#x4E2A;&#x5927;&#x4E8E; <code>1</code> &#x7684;&#x6574;&#x6570;&#xFF0C;&#x8868;&#x793A;&#x8981;&#x91C7;&#x6837;&#x7684;&#x884C;&#x6570;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/3e318d6c56c9576e73edf6d434dbd34c.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/监控-大数据/" rel="tag"># 监控,大数据</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035811839959105549.html" rel="next" title="TCP协议的粘包问题&解决方式 粘包问题 解决粘包问题 结语">
+                <i class="fa fa-chevron-left"></i> TCP协议的粘包问题&解决方式 粘包问题 解决粘包问题 结语
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035813893108662280.html" rel="prev" title="打通JAVA与内核系列之一ReentrantLock锁的实现">
+                打通JAVA与内核系列之一ReentrantLock锁的实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#系列"><span class="nav-number">1.</span> <span class="nav-text">系列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MATCH"><span class="nav-number">2.</span> <span class="nav-text">MATCH</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SELECT-BY"><span class="nav-number">3.</span> <span class="nav-text">SELECT .. BY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WHERE"><span class="nav-number">4.</span> <span class="nav-text">WHERE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HAVING"><span class="nav-number">5.</span> <span class="nav-text">HAVING</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ORDER-BY"><span class="nav-number">6.</span> <span class="nav-text">ORDER BY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LIMIT-BY-LIMIT-OFFSET"><span class="nav-number">7.</span> <span class="nav-text">LIMIT BY/LIMIT/OFFSET</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRANULARITY"><span class="nav-number">8.</span> <span class="nav-text">GRANULARITY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TOTALS"><span class="nav-number">9.</span> <span class="nav-text">TOTALS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SAMPLE"><span class="nav-number">10.</span> <span class="nav-text">SAMPLE</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

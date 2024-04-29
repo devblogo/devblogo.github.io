@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Writing a basic x86-64 JIT compiler from scratch in stock Python By Christian Stigen Larsen Posted 08 Nov 2017 &amp;#x2014; updated 11 Nov 2017  In this post I&amp;#x2019;ll show how to write a rudimentary, n">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用普通的Python，从头开始编写一个基本的x86-64 J">
+<meta property="og:url" content="https://dev.newban.cn/6844903512036360199.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="Writing a basic x86-64 JIT compiler from scratch in stock Python By Christian Stigen Larsen Posted 08 Nov 2017 &amp;#x2014; updated 11 Nov 2017  In this post I&amp;#x2019;ll show how to write a rudimentary, n">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T05:33:41.222Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="用普通的Python，从头开始编写一个基本的x86-64 J">
+<meta name="twitter:description" content="Writing a basic x86-64 JIT compiler from scratch in stock Python By Christian Stigen Larsen Posted 08 Nov 2017 &amp;#x2014; updated 11 Nov 2017  In this post I&amp;#x2019;ll show how to write a rudimentary, n">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903512036360199.html">
+
+
+
+
+
+  <title>用普通的Python，从头开始编写一个基本的x86-64 J | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">用普通的Python，从头开始编写一个基本的x86-64 J</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-17T14:54:49+08:00">
+                2017-11-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Writing-a-basic-x86-64-JIT-compiler-from-scratch-in-stock-Python"><a href="#Writing-a-basic-x86-64-JIT-compiler-from-scratch-in-stock-Python" class="headerlink" title="Writing a basic x86-64 JIT compiler from scratch in stock Python"></a><a href="/external_links/fbb3503668fb65a66cc486125f52f50e.html" target="blank" rel="noopener">Writing a basic x86-64 JIT compiler from scratch in stock Python</a></h1><p> <strong>By</strong> <a href="/external_links/fbb3503668fb65a66cc486125f52f50e.html" target="blank" rel="noopener">Christian Stigen Larsen</a><br> Posted 08 Nov 2017 &#x2014; updated 11 Nov 2017 </p>
+<p>In this post I&#x2019;ll show how to write a rudimentary, native x86-64 <a href="/external_links/b61f3569935c773ebaaa26db0d8fc1c7.html" target="blank" rel="noopener">just-in-time<br>compiler (JIT)</a> in CPython, using only the built-in modules.</p>
+<p>Update: This post made the <a href="/external_links/ab1f1d4f126c4ed4923aab0df95cded1.html" target="blank" rel="noopener">front page of HN</a>, and I&#x2019;ve incorporated some of the <a href="/external_links/35de7543df56561e3a274cf3069e5edd.html" target="blank" rel="noopener">discussion feedback</a>. I&#x2019;ve also written a<br> <a href="/external_links/bf81914218525899e420fee579922e0e.html" target="blank" rel="noopener">follow-up post</a> that JITs Python bytecode to x86-64.</p>
+<p>The code here specifically targets the UNIX systems macOS and Linux, but should be easily translated to other systems such as Windows. The complete code is available on <a href="/external_links/42bd54e155e7b9e1b23d77c0f570dd8b.html" target="blank" rel="noopener">github.com/cslarsen/mi&#x2026;</a>.</p>
+<p>The goal is to generate new versions of the below assembly code at runtime and execute it.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;48 b8 ed ef be ad de  movabs $0xdeadbeefed, %rax</span><br><span class="line">00 00 00</span><br><span class="line">48 0f af c7           imul   %rdi,%rax</span><br><span class="line">c3                    retq</span><br></pre></td></tr></table></figure>
+
+<p>We will mainly deal with the left hand side &#x2014; the byte sequence <code>48 b8 ed ...</code> and so on. Those fifteen <a href="/external_links/7d57d2c0a750f7944ff30e915c0b7641.html" target="blank" rel="noopener">machine code bytes</a> comprise an x86-64 function that multiplies its argument<br> with the constant <code>0xdeadbeefed</code>. The JIT step will create functions with different such constants. While being a contrived form of <a href="/external_links/f0e6f1fffefce8f04f3079549d72e531.html" target="blank" rel="noopener">specialization</a>, it illuminates<br> the basic mechanics of just-in-time compilation.</p>
+<p>Our general strategy is to rely on the built-in <code>ctypes</code> Python module to load the C standard library. From there, we can access system functions to interface with the virtual memory manager. We&#x2019;ll use <code>mmap</code> to fetch a page-aligned<br> block of memory. It needs to be aligned for it to become executable. That&#x2019;s the reason why we can&#x2019;t simply use the usual C function <code>malloc</code>, because it may return memory that spans page boundaries.</p>
+<p>The function <code>mprotect</code> will be used to mark the memory block as read-only and executable. After that, we should be able to call into our freshly compiled block of code through ctypes.</p>
+<h2 id="The-boiler-plate-part"><a href="#The-boiler-plate-part" class="headerlink" title="The boiler-plate part"></a>The boiler-plate part</h2><p>Before we can do anything, we need to load the standard C library.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;import ctypes</span><br><span class="line">import sys</span><br><span class="line"></span><br><span class="line">if sys.platform.startswith(&quot;darwin&quot;):</span><br><span class="line">    libc = ctypes.cdll.LoadLibrary(&quot;libc.dylib&quot;)</span><br><span class="line">    # ...</span><br><span class="line">elif sys.platform.startswith(&quot;linux&quot;):</span><br><span class="line">    libc = ctypes.cdll.LoadLibrary(&quot;libc.so.6&quot;)</span><br><span class="line">    # ...</span><br><span class="line">else:</span><br><span class="line">    raise RuntimeError(&quot;Unsupported platform&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>There are other ways to achieve this, for example</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&gt;&gt;&gt; import ctypes</span><br><span class="line">&gt;&gt;&gt; import ctypes.util</span><br><span class="line">&gt;&gt;&gt; libc = ctypes.CDLL(ctypes.util.find_library(&quot;c&quot;))</span><br><span class="line">&gt;&gt;&gt; libc</span><br><span class="line">&lt;CDLL &apos;/usr/lib/libc.dylib&apos;, handle 110d466f0 at 103725ad0&gt;</span><br></pre></td></tr></table></figure>
+
+<p>To find the page size, we&#x2019;ll call <code>sysconf(_SC_PAGESIZE)</code>. The <code>_SC_PAGESIZE</code> constant is 29 on macOS but 30 on Linux. We&#x2019;ll just hard-code those in our program. You can find them by digging into system header files or writing<br> a simple C program that print them out. A more robust and elegant solution would be to use the <code>cffi</code> module instead of ctypes, because it can automatically parse header files. However, since I wanted to stick to the default CPython<br> distribution, we&#x2019;ll continue using ctypes.</p>
+<p>We need a few additional constants for <code>mmap</code> and friends. They&#x2019;re just written out below. You may have to look them up for other UNIX variants.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;import ctypes</span><br><span class="line">import sys</span><br><span class="line"></span><br><span class="line">if sys.platform.startswith(&quot;darwin&quot;):</span><br><span class="line">    libc = ctypes.cdll.LoadLibrary(&quot;libc.dylib&quot;)</span><br><span class="line">    _SC_PAGESIZE = 29</span><br><span class="line">    MAP_ANONYMOUS = 0x1000</span><br><span class="line">    MAP_PRIVATE = 0x0002</span><br><span class="line">    PROT_EXEC = 0x04</span><br><span class="line">    PROT_NONE = 0x00</span><br><span class="line">    PROT_READ = 0x01</span><br><span class="line">    PROT_WRITE = 0x02</span><br><span class="line">    MAP_FAILED = -1 # voidptr actually</span><br><span class="line">elif sys.platform.startswith(&quot;linux&quot;):</span><br><span class="line">    libc = ctypes.cdll.LoadLibrary(&quot;libc.so.6&quot;)</span><br><span class="line">    _SC_PAGESIZE = 30</span><br><span class="line">    MAP_ANONYMOUS = 0x20</span><br><span class="line">    MAP_PRIVATE = 0x0002</span><br><span class="line">    PROT_EXEC = 0x04</span><br><span class="line">    PROT_NONE = 0x00</span><br><span class="line">    PROT_READ = 0x01</span><br><span class="line">    PROT_WRITE = 0x02</span><br><span class="line">    MAP_FAILED = -1 # voidptr actually</span><br><span class="line">else:</span><br><span class="line">    raise RuntimeError(&quot;Unsupported platform&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>Although not strictly required, it is very useful to tell ctypes the signature of the functions we&#x2019;ll use. That way, we&#x2019;ll get exceptions if we mix invalid types. For example</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;# Set up sysconf</span><br><span class="line">sysconf = libc.sysconf</span><br><span class="line">sysconf.argtypes = [ctypes.c_int]</span><br><span class="line">sysconf.restype = ctypes.c_long</span><br></pre></td></tr></table></figure>
+
+<p>tells ctypes that <code>sysconf</code> is a function that takes a single integer and produces a long integer. After this, we can get the current page size with</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;pagesize = sysconf(_SC_PAGESIZE)</span><br></pre></td></tr></table></figure>
+
+<p>The machine code we are going to generate will be interpreted as unsigned 8-bit bytes, so we need to declare a new pointer type:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;# 8-bit unsigned pointer type</span><br><span class="line">c_uint8_p = ctypes.POINTER(ctypes.c_uint8)</span><br></pre></td></tr></table></figure>
+
+<p>Below we just dish out the remaining signatures for the functions that we&#x2019;ll use. For error reporting, it&#x2019;s good to have the <code>strerror</code> function available. We&#x2019;ll use <code>munmap</code> to destroy the machine code block after we&#x2019;re done<br> with it. It lets the operating system reclaim that memory.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;strerror = libc.strerror</span><br><span class="line">strerror.argtypes = [ctypes.c_int]</span><br><span class="line">strerror.restype = ctypes.c_char_p</span><br><span class="line"></span><br><span class="line">mmap = libc.mmap</span><br><span class="line">mmap.argtypes = [ctypes.c_void_p,</span><br><span class="line">                 ctypes.c_size_t,</span><br><span class="line">                 ctypes.c_int,</span><br><span class="line">                 ctypes.c_int,</span><br><span class="line">                 ctypes.c_int,</span><br><span class="line">                 # Below is actually off_t, which is 64-bit on macOS</span><br><span class="line">                 ctypes.c_int64]</span><br><span class="line">mmap.restype = c_uint8_p</span><br><span class="line"></span><br><span class="line">munmap = libc.munmap</span><br><span class="line">munmap.argtypes = [ctypes.c_void_p, ctypes.c_size_t]</span><br><span class="line">munmap.restype = ctypes.c_int</span><br><span class="line"></span><br><span class="line">mprotect = libc.mprotect</span><br><span class="line">mprotect.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]</span><br><span class="line">mprotect.restype = ctypes.c_int</span><br></pre></td></tr></table></figure>
+
+<p>At this point, it&#x2019;s hard to justify using Python rather than C. With C, we don&#x2019;t need any of the above boiler-plate code. But down the line, Python will allow us to experiment much more easily.</p>
+<p>Now we&#x2019;re ready to write the <code>mmap</code> wrapper.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;def create_block(size):</span><br><span class="line">    ptr = mmap(0, size, PROT_WRITE | PROT_READ,</span><br><span class="line">            MAP_PRIVATE | MAP_ANONYMOUS, 0, 0)</span><br><span class="line"></span><br><span class="line">    if ptr == MAP_FAILED:</span><br><span class="line">        raise RuntimeError(strerror(ctypes.get_errno()))</span><br><span class="line"></span><br><span class="line">    return ptr</span><br></pre></td></tr></table></figure>
+
+<p>This function uses <code>mmap</code> to allocate page-aligned memory for us. We mark the memory region as readable and writable with the <code>PROT</code> flags, and we also mark it as private and anonymous. The latter means the memory will not be<br> visible from other processes and that it will not be file-backed. The Linux <code>mmap</code> manual page covers the details (but be sure to view the man page for your system). If the <code>mmap</code> call fails, we raise it as a Python error.</p>
+<p>To mark memory as executable,</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;def make_executable(block, size):</span><br><span class="line">    if mprotect(block, size, PROT_READ | PROT_EXEC) != 0:</span><br><span class="line">        raise RuntimeError(strerror(ctypes.get_errno()))</span><br></pre></td></tr></table></figure>
+
+<p>With this <code>mprotect</code> call, we mark the region as readable and executable. If we wanted to, we could have made it writable as well, but some systems will refuse to execute writable memory. This is sometimes called <a href="/external_links/662d3a5a0c74507474ada8b18a5e0ec2.html" target="blank" rel="noopener">the W^X security<br>feature</a>.</p>
+<p>To destroy the memory block, we&#x2019;ll use</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;def destroy_block(block, size):</span><br><span class="line">    if munmap(block, size) == -1:</span><br><span class="line">        raise RuntimeError(strerror(ctypes.get_errno()))</span><br></pre></td></tr></table></figure>
+
+<p>I edited out a badly placed <code>del</code> in that function after the HN submission.</p>
+<h2 id="The-fun-part"><a href="#The-fun-part" class="headerlink" title="The fun part"></a>The fun part</h2><p>Now we&#x2019;re finally ready to create an insanely simple piece of JIT code!</p>
+<p>Recall the assembly listing at the top: It&#x2019;s a small function &#x2014; without a local stack frame &#x2014; that multiplies an input number with a constant. In Python, we&#x2019;d write that as</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;def create_multiplication_function(constant):</span><br><span class="line">    return lambda n: n * constant</span><br></pre></td></tr></table></figure>
+
+<p>This is indeed a contrived example, but qualifies as JIT. After all, we do create native code at runtime and execute it. It&#x2019;s easy to imagine more advanced examples such as JIT-compiling <a href="/external_links/2b9d12dacb9cd0f268b34d80c8c95112.html" target="blank" rel="noopener">Brainfuck</a> to x86-64 machine code. Or using <a href="/external_links/7b6824a6bf0176871bb4b4fbd97d678a.html" target="blank" rel="noopener">AVX</a> instructions for blazing fast, vectorized math ops.</p>
+<p>The disassembly at the top of this post was actually generated by compiling and disassembling the following C code:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;#include &lt;stdint.h&gt;</span><br><span class="line"></span><br><span class="line">uint64_t multiply(uint64_t n)</span><br><span class="line">{</span><br><span class="line">  return n*0xdeadbeefedULL;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>If you want to compile it yourself, use something like</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$ gcc -Os -fPIC -shared -fomit-frame-pointer \</span><br><span class="line">    -march=native multiply.c -olibmultiply.so</span><br></pre></td></tr></table></figure>
+
+<p>Here I optimized for space (<code>-Os</code>) to generate as little machine code as possible, with position-independent code (<code>-fPIC</code>) to prevent using absolute jumps, without any frame pointers (<code>-fomit-frame-pointer</code>) to remove<br> superfluous stack setup code (but it may be required for more advanced functions) and using the current CPU&#x2019;s native instruction set (<code>-march=native</code>).</p>
+<p>We could have passed <code>-S</code> to produce a disassembly listing, but we&#x2019;re actually interested in the <em>machine code</em>, so we&#x2019;ll rather use a tool like <code>objdump</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$ objdump -d libmultiply.so</span><br><span class="line">...</span><br><span class="line">0000000000000f71 &lt;_multiply&gt;:</span><br><span class="line"> f71:   48 b8 ed ef be ad de    movabs $0xdeadbeefed,%rax</span><br><span class="line"> f78:   00 00 00 </span><br><span class="line"> f7b:   48 0f af c7             imul   %rdi,%rax</span><br><span class="line"> f7f:   c3                      retq</span><br></pre></td></tr></table></figure>
+
+<p>In case you are not familiar with assembly, I&#x2019;ll let you know how this function works. First, the <code>movabs</code> function just puts an <em>immediate</em> number in the RAX register. <em>Immediate</em> is assembly-jargon for encoding something<br> right in the machine code. In other words, it&#x2019;s an embedded argument for the <code>movabs</code> instruction. So RAX now holds the constant <code>0xdeadbeefed</code>.</p>
+<p>Also &#x2014; by <a href="/external_links/badbab7676cc87f7a6a00d7ae6a2f4dc.html" target="blank" rel="noopener">AMD64</a> convention &#x2014; the first integer argument will be in RDI, and the return value in RAX. So RDI will hold the number to multiply with. That&#x2019;s<br> what <code>imul</code> does. It multiplies RAX and RDI and puts the result in RAX. Finally, we pop a 64-bit return address off the stack and jump to it with RETQ. At this level, it&#x2019;s easy to imagine how one could implement <a href="/external_links/c87af94e19fd6b8c4ca36f3f39f99380.html" target="blank" rel="noopener">continuation-passing style</a>.</p>
+<p>Note that the constant <code>0xdeadbeefed</code> is in little-endian format. We need to remember to do the same when we patch the code. (By the way, a good mnemonic for remembering the word order is that little endian means &#x201C;little-end first&#x201D;).</p>
+<p>We are now ready to put everything in a Python function.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;def make_multiplier(block, multiplier):</span><br><span class="line">    # Encoding of: movabs &lt;multiplier&gt;, rax</span><br><span class="line">    block[0] = 0x48</span><br><span class="line">    block[1] = 0xb8</span><br><span class="line"></span><br><span class="line">    # Little-endian encoding of multiplication constant</span><br><span class="line">    block[2] = (multiplier &amp; 0x00000000000000ff) &gt;&gt;  0</span><br><span class="line">    block[3] = (multiplier &amp; 0x000000000000ff00) &gt;&gt;  8</span><br><span class="line">    block[4] = (multiplier &amp; 0x0000000000ff0000) &gt;&gt; 16</span><br><span class="line">    block[5] = (multiplier &amp; 0x00000000ff000000) &gt;&gt; 24</span><br><span class="line">    block[6] = (multiplier &amp; 0x000000ff00000000) &gt;&gt; 32</span><br><span class="line">    block[7] = (multiplier &amp; 0x0000ff0000000000) &gt;&gt; 40</span><br><span class="line">    block[8] = (multiplier &amp; 0x00ff000000000000) &gt;&gt; 48</span><br><span class="line">    block[9] = (multiplier &amp; 0xff00000000000000) &gt;&gt; 56</span><br><span class="line"></span><br><span class="line">    # Encoding of: imul rdi, rax</span><br><span class="line">    block[10] = 0x48</span><br><span class="line">    block[11] = 0x0f</span><br><span class="line">    block[12] = 0xaf</span><br><span class="line">    block[13] = 0xc7</span><br><span class="line"></span><br><span class="line">    # Encoding of: retq</span><br><span class="line">    block[14] = 0xc3</span><br><span class="line"></span><br><span class="line">    # Return a ctypes function with the right prototype</span><br><span class="line">    function = ctypes.CFUNCTYPE(ctypes.c_uint64)</span><br><span class="line">    function.restype = ctypes.c_uint64</span><br><span class="line">    return function</span><br></pre></td></tr></table></figure>
+
+<p>At the bottom, we return the ctypes function signature to be used with this code. It&#x2019;s somewhat arbitrarily placed, but I thought it was good to keep the signature close to the machine code.</p>
+<h2 id="The-final-part"><a href="#The-final-part" class="headerlink" title="The final part"></a>The final part</h2><p>Now that we have the basic parts we can weave everything together. The first part is to allocate one page of memory:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;pagesize = sysconf(_SC_PAGESIZE)</span><br><span class="line">block = create_block(pagesize)</span><br></pre></td></tr></table></figure>
+
+<p>Next, we generate the machine code. Let&#x2019;s pick the number 101 to use as a multiplier.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;mul101_signature = make_multiplier(block, 101)</span><br></pre></td></tr></table></figure>
+
+<p>We now mark the memory region as executable and read-only:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;make_executable(block, pagesize)</span><br></pre></td></tr></table></figure>
+
+<p>Take the address of the first byte in the memory block and cast it to a callable ctypes function with proper signature:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;address = ctypes.cast(block, ctypes.c_void_p).value</span><br><span class="line">mul101 = mul101_signature(address)</span><br></pre></td></tr></table></figure>
+
+<p>To get the memory address of the block, we use ctypes to cast it to a void pointer and extract its value. Finally, we instantiate an actual function from this address using the <code>mul101_signature</code> constructor.</p>
+<p>Voila! We now have a piece of <em>native</em> code that we can call from Python. If you&#x2019;re in a REPL, you can try it directly:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&gt;&gt;&gt; print(mul101(8))</span><br><span class="line">808</span><br></pre></td></tr></table></figure>
+
+<p>Note that this small multiplication function will run slower than a native Python calculation. That&#x2019;s mainly because ctypes, being a foreign-function library, has a lot of overhead: It needs to inspect what dynamic types you pass the function every<br> time you call it, then unbox them, convert them and then do the same with the return value. So the trick is to either use assembly because you have to access some new Intel instruction, or because you compile something like Brainfuck to native<br> code.</p>
+<p>Finally, if you want to, you can let the system reclaim the memory holding the function. Beware that after this, you will probably crash the process if you try calling the code again. So probably best to delete all references in Python as well:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;destroy_block(block, pagesize)</span><br><span class="line"></span><br><span class="line">del block</span><br><span class="line">del mul101</span><br></pre></td></tr></table></figure>
+
+<p>If you run the code in its complete form from the <a href="/external_links/42bd54e155e7b9e1b23d77c0f570dd8b.html" target="blank" rel="noopener">GitHub</a> repository, you can put the multiplication constant on the command line:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$ python mj.py 101</span><br><span class="line">Pagesize: 4096</span><br><span class="line">Allocating one page of memory</span><br><span class="line">JIT-compiling a native mul-function w/arg 101</span><br><span class="line">Making function block executable</span><br><span class="line">Testing function</span><br><span class="line">OK   mul(0) = 0</span><br><span class="line">OK   mul(1) = 101</span><br><span class="line">OK   mul(2) = 202</span><br><span class="line">OK   mul(3) = 303</span><br><span class="line">OK   mul(4) = 404</span><br><span class="line">OK   mul(5) = 505</span><br><span class="line">OK   mul(6) = 606</span><br><span class="line">OK   mul(7) = 707</span><br><span class="line">OK   mul(8) = 808</span><br><span class="line">OK   mul(9) = 909</span><br><span class="line">Deallocating function</span><br></pre></td></tr></table></figure>
+
+<h2 id="Debugging-JIT-code"><a href="#Debugging-JIT-code" class="headerlink" title="Debugging JIT-code"></a>Debugging JIT-code</h2><p>If you want to continue learning with this simple program, you&#x2019;ll quickly want to disassemble the machine code you generate. One option is to simply use gdb or lldb, but you need to know where to break. One trick is to just print the hex value of<br> the <code>block</code> address and then wait for a keystroke:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;print(&quot;address: 0x%x&quot; % address)</span><br><span class="line">print(&quot;Press ENTER to continue&quot;)</span><br><span class="line">raw_input()</span><br></pre></td></tr></table></figure>
+
+<p>Then you just run the program in the debugger, break into the debugger while the program is pausing, and disassemble the memory location. Of course you can also step-debug through the assembly code if you want to see what&#x2019;s going on. Here&#x2019;s an example<br> lldb session:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$ lldb python</span><br><span class="line">...</span><br><span class="line">(lldb) run mj.py 101</span><br><span class="line">...</span><br><span class="line">(lldb) c</span><br><span class="line">Process 19329 resuming</span><br><span class="line">...</span><br><span class="line">address 0x1002fd000</span><br><span class="line">Press ENTER to continue</span><br></pre></td></tr></table></figure>
+
+<p>At this point, hit CTRL+C to break back into the debugger, then disassemble from the memory location:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;(lldb) x/3i 0x1002fd000</span><br><span class="line">    0x1002fd000: 48 b8 65 00 00 00 00 00 00 00  movabsq $0x65, %rax</span><br><span class="line">    0x1002fd00a: 48 0f af c7                    imulq  %rdi, %rax</span><br><span class="line">    0x1002fd00e: c3                             retq</span><br></pre></td></tr></table></figure>
+
+<p>Notice that 65 hex is 101 in decimal, which was the command line argument we passed above.</p>
+<p>If you only want a disassembler inside Python, I recommend the <a href="/external_links/45af3727c485bb9e0223eaccbf935eac.html" target="blank" rel="noopener">Capstone</a> module.</p>
+<h2 id="What&#x2019;s-next"><a href="#What&#x2019;s-next" class="headerlink" title="What&#x2019;s next?"></a>What&#x2019;s next?</h2><p>A good exercise would be to JIT-compile <a href="/external_links/2b9d12dacb9cd0f268b34d80c8c95112.html" target="blank" rel="noopener">Brainfuck programs</a> to native code. If you want to jump right in, I&#x2019;ve made a GitHub repository at <a href="/external_links/1f3162b4ca0ad6935e46294c80342ee6.html" target="blank" rel="noopener">github.com/cslarsen/br&#x2026;</a>.<br> I even have a <a href="/external_links/c2f05cac72322b025003f9131dc9c3ef.html" target="blank" rel="noopener">Speaker Deck presentation</a> to go with it. It performs JIT-ing and optimizations, but uses GNU Lightning to compile native code instead of this approach.<br> It should be extremely simple to boot out GNU Lightning in favor or some code generation of your own. An interesting note on the Brainfuck project is that if you just JIT-compile each Brainfuck instruction one-by-one, you won&#x2019;t get much of a speed<br> boost, even if you run native code. The entire speed boost is done in the <em>code optimization</em> stage, where you can bulk up integer operations into one or a few x86 instructions. Another candidate for such compilation would be the <a href="/external_links/411c348527586f1b456569516f89da29.html" target="blank" rel="noopener">Forth language</a>.</p>
+<p>Also, before you get serious about expanding this JIT-compiler, take a look at the <a href="/external_links/74eee1d4c4dd73d283cea5e06c0dc4a8.html" target="blank" rel="noopener">PeachPy project</a>. It goes way beyond this and includes a disassembler and supports seemingly the entire x86-64 instruction<br> set right up to <a href="/external_links/7b6824a6bf0176871bb4b4fbd97d678a.html" target="blank" rel="noopener">AVX</a>.</p>
+<p>As mentioned, there is a good deal of overhad when using ctypes to call into functions. You can use the <code>cffi</code> module to overcome some of this, but the fact remains that if you want to call very small JIT-ed functions a large number of<br> times, it&#x2019;s usually faster to just use pure Python.</p>
+<p>What other cool uses are there? I&#x2019;ve seen some math libraries in Python that switch to vector operations for higher performance. But I can imagine other fun things as well. For example, tools to compress and decompress native code, access virtualization<br> primitives, sign code and so on. I do know that some <a href="/external_links/60cc7d9fd19e5e86e95e5324eeea3d8d.html" target="blank" rel="noopener">BPF</a> tools and regex modules JIT-compile queries for faster processing.</p>
+<p>What I think is fun about this exercise is to get into deeper territory than pure assembly. One thing that comes to mind is how different instructions are disassembled to the same mnemonic. For example, the RETQ instruction has a different opcode<br> than an ordinary RET, because it operates on 64-bit values. This is something that may not be important when doing assembly programming, because it&#x2019;s a detail that may not always matter, but it&#x2019;s worth being aware of the difference. I saw that<br> gcc, lldb and objdump gave slightly different disassembly listings of the same code for RETQ and MOVABSQ.</p>
+<p>There&#x2019;s another takeaway. I&#x2019;ve mentioned that the native Brainfuck compiler I made didn&#x2019;t initially produce very fast code. I had to optimize to get it fast. So things won&#x2019;t go fast just because you use AVX, Cuda or whatever. The cold truth is that<br> gcc contains a vast database of optimizations that you cannot possibly replicate by hand. Felix von Letiner has a <a href="/external_links/4be5532bae9038944adff92897608911.html" target="blank" rel="noopener">classic talk about source<br>code optimization</a> that I recommend for more on this.</p>
+<h2 id="What-about-actual-compilation"><a href="#What-about-actual-compilation" class="headerlink" title="What about actual compilation?"></a>What about actual compilation?</h2><p>A few people <a href="/external_links/35de7543df56561e3a274cf3069e5edd.html" target="blank" rel="noopener">commented</a> that they had expected to see more about the actual compilation step. Fair point. As it stands, this is indeed a <em>very</em> restricted form of compilation, where<br> we barely do anything with the code at runtime &#x2014; we just patch in a constant. I <em>may</em> write a follow-up post that focuses solely on the compilation stage. Stay tuned!</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/9fcd0f116b2c6f0c706e92d385aaabaa.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Python/" rel="tag"># Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903512036343816.html" rel="next" title="使用Python、Neo4j和GraphQL，爬取俄罗斯Tw">
+                <i class="fa fa-chevron-left"></i> 使用Python、Neo4j和GraphQL，爬取俄罗斯Tw
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903512057315342.html" rel="prev" title="MyFlash——美团点评的开源MySQL闪回工具 闪回工具">
+                MyFlash——美团点评的开源MySQL闪回工具 闪回工具 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Writing-a-basic-x86-64-JIT-compiler-from-scratch-in-stock-Python"><span class="nav-number">1.</span> <span class="nav-text">Writing a basic x86-64 JIT compiler from scratch in stock Python</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-boiler-plate-part"><span class="nav-number">1.1.</span> <span class="nav-text">The boiler-plate part</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-fun-part"><span class="nav-number">1.2.</span> <span class="nav-text">The fun part</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-final-part"><span class="nav-number">1.3.</span> <span class="nav-text">The final part</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Debugging-JIT-code"><span class="nav-number">1.4.</span> <span class="nav-text">Debugging JIT-code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What’s-next"><span class="nav-number">1.5.</span> <span class="nav-text">What’s next?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-about-actual-compilation"><span class="nav-number">1.6.</span> <span class="nav-text">What about actual compilation?</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

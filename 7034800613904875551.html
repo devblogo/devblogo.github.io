@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Node.js,Go,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5728;&amp;#x300A;&amp;#x4F7F;&amp;#x7528; Docker &amp;#x548C; Golang &amp;#x5FEB;&amp;#x901F;&amp;#x4E0A;&amp;#x624B; WebAssembly&amp;#x300B;&amp;#x4E00;&amp;#x6587;&amp;#x4E2D;&amp;#xFF0C;&amp;#x6211;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E86;&amp;#x5982;&amp;#x4F55;&amp;#x5236;&amp;#x4">
+<meta name="keywords" content="Node.js,Go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="借助 WASM 进行密集计算：入门篇">
+<meta property="og:url" content="https://dev.newban.cn/7034800613904875551.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x5728;&amp;#x300A;&amp;#x4F7F;&amp;#x7528; Docker &amp;#x548C; Golang &amp;#x5FEB;&amp;#x901F;&amp;#x4E0A;&amp;#x624B; WebAssembly&amp;#x300B;&amp;#x4E00;&amp;#x6587;&amp;#x4E2D;&amp;#xFF0C;&amp;#x6211;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E86;&amp;#x5982;&amp;#x4F55;&amp;#x5236;&amp;#x4">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T11:34:40.928Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="借助 WASM 进行密集计算：入门篇">
+<meta name="twitter:description" content="&amp;#x5728;&amp;#x300A;&amp;#x4F7F;&amp;#x7528; Docker &amp;#x548C; Golang &amp;#x5FEB;&amp;#x901F;&amp;#x4E0A;&amp;#x624B; WebAssembly&amp;#x300B;&amp;#x4E00;&amp;#x6587;&amp;#x4E2D;&amp;#xFF0C;&amp;#x6211;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E86;&amp;#x5982;&amp;#x4F55;&amp;#x5236;&amp;#x4">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7034800613904875551.html">
+
+
+
+
+
+  <title>借助 WASM 进行密集计算：入门篇 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">借助 WASM 进行密集计算：入门篇</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-26T17:00:32+08:00">
+                2021-11-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x5728;<a href="/external_links/712fb25617d1e44c48d155caf6219819.html" target="blank" rel="noopener">&#x300A;&#x4F7F;&#x7528; Docker &#x548C; Golang &#x5FEB;&#x901F;&#x4E0A;&#x624B; WebAssembly&#x300B;</a>&#x4E00;&#x6587;&#x4E2D;&#xFF0C;&#x6211;&#x4ECB;&#x7ECD;&#x4E86;&#x5982;&#x4F55;&#x5236;&#x4F5C;&#x7B26;&#x5408; WASI &#x63A5;&#x53E3;&#x6807;&#x51C6;&#x7684;&#x901A;&#x7528; WASM&#xFF0C;&#x4EE5;&#x53CA;&#x5982;&#x4F55;&#x5728;&#x51E0;&#x79CD;&#x4E0D;&#x540C;&#x7684;&#x573A;&#x666F;&#x4E0B;&#x8FDB;&#x884C;&#x7A0B;&#x5E8F;&#x8C03;&#x7528;&#x3002;</p>
+<p>&#x672C;&#x7BC7;&#x6587;&#x7AE0;&#x5C06;&#x5EF6;&#x7EED;&#x524D;&#x6587;&#xFF0C;&#x804A;&#x804A;&#x5728;&#x5982;&#x4F55;&#x501F;&#x52A9; WASM &#x589E;&#x5F3A; Golang&#x3001;Node.js &#xFF0C;&#x8FDB;&#x884C;&#x66F4;&#x9AD8;&#x6548;&#x7684;&#x5BC6;&#x96C6;&#x8BA1;&#x7B97;&#x3002;</p>
+<h2 id="&#x5199;&#x5728;&#x524D;&#x9762;"><a href="#&#x5199;&#x5728;&#x524D;&#x9762;" class="headerlink" title="&#x5199;&#x5728;&#x524D;&#x9762;"></a>&#x5199;&#x5728;&#x524D;&#x9762;</h2><p>&#x6216;&#x8BB8;&#x6709;&#x8BFB;&#x8005;&#x4F1A;&#x8BF4;&#xFF0C;&#x65E2;&#x7136;&#x4F7F;&#x7528; Golang &#x53C8;&#x4F55;&#x5FC5;&#x4F7F;&#x7528; Node.js&#xFF0C;&#x5DEE;&#x4E0D;&#x591A;&#x7684;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#x573A;&#x666F;&#xFF0C;&#x4E24;&#x8005;&#x6027;&#x80FD;&#x6839;&#x672C;&#x4E0D;&#x5728;&#x4E00;&#x4E2A;&#x6570;&#x91CF;&#x7EA7;&#xFF0C;&#x6BD4;&#x8F83;&#x8D77;&#x6765;&#x4E0D;&#x591F;&#x5BA2;&#x89C2;&#x3002;&#x4F46;&#x5176;&#x5B9E;&#xFF0C;&#x5B8C;&#x5168;&#x6CA1;&#x6709;&#x5FC5;&#x8981;&#x505A;&#x8FD9;&#x6837;&#x7684;&#x8BED;&#x8A00;&#x5BF9;&#x7ACB;&#xFF0C;&#x9664;&#x4E86;&#x4E24;&#x79CD;&#x8BED;&#x8A00;&#x7684;&#x7EDD;&#x5BF9;&#x7684;&#x6027;&#x80FD;&#x533A;&#x522B;&#x4E4B;&#x5916;&#xFF0C;&#x6216;&#x8BB8;&#x6211;&#x4EEC;&#x4E5F;&#x5E94;&#x8BE5;&#x5173;&#x6CE8;&#x4E0B;&#x9762;&#x7684;&#x4E8B;&#x60C5;&#xFF1A;</p>
+<p>&#x5728;&#x76F8;&#x540C;&#x7684;&#x8BA1;&#x7B97;&#x573A;&#x666F;&#x4E0B;&#xFF0C;&#x5982;&#x679C;&#x5206;&#x522B;&#x4EE5;&#x4E24;&#x79CD;&#x8BED;&#x8A00;&#x81EA;&#x8EAB;&#x7684;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#x4E3A;&#x57FA;&#x51C6;&#xFF0C;&#x914D;&#x5408; WASM &#x8FDB;&#x884C;&#x4E1A;&#x52A1;&#x5B9E;&#x73B0;&#xFF0C;<strong>&#x662F;&#x5426;&#x6709;&#x53EF;&#x80FD;&#x5728;&#xFF1A;&#x7A0B;&#x5E8F;&#x6267;&#x884C;&#x6548;&#x7387;&#x3001;&#x7A0B;&#x5E8F;&#x5206;&#x53D1;&#x5185;&#x5BB9;&#x5B89;&#x5168;&#x3001;&#x63D2;&#x4EF6;&#x751F;&#x6001;&#x4E0A;&#x4EA7;&#x751F;&#x66F4;&#x597D;&#x7684;&#x53D8;&#x5316;&#x5462;&#xFF1F;</strong></p>
+<p>&#x4EE5;&#x53CA;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8111;&#x6D1E;&#x66F4;&#x5927;&#x4E00;&#x4E9B;&#xFF0C;&#x4E24;&#x79CD;&#x8BED;&#x8A00;&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x901A;&#x8FC7; WASM &#x7684;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x751F;&#x6001;&#x6574;&#x5408;&#xFF0C;&#x8BA9;&#x4E30;&#x5BCC;&#x7684; Node / NPM &#x751F;&#x6001;&#xFF0C;&#x7075;&#x6D3B;&#x7684; JavaScript &#x5E94;&#x7528;&#x548C;&#x4E25;&#x8C28;&#x9AD8;&#x6548;&#x7684; Golang &#x4EA7;&#x751F;&#x5316;&#x5B66;&#x53CD;&#x5E94;&#x5462;&#xFF1F;</p>
+<p>&#x5728;&#x5F00;&#x59CB;&#x672C;&#x6587;&#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x5148;&#x6765;&#x8BF4;&#x51E0;&#x4E2A;&#x8BA9;&#x4EBA;&#x610F;&#x5916;&#x7684;&#x89C2;&#x5BDF;&#x7ED3;&#x8BBA;&#xFF08;&#x5177;&#x4F53;&#x6570;&#x636E;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x6587;&#x672B;&#x8868;&#x683C;&#xFF09;&#xFF1A;</p>
+<ul>
+<li>&#x5982;&#x679C;&#x8BF4; Go &#x5728;&#x4F7F;&#x7528; WASM &#x7684;&#x6A21;&#x5F0F;&#x4E0B;&#xFF0C;&#x666E;&#x904D;&#x6267;&#x884C;&#x901F;&#x5EA6;&#x5E76;&#x4E0D;&#x4F1A;&#x6BD4;&#x201C;&#x539F;&#x751F;&#x201D;&#x5DEE;&#x591A;&#x5C11;&#xFF0C;&#x751A;&#x81F3;&#x5728;&#x4E2A;&#x522B;&#x573A;&#x666F;&#x4E0B;&#xFF0C;&#x6267;&#x884C;&#x901F;&#x5EA6;&#x8FD8;&#x6BD4;&#x539F;&#x751F;&#x5FEB;&#xFF0C;&#x4F60;&#x662F;&#x5426;&#x4F1A;&#x611F;&#x5230;&#x8BE7;&#x5F02;&#xFF1F;</li>
+<li>&#x5982;&#x679C;&#x8BF4;&#x539F;&#x672C; Node &#x591A;&#x8FDB;&#x7A0B;/&#x7EBF;&#x7A0B;&#x7684;&#x6267;&#x884C;&#x901F;&#x5EA6;&#x843D;&#x540E;&#x76F8;&#x540C;&#x529F;&#x80FD;&#x7684; Golang &#x7A0B;&#x5E8F; 200%&#xFF0C;&#x5728;&#x4E0D;&#x8FDB;&#x884C;&#x6781;&#x7AEF;&#x4F18;&#x5316;&#x7684;&#x573A;&#x666F;&#x4E0B;&#xFF0C;&#x4EC5;&#x4EC5;&#x662F;&#x901A;&#x8FC7;&#x5F15;&#x5165; WASM&#xFF0C;&#x5C31;&#x80FD;&#x8BA9;&#x5DEE;&#x8DDD;&#x7F29;&#x5C0F;&#x5230; 100%&#x3002;</li>
+<li>&#x751A;&#x81F3;&#x5728;&#x4E00;&#x4E9B;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x4F60;&#x4F1A;&#x53D1;&#x73B0; Node + WASM &#x7684;&#x6027;&#x80FD;&#x548C; Go &#x6700;&#x4F73;&#x7684;&#x8868;&#x73B0;&#x5176;&#x5B9E;&#x5DEE;&#x8DDD;&#x53EF;&#x4EE5;&#x4ECE; 300% &#x7F29;&#x77ED;&#x5230;&#x63A5;&#x8FD1; 30%&#x3002;</li>
+</ul>
+<p>&#x5982;&#x679C;&#x4F60;&#x89C9;&#x5F97;&#x610F;&#x5916;&#xFF0C;&#x4F46;&#x662F;&#x53C8;&#x597D;&#x5947;&#xFF0C;&#x4E0D;&#x59A8;&#x8DDF;&#x968F;&#x6587;&#x7AE0;&#x81EA;&#x5DF1;&#x4EB2;&#x81EA;&#x6765;&#x8BD5;&#x4E00;&#x8BD5;&#x3002;</p>
+<p>&#x6D4B;&#x8BD5;&#x73AF;&#x5883;&#x4E2D;&#x7684;&#x51E0;&#x79CD;&#x7A0B;&#x5E8F;&#xFF0C;<strong>&#x4E3A;&#x4E86;&#x6A21;&#x62DF;&#x6700;&#x7CDF;&#x7CD5;&#x7684;&#x60C5;&#x51B5;</strong>&#xFF0C;&#x5747;&#x91C7;&#x7528; CLI &#x4E00;&#x6B21;&#x6027;&#x89E6;&#x53D1;&#x6267;&#x884C;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x6536;&#x96C6;&#x7ED3;&#x679C;&#xFF0C;&#x51CF;&#x5C11; Go &#x8BED;&#x8A00;&#x8FD0;&#x884C;&#x65F6;&#x7684; GC &#x4F18;&#x5316;&#x3001;&#x6216;&#x8005; Node &#x5728;&#x8FD0;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#x7684; JIT &#x4F18;&#x5316;&#xFF0C;&#x4EE5;&#x53CA;&#x5B57;&#x8282;&#x7801;&#x7F13;&#x5B58;&#x5E26;&#x6765;&#x7684;&#x6709;&#x76CA;&#x5E2E;&#x52A9;&#x3002;</p>
+<h2 id="&#x524D;&#x7F6E;&#x51C6;&#x5907;"><a href="#&#x524D;&#x7F6E;&#x51C6;&#x5907;" class="headerlink" title="&#x524D;&#x7F6E;&#x51C6;&#x5907;"></a>&#x524D;&#x7F6E;&#x51C6;&#x5907;</h2><p>&#x5728;&#x5F00;&#x59CB;&#x6298;&#x817E;&#x4E4B;&#x65C5;&#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x4EEC;&#x9996;&#x5148;&#x9700;&#x8981;&#x51C6;&#x5907;&#x73AF;&#x5883;&#x3002;&#x4E3A;&#x4E86;&#x4FDD;&#x969C;&#x7A0B;&#x5E8F;&#x8FD0;&#x884C;&#x548C;&#x6D4B;&#x8BD5;&#x7684;&#x7ED3;&#x679C;&#x5C3D;&#x91CF;&#x5BA2;&#x89C2;&#xFF0C;&#x6211;&#x4EEC;&#x7EDF;&#x4E00;&#x4F7F;&#x7528;&#x540C;&#x4E00;&#x53F0;&#x673A;&#x5668;&#xFF0C;&#x5E76;&#x4E14;&#x51C6;&#x5907;&#x76F8;&#x540C;&#x7684;&#x5BB9;&#x5668;&#x73AF;&#x5883;&#xFF0C;&#x5E76;&#x5C06;&#x5BB9;&#x5668;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x7684; CPU &#x8D44;&#x6E90;&#x6570;&#x91CF;&#x9650;&#x5236;&#x5C0F;&#x4E00;&#x4E9B;&#xFF0C;&#x4E3A;&#x5BBF;&#x4E3B;&#x673A;&#x9884;&#x7559;&#x4E00;&#x4E9B;&#x8D44;&#x6E90;&#xFF0C;&#x786E;&#x4FDD;&#x6D4B;&#x8BD5;&#x7684;&#x673A;&#x5668;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0; CPU &#x4E0D;&#x8DB3;&#x7684;&#x72B6;&#x51B5;&#x3002;</p>
+<p>&#x5173;&#x4E8E;&#x6784;&#x5EFA;&#x7A0B;&#x5E8F;&#x4F7F;&#x7528;&#x7684;&#x65B9;&#x5F0F;&#x548C;&#x5BB9;&#x5668;&#x73AF;&#x5883;&#xFF0C;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x524D;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x7684;&#x201C;<a href="/external_links/712fb25617d1e44c48d155caf6219819.html" target="blank" rel="noopener">&#x73AF;&#x5883;&#x51C6;&#x5907;</a>&#x201D;&#xFF0C;&#x4E3A;&#x4E86;&#x8282;&#x7EA6;&#x7BC7;&#x5E45;&#xFF0C;&#x5C31;&#x4E0D;&#x591A;&#x8D58;&#x8FF0;&#x4E86;&#x3002;</p>
+<p>&#x4E0B;&#x9762;&#x662F;&#x5404;&#x79CD;&#x4F9D;&#x8D56;&#x548C;&#x7EC4;&#x4EF6;&#x7684;&#x7248;&#x672C;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;# go version</span><br><span class="line">go version go1.17.3 linux/amd64</span><br><span class="line"></span><br><span class="line"># node --version</span><br><span class="line">v17.1.0</span><br><span class="line"></span><br><span class="line"># wasmer --version</span><br><span class="line">wasmer 2.0.0</span><br><span class="line"></span><br><span class="line">#tinygo version</span><br><span class="line">tinygo version 0.21.0 linux/amd64 (using go version go1.17.3 and LLVM version 11.0.0)</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x51C6;&#x5907;-WASM-&#x7A0B;&#x5E8F;"><a href="#&#x51C6;&#x5907;-WASM-&#x7A0B;&#x5E8F;" class="headerlink" title="&#x51C6;&#x5907; WASM &#x7A0B;&#x5E8F;"></a>&#x51C6;&#x5907; WASM &#x7A0B;&#x5E8F;</h2><p>&#x4E3A;&#x4E86;&#x66F4;&#x597D;&#x7684;&#x6A21;&#x62DF;&#x548C;&#x8FDB;&#x884C;&#x7ED3;&#x679C;&#x5BF9;&#x6BD4;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x4E00;&#x4E2A;&#x8BA1;&#x7B97;&#x65F6;&#x95F4;&#x6BD4;&#x8F83;&#x4E45;&#x7684;&#x201C;&#x6D3B;&#x513F;&#x201D;&#xFF0C;&#x201C;&#x6590;&#x6CE2;&#x90A3;&#x5951;&#x6570;&#x5217;&#x201D;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x4E0D;&#x9519;&#x7684;&#x9009;&#x62E9;&#xFF0C;&#x5C24;&#x5176;&#x662F;&#x6CA1;&#x6709;&#x8FDB;&#x884C;&#x52A8;&#x6001;&#x89C4;&#x5212;&#x4F18;&#x5316;&#x7684;&#x201C;&#x57FA;&#x7840;&#x7248;&#x201D;&#x3002;</p>
+<h3 id="&#x7EA6;&#x5B9A;&#x6A21;&#x62DF;&#x5BC6;&#x96C6;&#x8BA1;&#x7B97;&#x7684;&#x573A;&#x666F;"><a href="#&#x7EA6;&#x5B9A;&#x6A21;&#x62DF;&#x5BC6;&#x96C6;&#x8BA1;&#x7B97;&#x7684;&#x573A;&#x666F;" class="headerlink" title="&#x7EA6;&#x5B9A;&#x6A21;&#x62DF;&#x5BC6;&#x96C6;&#x8BA1;&#x7B97;&#x7684;&#x573A;&#x666F;"></a>&#x7EA6;&#x5B9A;&#x6A21;&#x62DF;&#x5BC6;&#x96C6;&#x8BA1;&#x7B97;&#x7684;&#x573A;&#x666F;</h3><p>&#x8FD9;&#x91CC;&#x4E3A;&#x4E86;&#x65B9;&#x4FBF;&#x7A0B;&#x5E8F;&#x6027;&#x80FD;&#x5BF9;&#x6BD4;&#xFF0C;&#x6211;&#x4EEC;&#x7EDF;&#x4E00;&#x8BA9;&#x7A0B;&#x5E8F;&#x9488;&#x5BF9;&#x6590;&#x6CE2;&#x90A3;&#x5951;&#x6570;&#x5217;&#x7684;&#x7B2C;40&#x4F4D;&#xFF08;&#x5927;&#x6982;1&#x4EBF;&#x591A;&#x7684;&#x4E00;&#x4E2A;&#x6574;&#x6570;&#xFF09;&#x8FDB;&#x884C;&#x5FEB;&#x901F;&#x7684;&#x91CD;&#x590D;&#x8BA1;&#x7B97;&#x3002;</p>
+<p>&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;&#x5BB9;&#x5668;&#x5185;&#x7684; CPU &#x5145;&#x5206;&#x4F7F;&#x7528;&#xFF0C;&#x7ED3;&#x679C;&#x76F8;&#x5BF9;&#x5BA2;&#x89C2;&#xFF0C;&#x7A0B;&#x5E8F;&#x4E00;&#x5F8B;&#x4F7F;&#x7528;&#x201C;&#x5E76;&#x884C;&#x8BA1;&#x7B97;&#x201D;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x8FDB;&#x884C;&#x6570;&#x503C;&#x8BA1;&#x7B97;&#x3002;</p>
+<h3 id="&#x4F7F;&#x7528;-Go-&#x7F16;&#x5199;-&#x5177;&#x5907;-WASI-&#x6807;&#x51C6;&#x63A5;&#x53E3;&#x7684;-WASM-&#x7A0B;&#x5E8F;"><a href="#&#x4F7F;&#x7528;-Go-&#x7F16;&#x5199;-&#x5177;&#x5907;-WASI-&#x6807;&#x51C6;&#x63A5;&#x53E3;&#x7684;-WASM-&#x7A0B;&#x5E8F;" class="headerlink" title="&#x4F7F;&#x7528; Go &#x7F16;&#x5199; &#x5177;&#x5907; WASI &#x6807;&#x51C6;&#x63A5;&#x53E3;&#x7684; WASM &#x7A0B;&#x5E8F;"></a>&#x4F7F;&#x7528; Go &#x7F16;&#x5199; &#x5177;&#x5907; WASI &#x6807;&#x51C6;&#x63A5;&#x53E3;&#x7684; WASM &#x7A0B;&#x5E8F;</h3><p>&#x5982;&#x679C;&#x5C06;&#x4E0A;&#x9762;&#x7684;&#x9700;&#x6C42;&#x8FDB;&#x884C;&#x7FFB;&#x8BD1;&#xFF0C;&#x4EC5;&#x5B9E;&#x73B0;&#x6590;&#x6CE2;&#x90A3;&#x5951;&#x6570;&#x5217;&#x7684;&#x8BA1;&#x7B97;&#x3002;&#x90A3;&#x4E48;&#x4F7F;&#x7528; Go &#x4E0D;&#x505A;&#x4EFB;&#x4F55;&#x7B97;&#x6CD5;&#x4F18;&#x5316;&#x7684;&#x8BDD;&#xFF0C;&#x7EAF;&#x8BA1;&#x7B97;&#x51FD;&#x6570;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x4EE3;&#x7801;&#x5927;&#x6982;&#x4F1A;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;package main</span><br><span class="line"></span><br><span class="line">func main() {}</span><br><span class="line"></span><br><span class="line">//export fibonacci</span><br><span class="line">func fibonacci(n uint) uint {</span><br><span class="line">	if n == 0 {</span><br><span class="line">		return 0</span><br><span class="line">	} else if n == 1 {</span><br><span class="line">		return 1</span><br><span class="line">	} else {</span><br><span class="line">		return fibonacci(n-1) + fibonacci(n-2)</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5C06;&#x4E0A;&#x9762;&#x7684;&#x5185;&#x5BB9;&#x4FDD;&#x5B58;&#x4E3A; <code>wasm.go</code>&#xFF0C;&#x53C2;&#x8003;&#x4E0A;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#x63D0;&#x5230;&#x7684;&#x7F16;&#x5199;<a href="/external_links/712fb25617d1e44c48d155caf6219819.html" target="blank" rel="noopener">&#x901A;&#x7528;&#x7684; WASI &#x7A0B;&#x5E8F;</a>&#xFF0C;&#x6267;&#x884C; <code>tinygo build --no-debug -o module.wasm -wasm-abi=generic -target=wasi wasm.go</code>&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x5C06;&#x4F1A;&#x987A;&#x5229;&#x7684;&#x5F97;&#x5230;&#x4E00;&#x4E2A;&#x7F16;&#x8BD1;&#x597D;&#x7684;&#x3001;&#x901A;&#x7528;&#x7684; WASM &#x7A0B;&#x5E8F;&#xFF0C;&#x7528;&#x4E8E;&#x7A0D;&#x540E;&#x7684;&#x7A0B;&#x5E8F;&#x6D4B;&#x8BD5;&#x4E2D;&#x3002;</p>
+<h2 id="&#x7F16;&#x5199;-Go-&#x8BED;&#x8A00;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;"><a href="#&#x7F16;&#x5199;-Go-&#x8BED;&#x8A00;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;" class="headerlink" title="&#x7F16;&#x5199; Go &#x8BED;&#x8A00;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;"></a>&#x7F16;&#x5199; Go &#x8BED;&#x8A00;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;</h2><p>&#x867D;&#x7136;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x5F97;&#x5230;&#x4E86; WASM &#x7A0B;&#x5E8F;&#xFF0C;&#x4F46;&#x662F;&#x4E3A;&#x4E86;&#x76F4;&#x89C2;&#x7684;&#x6BD4;&#x8F83;&#xFF0C;&#x6211;&#x4EEC;&#x8FD8;&#x662F;&#x9700;&#x8981;&#x4E00;&#x4E2A;&#x5B8C;&#x5168;&#x4F7F;&#x7528; Go &#x5B9E;&#x73B0;&#x57FA;&#x7840;&#x7248;&#x7684;&#x7A0B;&#x5E8F;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;time&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func fibonacci(n uint) uint {</span><br><span class="line">	if n == 0 {</span><br><span class="line">		return 0</span><br><span class="line">	} else if n == 1 {</span><br><span class="line">		return 1</span><br><span class="line">	} else {</span><br><span class="line">		return fibonacci(n-1) + fibonacci(n-2)</span><br><span class="line">	}</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func main() {</span><br><span class="line">	start := time.Now()</span><br><span class="line">	n := uint(40)</span><br><span class="line">	fmt.Println(fibonacci(n))</span><br><span class="line">	fmt.Printf(&quot;&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;%v \n&quot;, time.Since(start).Milliseconds())</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5C06;&#x4E0A;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x4FDD;&#x5B58;&#x4E3A; <code>base.go</code>&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C; <code>go run base.go</code>&#xFF0C;&#x5C06;&#x4F1A;&#x770B;&#x5230;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x7684;&#x7ED3;&#x679C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;102334155</span><br><span class="line">&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;574</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x679C;&#x4F60;&#x60F3;&#x8FFD;&#x6C42;&#x7EDD;&#x5BF9;&#x7684;&#x6027;&#x80FD;&#xFF0C;&#x53EF;&#x4EE5;&#x8FDB;&#x884C; <code>go build base.go</code>&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C; <code>./base</code>&#xFF0C;&#x4E0D;&#x8FC7;&#x56E0;&#x4E3A;&#x4EE3;&#x7801;&#x5B9E;&#x5728;&#x662F;&#x592A;&#x7B80;&#x5355;&#x4E86;&#xFF0C;&#x4ECE;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#x6765;&#x770B;&#xFF0C;&#x6027;&#x80FD;&#x5DEE;&#x5F02;&#x5E76;&#x4E0D;&#x5927;&#x3002;</p>
+<p>&#x57FA;&#x7840;&#x8BA1;&#x7B97;&#x529F;&#x80FD;&#x641E;&#x5B9A;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x7B80;&#x5355;&#x8C03;&#x6574;&#x4EE3;&#x7801;&#xFF0C;&#x8BA9;&#x4EE3;&#x7801;&#x5177;&#x5907;&#x5E76;&#x884C;&#x8BA1;&#x7B97;&#x7684;&#x80FD;&#x529B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;os&quot;</span><br><span class="line">	&quot;runtime&quot;</span><br><span class="line">	&quot;strconv&quot;</span><br><span class="line">	&quot;time&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func fibonacci(n uint) uint {</span><br><span class="line">	if n == 0 {</span><br><span class="line">		return 0</span><br><span class="line">	} else if n == 1 {</span><br><span class="line">		return 1</span><br><span class="line">	} else {</span><br><span class="line">		return fibonacci(n-1) + fibonacci(n-2)</span><br><span class="line">	}</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func calc(n uint, ch chan string) {</span><br><span class="line">	ret := fibonacci(n)</span><br><span class="line">	msg := strconv.FormatUint(uint64(ret), 10)</span><br><span class="line">	fmt.Println(fmt.Sprintf(&quot;&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; %s&quot;, msg))</span><br><span class="line">	ch &lt;- msg</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func main() {</span><br><span class="line">	numCPUs := runtime.NumCPU()</span><br><span class="line">	n := uint(40)</span><br><span class="line">	ch := make(chan string, numCPUs)</span><br><span class="line"></span><br><span class="line">	fmt.Printf(&quot;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID %v\n&quot;, os.Getpid())</span><br><span class="line"></span><br><span class="line">	start := time.Now()</span><br><span class="line"></span><br><span class="line">	for i := 0; i &lt; numCPUs; i++ {</span><br><span class="line">		fmt.Printf(&quot;&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID %v\n&quot;, i)</span><br><span class="line">		go calc(n, ch)</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	for i := 0; i &lt; numCPUs; i++ {</span><br><span class="line">		&lt;-ch</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	fmt.Printf(&quot;&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;%v \n&quot;, time.Since(start).Milliseconds())</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5C06;&#x4EE3;&#x7801;&#x4FDD;&#x5B58;&#x4E3A; <code>full.go</code>&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C; <code>go run full.go</code>&#xFF0C;&#x5C06;&#x4F1A;&#x770B;&#x5230;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x7684;&#x7ED3;&#x679C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID 2248</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 0</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 1</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 2</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 3</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 4</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 5</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 6</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 7</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;658</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x662F;&#x4E0D;&#x662F;&#x6709;&#x4E00;&#x4E1D;&#x6027;&#x4EF7;&#x6BD4;&#x7684;&#x5473;&#x9053;</strong>&#xFF0C;&#x524D;&#x9762;&#x4E00;&#x6B21;&#x8BA1;&#x7B97;&#x7ED3;&#x679C;&#x63A5;&#x8FD1; 600 &#x6BEB;&#x79D2;&#xFF0C;&#x8FD9;&#x6B21;&#x5E76;&#x53D1;8&#x4E2A;&#xFF08;&#x53D7;&#x9650;&#x4E8E; Docker &#x73AF;&#x5883;&#x8D44;&#x6E90;&#x9650;&#x5236;&#xFF09;&#x8BA1;&#x7B97;&#xFF0C;&#x4E5F;&#x5C31; 650 &#x6BEB;&#x79D2;&#x3002;</p>
+<h2 id="&#x7F16;&#x5199;-Go-&#x8BED;&#x8A00;&#x8C03;&#x7528;-WASM-&#x7A0B;&#x5E8F;"><a href="#&#x7F16;&#x5199;-Go-&#x8BED;&#x8A00;&#x8C03;&#x7528;-WASM-&#x7A0B;&#x5E8F;" class="headerlink" title="&#x7F16;&#x5199; Go &#x8BED;&#x8A00;&#x8C03;&#x7528; WASM &#x7A0B;&#x5E8F;"></a>&#x7F16;&#x5199; Go &#x8BED;&#x8A00;&#x8C03;&#x7528; WASM &#x7A0B;&#x5E8F;</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;os&quot;</span><br><span class="line">	&quot;runtime&quot;</span><br><span class="line">	&quot;time&quot;</span><br><span class="line"></span><br><span class="line">	&quot;io/ioutil&quot;</span><br><span class="line"></span><br><span class="line">	wasmer &quot;github.com/wasmerio/wasmer-go/wasmer&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() {</span><br><span class="line">	wasmBytes, _ := ioutil.ReadFile(&quot;module.wasm&quot;)</span><br><span class="line">	store := wasmer.NewStore(wasmer.NewEngine())</span><br><span class="line">	module, _ := wasmer.NewModule(store, wasmBytes)</span><br><span class="line"></span><br><span class="line">	wasiEnv, _ := wasmer.NewWasiStateBuilder(&quot;wasi-program&quot;).Finalize()</span><br><span class="line">	GenerateImportObject, err := wasiEnv.GenerateImportObject(store, module)</span><br><span class="line">	check(err)</span><br><span class="line"></span><br><span class="line">	instance, err := wasmer.NewInstance(module, GenerateImportObject)</span><br><span class="line">	check(err)</span><br><span class="line"></span><br><span class="line">	wasmInitial, err := instance.Exports.GetWasiStartFunction()</span><br><span class="line">	check(err)</span><br><span class="line">	wasmInitial()</span><br><span class="line"></span><br><span class="line">	fibonacci, err := instance.Exports.GetFunction(&quot;fibonacci&quot;)</span><br><span class="line">	check(err)</span><br><span class="line"></span><br><span class="line">	numCPUs := runtime.NumCPU()</span><br><span class="line">	ch := make(chan string, numCPUs)</span><br><span class="line"></span><br><span class="line">	fmt.Printf(&quot;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID %v\n&quot;, os.Getpid())</span><br><span class="line"></span><br><span class="line">	start := time.Now()</span><br><span class="line"></span><br><span class="line">	for i := 0; i &lt; numCPUs; i++ {</span><br><span class="line">		fmt.Printf(&quot;&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID %v\n&quot;, i)</span><br><span class="line"></span><br><span class="line">		calc := func(n uint, ch chan string) {</span><br><span class="line">			ret, _ := fibonacci(n)</span><br><span class="line">			msg := fmt.Sprintf(&quot;%d&quot;, ret)</span><br><span class="line">			fmt.Println(fmt.Sprintf(&quot;&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; %s&quot;, msg))</span><br><span class="line">			ch &lt;- msg</span><br><span class="line">		}</span><br><span class="line"></span><br><span class="line">		go calc(40, ch)</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	for i := 0; i &lt; numCPUs; i++ {</span><br><span class="line">		&lt;-ch</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	fmt.Printf(&quot;&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;%v \n&quot;, time.Since(start).Milliseconds())</span><br><span class="line"></span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func check(e error) {</span><br><span class="line">	if e != nil {</span><br><span class="line">		panic(e)</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5C06;&#x4EE3;&#x7801;&#x4FDD;&#x5B58;&#x4E3A; <code>wasi.go</code> &#xFF0C;&#x6267;&#x884C; <code>go run wasi.go</code>&#xFF0C;&#x4F1A;&#x5F97;&#x5230;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x7684;&#x7ED3;&#x679C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID 3198</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 0</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 1</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 2</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 3</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 4</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 5</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 6</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 7</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;595</span><br></pre></td></tr></table></figure>
+
+<p>&#x591A;&#x6267;&#x884C;&#x51E0;&#x6B21;&#xFF0C;&#x4F60;&#x4F1A;&#x53D1;&#x73B0;&#x76F8;&#x6BD4;&#x8F83;&#x5B8C;&#x5168;&#x4F7F;&#x7528; Go &#x5B9E;&#x73B0;&#x7684;&#x7A0B;&#x5E8F;&#xFF0C;&#x591A;&#x6570;&#x6267;&#x884C;&#x7ED3;&#x679C;&#x5C45;&#x7136;&#x4F1A;&#x66F4;&#x5FEB;&#x4E00;&#x4E9B;&#xFF0C;&#x6781;&#x9650;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x4E5F;&#x4E0D;&#x8FC7;&#x662F;&#x5DEE;&#x4E0D;&#x591A;&#x5FEB;&#x3002;<strong>&#x662F;&#x4E0D;&#x662F;&#x6027;&#x4EF7;&#x6BD4;&#x7684;&#x5473;&#x9053;&#x53C8;&#x6765;&#x4E86;</strong>&#x3002;&#xFF08;&#x4E0D;&#x8FC7;&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;&#x5BA2;&#x89C2;&#xFF0C;&#x6587;&#x672B;&#x4F1A;&#x9644;&#x5E26;&#x591A;&#x6B21;&#x8BA1;&#x7B97;&#x7ED3;&#x679C;&#xFF09;</p>
+<h2 id="&#x4F7F;&#x7528;-Node-&#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Cluster&#x6A21;&#x5F0F;&#xFF09;"><a href="#&#x4F7F;&#x7528;-Node-&#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Cluster&#x6A21;&#x5F0F;&#xFF09;" class="headerlink" title="&#x4F7F;&#x7528; Node &#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Cluster&#x6A21;&#x5F0F;&#xFF09;"></a>&#x4F7F;&#x7528; Node &#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Cluster&#x6A21;&#x5F0F;&#xFF09;</h2><p>&#x76F8;&#x540C;&#x7684;&#x4EE3;&#x7801;&#x5982;&#x679C;&#x4F7F;&#x7528; Node.js &#x6765;&#x5B9E;&#x73B0;&#xFF0C;&#x884C;&#x6570;&#x4F1A;&#x7A0D;&#x5FAE;&#x591A;&#x4E00;&#x70B9;&#x3002;</p>
+<p>&#x867D;&#x7136;&#x7A0B;&#x5E8F;&#x6587;&#x4EF6;&#x540D;&#x53EB;&#x5565;&#x90FD;&#x884C;&#xFF0C;&#x4F46;&#x662F;&#x4E3A;&#x4E86;&#x80FD;&#x5728; <code>CLI</code> &#x6267;&#x884C;&#x4E0A;&#x5077;&#x61D2;&#xFF0C;&#x5C31;&#x7BA1;&#x5B83;&#x53EB; <code>index.js</code> &#x5427;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const cluster = require(&apos;cluster&apos;);</span><br><span class="line">const { cpus } = require(&apos;os&apos;);</span><br><span class="line">const { exit, pid } = require(&apos;process&apos;);</span><br><span class="line"></span><br><span class="line">function fibonacci(num) {</span><br><span class="line">  if (num === 0) {</span><br><span class="line">    return 0;</span><br><span class="line">  } else if (num === 1) {</span><br><span class="line">    return 1;</span><br><span class="line">  } else {</span><br><span class="line">    return fibonacci(num - 1) + fibonacci(num - 2);</span><br><span class="line">  }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">const numCPUs = cpus().length;</span><br><span class="line"></span><br><span class="line">if (cluster.isPrimary) {</span><br><span class="line">  let dataStore = [];</span><br><span class="line">  const readyChecker = () =&gt; {</span><br><span class="line">    if (dataStore.length === numCPUs) {</span><br><span class="line">      console.log(`&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;${new Date - start}`);</span><br><span class="line">      exit(0);</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  console.log(`&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID ${pid}`);</span><br><span class="line">  const start = new Date();</span><br><span class="line"></span><br><span class="line">  for (let i = 0; i &lt; numCPUs; i++) {</span><br><span class="line">    cluster.fork();</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  cluster.on(&apos;online&apos;, (worker) =&gt; {</span><br><span class="line">    console.log(`&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID ${worker.id}`);</span><br><span class="line">    worker.send(40);</span><br><span class="line">  });</span><br><span class="line"></span><br><span class="line">  const messageHandler = function (msg) {</span><br><span class="line">    console.log(&quot;&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C;&quot;, msg.ret)</span><br><span class="line">    dataStore.push(msg.ret);</span><br><span class="line">    readyChecker()</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  for (const id in cluster.workers) {</span><br><span class="line">    cluster.workers[id].on(&apos;message&apos;, messageHandler);</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">} else {</span><br><span class="line">  process.on(&apos;message&apos;, (msg) =&gt; {</span><br><span class="line">    process.send({ ret: fibonacci(msg) });</span><br><span class="line">  });</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4FDD;&#x5B58;&#x597D;&#x6587;&#x4EF6;&#xFF0C;&#x6267;&#x884C; <code>node .</code> &#xFF0C;&#x7A0B;&#x5E8F;&#x8F93;&#x51FA;&#x5185;&#x5BB9;&#x4F1A;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x8FD9;&#x6837;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID 2038</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 1</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 2</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 3</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 4</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 7</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 5</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 6</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 8</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;1747</span><br></pre></td></tr></table></figure>
+
+<p>&#x76EE;&#x524D;&#x6765;&#x770B;&#xFF0C;&#x6267;&#x884C;&#x65F6;&#x95F4;&#x5DEE;&#x4E0D;&#x591A;&#x662F; Go &#x7248;&#x7A0B;&#x5E8F;&#x7684; 3 &#x500D;&#xFF0C;&#x4E0D;&#x8FC7;&#x5F80;&#x597D;&#x5904;&#x60F3;&#xFF0C;&#x53EF;&#x63D0;&#x5347;&#x7A7A;&#x95F4;&#x5E94;&#x8BE5;&#x4E5F;&#x975E;&#x5E38;&#x5927;&#x3002;</p>
+<h2 id="&#x4F7F;&#x7528;-Node-&#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Worker-Threads&#xFF09;"><a href="#&#x4F7F;&#x7528;-Node-&#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Worker-Threads&#xFF09;" class="headerlink" title="&#x4F7F;&#x7528; Node &#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Worker Threads&#xFF09;"></a>&#x4F7F;&#x7528; Node &#x7F16;&#x5199;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#xFF08;Worker Threads&#xFF09;</h2><p>&#x5F53;&#x7136;&#xFF0C;&#x6BCF;&#x5F53;&#x63D0;&#x5230; Node.js <code>Cluster</code> &#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5C31;&#x4E0D;&#x514D;&#x4F1A;&#x6709;&#x4EBA;&#x8BF4; <code>Cluster</code> &#x6570;&#x636E;&#x4EA4;&#x6362;&#x6548;&#x7387;&#x4F4E;&#x3001;&#x6BD4;&#x8F83;&#x7B28;&#x91CD;&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x540C;&#x6837;&#x6D4B;&#x8BD5;&#x4E00;&#x628A; <code>Worker Threads</code>&#x3002;</p>
+<p>&#x5176;&#x5B9E;&#x4ECE; Node.js 12.x LTS &#x5F00;&#x59CB;&#xFF0C;Node &#x5C31;&#x5177;&#x5907;&#x4E86; <a href="/external_links/51f196edee040fb0651f4fc8dcbd93f6.html" target="blank" rel="noopener">Worker Threads</a> &#x7684;&#x80FD;&#x529B;&#x3002;&#x5173;&#x4E8E;&#x5982;&#x4F55;&#x4F7F;&#x7528; Node.js &#x7684; <code>Worker Treads</code> &#xFF0C;&#x4EE5;&#x53CA;&#x5FAA;&#x5E8F;&#x6E10;&#x8FDB;&#x7684;&#x7406;&#x89E3;&#x5982;&#x4F55;&#x4F7F;&#x7528; <code>SharedArrayBuffer</code>&#xFF0C;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;<a href="/external_links/6de17f1cfb030b1020bb149ea248ef15.html" target="blank" rel="noopener">&#x300A;How to work with worker threads in NodeJS&#x300B;</a>&#xFF0C;&#x672C;&#x6587;&#x5C31;&#x4E0D;&#x505A;&#x57FA;&#x7840;&#x5C55;&#x5F00;&#x4E86;&#x3002;&#x8003;&#x8651;&#x5230;&#x6211;&#x4EEC;&#x6A21;&#x62DF;&#x7684;&#x662F;&#x6781;&#x9650;&#x7CDF;&#x7CD5;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x4E5F;&#x4E0D;&#x5FC5;&#x4F7F;&#x7528; <code>node-worker-threads-pool</code> &#x4E4B;&#x7C7B;&#x7684;&#x4E09;&#x65B9;&#x5E93;&#xFF0C;&#x5BF9; threads &#x505A; pool &#x5316;&#x4E86;&#x3002;&#xFF08;&#x5B9E;&#x6D4B;&#x51E0;&#x4E4E;&#x6CA1;&#x5DEE;&#x522B;&#xFF09;</p>
+<p>&#x5C06;&#x4E0A;&#x9762; Cluster &#x7248;&#x672C;&#x7684;&#x4EE3;&#x7801;&#x7B80;&#x5355;&#x8C03;&#x6574;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5F97;&#x5230;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x4E0D;&#x540C;&#x7684;&#x662F;&#xFF0C;&#x4E3A;&#x4E86;&#x4E66;&#x5199;&#x7B80;&#x5355;&#xFF0C;&#x6211;&#x4EEC;&#x8FD9;&#x6B21;&#x9700;&#x8981;&#x62C6;&#x5206;&#x4E3A;&#x4E24;&#x4E2A;&#x6587;&#x4EF6;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { Worker } = require(&quot;worker_threads&quot;);</span><br><span class="line">const { cpus } = require(&apos;os&apos;);</span><br><span class="line">const { exit } = require(&apos;process&apos;);</span><br><span class="line"></span><br><span class="line">let dataStore = [];</span><br><span class="line"></span><br><span class="line">const readyChecker = () =&gt; {</span><br><span class="line">    if (dataStore.length === numCPUs) {</span><br><span class="line">        console.log(`&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;${new Date - start}`)</span><br><span class="line">        exit(0);</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">const num = [40];</span><br><span class="line">const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * num.length);</span><br><span class="line">const sharedArray = new Int32Array(sharedBuffer);</span><br><span class="line">Atomics.store(sharedArray, 0, num);</span><br><span class="line"></span><br><span class="line">const numCPUs = cpus().length;</span><br><span class="line"></span><br><span class="line">console.log(`&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID ${process.pid}`);</span><br><span class="line"></span><br><span class="line">const start = new Date();</span><br><span class="line"></span><br><span class="line">for (let i = 0; i &lt; numCPUs; i++) {</span><br><span class="line">    const worker = new Worker(&quot;./worker.js&quot;);</span><br><span class="line"></span><br><span class="line">    worker.on(&quot;message&quot;, msg =&gt; {</span><br><span class="line">        console.log(&quot;&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C;&quot;, msg.ret)</span><br><span class="line">        dataStore.push(msg.ret);</span><br><span class="line">        readyChecker()</span><br><span class="line">    });</span><br><span class="line"></span><br><span class="line">    console.log(`&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;`);</span><br><span class="line">    worker.postMessage({ num: sharedArray });</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x8003;&#x8651;&#x6362;&#x4E2A;&#x76EE;&#x5F55;&#xFF0C;&#x5148;&#x5C06;&#x4E0A;&#x9762;&#x7684;&#x5185;&#x5BB9;&#x540C;&#x6837;&#x4FDD;&#x5B58;&#x4E3A; <code>index.js</code>&#x3002;&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x6765;&#x5B8C;&#x6210; <code>worker.js</code> &#x7684;&#x5185;&#x5BB9;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { parentPort } = require(&quot;worker_threads&quot;);</span><br><span class="line"></span><br><span class="line">function fibonacci(num) {</span><br><span class="line">    if (num === 0) {</span><br><span class="line">        return 0;</span><br><span class="line">    } else if (num === 1) {</span><br><span class="line">        return 1;</span><br><span class="line">    } else {</span><br><span class="line">        return fibonacci(num - 1) + fibonacci(num - 2);</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">parentPort.on(&quot;message&quot;, data =&gt; {</span><br><span class="line">    parentPort.postMessage({ num: data.num, ret: fibonacci(data.num) });</span><br><span class="line">});</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x6587;&#x4EF6;&#x90FD;&#x4FDD;&#x5B58;&#x5C31;&#x7EEA;&#x540E;&#xFF0C;&#x6267;&#x884C; <code>node .</code> &#x540C;&#x6837;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x7684;&#x8F93;&#x51FA;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID 2190</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;1768</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x91CC;&#x5E94;&#x8BE5;&#x662F;&#x56E0;&#x4E3A;<strong>&#x4EA4;&#x6362;&#x7684;&#x6570;&#x636E;&#x91CF;</strong>&#x6BD4;&#x8F83;&#x5C11;&#xFF0C;&#x6240;&#x4EE5;&#x6267;&#x884C;&#x65F6;&#x95F4;&#x5176;&#x5B9E;&#x548C; <code>Cluster</code> &#x7248;&#x672C;&#x5DEE;&#x4E0D;&#x591A;&#x3002;</p>
+<h2 id="&#x4F7F;&#x7528;-Node-&#x8C03;&#x7528;-WASM-&#x7A0B;&#x5E8F;&#xFF08;Cluster&#xFF09;"><a href="#&#x4F7F;&#x7528;-Node-&#x8C03;&#x7528;-WASM-&#x7A0B;&#x5E8F;&#xFF08;Cluster&#xFF09;" class="headerlink" title="&#x4F7F;&#x7528; Node &#x8C03;&#x7528; WASM &#x7A0B;&#x5E8F;&#xFF08;Cluster&#xFF09;"></a>&#x4F7F;&#x7528; Node &#x8C03;&#x7528; WASM &#x7A0B;&#x5E8F;&#xFF08;Cluster&#xFF09;</h2><p>&#x7B80;&#x5355;&#x8C03;&#x6574;&#x4E0A;&#x6587;&#x4E2D;&#x7684; Cluster &#x6A21;&#x5F0F;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x6765;&#x5B9E;&#x73B0;&#x4E00;&#x4E2A;&#x80FD;&#x591F;&#x4F7F;&#x7528; WASM &#x8FDB;&#x884C;&#x8BA1;&#x7B97;&#x7684;&#x7A0B;&#x5E8F;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { readFileSync } = require(&apos;fs&apos;);</span><br><span class="line">const { WASI } = require(&apos;wasi&apos;);</span><br><span class="line">const { argv, env } = require(&apos;process&apos;);</span><br><span class="line"></span><br><span class="line">const cluster = require(&apos;cluster&apos;);</span><br><span class="line">const { cpus } = require(&apos;os&apos;);</span><br><span class="line">const { exit, pid } = require(&apos;process&apos;);</span><br><span class="line"></span><br><span class="line">const numCPUs = cpus().length;</span><br><span class="line"></span><br><span class="line">if (cluster.isPrimary) {</span><br><span class="line">    let dataStore = [];</span><br><span class="line">    const readyChecker = () =&gt; {</span><br><span class="line">        if (dataStore.length === numCPUs) {</span><br><span class="line">            console.log(`&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;${new Date - start}`);</span><br><span class="line">            exit(0);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    console.log(`&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID ${pid}`);</span><br><span class="line">    const start = new Date();</span><br><span class="line"></span><br><span class="line">    for (let i = 0; i &lt; numCPUs; i++) {</span><br><span class="line">        cluster.fork();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    cluster.on(&apos;online&apos;, (worker) =&gt; {</span><br><span class="line">        console.log(`&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID ${worker.id}`);</span><br><span class="line">        worker.send(40);</span><br><span class="line">    });</span><br><span class="line"></span><br><span class="line">    const messageHandler = function (msg) {</span><br><span class="line">        console.log(&quot;&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C;&quot;, msg.ret)</span><br><span class="line">        dataStore.push(msg.ret);</span><br><span class="line">        readyChecker()</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    for (const id in cluster.workers) {</span><br><span class="line">        cluster.workers[id].on(&apos;message&apos;, messageHandler);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">} else {</span><br><span class="line"></span><br><span class="line">    process.on(&apos;message&apos;, async (msg) =&gt; {</span><br><span class="line">        const wasi = new WASI({ args: argv, env });</span><br><span class="line">        const importObject = { wasi_snapshot_preview1: wasi.wasiImport };</span><br><span class="line">        const wasm = await WebAssembly.compile(readFileSync(&quot;./module.wasm&quot;));</span><br><span class="line">        const instance = await WebAssembly.instantiate(wasm, importObject);</span><br><span class="line">        wasi.start(instance);</span><br><span class="line">        const ret = await instance.exports.fibonacci(msg)</span><br><span class="line">        process.send({ ret });</span><br><span class="line">    });</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5C06;&#x5185;&#x5BB9;&#x4FDD;&#x5B58;&#x4E3A; <code>index.js</code> &#x540E;&#xFF0C;&#x6267;&#x884C; <code>node --experimental-wasi-unstable-preview1 .</code> &#x540E;&#xFF0C;&#x4F1A;&#x770B;&#x5230;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x7684;&#x8F93;&#x51FA;&#x7ED3;&#x679C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID 2338</span><br><span class="line">(node:2338) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 1</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 3</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 2</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 5</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 6</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 8</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 4</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1; #ID 7</span><br><span class="line">(node:2345) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2346) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2360) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2350) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2365) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2377) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2371) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2354) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;808</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x662F;&#x4E0D;&#x662F;&#x518D;&#x6B21;&#x55C5;&#x5230;&#x4E86;&#x4E00;&#x4E1D;&#x771F;&#x9999;&#x7684;&#x5473;&#x9053;</strong>&#x3002;&#x5728;&#x51E0;&#x4E4E;&#x4E0D;&#x9700;&#x8981;&#x600E;&#x4E48;&#x8D39;&#x52B2;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x7B80;&#x5355;&#x8C03;&#x6574;&#x4E0B;&#x4EE3;&#x7801;&#xFF0C;&#x6267;&#x884C;&#x6548;&#x7387;&#x6BD4;&#x4E0D;&#x4F7F;&#x7528; WASM &#x5C11;&#x4E86;&#x4E00;&#x534A;&#x7684;&#x65F6;&#x95F4;&#xFF0C;&#x751A;&#x81F3;&#x5728;&#x964D;&#x4F4E;&#x4E86;&#x4E00;&#x4E2A;&#x6570;&#x91CF;&#x7EA7;&#x4E4B;&#x540E;&#xFF0C;&#x5982;&#x679C;&#x7EE7;&#x7EED;&#x4F18;&#x5316;&#x3001;&#x4EE5;&#x53CA;&#x8BA9;&#x7A0B;&#x5E8F;&#x6301;&#x7EED;&#x7684;&#x8FD0;&#x884C;&#xFF0C;&#x6216;&#x8BB8;&#x751A;&#x81F3;&#x80FD;&#x591F;&#x65E0;&#x9650;&#x8D8B;&#x8FD1;&#x4E8E; Go &#x7248;&#x672C;&#x5B9E;&#x73B0;&#x7684;&#x7A0B;&#x5E8F;&#x7684;&#x6027;&#x80FD;&#x3002;</p>
+<h2 id="&#x4F7F;&#x7528;-Node-&#x8C03;&#x7528;-WASM-&#x7A0B;&#x5E8F;&#xFF08;Worker-Threads&#xFF09;"><a href="#&#x4F7F;&#x7528;-Node-&#x8C03;&#x7528;-WASM-&#x7A0B;&#x5E8F;&#xFF08;Worker-Threads&#xFF09;" class="headerlink" title="&#x4F7F;&#x7528; Node &#x8C03;&#x7528; WASM &#x7A0B;&#x5E8F;&#xFF08;Worker Threads&#xFF09;"></a>&#x4F7F;&#x7528; Node &#x8C03;&#x7528; WASM &#x7A0B;&#x5E8F;&#xFF08;Worker Threads&#xFF09;</h2><p>&#x4E3A;&#x4E86;&#x8BA9;&#x6211;&#x4EEC;&#x7684;&#x4EE3;&#x7801;&#x4FDD;&#x6301;&#x7B80;&#x5355;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5C06;&#x7A0B;&#x5E8F;&#x62C6;&#x5206;&#x4E3A;&#x4E09;&#x4E2A;&#x90E8;&#x5206;&#xFF1A;&#x5165;&#x53E3;&#x7A0B;&#x5E8F;&#x3001;Worker&#x7A0B;&#x5E8F;&#x3001;WASI &#x8C03;&#x7528;&#x7A0B;&#x5E8F;&#x3002;&#x8FD8;&#x662F;&#x5148;&#x6765;&#x5B9E;&#x73B0;&#x5165;&#x53E3;&#x7A0B;&#x5E8F; <code>index.js</code>&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { Worker } = require(&quot;worker_threads&quot;);</span><br><span class="line">const { cpus } = require(&apos;os&apos;);</span><br><span class="line">const { exit, pid } = require(&apos;process&apos;)</span><br><span class="line"></span><br><span class="line">let dataStore = [];</span><br><span class="line"></span><br><span class="line">const readyChecker = () =&gt; {</span><br><span class="line">    if (dataStore.length === numCPUs) {</span><br><span class="line">        console.log(`&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;${new Date - start}`);</span><br><span class="line">        exit(0);</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">const num = [40];</span><br><span class="line">const sharedBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * num.length);</span><br><span class="line">const sharedArray = new Int32Array(sharedBuffer);</span><br><span class="line">Atomics.store(sharedArray, 0, num);</span><br><span class="line"></span><br><span class="line">const numCPUs = cpus().length;</span><br><span class="line">console.log(`&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID ${pid}`);</span><br><span class="line"></span><br><span class="line">const start = new Date();</span><br><span class="line"></span><br><span class="line">for (let i = 0; i &lt; numCPUs; i++) {</span><br><span class="line">    const worker = new Worker(&quot;./worker.js&quot;);</span><br><span class="line"></span><br><span class="line">    worker.on(&quot;message&quot;, msg =&gt; {</span><br><span class="line">        console.log(&quot;&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C;&quot;, msg.ret)</span><br><span class="line">        dataStore.push(msg.ret);</span><br><span class="line">        readyChecker()</span><br><span class="line">    });</span><br><span class="line"></span><br><span class="line">    console.log(`&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;`);</span><br><span class="line">    worker.postMessage({ num: sharedArray });</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x63A5;&#x7740;&#x5B9E;&#x73B0; <code>worker.js</code> &#x90E8;&#x5206;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { parentPort } = require(&quot;worker_threads&quot;);</span><br><span class="line">const wasi = require(&quot;./wasi&quot;);</span><br><span class="line"></span><br><span class="line">parentPort.on(&quot;message&quot;, async (msg) =&gt; {</span><br><span class="line">    const instance = await wasi();</span><br><span class="line">    const ret = await instance.exports.fibonacci(msg.num)</span><br><span class="line">    parentPort.postMessage({ ret });</span><br><span class="line">});</span><br></pre></td></tr></table></figure>
+
+<p>&#x6700;&#x540E;&#x6765;&#x5B9E;&#x73B0;&#x65B0;&#x589E;&#x7684; <code>wasi.js</code> &#x90E8;&#x5206;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { readFileSync } = require(&apos;fs&apos;);</span><br><span class="line">const { WASI } = require(&apos;wasi&apos;);</span><br><span class="line">const { argv, env } = require(&apos;process&apos;);</span><br><span class="line"></span><br><span class="line">module.exports = async () =&gt; {</span><br><span class="line">    const wasi = new WASI({ args: argv, env });</span><br><span class="line">    const importObject = { wasi_snapshot_preview1: wasi.wasiImport };</span><br><span class="line">    const wasm = await WebAssembly.compile(readFileSync(&quot;./module.wasm&quot;));</span><br><span class="line">    const instance = await WebAssembly.instantiate(wasm, importObject);</span><br><span class="line">    wasi.start(instance);</span><br><span class="line">    return instance;</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>&#x5C06;&#x6587;&#x4EF6;&#x90FD;&#x4FDD;&#x5B58;&#x597D;&#x4E4B;&#x540E;&#xFF0C;&#x6267;&#x884C; <code>node .</code> &#x53EF;&#x4EE5;&#x770B;&#x5230;&#x7C7B;&#x4F3C;&#x4E0A;&#x9762; Cluster &#x7248;&#x672C;&#x7684;&#x8FD0;&#x884C;&#x8F93;&#x51FA;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;&#x1F680; &#x4E3B;&#x8FDB;&#x7A0B;&#x4E0A;&#x7EBF; #ID 2927</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">&#x1F477; &#x5206;&#x53D1;&#x8BA1;&#x7B97;&#x4EFB;&#x52A1;</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:2927) ExperimentalWarning: WASI is an experimental feature. This feature could change at any time</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F4E6; &#x6536;&#x5230;&#x7ED3;&#x679C; 102334155</span><br><span class="line">&#x1F389; &#x90FD;&#x641E;&#x5B9A;&#x4E86;&#xFF0C;&#x7528;&#x65F6;&#xFF1A;825</span><br></pre></td></tr></table></figure>
+
+<p>&#x548C;&#x5206;&#x522B;&#x4F7F;&#x7528; Cluster &#x548C; Threads &#x5B9E;&#x73B0;&#x57FA;&#x51C6;&#x7248;&#x7A0B;&#x5E8F;&#x4E00;&#x6837;&#xFF0C;&#x6267;&#x884C;&#x65F6;&#x95F4;&#x4E5F;&#x662F;&#x5DEE;&#x4E0D;&#x591A;&#x7684;&#x3002;</p>
+<h2 id="&#x5BF9;&#x4E0A;&#x8FF0;&#x7A0B;&#x5E8F;&#x8FDB;&#x884C;&#x6279;&#x91CF;&#x6D4B;&#x8BD5;"><a href="#&#x5BF9;&#x4E0A;&#x8FF0;&#x7A0B;&#x5E8F;&#x8FDB;&#x884C;&#x6279;&#x91CF;&#x6D4B;&#x8BD5;" class="headerlink" title="&#x5BF9;&#x4E0A;&#x8FF0;&#x7A0B;&#x5E8F;&#x8FDB;&#x884C;&#x6279;&#x91CF;&#x6D4B;&#x8BD5;"></a>&#x5BF9;&#x4E0A;&#x8FF0;&#x7A0B;&#x5E8F;&#x8FDB;&#x884C;&#x6279;&#x91CF;&#x6D4B;&#x8BD5;</h2><p>&#x4E3A;&#x4E86;&#x8BA9;&#x7ED3;&#x679C;&#x66F4;&#x5BA2;&#x89C2;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x7F16;&#x5199;&#x4E00;&#x4E2A;&#x5C0F;&#x7A0B;&#x5E8F;&#xFF0C;&#x8BA9;&#x4E0A;&#x9762;&#x7684;&#x7A0B;&#x5E8F;&#x5206;&#x522B;&#x91CD;&#x590D;&#x6267;&#x884C; 100 &#x904D;&#xFF0C;&#x5E76;&#x5254;&#x9664;&#x8868;&#x73B0;&#x6700;&#x597D;&#x548C;&#x6700;&#x7CDF;&#x7CD5;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x53D6;&#x5E73;&#x5747;&#x503C;&#x3002;</p>
+<p>&#x5148;&#x6765;&#x5B9E;&#x73B0;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x7A0B;&#x5E8F;&#xFF0C;&#x4EE3;&#x66FF;&#x6211;&#x4EEC;&#x7684;&#x624B;&#x52A8;&#x6267;&#x884C;&#xFF0C;&#x9488;&#x5BF9;&#x4E0D;&#x540C;&#x7684;&#x7A0B;&#x5E8F;&#x76EE;&#x5F55;&#x6267;&#x884C;&#x4E0D;&#x540C;&#x7684;&#x547D;&#x4EE4;&#xFF0C;&#x6536;&#x96C6; 100 &#x6B21;&#x7A0B;&#x5E8F;&#x8FD0;&#x884C;&#x6570;&#x636E;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const { execSync } = require(&apos;child_process&apos;);</span><br><span class="line">const { writeFileSync } = require(&apos;fs&apos;);</span><br><span class="line">const sleep = (ms) =&gt; new Promise((res) =&gt; setTimeout(res, ms));</span><br><span class="line"></span><br><span class="line">const cmd = &apos;./base&apos;;</span><br><span class="line">const cwd = &apos;../go-case&apos;;</span><br><span class="line">const file = &apos;./go-base.json&apos;;</span><br><span class="line"></span><br><span class="line">let data = [];</span><br><span class="line"></span><br><span class="line">(async () =&gt; {</span><br><span class="line">    for (let i = 1; i &lt;= 100; i++) {</span><br><span class="line">        console.log(`&#x231B;&#xFE0F; &#x6B63;&#x5728;&#x6536;&#x96C6; ${i} &#x6B21;&#x7ED3;&#x679C;`)</span><br><span class="line">        const stdout = execSync(cmd, { cwd }).toString();</span><br><span class="line">        const words = stdout.split(&apos;\n&apos;).filter(n =&gt; n &amp;&amp; n.includes(&apos;&#x641E;&#x5B9A;&apos;))[0];</span><br><span class="line">        const time = Number(words.match(/\d+/)[0]);</span><br><span class="line">        data.push(time)</span><br><span class="line">        await sleep(100);</span><br><span class="line">    }</span><br><span class="line">    writeFileSync(file, JSON.stringify(data))</span><br><span class="line">})();</span><br></pre></td></tr></table></figure>
+
+<p>&#x7A0B;&#x5E8F;&#x6267;&#x884C;&#x4E4B;&#x540E;&#x7684;&#x8F93;&#x51FA;&#x4F1A;&#x7C7B;&#x4F3C;&#x4E0B;&#x9762;&#x8FD9;&#x6837;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;&#x231B;&#xFE0F; &#x6B63;&#x5728;&#x6536;&#x96C6; 1 &#x6B21;&#x7ED3;&#x679C;</span><br><span class="line">&#x231B;&#xFE0F; &#x6B63;&#x5728;&#x6536;&#x96C6; 2 &#x6B21;&#x7ED3;&#x679C;</span><br><span class="line">&#x231B;&#xFE0F; &#x6B63;&#x5728;&#x6536;&#x96C6; 3 &#x6B21;&#x7ED3;&#x679C;</span><br><span class="line">...</span><br><span class="line">&#x231B;&#xFE0F; &#x6B63;&#x5728;&#x6536;&#x96C6; 100 &#x6B21;&#x7ED3;&#x679C;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x6570;&#x636E;&#x91C7;&#x96C6;&#x5B8C;&#x6BD5;&#x4E4B;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x7F16;&#x5199;&#x4E00;&#x4E2A;&#x66F4;&#x7B80;&#x5355;&#x7684;&#x7A0B;&#x5E8F;&#xFF0C;&#x6765;&#x67E5;&#x770B;&#x7A0B;&#x5E8F;&#x8FD0;&#x884C;&#x7684;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#xFF0C;&#x4EE5;&#x53CA;&#x6392;&#x9664;&#x6389;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#x540E;&#x7684;&#x5E73;&#x5747;&#x503C;&#x3002;&#xFF08;&#x5176;&#x5B9E;&#x8FD8;&#x5E94;&#x8BE5;&#x8DD1;&#x4E2A;&#x5206;&#x5E03;&#xFF0C;&#x4E0D;&#x8FC7;&#x5077;&#x61D2;&#x5C31;&#x4E0D;&#x505A;&#x5566;&#xFF0C;&#x611F;&#x5174;&#x8DA3;&#x7684;&#x540C;&#x5B66;&#x53EF;&#x4EE5;&#x8BD5;&#x8BD5;&#x770B;&#xFF0C;&#x4F1A;&#x6709;&#x60CA;&#x559C;&#xFF09;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">js&#x590D;&#x5236;&#x4EE3;&#x7801;const raw = require(&apos;./data.json&apos;).sort((a, b) =&gt; a - b);</span><br><span class="line">const body = raw.slice(1,-1);</span><br><span class="line"></span><br><span class="line">const sum = body.reduce((x,y)=&gt;x+y, 0);</span><br><span class="line">const average = Math.floor(sum / body.length);</span><br><span class="line"></span><br><span class="line">const best = raw[0];</span><br><span class="line">const worst = raw[raw.length-1];</span><br><span class="line"></span><br><span class="line">console.log(&apos;&#x6700;&#x4F73;&apos;,best);</span><br><span class="line">console.log(&apos;&#x6700;&#x5DEE;&apos;,worst);</span><br><span class="line">console.log(&apos;&#x5E73;&#x5747;&apos;, average);</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;"><a href="#&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;" class="headerlink" title="&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;"></a>&#x6D4B;&#x8BD5;&#x7ED3;&#x679C;</h2><p>&#x524D;&#x6587;&#x63D0;&#x5230;&#xFF0C;&#x672C;&#x6B21;&#x6D4B;&#x8BD5;&#x53EF;&#x4EE5;&#x770B;&#x4F5C;&#x4E0A;&#x8FF0;&#x7A0B;&#x5E8F;&#x5728;&#x975E;&#x5E38;&#x53D7;&#x9650;&#x5236;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x7684;&#x6BD4;&#x8F83;&#x5DEE;&#x7684;&#x6570;&#x636E;&#x3002;</p>
+<p>&#x56E0;&#x4E3A;&#x8FD9;&#x6B21;&#x6211;&#x6CA1;&#x6709;&#x4F7F;&#x7528;&#x4E91;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x800C;&#x662F;&#x4F7F;&#x7528;&#x7B14;&#x8BB0;&#x672C;&#x4E0A;&#x7684;&#x672C;&#x5730;&#x5BB9;&#x5668;&#xFF0C;&#x6240;&#x4EE5;&#x5728;&#x6301;&#x7EED;&#x8FD0;&#x884C;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x7531;&#x4E8E;&#x591A;&#x6B21;&#x5BC6;&#x96C6;&#x8BA1;&#x7B97;&#xFF0C;&#x4F1A;&#x5BFC;&#x81F4;&#x8BBE;&#x5907;&#x7684;&#x53D1;&#x70ED;&#x3002;&#x5B58;&#x5728;&#x56E0;&#x4E3A;&#x6E29;&#x5EA6;&#x5BFC;&#x81F4;&#x8BA1;&#x7B97;&#x7ED3;&#x679C;&#x653E;&#x5927;&#x7684;&#x60C5;&#x51B5;&#xFF0C;<strong>&#x5982;&#x679C;&#x4F60;&#x91C7;&#x53D6;&#x4E91;&#x7AEF;&#x8BBE;&#x5907;&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#xFF0C;&#x6570;&#x503C;&#x7ED3;&#x679C;&#x5E94;&#x8BE5;&#x4F1A;&#x6BD4;&#x8F83;&#x6F02;&#x4EAE;</strong>&#x3002;</p>
+<table>
+<thead>
+<tr>
+<th>&#x7C7B;&#x578B;</th>
+<th>&#x6700;&#x4F73;</th>
+<th>&#x6700;&#x5DEE;</th>
+<th>&#x5E73;&#x5747;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Go</td>
+<td>574</td>
+<td>632</td>
+<td>586</td>
+</tr>
+<tr>
+<td>Go + WASM</td>
+<td>533</td>
+<td>800</td>
+<td>610</td>
+</tr>
+<tr>
+<td>Node Cluster</td>
+<td>1994</td>
+<td>3054</td>
+<td>2531</td>
+</tr>
+<tr>
+<td>Node Threads</td>
+<td>1997</td>
+<td>3671</td>
+<td>2981</td>
+</tr>
+<tr>
+<td>Node Cluster + WASM</td>
+<td>892</td>
+<td>1694</td>
+<td>1305</td>
+</tr>
+<tr>
+<td>Node Threads + WASM</td>
+<td>887</td>
+<td>2160</td>
+<td>1334</td>
+</tr>
+</tbody></table>
+<p>&#x4F46;&#x662F;&#x603B;&#x4F53;&#x800C;&#x8A00;&#xFF0C;&#x8D8B;&#x52BF;&#x8FD8;&#x662F;&#x5F88;&#x660E;&#x663E;&#x7684;&#xFF0C;&#x6216;&#x8BB8;&#x8DB3;&#x591F;&#x652F;&#x6491;&#x6211;&#x4EEC;&#x5728;&#x4E00;&#x4E9B;&#x9002;&#x5408;&#x7684;&#x573A;&#x666F;&#x4E0B;&#xFF0C;&#x91C7;&#x53D6; WASM + Node &#x6216;&#x8005; WASM + GO &#x7684;&#x65B9;&#x5F0F;&#x6765;&#x8FDB;&#x884C;&#x6DF7;&#x5408;&#x5F00;&#x53D1;&#x4E86;&#x3002;</p>
+<h2 id="&#x6700;&#x540E;"><a href="#&#x6700;&#x540E;" class="headerlink" title="&#x6700;&#x540E;"></a>&#x6700;&#x540E;</h2><p>&#x5982;&#x679C;&#x8BF4;&#x4E0A;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;&#x76EE;&#x7684;&#x5728;&#x4E8E;&#x8BA9;&#x60F3;&#x8981;&#x6298;&#x817E; WASM &#x7684;&#x540C;&#x5B66;&#x5FEB;&#x901F;&#x4E0A;&#x624B;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#xFF0C;&#x5E0C;&#x671B;&#x80FD;&#x591F;&#x5E2E;&#x52A9;&#x5230;&#x201C;&#x72B9;&#x8C6B;&#x662F;&#x5426;&#x91C7;&#x7528;&#x8F7B;&#x91CF;&#x5F02;&#x6784;&#x65B9;&#x6848;&#x201D;&#x7684;&#x540C;&#x5B66;&#xFF0C;&#x5E76;&#x7ED9;&#x51FA;&#x6700;&#x7B80;&#x5355;&#x7684;&#x5B9E;&#x6218;&#x4EE3;&#x7801;&#x3002;</p>
+<p>&#x56E0;&#x4E3A;&#x975E;&#x5E38;&#x591A;&#x7684;&#x5BA2;&#x89C2;&#x539F;&#x56E0;&#xFF0C;WASM &#x7684;&#x53D1;&#x5C55;&#x548C;&#x63A8;&#x5E7F;&#x6216;&#x8BB8;&#x4F1A;&#x548C; Docker &#x4E00;&#x822C;&#xFF0C;&#x975E;&#x5E38;&#x7684;&#x6162;&#x70ED;&#x3002;&#x5728; 2021 &#x5E74;&#x7684;&#x672B;&#x5C3E;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x5230;&#x4E86; Docker &#x5DF2;&#x7ECF;&#x7206;&#x53D1;&#x51FA;&#x6765;&#x7684;&#x5DE8;&#x5927;&#x80FD;&#x91CF;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x4F60;&#x613F;&#x610F;&#x4FDD;&#x6301;&#x5F00;&#x653E;&#x5FC3;&#x6001;&#xFF0C;&#x5982;&#x540C;&#x4E03;&#x516B;&#x5E74;&#x524D;&#xFF0C;&#x5BF9;&#x5F85; Docker &#x4E00;&#x6837;&#x7684;&#x6765;&#x770B;&#x5F85; WASM&#xFF0C;&#x76F8;&#x4FE1;&#x8FD9;&#x4E2A;&#x8F7B;&#x91CF;&#x7684;&#x3001;&#x6807;&#x51C6;&#x5316;&#x7684;&#x3001;&#x5F02;&#x6784;&#x7684;&#x89E3;&#x51B3;&#x65B9;&#x6848;&#x5E94;&#x8BE5;&#x80FD;&#x4E3A;&#x4F60;&#x548C;&#x4F60;&#x7684;&#x9879;&#x76EE;&#x5E26;&#x6765;&#x975E;&#x5E38;&#x591A;&#x7684;&#x4E0D;&#x540C;&#x3002;</p>
+<p>&#x541B;&#x5B50;&#x4EE5;&#x6587;&#x4F1A;&#x53CB;&#xFF0C;&#x4EE5;&#x53CB;&#x8F85;&#x4EC1;&#x3002;</p>
+<p>&#x2013;EOF</p>
+<hr>
+<p>&#x6211;&#x4EEC;&#x6709;&#x4E00;&#x4E2A;&#x5C0F;&#x5C0F;&#x7684;&#x6298;&#x817E;&#x7FA4;&#xFF0C;&#x91CC;&#x9762;&#x805A;&#x96C6;&#x4E86;&#x51E0;&#x767E;&#x4F4D;&#x559C;&#x6B22;&#x6298;&#x817E;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#x3002;</p>
+<p>&#x5728;&#x4E0D;&#x53D1;&#x5E7F;&#x544A;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x5728;&#x91CC;&#x9762;&#x4F1A;&#x4E00;&#x8D77;&#x804A;&#x804A;&#x8F6F;&#x786C;&#x4EF6;&#x3001;HomeLab&#x3001;&#x7F16;&#x7A0B;&#x4E0A;&#x7684;&#x4E00;&#x4E9B;&#x95EE;&#x9898;&#xFF0C;&#x4E5F;&#x4F1A;&#x5728;&#x7FA4;&#x91CC;&#x4E0D;&#x5B9A;&#x671F;&#x7684;&#x5206;&#x4EAB;&#x4E00;&#x4E9B;&#x6280;&#x672F;&#x6C99;&#x9F99;&#x7684;&#x8D44;&#x6599;&#x3002;</p>
+<p>&#x559C;&#x6B22;&#x6298;&#x817E;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#x6B22;&#x8FCE;&#x626B;&#x7801;&#x6DFB;&#x52A0;&#x597D;&#x53CB;&#x3002;<strong>&#xFF08;&#x6DFB;&#x52A0;&#x597D;&#x53CB;&#xFF0C;&#x8BF7;&#x5907;&#x6CE8;&#x5B9E;&#x540D;&#xFF0C;&#x6CE8;&#x660E;&#x6765;&#x6E90;&#x548C;&#x76EE;&#x7684;&#xFF0C;&#x5426;&#x5219;&#x4E0D;&#x4F1A;&#x901A;&#x8FC7;&#x5BA1;&#x6838;&#xFF09;</strong></p>
+<p><a href="/external_links/6983bd68e5198996fbba452bdfad14ef.html" target="blank" rel="noopener">&#x5173;&#x4E8E;&#x6298;&#x817E;&#x7FA4;&#x5165;&#x7FA4;&#x7684;&#x90A3;&#x4E9B;&#x4E8B;</a></p>
+<hr>
+<p><strong>&#x5982;&#x679C;&#x4F60;&#x89C9;&#x5F97;&#x5185;&#x5BB9;&#x8FD8;&#x7B97;&#x5B9E;&#x7528;&#xFF0C;&#x6B22;&#x8FCE;&#x70B9;&#x8D5E;&#x5206;&#x4EAB;&#x7ED9;&#x4F60;&#x7684;&#x670B;&#x53CB;&#xFF0C;&#x5728;&#x6B64;&#x8C22;&#x8FC7;&#x3002;</strong></p>
+<hr>
+<p>&#x672C;&#x6587;&#x4F7F;&#x7528;&#x300C;&#x7F72;&#x540D; 4.0 &#x56FD;&#x9645; (CC BY 4.0)&#x300D;&#x8BB8;&#x53EF;&#x534F;&#x8BAE;&#xFF0C;&#x6B22;&#x8FCE;&#x8F6C;&#x8F7D;&#x3001;&#x6216;&#x91CD;&#x65B0;&#x4FEE;&#x6539;&#x4F7F;&#x7528;&#xFF0C;&#x4F46;&#x9700;&#x8981;&#x6CE8;&#x660E;&#x6765;&#x6E90;&#x3002; <a href="/external_links/c5b85508750e4d24ffd3c9f100455119.html" target="blank" rel="noopener">&#x7F72;&#x540D; 4.0 &#x56FD;&#x9645; (CC BY 4.0)</a></p>
+<p>&#x672C;&#x6587;&#x4F5C;&#x8005;: &#x82CF;&#x6D0B;</p>
+<p>&#x521B;&#x5EFA;&#x65F6;&#x95F4;: 2021&#x5E74;11&#x6708;26&#x65E5;<br>&#x7EDF;&#x8BA1;&#x5B57;&#x6570;: 12835&#x5B57;<br>&#x9605;&#x8BFB;&#x65F6;&#x95F4;: 26&#x5206;&#x949F;&#x9605;&#x8BFB;<br>&#x672C;&#x6587;&#x94FE;&#x63A5;: <a href="/external_links/c5532cb0b8e314ccf042bf244d8a24a7.html" target="blank" rel="noopener">soulteary.com/2021/11/26/&#x2026;</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/4b3acf92c897e177a9f5269bafb1b017.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Node-js-Go/" rel="tag"># Node.js,Go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7034785043302072328.html" rel="next" title="Nodejs应用接入Skywalking实现APM监控">
+                <i class="fa fa-chevron-left"></i> Nodejs应用接入Skywalking实现APM监控
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7034814415190884389.html" rel="prev" title="EXPLAIN 使用">
+                EXPLAIN 使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#写在前面"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前置准备"><span class="nav-number">2.</span> <span class="nav-text">前置准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#准备-WASM-程序"><span class="nav-number">3.</span> <span class="nav-text">准备 WASM 程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#约定模拟密集计算的场景"><span class="nav-number">3.1.</span> <span class="nav-text">约定模拟密集计算的场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-Go-编写-具备-WASI-标准接口的-WASM-程序"><span class="nav-number">3.2.</span> <span class="nav-text">使用 Go 编写 具备 WASI 标准接口的 WASM 程序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写-Go-语言基准版程序"><span class="nav-number">4.</span> <span class="nav-text">编写 Go 语言基准版程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写-Go-语言调用-WASM-程序"><span class="nav-number">5.</span> <span class="nav-text">编写 Go 语言调用 WASM 程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-Node-编写基准版程序（Cluster模式）"><span class="nav-number">6.</span> <span class="nav-text">使用 Node 编写基准版程序（Cluster模式）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-Node-编写基准版程序（Worker-Threads）"><span class="nav-number">7.</span> <span class="nav-text">使用 Node 编写基准版程序（Worker Threads）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-Node-调用-WASM-程序（Cluster）"><span class="nav-number">8.</span> <span class="nav-text">使用 Node 调用 WASM 程序（Cluster）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-Node-调用-WASM-程序（Worker-Threads）"><span class="nav-number">9.</span> <span class="nav-text">使用 Node 调用 WASM 程序（Worker Threads）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对上述程序进行批量测试"><span class="nav-number">10.</span> <span class="nav-text">对上述程序进行批量测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试结果"><span class="nav-number">11.</span> <span class="nav-text">测试结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后"><span class="nav-number">12.</span> <span class="nav-text">最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

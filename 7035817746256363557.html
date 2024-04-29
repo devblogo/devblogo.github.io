@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,Netty,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;30&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;">
+<meta name="keywords" content="Java,Netty">
+<meta property="og:type" content="article">
+<meta property="og:title" content="『Netty核心』数据交互源码解读">
+<meta property="og:url" content="https://dev.newban.cn/7035817746256363557.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;30&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/50c1921f9655fc6dc89bb94125c872f4440a2e77b0fa4243f504a579a6693306">
+<meta property="og:updated_time" content="2024-04-28T11:31:04.444Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="『Netty核心』数据交互源码解读">
+<meta name="twitter:description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;30&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/50c1921f9655fc6dc89bb94125c872f4440a2e77b0fa4243f504a579a6693306">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035817746256363557.html">
+
+
+
+
+
+  <title>『Netty核心』数据交互源码解读 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">『Netty核心』数据交互源码解读</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-29T10:46:43+08:00">
+                2021-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x300C;&#x8FD9;&#x662F;&#x6211;&#x53C2;&#x4E0E;11&#x6708;&#x66F4;&#x6587;&#x6311;&#x6218;&#x7684;&#x7B2C;30&#x5929;&#xFF0C;&#x6D3B;&#x52A8;&#x8BE6;&#x60C5;&#x67E5;&#x770B;&#xFF1A;<a href="https://dev.newban.cn/7023643374569816095/">2021&#x6700;&#x540E;&#x4E00;&#x6B21;&#x66F4;&#x6587;&#x6311;&#x6218;</a>&#x300D;&#x3002;</p>
+<blockquote>
+<p>&#x70B9;&#x8D5E;&#x518D;&#x770B;&#xFF0C;&#x517B;&#x6210;&#x4E60;&#x60EF;&#x1F44F;&#x1F44F;</p>
+</blockquote>
+<h2 id="1&#x3001;NioEventLoopGroup"><a href="#1&#x3001;NioEventLoopGroup" class="headerlink" title="1&#x3001;NioEventLoopGroup"></a>1&#x3001;NioEventLoopGroup</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;EventLoopGroup bossGroup = new NioEventLoopGroup(1);</span><br></pre></td></tr></table></figure>
+
+<p>&#x521D;&#x59CB;&#x5316;&#x7684;&#x65F6;&#x5019;&#x5982;&#x679C;&#x6709;&#x4F20;&#x7EBF;&#x7A0B;&#x6570;&#x91CF;&#x7684;&#x8BDD;&#x4EE5;&#x4F20;&#x7684;&#x4E3A;&#x4E3B;&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x4F20;&#x542B;&#x6709;&#x7684;&#x5B50;&#x7EBF;&#x7A0B;NioEventLoop&#x7684;&#x4E2A;&#x6570;&#x9ED8;&#x8BA4;&#x4E3A;cpu&#x6838;&#x6570;&#x7684;&#x4E24;&#x500D;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;private static final int DEFAULT_EVENT_LOOP_THREADS = </span><br><span class="line">    Math.max(1, SystemPropertyUtil.getInt(&quot;io.netty.eventLoopThreads&quot;, </span><br><span class="line">    NettyRuntime.availableProcessors() * 2));</span><br><span class="line"></span><br><span class="line">protected MultithreadEventLoopGroup(int nThreads, Executor executor, Object... args) {</span><br><span class="line">    super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x91CC;&#x7684;children&#x662F;NioEventLoopGroup&#x7684;&#x4E00;&#x4E2A;&#x6210;&#x5458;&#x53D8;&#x91CF;&#xFF0C;&#x901A;&#x8FC7;for&#x5FAA;&#x73AF;&#x4E00;&#x4E2A;&#x4E2A;&#x8D4B;&#x503C;&#xFF0C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;this.children = new EventExecutor[nThreads];</span><br><span class="line">this.children[i] = this.newChild((Executor)executor, args);</span><br></pre></td></tr></table></figure>
+
+<p>&#x6240;&#x4EE5;&#x8DDF;&#x4E0A;&#x9762;&#x4ECB;&#x7ECD;&#x7684;&#x7C7B;&#x4F3C;&#xFF0C;&#x4E00;&#x4E2A;NioEventLoopGroup&#x91CC;&#x9762;&#x6709;&#x591A;&#x4E2A;NioEventLoop</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;NioEventLoopGroup.class</span><br><span class="line">protected EventLoop newChild(Executor executor, Object... args) throws Exception {</span><br><span class="line">    return new NioEventLoop(this, executor, (SelectorProvider)args[0]</span><br><span class="line">    ((SelectStrategyFactory)args[1]).newSelectStrategy(), (RejectedExecutionHandler)args[2]);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E00;&#x4E2A;NioEventLoop&#x91CC;&#x9762;&#x6709;Selector&#x548C;TaskQueue</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;SingleThreadEventExecutor.class</span><br><span class="line">this.taskQueue = this.newTaskQueue(this.maxPendingTasks);</span><br><span class="line">protected Queue&lt;Runnable&gt; newTaskQueue(int maxPendingTasks) {</span><br><span class="line">        return new LinkedBlockingQueue(maxPendingTasks);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">NioEventLoop.class</span><br><span class="line">this.provider = selectorProvider;</span><br><span class="line">        NioEventLoop.SelectorTuple selectorTuple = this.openSelector();//&#x8C03;&#x7528;nio&#x65B9;&#x6CD5;</span><br><span class="line">        this.selector = selectorTuple.selector;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2&#x3001;ServerBootstrap"><a href="#2&#x3001;ServerBootstrap" class="headerlink" title="2&#x3001;ServerBootstrap"></a>2&#x3001;ServerBootstrap</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;//&#x521B;&#x5EFA;&#x670D;&#x52A1;&#x5668;&#x7AEF;&#x7684;&#x542F;&#x52A8;&#x5BF9;&#x8C61;</span><br><span class="line">ServerBootstrap bootstrap = new ServerBootstrap();</span><br><span class="line">//&#x4F7F;&#x7528;&#x94FE;&#x5F0F;&#x7F16;&#x7A0B;&#x6765;&#x914D;&#x7F6E;&#x53C2;&#x6570;</span><br><span class="line">bootstrap.group(bossGroup,workerGroup)  //&#x8BBE;&#x7F6E;&#x4E24;&#x4E2A;&#x7EBF;&#x7A0B;&#x7EC4;</span><br><span class="line">        .channel(NioServerSocketChannel.class)      //&#x4F7F;&#x7528;NioServerSocketChannel&#x4F5C;&#x4E3A;&#x670D;&#x52A1;&#x5668;&#x7684;&#x901A;&#x9053;&#x5B9E;&#x73B0;</span><br><span class="line">        //&#x521D;&#x59CB;&#x5316;&#x670D;&#x52A1;&#x5668;&#x8FDE;&#x63A5;&#x961F;&#x5217;&#x5927;&#x5C0F;&#xFF0C;&#x670D;&#x52A1;&#x5668;&#x5904;&#x7406;&#x5BA2;&#x6237;&#x7AEF;&#x8FDE;&#x63A5;&#x8BF7;&#x6C42;&#x662F;&#x987A;&#x5E8F;&#x5904;&#x7406;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x540C;&#x4E00;&#x65F6;&#x95F4;&#x53EA;&#x80FD;&#x5904;&#x7406;&#x4E00;&#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x8FDE;&#x63A5;&#x3002;</span><br><span class="line">        //&#x591A;&#x4E2A;&#x5BA2;&#x6237;&#x7AEF;&#x540C;&#x65F6;&#x6765;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x670D;&#x52A1;&#x7AEF;&#x5C06;&#x4E0D;&#x80FD;&#x5904;&#x7406;&#x7684;&#x5BA2;&#x6237;&#x7AEF;&#x8FDE;&#x63A5;&#x8BF7;&#x6C42;&#x653E;&#x5728;&#x961F;&#x5217;&#x4E2D;&#x7B49;&#x5F85;&#x5904;&#x7406;</span><br><span class="line">        .option(ChannelOption.SO_BACKLOG,1024)</span><br><span class="line">        .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() {     //&#x521B;&#x5EFA;&#x901A;&#x9053;&#x521D;&#x59CB;&#x5316;&#x5BF9;&#x8C61;&#xFF0C;&#x8BBE;&#x7F6E;&#x521D;&#x59CB;&#x5316;&#x53C2;&#x6570;</span><br><span class="line">            @Override</span><br><span class="line">            protected void initChannel(SocketChannel socketChannel) throws Exception {</span><br><span class="line">                //&#x5BF9;workGroup&#x7684;SocketChannel&#x8BBE;&#x7F6E;&#x5904;&#x7406;&#x5668;</span><br><span class="line">                socketChannel.pipeline().addLast(new NettyServerHandler());</span><br><span class="line">            }</span><br><span class="line">        });</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0A;&#x9762;&#x672C;&#x8D28;&#x5C31;&#x662F;&#x901A;&#x8FC7;&#x94FE;&#x5F0F;&#x7F16;&#x7A0B;&#x7684;&#x5F62;&#x5F0F;&#x7ED9;ServerBootstrap&#x7684;&#x5404;&#x4E2A;&#x6210;&#x5458;&#x53D8;&#x91CF;&#x8D4B;&#x521D;&#x503C;&#xFF0C;&#x4EE5;&#x4FBF;&#x5728;&#x540E;&#x7EED;&#x4F7F;&#x7528;&#x3002;</p>
+<h2 id="3&#x3001;NioServerSocketChannel"><a href="#3&#x3001;NioServerSocketChannel" class="headerlink" title="3&#x3001;NioServerSocketChannel"></a>3&#x3001;NioServerSocketChannel</h2><p>NioServerSocketChannel&#x521D;&#x59CB;&#x5316;&#x4E3B;&#x8981;&#x8FD4;&#x56DE;ServerSocketChannel&#xFF0C;&#x8FD9;&#x6B65;&#x4E5F;&#x662F;&#x5BF9;nio&#x7684;&#x5C01;&#x88C5;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;NioServerSocketChannel.class</span><br><span class="line">private static java.nio.channels.ServerSocketChannel newSocket(SelectorProvider provider) {</span><br><span class="line">        try {</span><br><span class="line">            //ServerSocketChannel serverSocket = ServerSocketChannel.open();</span><br><span class="line">            return provider.openServerSocketChannel();</span><br><span class="line">        } catch (IOException var2) {</span><br><span class="line">            throw new ChannelException(&quot;Failed to open a server socket.&quot;, var2);</span><br><span class="line">        }</span><br><span class="line">  }</span><br><span class="line">    </span><br><span class="line">public NioServerSocketChannel() {</span><br><span class="line">    this(newSocket(DEFAULT_SELECTOR_PROVIDER));</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x540C;&#x65F6;&#x4E5F;&#x6267;&#x884C;this.pipeline = this.newChannelPipeline();&#x4E3A;&#x8BE5;&#x6210;&#x5458;&#x53D8;&#x91CF;pipeline&#x8D4B;&#x521D;&#x59CB;&#x503C;,&#x901A;&#x8FC7;pipeline&#x5C06;&#x5404;&#x4E2A;handler&#x4E32;&#x8FDE;&#x8D77;&#x6765;&#xFF0C;&#x8FD9;&#x91CC;&#x53EA;&#x662F;&#x521D;&#x59CB;&#x5316;tail&#x548C;head,&#x540E;&#x7EED;&#x8C03;&#x7528;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x4F7F;&#x7528;&#x5230;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;protected DefaultChannelPipeline(Channel channel) {</span><br><span class="line">    this.channel = (Channel)ObjectUtil.checkNotNull(channel, &quot;channel&quot;);</span><br><span class="line">    this.succeededFuture = new SucceededChannelFuture(channel, (EventExecutor)null);</span><br><span class="line">    this.voidPromise = new VoidChannelPromise(channel, true);</span><br><span class="line">    this.tail = new DefaultChannelPipeline.TailContext(this);</span><br><span class="line">    this.head = new DefaultChannelPipeline.HeadContext(this);</span><br><span class="line">    this.head.next = this.tail;</span><br><span class="line">    this.tail.prev = this.head;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x540C;&#x65F6;&#x4E5F;&#x5C06;&#x8BE5;channel&#x8BBE;&#x7F6E;&#x4E3A;&#x975E;&#x963B;&#x585E;&#x548C;&#x63A5;&#x6536;&#x8FDE;&#x63A5;&#xFF0C;&#x4E5F;&#x662F;&#x5BF9;nio&#x7684;&#x5C01;&#x88C5;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {</span><br><span class="line">    super(parent);</span><br><span class="line">    this.ch = ch;</span><br><span class="line">    //readInterestOp&#x4F20;&#x8FDB;&#x6765;&#x662F;16&#x4E5F;&#x5C31;&#x662F;SelectionKey.OP_ACCEPT&#xFF0C;&#x8FD9;&#x91CC;&#x53EA;&#x662F;&#x666E;&#x901A;&#x7684;&#x8D4B;&#x503C;&#xFF0C;&#x8FD8;&#x6CA1;&#x8FDB;&#x884C;&#x7ED1;&#x5B9A;</span><br><span class="line">    this.readInterestOp = readInterestOp;</span><br><span class="line"></span><br><span class="line">    try {</span><br><span class="line">        //serverSocket.configureBlocking(false);</span><br><span class="line">        ch.configureBlocking(false);</span><br><span class="line">    } catch (IOException var7) {</span><br><span class="line">        try {</span><br><span class="line">            ch.close();</span><br><span class="line">        } catch (IOException var6) {</span><br><span class="line">            if (logger.isWarnEnabled()) {</span><br><span class="line">                logger.warn(&quot;Failed to close a partially initialized socket.&quot;, var6);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        throw new ChannelException(&quot;Failed to enter non-blocking mode.&quot;, var7);</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="4&#x3001;&#x6E90;&#x7801;&#x5256;&#x6790;&#x56FE;&#xFF1A;"><a href="#4&#x3001;&#x6E90;&#x7801;&#x5256;&#x6790;&#x56FE;&#xFF1A;" class="headerlink" title="4&#x3001;&#x6E90;&#x7801;&#x5256;&#x6790;&#x56FE;&#xFF1A;"></a>4&#x3001;&#x6E90;&#x7801;&#x5256;&#x6790;&#x56FE;&#xFF1A;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p6/raw/master/img/50c1921f9655fc6dc89bb94125c872f4440a2e77b0fa4243f504a579a6693306" alt="image.png"></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/9d525554fa99ee97eb2bd4a6d949e2f4.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java-Netty/" rel="tag"># Java,Netty</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035816477651369998.html" rel="next" title="JSON解析教程（Gson、FastJson、Jackson">
+                <i class="fa fa-chevron-left"></i> JSON解析教程（Gson、FastJson、Jackson
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035817899860164639.html" rel="prev" title="百度商业大规模高性能全息日志检索技术揭秘">
+                百度商业大规模高性能全息日志检索技术揭秘 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1、NioEventLoopGroup"><span class="nav-number">1.</span> <span class="nav-text">1、NioEventLoopGroup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2、ServerBootstrap"><span class="nav-number">2.</span> <span class="nav-text">2、ServerBootstrap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3、NioServerSocketChannel"><span class="nav-number">3.</span> <span class="nav-text">3、NioServerSocketChannel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4、源码剖析图："><span class="nav-number">4.</span> <span class="nav-text">4、源码剖析图：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

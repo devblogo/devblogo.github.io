@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,Ruby,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="WEBrick Thin Unicorn Puma &amp;#x5BF9;&amp;#x6BD4; &amp;#x603B;&amp;#x7ED3; Reference   &amp;#x8C08;&amp;#x8C08; Rack &amp;#x534F;&amp;#x8BAE;&amp;#x4E0E;&amp;#x5B9E;&amp;#x73B0; &amp;#x6D45;&amp;#x8C08; WEBrick &amp;#x7684;&amp;#x591A;&amp;#x7EBF;&amp;#x7A0B;&amp;#x6A21">
+<meta name="keywords" content="后端,Ruby">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ruby Web 服务器的并发模型与性能">
+<meta property="og:url" content="https://dev.newban.cn/6844903512661295112.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="WEBrick Thin Unicorn Puma &amp;#x5BF9;&amp;#x6BD4; &amp;#x603B;&amp;#x7ED3; Reference   &amp;#x8C08;&amp;#x8C08; Rack &amp;#x534F;&amp;#x8BAE;&amp;#x4E0E;&amp;#x5B9E;&amp;#x73B0; &amp;#x6D45;&amp;#x8C08; WEBrick &amp;#x7684;&amp;#x591A;&amp;#x7EBF;&amp;#x7A0B;&amp;#x6A21">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/8d03ab36b23f68406e24e74d066d592dc4d889f992e3c69b12cd6510a745e4cb">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/2fa168ab64799519851e05854180ae0fef43cb4b862e5bd266efb1bd98d98c82">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/9353e145fbfa0d3cdc669469e8ddfa9507325144f63ea88b94b5f76426d902e5">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/6b5e7b2f4574c525bc43ccef7d468d370eb10cc768945cfbb56c2451f120c3db">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/ab35b324c8b2077aae7728aff45dc3699fa7aefd3943f43cf24d5c217ecde4af">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/69b0ebd1bcc87c4401306d7aeea3610f7bd3bc6d710ce7e60c40d95766089e3f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/24a12ee339ea26c75565a868797f0be61c602b22575b17f26b7a84d29a87ea68">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/79e43e7cfb3e9be2877ed8bc2f91bf389914aa2db38422a4a98a7c2d67987daa">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/ebb6e1a67a054f623ccb8ce757bb5acd4d0f9fec648b3f64541564c868be6ade">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/4163ab1c09390b96c5809375091727e46094a76c2b75e86c2584638dd4c52fcf">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/908023d3956d02deeaa49f9c1bc927b8578c2748f5e5a65d0afed41749e4b204">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/1f82ebf07bfc74d6092d9c64db53c6cfb5c7f685e74bcd59ede57f3c02268b8f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/b3b0dd84d0f743f8b986caf6974a2205c77801883771b103d07e409c8c654a9b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/5209d50b832c927e9f61a5c05c9dc987fef6b5012df536bd2fc90422e9e438d9">
+<meta property="og:updated_time" content="2024-04-28T05:40:48.881Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ruby Web 服务器的并发模型与性能">
+<meta name="twitter:description" content="WEBrick Thin Unicorn Puma &amp;#x5BF9;&amp;#x6BD4; &amp;#x603B;&amp;#x7ED3; Reference   &amp;#x8C08;&amp;#x8C08; Rack &amp;#x534F;&amp;#x8BAE;&amp;#x4E0E;&amp;#x5B9E;&amp;#x73B0; &amp;#x6D45;&amp;#x8C08; WEBrick &amp;#x7684;&amp;#x591A;&amp;#x7EBF;&amp;#x7A0B;&amp;#x6A21">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/8d03ab36b23f68406e24e74d066d592dc4d889f992e3c69b12cd6510a745e4cb">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903512661295112.html">
+
+
+
+
+
+  <title>Ruby Web 服务器的并发模型与性能 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Ruby Web 服务器的并发模型与性能</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-21T06:58:52+08:00">
+                2017-11-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ul>
+<li><a href="#webrick">WEBrick</a></li>
+<li><a href="#thin">Thin</a></li>
+<li><a href="#unicorn">Unicorn</a></li>
+<li><a href="#puma">Puma</a></li>
+<li><a href="#&#x5BF9;&#x6BD4;">&#x5BF9;&#x6BD4;</a></li>
+<li><a href="#&#x603B;&#x7ED3;">&#x603B;&#x7ED3;</a></li>
+<li><a href="#reference">Reference</a></li>
+</ul>
+<ul>
+<li><a href="/external_links/0fdfdbcde78f4a48bbb8ceb73750d884.html" target="blank" rel="noopener">&#x8C08;&#x8C08; Rack &#x534F;&#x8BAE;&#x4E0E;&#x5B9E;&#x73B0;</a></li>
+<li><a href="/external_links/0181d0ec1818ed0a40db2710c4cd2cfb.html" target="blank" rel="noopener">&#x6D45;&#x8C08; WEBrick &#x7684;&#x591A;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;</a></li>
+<li><a href="/external_links/f69411029126dc49bac794a49e2f0bd5.html" target="blank" rel="noopener">&#x6D45;&#x8C08; Thin &#x7684;&#x4E8B;&#x4EF6;&#x9A71;&#x52A8;&#x6A21;&#x578B;</a></li>
+<li><a href="/external_links/a64434c1bc104e31691ba5b2908ded76.html" target="blank" rel="noopener">&#x6D45;&#x8C08; Unicorn &#x7684;&#x591A;&#x8FDB;&#x7A0B;&#x6A21;&#x578B;</a></li>
+<li><a href="/external_links/a4ce650059744e0b914a829c96d9797c.html" target="blank" rel="noopener">&#x6D45;&#x8C08; Puma &#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#x4E0E;&#x5B9E;&#x73B0;</a></li>
+<li><a href="/external_links/374612466724eb632f537707853701f9.html" target="blank" rel="noopener">Ruby Web &#x670D;&#x52A1;&#x5668;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#x4E0E;&#x6027;&#x80FD;</a></li>
+</ul>
+<p>&#x8FD9;&#x662F;&#x6574;&#x4E2A; Rack &#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x7684;&#x6700;&#x540E;&#x4E00;&#x7BC7;&#x4E86;&#xFF0C;&#x5728;&#x4E4B;&#x524D;&#x5176;&#x5B9E;&#x4E5F;&#x5C1D;&#x8BD5;&#x5199;&#x8FC7;&#x5F88;&#x591A;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#xFF0C;&#x4F46;&#x662F;&#x5230;&#x6700;&#x540E;&#x90FD;&#x56E0;&#x4E3A;&#x5404;&#x79CD;&#x539F;&#x56E0;&#x653E;&#x5F03;&#x4E86;&#xFF0C;&#x6700;&#x8FD1;&#x7531;&#x4E8E;&#x81EA;&#x5DF1;&#x5BF9; Ruby &#x7684; webserver &#x975E;&#x5E38;&#x611F;&#x5174;&#x8DA3;&#xFF0C;&#x6240;&#x4EE5;&#x770B;&#x4E86;&#x4E0B;&#x793E;&#x533A;&#x4E2D;&#x5E38;&#x89C1; webserver &#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#xFF0C;&#x5305;&#x62EC; WEBrick&#x3001;Thin&#x3001;Unicorn &#x548C; Puma&#xFF0C;&#x867D;&#x7136;&#x5728; Ruby &#x793E;&#x533A;&#x4E2D;&#x4E5F;&#x6709;&#x4E00;&#x4E9B;&#x5176;&#x4ED6;&#x7684; webserver &#x6709;&#x7740;&#x6BD4;&#x8F83;&#x4F18;&#x5F02;&#x7684;&#x6027;&#x80FD;&#xFF0C;&#x4F46;&#x662F;&#x5728;&#x8FD9;&#x6709;&#x9650;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#x4E5F;&#x6CA1;&#x6709;&#x529E;&#x6CD5;&#x5168;&#x90FD;&#x4ECB;&#x7ECD;&#x4E00;&#x904D;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/8d03ab36b23f68406e24e74d066d592dc4d889f992e3c69b12cd6510a745e4cb" alt="webservers"></p>
+<p>&#x5728;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x4F5C;&#x8005;&#x60F3;&#x5BF9; Ruby &#x793E;&#x533A;&#x4E2D;&#x4E0D;&#x540C; webserver &#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#x548C;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#x8FDB;&#x884C;&#x7B80;&#x5355;&#x7684;&#x4ECB;&#x7ECD;&#xFF0C;&#x603B;&#x7ED3;&#x4E00;&#x4E0B;&#x524D;&#x9762;&#x51E0;&#x7BC7;&#x6587;&#x7AE0;&#x4E2D;&#x7684;&#x5185;&#x5BB9;&#x3002;</p>
+<blockquote>
+<p>&#x6587;&#x4E2D;&#x6240;&#x6709;&#x7684;&#x538B;&#x529B;&#x6D4B;&#x8BD5;&#x90FD;&#x662F;&#x5728;&#x5185;&#x5B58; 16GB&#x3001;8 CPU&#x3001;2.6 GHz Intel Core i7 &#x7684; macOS &#x4E0A;&#x8FD0;&#x884C;&#x7684;&#xFF0C;&#x5982;&#x679C;&#x4F60;&#x60F3;&#x8981;&#x590D;&#x73B0;&#x8FD9;&#x91CC;&#x7684;&#x6D4B;&#x8BD5;&#x53EF;&#x80FD;&#x4E0D;&#x4F1A;&#x5F97;&#x5230;&#x5B8C;&#x5168;&#x76F8;&#x540C;&#x7684;&#x7ED3;&#x679C;&#x3002;</p>
+</blockquote>
+<h2 id="WEBrick"><a href="#WEBrick" class="headerlink" title="WEBrick"></a>WEBrick</h2><p>WEBrick &#x662F; Ruby &#x793E;&#x533A;&#x4E2D;&#x975E;&#x5E38;&#x53E4;&#x8001;&#x7684; Web &#x670D;&#x52A1;&#x5668;&#xFF0C;&#x4ECE; 2000 &#x5E74;&#x5230;&#x73B0;&#x5728;&#x5DF2;&#x7ECF;&#x6709;&#x4E86;&#x5C06;&#x8FD1; 20 &#x5E74;&#x7684;&#x5386;&#x53F2;&#x4E86;&#xFF0C;&#x867D;&#x7136; WEBrick &#x6709;&#x7740;&#x975E;&#x5E38;&#x591A;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x4F46;&#x662F;&#x8FC4;&#x4ECA;&#x4E3A;&#x6B62; WEBrick &#x4E5F;&#x662F;&#x5F00;&#x53D1;&#x73AF;&#x5883;&#x4E2D;&#x6700;&#x5E38;&#x7528;&#x7684; Ruby &#x670D;&#x52A1;&#x5668;&#xFF1B;&#x5B83;&#x4F7F;&#x7528;&#x4E86;&#x6700;&#x4E3A;&#x7B80;&#x5355;&#x3001;&#x76F4;&#x63A5;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#xFF0C;&#x8FD0;&#x884C;&#x4E00;&#x4E2A; WEBrick &#x670D;&#x52A1;&#x5668;&#x53EA;&#x4F1A;&#x5728;&#x540E;&#x53F0;&#x542F;&#x52A8;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF0C;&#x9ED8;&#x8BA4;&#x76D1;&#x542C;&#x6765;&#x81EA; 9292 &#x7AEF;&#x53E3;&#x7684;&#x8BF7;&#x6C42;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/2fa168ab64799519851e05854180ae0fef43cb4b862e5bd266efb1bd98d98c82" alt="webrick-concurrency-model"></p>
+<p>&#x5F53; WEBrick &#x901A;&#x8FC7; <code>.select</code> &#x65B9;&#x6CD5;&#x76D1;&#x542C;&#x5230;&#x6765;&#x81EA;&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x8BF7;&#x6C42;&#x4E4B;&#x540E;&#xFF0C;&#x4F1A;&#x4E3A;&#x6BCF;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x5355;&#x72EC; <code>Thread</code> &#x5E76;&#x5728;&#x65B0;&#x7684;&#x7EBF;&#x7A0B;&#x4E2D;&#x5904;&#x7406; HTTP &#x8BF7;&#x6C42;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;run Proc.new { |env| [&apos;200&apos;, {&apos;Content-Type&apos; =&gt; &apos;text/plain&apos;}, [&apos;get rack\&apos;d&apos;]] }</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x679C;&#x6211;&#x4EEC;&#x5982;&#x679C;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x6700;&#x7B80;&#x5355;&#x7684; Rack &#x5E94;&#x7528;&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#x6240;&#x6709;&#x7684; HTTP &#x54CD;&#x5E94;&#xFF0C;&#x90A3;&#x4E48;&#x4F7F;&#x7528;&#x4E0B;&#x9762;&#x7684;&#x547D;&#x4EE4;&#x5BF9; WEBrick &#x7684;&#x670D;&#x52A1;&#x5668;&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#x4F1A;&#x5F97;&#x5230;&#x5982;&#x4E0B;&#x7684;&#x7ED3;&#x679C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;Concurrency Level:      100</span><br><span class="line">Time taken for tests:   22.519 seconds</span><br><span class="line">Complete requests:      10000</span><br><span class="line">Failed requests:        0</span><br><span class="line">Total transferred:      2160000 bytes</span><br><span class="line">HTML transferred:       200000 bytes</span><br><span class="line">Requests per second:    444.07 [#/sec] (mean)</span><br><span class="line">Time per request:       225.189 [ms] (mean)</span><br><span class="line">Time per request:       2.252 [ms] (mean, across all concurrent requests)</span><br><span class="line">Transfer rate:          93.67 [Kbytes/sec] received</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x5904;&#x7406; ApacheBench &#x53D1;&#x51FA;&#x7684; 10000 &#x4E2A; HTTP &#x8BF7;&#x6C42;&#x65F6;&#xFF0C;WEBrick &#x5BF9;&#x4E8E;&#x6BCF;&#x4E2A;&#x8BF7;&#x6C42;&#x5E73;&#x5747;&#x6D88;&#x8017;&#x4E86; 225.189ms&#xFF0C;&#x6BCF;&#x79D2;&#x5904;&#x7406;&#x4E86; 444.07 &#x4E2A;&#x8BF7;&#x6C42;&#xFF1B;&#x9664;&#x6B64;&#x4E4B;&#x5916;&#xFF0C;&#x5728;&#x5904;&#x7406;&#x8BF7;&#x6C42;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D; WEBrick &#x8FDB;&#x7A0B;&#x7684; CPU &#x5360;&#x7528;&#x7387;&#x5F88;&#x5FEB;&#x8FBE;&#x5230;&#x4E86; 100%&#xFF0C;&#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x6D4B;&#x8BD5;&#x6211;&#x4EEC;&#x5C31;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#x4E3A;&#x4EC0;&#x4E48;&#x4E0D;&#x5E94;&#x8BE5;&#x5728;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#x4F7F;&#x7528; WEBrick &#x4F5C;&#x4E3A; Ruby &#x7684;&#x5E94;&#x7528;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x5728;&#x4E1A;&#x52A1;&#x903B;&#x8F91;&#x548C;&#x4EE3;&#x7801;&#x66F4;&#x52A0;&#x590D;&#x6742;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;WEBrick &#x7684;&#x6027;&#x80FD;&#x60F3;&#x5FC5;&#x4E5F;&#x4E0D;&#x4F1A;&#x8FBE;&#x5230;&#x671F;&#x671B;&#x3002;</p>
+<h2 id="Thin"><a href="#Thin" class="headerlink" title="Thin"></a>Thin</h2><p>&#x5728; 2006 &#x548C; 2007 &#x4E24;&#x5E74;&#xFF0C;Ruby &#x793E;&#x533A;&#x4E2D;&#x53D1;&#x5E03;&#x4E86;&#x4E24;&#x4E2A;&#x81F3;&#x4ECA;&#x90FD;&#x975E;&#x5E38;&#x91CD;&#x8981;&#x7684;&#x5F00;&#x6E90;&#x9879;&#x76EE;&#xFF0C;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#x662F; Mongrel&#xFF0C;&#x5B83;&#x63D0;&#x4F9B;&#x4E86;&#x6807;&#x51C6;&#x7684; HTTP &#x63A5;&#x53E3;&#xFF0C;&#x540C;&#x65F6;&#x591A;&#x8BED;&#x8A00;&#x7684;&#x652F;&#x6301;&#x4E5F;&#x4F7F;&#x5F97; Mongrel &#x5728;&#x5F53;&#x65F6;&#x975E;&#x5E38;&#x6D41;&#x884C;&#xFF0C;&#x53E6;&#x4E00;&#x4E2A;&#x9879;&#x76EE;&#x5C31;&#x662F; Rack &#x4E86;&#xFF0C;&#x5B83;&#x5728; Web &#x5E94;&#x7528;&#x548C; Web &#x670D;&#x52A1;&#x5668;&#x4E4B;&#x95F4;&#x5EFA;&#x7ACB;&#x4E86;&#x4E00;&#x5957;&#x7EDF;&#x4E00;&#x7684; <a href="/external_links/76c04d3a30664f290738298a8dd8fa3e.html" target="blank" rel="noopener">&#x6807;&#x51C6;</a>&#xFF0C;&#x89C4;&#x5B9A;&#x4E86;&#x4E24;&#x8005;&#x7684;&#x534F;&#x4F5C;&#x65B9;&#x5F0F;&#xFF0C;&#x6240;&#x6709;&#x7684;&#x5E94;&#x7528;&#x53EA;&#x8981;&#x9075;&#x5FAA;<br> Rack &#x534F;&#x8BAE;&#x5C31;&#x80FD;&#x591F;&#x968F;&#x65F6;&#x66FF;&#x6362;&#x5E95;&#x5C42;&#x7684;&#x5E94;&#x7528;&#x670D;&#x52A1;&#x5668;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/9353e145fbfa0d3cdc669469e8ddfa9507325144f63ea88b94b5f76426d902e5" alt="rack-protoco"></p>
+<p>&#x968F;&#x540E;&#xFF0C;&#x5728; 2009 &#x5E74;&#x51FA;&#x73B0;&#x7684; Thin &#x5C31;&#x7AD9;&#x5728;&#x4E86;&#x5DE8;&#x4EBA;&#x7684;&#x80A9;&#x8180;&#x4E0A;&#xFF0C;&#x540C;&#x65F6;&#x9075;&#x5FAA;&#x4E86; Rack &#x534F;&#x8BAE;&#x5E76;&#x4F7F;&#x7528;&#x4E86; Mongrel &#x4E2D;&#x7684;&#x89E3;&#x6790;&#x5668;&#xFF0C;&#x800C;&#x5B83;&#x4E5F;&#x662F; Ruby &#x793E;&#x533A;&#x4E2D;&#x7B2C;&#x4E00;&#x4E2A;&#x4F7F;&#x7528; Reactor &#x6A21;&#x578B;&#x7684; Web &#x670D;&#x52A1;&#x5668;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/6b5e7b2f4574c525bc43ccef7d468d370eb10cc768945cfbb56c2451f120c3db" alt="thin-concurrency-model"></p>
+<p>Thin &#x4F7F;&#x7528; Reactor &#x6A21;&#x578B;&#x5904;&#x7406;&#x5BA2;&#x6237;&#x7AEF;&#x7684; HTTP &#x8BF7;&#x6C42;&#xFF0C;&#x6BCF;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x90FD;&#x4F1A;&#x4EA4;&#x7531; EventMachine&#xFF0C;&#x901A;&#x8FC7;&#x5185;&#x90E8;&#x5BF9;&#x4E8B;&#x4EF6;&#x7684;&#x5206;&#x53D1;&#xFF0C;&#x6700;&#x7EC8;&#x6267;&#x884C;&#x76F8;&#x5E94;&#x7684;&#x56DE;&#x8C03;&#xFF0C;&#x8FD9;&#x79CD;&#x4E8B;&#x4EF6;&#x9A71;&#x52A8;&#x7684; IO &#x6A21;&#x578B;&#x4E0E; node.js &#x975E;&#x5E38;&#x76F8;&#x4F3C;&#xFF0C;&#x4F7F;&#x7528;&#x5355;&#x8FDB;&#x7A0B;&#x5355;&#x7EBF;&#x7A0B;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#x5374;&#x80FD;&#x591F;&#x5FEB;&#x901F;&#x5904;&#x7406; HTTP &#x8BF7;&#x6C42;&#xFF1B;&#x5728;&#x8FD9;&#x91CC;&#xFF0C;&#x6211;&#x4EEC;&#x4ECD;&#x7136;&#x4F7F;&#x7528; ApacheBench &#x4EE5;&#x53CA;&#x540C;&#x6837;&#x7684;&#x8D1F;&#x8F7D;&#x5BF9; Thin &#x7684;&#x6027;&#x80FD;&#x8FDB;&#x884C;&#x7B80;&#x5355;&#x7684;&#x6D4B;&#x8BD5;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;Concurrency Level:      100</span><br><span class="line">Time taken for tests:   4.221 seconds</span><br><span class="line">Complete requests:      10000</span><br><span class="line">Failed requests:        0</span><br><span class="line">Total transferred:      880000 bytes</span><br><span class="line">HTML transferred:       100000 bytes</span><br><span class="line">Requests per second:    2368.90 [#/sec] (mean)</span><br><span class="line">Time per request:       42.214 [ms] (mean)</span><br><span class="line">Time per request:       0.422 [ms] (mean, across all concurrent requests)</span><br><span class="line">Transfer rate:          203.58 [Kbytes/sec] received</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;&#x4E8E;&#x4E00;&#x4E2A;&#x76F8;&#x540C;&#x7684; HTTP &#x8BF7;&#x6C42;&#xFF0C;Thin &#x7684;&#x541E;&#x5410;&#x91CF;&#x5927;&#x7EA6;&#x662F; WEBrick &#x7684;&#x56DB;&#x500D;&#xFF0C;&#x6BCF;&#x79D2;&#x80FD;&#x591F;&#x5904;&#x7406; 2368.90 &#x4E2A;&#x8BF7;&#x6C42;&#xFF0C;&#x540C;&#x65F6;&#x5904;&#x7406;&#x7684;&#x901F;&#x5EA6;&#x4E5F;&#x5927;&#x5E45;&#x964D;&#x4F4E;&#x5230;&#x4E86; 42.214ms&#xFF1B;&#x5728;&#x538B;&#x529B;&#x6D4B;&#x8BD5;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#x867D;&#x7136; CPU &#x5360;&#x7528;&#x7387;&#x6709;&#x6240;&#x4E0A;&#x5347;&#x4F46;&#x662F;&#x5728;&#x5904;&#x7406;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#x5B8C;&#x5168;&#x6CA1;&#x6709;&#x8D85;&#x8FC7; 90%&#xFF0C;&#x53EF;&#x4EE5;&#x8BF4; Thin &#x7684;&#x6027;&#x80FD;&#x78BE;&#x538B;&#x4E86; WEBrick&#xFF0C;&#x8FD9;&#x53EF;&#x80FD;&#x4E5F;&#x662F;&#x5F00;&#x53D1;&#x8005;&#x90FD;&#x4E0D;&#x4F1A;&#x5728;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#x4F7F;&#x7528; WEBrick &#x7684;&#x6700;&#x91CD;&#x8981;&#x539F;&#x56E0;&#x3002;</p>
+<p>&#x4F46;&#x662F;&#x540C;&#x6837;&#x4F5C;&#x4E3A;&#x5355;&#x8FDB;&#x7A0B;&#x8FD0;&#x884C;&#x7684; Thin&#xFF0C;&#x7531;&#x4E8E;&#x6CA1;&#x6709; master &#x8FDB;&#x7A0B;&#x7684;&#x5B58;&#x5728;&#xFF0C;&#x54EA;&#x6015;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x7531;&#x4E8E;&#x5404;&#x79CD;&#x5404;&#x6837;&#x5947;&#x602A;&#x7684;&#x539F;&#x56E0;&#x88AB;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x6740;&#x6389;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x4E0D;&#x4F1A;&#x6536;&#x5230;&#x4EFB;&#x4F55;&#x7684;&#x901A;&#x77E5;&#xFF0C;&#x53EA;&#x80FD;&#x624B;&#x52A8;&#x91CD;&#x542F;&#x5E94;&#x7528;&#x670D;&#x52A1;&#x5668;&#x3002;</p>
+<h2 id="Unicorn"><a href="#Unicorn" class="headerlink" title="Unicorn"></a>Unicorn</h2><p>&#x4E0E; Thin &#x540C;&#x5E74;&#x53D1;&#x5E03;&#x7684; Unicorn &#x867D;&#x7136;&#x4E5F;&#x662F; Mongrel &#x9879;&#x76EE;&#x7684;&#x4E00;&#x4E2A; fork&#xFF0C;&#x4F46;&#x662F;&#x4F7F;&#x7528;&#x4E86;&#x5B8C;&#x5168;&#x4E0D;&#x540C;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#xFF0C;&#x6BCF;Unicorn &#x5185;&#x90E8;&#x901A;&#x8FC7;&#x591A;&#x6B21; <code>fork</code> &#x521B;&#x5EFA;&#x591A;&#x4E2A; worker &#x8FDB;&#x7A0B;&#xFF0C;&#x6240;&#x6709;&#x7684; worker &#x8FDB;&#x7A0B;&#x4E5F;&#x90FD;&#x7531;&#x4E00;&#x4E2A; master &#x8FDB;&#x7A0B;&#x7BA1;&#x7406;&#x548C;&#x63A7;&#x5236;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/ab35b324c8b2077aae7728aff45dc3699fa7aefd3943f43cf24d5c217ecde4af" alt="unicorn-master-workers"></p>
+<p>&#x7531;&#x4E8E; master &#x8FDB;&#x7A0B;&#x7684;&#x5B58;&#x5728;&#xFF0C;&#x5F53; worker &#x8FDB;&#x7A0B;&#x88AB;&#x610F;&#x5916;&#x6740;&#x6389;&#x540E;&#x4F1A;&#x88AB; master &#x8FDB;&#x7A0B;&#x91CD;&#x542F;&#xFF0C;&#x80FD;&#x591F;&#x4FDD;&#x8BC1;&#x6301;&#x7EED;&#x5BF9;&#x5916;&#x754C;&#x63D0;&#x4F9B;&#x670D;&#x52A1;&#xFF0C;&#x591A;&#x4E2A;&#x8FDB;&#x7A0B;&#x7684; worker &#x4E5F;&#x80FD;&#x591F;&#x5F88;&#x597D;&#x5730;&#x538B;&#x69A8;&#x591A;&#x6838; CPU &#x7684;&#x6027;&#x80FD;&#xFF0C;&#x5C3D;&#x53EF;&#x80FD;&#x5730;&#x63D0;&#x9AD8;&#x8BF7;&#x6C42;&#x7684;&#x5904;&#x7406;&#x901F;&#x5EA6;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/69b0ebd1bcc87c4401306d7aeea3610f7bd3bc6d710ce7e60c40d95766089e3f" alt="unicorn-concurrency-model"></p>
+<p>&#x4E00;&#x7EC4;&#x7531; master &#x7BA1;&#x7406;&#x7684; Unicorn worker &#x4F1A;&#x76D1;&#x542C;&#x7ED1;&#x5B9A;&#x7684;&#x4E24;&#x4E2A; Socket&#xFF0C;&#x6240;&#x6709;&#x6765;&#x81EA;&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x8BF7;&#x6C42;&#x90FD;&#x4F1A;&#x901A;&#x8FC7;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5185;&#x90E8;&#x7684;&#x8D1F;&#x8F7D;&#x5747;&#x8861;&#x8FDB;&#x884C;&#x8C03;&#x5EA6;&#xFF0C;&#x5C06;&#x8BF7;&#x6C42;&#x5206;&#x914D;&#x5230;&#x4E0D;&#x540C;&#x7684; worker &#x8FDB;&#x7A0B;&#x4E0A;&#x8FDB;&#x884C;&#x5904;&#x7406;&#x3002;</p>
+<p>&#x4E0D;&#x8FC7;&#x7531;&#x4E8E; Unicorn &#x867D;&#x7136;&#x4F7F;&#x7528;&#x4E86;&#x591A;&#x8FDB;&#x7A0B;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#xFF0C;&#x4F46;&#x662F;&#x6BCF;&#x4E2A; worker &#x8FDB;&#x7A0B;&#x5728;&#x5904;&#x7406;&#x8BF7;&#x6C42;&#x65F6;&#x90FD;&#x662F;&#x7528;&#x4E86;&#x963B;&#x585E; I/O &#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x6240;&#x4EE5;&#x5982;&#x679C;&#x5BA2;&#x6237;&#x7AEF;&#x975E;&#x5E38;&#x6162;&#x5C31;&#x4F1A;&#x5927;&#x5927;&#x5F71;&#x54CD; Unicorn &#x7684;&#x6027;&#x80FD;&#xFF0C;&#x4E0D;&#x8FC7;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x5C31;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x53CD;&#x5411;&#x4EE3;&#x7406;&#x6765; nginx &#x89E3;&#x51B3;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/24a12ee339ea26c75565a868797f0be61c602b22575b17f26b7a84d29a87ea68" alt="unicorn-multi-processes"></p>
+<p>&#x5728;&#x914D;&#x7F6E; Unicorn &#x7684; worker &#x6570;&#x65F6;&#xFF0C;&#x4E3A;&#x4E86;&#x6700;&#x5927;&#x5316;&#x7684;&#x5229;&#x7528; CPU &#x8D44;&#x6E90;&#xFF0C;&#x5F80;&#x5F80;&#x4F1A;&#x5C06;&#x8FDB;&#x7A0B;&#x6570;&#x8BBE;&#x7F6E;&#x4E3A; CPU &#x7684;&#x6570;&#x91CF;&#xFF0C;&#x540C;&#x6837;&#x6211;&#x4EEC;&#x4F7F;&#x7528; ApacheBench &#x4EE5;&#x53CA;&#x76F8;&#x540C;&#x7684;&#x8D1F;&#x8F7D;&#x6D4B;&#x8BD5;&#x4E00;&#x4E2A;&#x4F7F;&#x7528; 8 &#x6838; CPU &#x7684; Unicorn &#x670D;&#x52A1;&#x7684;&#x5904;&#x7406;&#x6548;&#x7387;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;Concurrency Level:      100</span><br><span class="line">Time taken for tests:   2.401 seconds</span><br><span class="line">Complete requests:      10000</span><br><span class="line">Failed requests:        0</span><br><span class="line">Total transferred:      1110000 bytes</span><br><span class="line">HTML transferred:       100000 bytes</span><br><span class="line">Requests per second:    4164.31 [#/sec] (mean)</span><br><span class="line">Time per request:       24.014 [ms] (mean)</span><br><span class="line">Time per request:       0.240 [ms] (mean, across all concurrent requests)</span><br><span class="line">Transfer rate:          451.41 [Kbytes/sec] received</span><br></pre></td></tr></table></figure>
+
+<p>&#x7ECF;&#x8FC7;&#x7B80;&#x5355;&#x7684;&#x538B;&#x529B;&#x6D4B;&#x8BD5;&#xFF0C;&#x5F53;&#x524D;&#x7684;&#x4E00;&#x7EC4; Unicorn &#x670D;&#x52A1;&#x6BCF;&#x79D2;&#x80FD;&#x591F;&#x5904;&#x7406; 4000 &#x591A;&#x4E2A;&#x8BF7;&#x6C42;&#xFF0C;&#x6BCF;&#x4E2A;&#x8BF7;&#x6C42;&#x4E5F;&#x53EA;&#x6D88;&#x8017;&#x4E86; 24ms &#x7684;&#x65F6;&#x95F4;&#xFF0C;&#x6BD4;&#x8D77;&#x4F7F;&#x7528;&#x5355;&#x8FDB;&#x7A0B;&#x7684; Thin &#x786E;&#x5B9E;&#x6709;&#x7740;&#x6BD4;&#x8F83;&#x591A;&#x7684;&#x63D0;&#x5347;&#xFF0C;&#x4F46;&#x662F;&#x5E76;&#x6CA1;&#x6709;&#x6570;&#x91CF;&#x7EA7;&#x7684;&#x5DEE;&#x8DDD;&#x3002;</p>
+<p>&#x9664;&#x6B64;&#x4E4B;&#x5916;&#xFF0C;Unicorn &#x7531;&#x4E8E;&#x5176;&#x591A;&#x8FDB;&#x7A0B;&#x7684;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#x4F1A;&#x5360;&#x7528;&#x5927;&#x91CF;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x5728;&#x5E76;&#x884C;&#x7684;&#x5904;&#x7406;&#x5927;&#x91CF;&#x8BF7;&#x6C42;&#x65F6;&#x4F60;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x5185;&#x5B58;&#x7684;&#x4F7F;&#x7528;&#x91CF;&#x6709;&#x6BD4;&#x8F83;&#x660E;&#x663E;&#x7684;&#x4E0A;&#x5347;&#x3002;</p>
+<h2 id="Puma"><a href="#Puma" class="headerlink" title="Puma"></a>Puma</h2><p>&#x8DDD;&#x79BB; Ruby &#x793E;&#x533A;&#x7684;&#x7B2C;&#x4E00;&#x4E2A; webserver WEBrick &#x53D1;&#x5E03;&#x7684; 11 &#x5E74;&#x4E4B;&#x540E;&#x7684; 2011 &#x5E74;&#xFF0C;Puma &#x6B63;&#x5F0F;&#x53D1;&#x5E03;&#x4E86;&#xFF0C;&#x5B83;&#x4E0E; Thin &#x548C; Unicorn &#x4E00;&#x6837;&#x90FD;&#x4ECE; Mongrel &#x4E2D;&#x7EE7;&#x627F;&#x4E86; HTTP &#x534F;&#x8BAE;&#x7684;&#x89E3;&#x6790;&#x5668;&#xFF0C;&#x4E0D;&#x4EC5;&#x5982;&#x6B64;&#x5B83;&#x8FD8;&#x57FA;&#x4E8E; Rack &#x534F;&#x8BAE;&#x91CD;&#x65B0;&#x5BF9;&#x5E95;&#x5C42;&#x8FDB;&#x884C;&#x4E86;&#x5B9E;&#x73B0;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/79e43e7cfb3e9be2877ed8bc2f91bf389914aa2db38422a4a98a7c2d67987daa" alt="puma-cluster-mode"></p>
+<p>&#x4E0E; Unicorn &#x4E0D;&#x540C;&#x7684;&#x662F;&#xFF0C;Puma &#x662F;&#x7528;&#x4E86;&#x591A;&#x8FDB;&#x7A0B;&#x52A0;&#x591A;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#xFF0C;&#x5B83;&#x53EF;&#x4EE5;&#x540C;&#x65F6;&#x5728; fork &#x51FA;&#x6765;&#x7684;&#x591A;&#x4E2A; worker &#x4E2D;&#x521B;&#x5EFA;&#x591A;&#x4E2A;&#x7EBF;&#x7A0B;&#x6765;&#x5904;&#x7406;&#x8BF7;&#x6C42;&#xFF1B;&#x4E0D;&#x4EC5;&#x5982;&#x6B64; Puma &#x8FD8;&#x5B9E;&#x73B0;&#x4E86;&#x7528;&#x4E8E;&#x63D0;&#x9AD8;&#x5E76;&#x53D1;&#x901F;&#x5EA6;&#x7684; Reactor &#x6A21;&#x5757;&#x548C;&#x7EBF;&#x7A0B;&#x6C60;&#x80FD;&#x591F;&#x5728;&#x63D0;&#x5347;&#x541E;&#x5410;&#x91CF;&#x7684;&#x540C;&#x65F6;&#xFF0C;&#x964D;&#x4F4E;&#x5185;&#x5B58;&#x7684;&#x6D88;&#x8017;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/ebb6e1a67a054f623ccb8ce757bb5acd4d0f9fec648b3f64541564c868be6ade" alt="puma-concurrency-mode"></p>
+<p>&#x4F46;&#x662F;&#x7531;&#x4E8E; MRI &#x7684;&#x5B58;&#x5728;&#xFF0C;&#x5F80;&#x5F80;&#x90FD;&#x9700;&#x8981;&#x4F7F;&#x7528; JRuby &#x624D;&#x80FD;&#x6700;&#x5927;&#x5316; Puma &#x670D;&#x52A1;&#x5668;&#x7684;&#x6027;&#x80FD;&#xFF0C;&#x4F46;&#x662F;&#x5373;&#x4FBF;&#x5982;&#x6B64;&#xFF0C;&#x4F7F;&#x7528; MRI &#x7684; Puma &#x7684;&#x541E;&#x5410;&#x91CF;&#x4E5F;&#x80FD;&#x591F;&#x8F7B;&#x677E;&#x8FBE;&#x5230; Unicorn &#x7684;&#x4E24;&#x500D;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;Concurrency Level:      100</span><br><span class="line">Time taken for tests:   1.057 seconds</span><br><span class="line">Complete requests:      10000</span><br><span class="line">Failed requests:        0</span><br><span class="line">Total transferred:      750000 bytes</span><br><span class="line">HTML transferred:       100000 bytes</span><br><span class="line">Requests per second:    9458.08 [#/sec] (mean)</span><br><span class="line">Time per request:       10.573 [ms] (mean)</span><br><span class="line">Time per request:       0.106 [ms] (mean, across all concurrent requests)</span><br><span class="line">Transfer rate:          692.73 [Kbytes/sec] received</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x521B;&#x5EFA;&#x4E86; 8 &#x4E2A; Puma &#x7684; worker&#xFF0C;&#x6BCF;&#x4E2A; worker &#x4E2D;&#x90FD;&#x5305;&#x542B; 16~32 &#x4E2A;&#x7528;&#x4E8E;&#x5904;&#x7406;&#x7528;&#x6237;&#x8BF7;&#x6C42;&#x7684;&#x7EBF;&#x7A0B;&#xFF0C;&#x6BCF;&#x79D2;&#x4E2D;&#x5904;&#x7406;&#x7684;&#x8BF7;&#x6C42;&#x6570;&#x63A5;&#x8FD1; 10000&#xFF0C;&#x5904;&#x7406;&#x65F6;&#x95F4;&#x4E5F;&#x4EC5;&#x4E3A; 10.573ms&#xFF0C;&#x591A;&#x8FDB;&#x7A0B;&#x3001;&#x591A;&#x7EBF;&#x7A0B;&#x4EE5;&#x53CA; Reactor &#x6A21;&#x5F0F;&#x7684;&#x534F;&#x4F5C;&#x786E;&#x5B9E;&#x80FD;&#x591F;&#x975E;&#x5E38;&#x660E;&#x663E;&#x7684;&#x589E;&#x52A0; Web &#x670D;&#x52A1;&#x5668;&#x7684;&#x5DE5;&#x4F5C;&#x6027;&#x80FD;&#x548C;&#x541E;&#x5410;&#x91CF;&#x3002;</p>
+<p>&#x5728; Puma &#x7684; <a href="/external_links/05850138022f3ada57e3ed3903ec461d.html" target="blank" rel="noopener">&#x5B98;&#x65B9;&#x7F51;&#x7AD9;</a> &#x4E2D;&#xFF0C;&#x6709;&#x4E00;&#x5F20;&#x4E0D;&#x540C; Web &#x670D;&#x52A1;&#x5668;&#x5185;&#x5B58;&#x6D88;&#x8017;&#x7684;&#x5BF9;&#x6BD4;&#x56FE;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/4163ab1c09390b96c5809375091727e46094a76c2b75e86c2584638dd4c52fcf" alt="memory-usage-comparision"></p>
+<p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x4E0E; Unicorn &#x76F8;&#x6BD4; Puma &#x7684;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x91CF;&#x51E0;&#x4E4E;&#x53EF;&#x4EE5;&#x5FFD;&#x7565;&#x4E0D;&#x8BA1;&#xFF0C;&#x5B83;&#x660E;&#x663E;&#x89E3;&#x51B3;&#x4E86;&#x591A;&#x4E2A; worker &#x5360;&#x7528;&#x5927;&#x91CF;&#x5185;&#x5B58;&#x7684;&#x95EE;&#x9898;&#xFF1B;&#x4E0D;&#x8FC7;&#x4F7F;&#x7528;&#x4E86;&#x591A;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x7684; Puma &#x9700;&#x8981;&#x5F00;&#x53D1;&#x8005;&#x5728;&#x5E94;&#x7528;&#x4E2D;&#x4FDD;&#x8BC1;&#x4E0D;&#x540C;&#x7684;&#x7EBF;&#x7A0B;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0;&#x7ADE;&#x4E89;&#x6761;&#x4EF6;&#x7684;&#x95EE;&#x9898;&#xFF0C;Unicorn &#x7684;&#x591A;&#x8FDB;&#x7A0B;&#x6A21;&#x578B;&#x5C31;&#x4E0D;&#x9700;&#x8981;&#x5F00;&#x53D1;&#x8005;&#x601D;&#x8003;&#x8FD9;&#x6837;&#x7684;&#x4E8B;&#x60C5;&#x3002;</p>
+<h2 id="&#x5BF9;&#x6BD4;"><a href="#&#x5BF9;&#x6BD4;" class="headerlink" title="&#x5BF9;&#x6BD4;"></a>&#x5BF9;&#x6BD4;</h2><p>&#x4E0A;&#x8FF0;&#x56DB;&#x79CD;&#x4E0D;&#x540C;&#x7684; Web &#x670D;&#x52A1;&#x5668;&#x5176;&#x5B9E;&#x6709;&#x7740;&#x6BD4;&#x8F83;&#x660E;&#x663E;&#x7684;&#x6027;&#x80FD;&#x5DEE;&#x5F02;&#xFF0C;&#x5728;&#x4F7F;&#x7528;&#x540C;&#x4E00;&#x4E2A;&#x6700;&#x7B80;&#x5355;&#x7684; Web &#x5E94;&#x7528;&#x65F6;&#xFF0C;&#x4E0D;&#x540C;&#x7684;&#x670D;&#x52A1;&#x5668;&#x8868;&#x73B0;&#x51FA;&#x4E86;&#x5DEE;&#x5F02;&#x5DE8;&#x5927;&#x7684;&#x541E;&#x5410;&#x91CF;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/908023d3956d02deeaa49f9c1bc927b8578c2748f5e5a65d0afed41749e4b204" alt="ruby-webservers"></p>
+<p>Puma &#x548C; Unicorn &#x4E24;&#x8005;&#x4E4B;&#x95F4;&#x53EF;&#x80FD;&#x8FD8;&#x6CA1;&#x6709;&#x660E;&#x663E;&#x7684;&#x6570;&#x91CF;&#x7EA7;&#x5DEE;&#x8DDD;&#xFF0C;1 &#x500D;&#x7684;&#x541E;&#x5410;&#x91CF;&#x5DEE;&#x8DDD;&#x4E5F;&#x53EF;&#x80FD;&#x5F88;&#x5BB9;&#x6613;&#x88AB;&#x73AF;&#x5883;&#x56E0;&#x7D20;&#x62B9;&#x5E73;&#x4E86;&#xFF0C;&#x4F46;&#x662F; WEBrick &#x53EF;&#x4EE5;&#x8BF4;&#x662F;&#x7EDD;&#x5BF9;&#x65E0;&#x6CD5;&#x4E0E;&#x5176;&#x4ED6;&#x4E09;&#x8005;&#x5339;&#x654C;&#x7684;&#x3002;</p>
+<p>&#x4E0A;&#x8FF0;&#x7684;&#x4E0D;&#x540C;&#x670D;&#x52A1;&#x5668;&#x5176;&#x5B9E;&#x6709;&#x7740;&#x622A;&#x7136;&#x4E0D;&#x540C;&#x7684; I/O &#x5E76;&#x53D1;&#x6A21;&#x578B;&#xFF0C;&#x56E0;&#x4E3A; MRI &#x4E2D; GIL &#x7684;&#x5B58;&#x5728;&#x6211;&#x4EEC;&#x5F88;&#x96BE;&#x5229;&#x7528;&#x591A;&#x6838; CPU &#x7684;&#x8BA1;&#x7B97;&#x8D44;&#x6E90;&#xFF0C;&#x6240;&#x4EE5;&#x5927;&#x591A;&#x6570;&#x591A;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x5728; MRI &#x4E0A;&#x7684;&#x6027;&#x80FD;&#x53EF;&#x80FD;&#x53EA;&#x6BD4;&#x5355;&#x7EBF;&#x7A0B;&#x7565;&#x597D;&#xFF0C;&#x8FBE;&#x4E0D;&#x5230;&#x5B8C;&#x5168;&#x78BE;&#x538B;&#x7684;&#x6548;&#x679C;&#xFF0C;&#x4F46;&#x662F; JRuby &#x6216;&#x8005; Rubinius &#x7684;&#x4F7F;&#x7528;&#x786E;&#x5B9E;&#x80FD;&#x591F;&#x5229;&#x7528;&#x591A;&#x6838; CPU &#x7684;&#x8BA1;&#x7B97;&#x8D44;&#x6E90;&#xFF0C;&#x4ECE;&#x800C;&#x589E;&#x52A0;&#x591A;&#x7EBF;&#x7A0B;&#x6A21;&#x578B;&#x7684;&#x5E76;&#x53D1;&#x6548;&#x7387;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/1f82ebf07bfc74d6092d9c64db53c6cfb5c7f685e74bcd59ede57f3c02268b8f" alt="jruby"></p>
+<p>&#x4F20;&#x7EDF;&#x7684; I/O &#x6A21;&#x578B;&#x5C31;&#x662F;&#x5728;&#x6BCF;&#x6B21;&#x63A5;&#x6536;&#x5230;&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x8BF7;&#x6C42;&#x65F6; fork &#x51FA;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x8FDB;&#x7A0B;&#x6765;&#x5904;&#x7406;&#x5F53;&#x524D;&#x7684;&#x8BF7;&#x6C42;&#x6216;&#x8005;&#x5728;&#x670D;&#x52A1;&#x5668;&#x542F;&#x52A8;&#x65F6;&#x5C31;&#x542F;&#x52A8;&#x591A;&#x4E2A;&#x8FDB;&#x7A0B;&#xFF0C;&#x6BCF;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#x5728;&#x540C;&#x4E00;&#x65F6;&#x95F4;&#x53EA;&#x80FD;&#x5904;&#x7406;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x79CD;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#x7684;&#x541E;&#x5410;&#x91CF;&#x6709;&#x9650;&#xFF0C;&#x5728;&#x4ECA;&#x5929;&#x5DF2;&#x7ECF;&#x51E0;&#x4E4E;&#x770B;&#x4E0D;&#x5230;&#x4F7F;&#x7528; <strong>accept &amp; fork</strong> &#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x5904;&#x7406;&#x8BF7;&#x6C42;&#x7684;&#x670D;&#x52A1;&#x5668;&#x4E86;&#x3002;</p>
+<p>&#x76EE;&#x524D;&#x6700;&#x4E3A;&#x6D41;&#x884C;&#x7684;&#x65B9;&#x5F0F;&#x8FD8;&#x662F;&#x6DF7;&#x5408;&#x591A;&#x79CD; I/O &#x6A21;&#x578B;&#xFF0C;&#x540C;&#x65F6;&#x4F7F;&#x7528;&#x591A;&#x8FDB;&#x7A0B;&#x548C;&#x591A;&#x7EBF;&#x7A0B;&#x538B;&#x69A8; CPU &#x8BA1;&#x7B97;&#x8D44;&#x6E90;&#xFF0C;&#x4F8B;&#x5982; Phusion Passenger &#x6216;&#x8005; Puma &#x90FD;&#x652F;&#x6301;&#x5728;&#x5355;&#x8FDB;&#x7A0B;&#x548C;&#x591A;&#x8FDB;&#x7A0B;&#x3001;&#x5355;&#x7EBF;&#x7A0B;&#x548C;&#x591A;&#x7EBF;&#x7A0B;&#x4E4B;&#x524D;&#x6765;&#x56DE;&#x5207;&#x6362;&#xFF0C;&#x914D;&#x7F6E;&#x7684;&#x4E0D;&#x540C;&#x4F1A;&#x521B;&#x5EFA;&#x4E0D;&#x540C;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#xFF0C;&#x53EF;&#x4EE5;&#x8BF4;&#x662F; Web &#x670D;&#x52A1;&#x5668;&#x4E2D;&#x6700;&#x597D;&#x7684;&#x9009;&#x62E9;&#x4E86;&#x3002;</p>
+<p>&#x6700;&#x540E;&#x8981;&#x8BF4;&#x7684; Thin &#x5176;&#x5B9E;&#x4F7F;&#x7528;&#x4E86;&#x975E;&#x5E38;&#x4E0D;&#x540C;&#x7684; I/O &#x6A21;&#x578B;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x4E8B;&#x4EF6;&#x9A71;&#x52A8;&#x6A21;&#x578B;&#xFF0C;&#x8FD9;&#x79CD;&#x6A21;&#x578B;&#x5728; Ruby &#x793E;&#x533A;&#x5176;&#x5B9E;&#x5E76;&#x6CA1;&#x6709;&#x90A3;&#x4E48;&#x70ED;&#x95E8;&#xFF0C;&#x4E3B;&#x8981;&#x662F;&#x56E0;&#x4E3A; Rails &#x6846;&#x67B6;&#x4EE5;&#x53CA; Ruby &#x793E;&#x533A;&#x4E2D;&#x7684;&#x5927;&#x90E8;&#x5206;&#x9879;&#x76EE;&#x5E76;&#x6CA1;&#x6709;&#x6309;&#x7167; Reactor &#x6A21;&#x578B;&#x7684;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x8BBE;&#x8BA1;&#xFF0C;&#x9ED8;&#x8BA4;&#x7684;&#x6587;&#x4EF6; I/O &#x4E5F;&#x90FD;&#x662F;&#x963B;&#x585E;&#x7684;&#xFF0C;&#x800C; Ruby &#x672C;&#x8EAB;&#x4E5F;&#x53EF;&#x4EE5;&#x5229;&#x7528;&#x591A;&#x8FDB;&#x7A0B;&#x548C;&#x591A;&#x7EBF;&#x7A0B;&#x7684;&#x8BA1;&#x7B97;&#x8D44;&#x6E90;&#xFF0C;&#x6CA1;&#x6709;&#x5FC5;&#x8981;&#x4F7F;&#x7528;&#x4E8B;&#x4EF6;&#x9A71;&#x52A8;&#x7684;&#x65B9;&#x5F0F;&#x6700;&#x5927;&#x5316;&#x5E76;&#x53D1;&#x91CF;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/b3b0dd84d0f743f8b986caf6974a2205c77801883771b103d07e409c8c654a9b" alt="nodejs-logo"></p>
+<p>Node.js &#x5C31;&#x5B8C;&#x5168;&#x4E0D;&#x540C;&#x4E86;&#x3002;Javascript &#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x6240;&#x6709;&#x64CD;&#x4F5C;&#x90FD;&#x4F1A;&#x963B;&#x585E;&#x4E3B;&#x7EBF;&#x7A0B;&#x7684;&#x8BED;&#x8A00;&#xFF0C;&#x66F4;&#x52A0;&#x9700;&#x8981;&#x4E8B;&#x4EF6;&#x9A71;&#x52A8;&#x6A21;&#x578B;&#x8BA9;&#x4E3B;&#x7EBF;&#x7A0B;&#x53EA;&#x8D1F;&#x8D23;&#x63A5;&#x53D7; HTTP &#x8BF7;&#x6C42;&#xFF0C;&#x5176;&#x4F59;&#x7684;&#x810F;&#x6D3B;&#x7D2F;&#x6D3B;&#x90FD;&#x4EA4;&#x7ED9;&#x7EBF;&#x7A0B;&#x6C60;&#x6765;&#x505A;&#x4E86;&#xFF0C;&#x7ED3;&#x679C;&#x7684;&#x8FD4;&#x56DE;&#x90FD;&#x901A;&#x8FC7;&#x56DE;&#x8C03;&#x7684;&#x5F62;&#x5F0F;&#x901A;&#x77E5;&#x4E3B;&#x7EBF;&#x7A0B;&#xFF0C;&#x8FD9;&#x6837;&#x624D;&#x80FD;&#x63D0;&#x9AD8;&#x541E;&#x5410;&#x91CF;&#x3002;</p>
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x5728;&#x8FD9;&#x4E2A;&#x7CFB;&#x5217;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x5148;&#x540E;&#x4ECB;&#x7ECD;&#x4E86; Rack &#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#x4EE5;&#x53CA; Rack &#x534F;&#x8BAE;&#xFF0C;&#x8FD8;&#x6709;&#x56DB;&#x79CD; webserver &#x5305;&#x62EC; WEBrick&#x3001;Thin&#x3001;Unicorn &#x548C; Puma &#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x9664;&#x4E86;&#x8FD9;&#x56DB;&#x79CD;&#x5E94;&#x7528;&#x670D;&#x52A1;&#x5668;&#x4E4B;&#x5916;&#xFF0C;Ruby &#x793E;&#x533A;&#x4E2D;&#x8FD8;&#x6709;&#x5176;&#x4ED6;&#x7684;&#x5E94;&#x7528;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x4F8B;&#x5982;&#xFF1A;Rainbows &#x548C; Phusion Passenger&#xFF0C;&#x5B83;&#x4EEC;&#x90FD;&#x6709;&#x5404;&#x81EA;&#x7684;&#x5B9E;&#x73B0;&#x4EE5;&#x53CA;&#x4F18;&#x7F3A;&#x70B9;&#x3002;</p>
+<p>&#x4ECE;&#x5F53;&#x524D;&#x7684;&#x60C5;&#x51B5;&#x6765;&#x770B;&#xFF0C;&#x8FD8;&#x662F;&#x66F4;&#x63A8;&#x8350;&#x5F00;&#x53D1;&#x8005;&#x4F7F;&#x7528; Puma &#x6216;&#x8005; Phusion Passenger &#x4F5C;&#x4E3A;&#x5E94;&#x7528;&#x7684;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x8FD9;&#x6837;&#x80FD;&#x83B7;&#x5F97;&#x6700;&#x4F73;&#x7684;&#x6548;&#x679C;&#x3002;</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a href="/external_links/8c64ffc339612b2fed1bee7d258b4db6.html" target="blank" rel="noopener">Ruby Web &#x670D;&#x52A1;&#x5668;&#xFF1A;&#x8FD9;&#x5341;&#x4E94;&#x5E74;</a></li>
+<li><a href="/external_links/74fa5153cd385e5cd566353225bf32d1.html" target="blank" rel="noopener">Ruby &#x670D;&#x52A1;&#x5668;&#x5BF9;&#x6BD4;</a></li>
+<li><a href="/external_links/9ebd5245c25a9fd0817a5b8d3da245d9.html" target="blank" rel="noopener">Ruby &#x7684;&#x591A;&#x7EBF;&#x7A0B;&#x5E94;&#x7528;&#x670D;&#x52A1;&#x5668;&#x4ECB;&#x7ECD;</a></li>
+<li><a href="/external_links/b9fc1954d0f03df9972c074ec791c608.html" target="blank" rel="noopener">Ruby on Rails Server options</a></li>
+</ul>
+<h3 id="&#x5173;&#x4E8E;&#x56FE;&#x7247;&#x548C;&#x8F6C;&#x8F7D;"><a href="#&#x5173;&#x4E8E;&#x56FE;&#x7247;&#x548C;&#x8F6C;&#x8F7D;" class="headerlink" title="&#x5173;&#x4E8E;&#x56FE;&#x7247;&#x548C;&#x8F6C;&#x8F7D;"></a>&#x5173;&#x4E8E;&#x56FE;&#x7247;&#x548C;&#x8F6C;&#x8F7D;</h3><p> <a href="/external_links/321f3992dd3875151d8801b773ab32ed.html" target="blank" rel="noopener"><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/5209d50b832c927e9f61a5c05c9dc987fef6b5012df536bd2fc90422e9e438d9" alt="&#x77E5;&#x8BC6;&#x5171;&#x4EAB;&#x8BB8;&#x53EF;&#x534F;&#x8BAE;"></a><br>&#x672C;&#x4F5C;&#x54C1;&#x91C7;&#x7528;<a href="/external_links/321f3992dd3875151d8801b773ab32ed.html" target="blank" rel="noopener">&#x77E5;&#x8BC6;&#x5171;&#x4EAB;&#x7F72;&#x540D; 4.0 &#x56FD;&#x9645;&#x8BB8;&#x53EF;&#x534F;&#x8BAE;</a>&#x8FDB;&#x884C;&#x8BB8;&#x53EF;&#x3002;<br> &#x8F6C;&#x8F7D;&#x65F6;&#x8BF7;&#x6CE8;&#x660E;&#x539F;&#x6587;&#x94FE;&#x63A5;&#xFF0C;&#x56FE;&#x7247;&#x5728;&#x4F7F;&#x7528;&#x65F6;&#x8BF7;&#x4FDD;&#x7559;&#x56FE;&#x7247;&#x4E2D;&#x7684;&#x5168;&#x90E8;&#x5185;&#x5BB9;&#xFF0C;&#x53EF;&#x9002;&#x5F53;&#x7F29;&#x653E;&#x5E76;&#x5728;&#x5F15;&#x7528;&#x5904;&#x9644;&#x4E0A;&#x56FE;&#x7247;&#x6240;&#x5728;&#x7684;&#x6587;&#x7AE0;&#x94FE;&#x63A5;&#xFF0C;&#x56FE;&#x7247;&#x4F7F;&#x7528; Sketch &#x8FDB;&#x884C;&#x7ED8;&#x5236;&#x3002;</p>
+<h3 id="&#x5173;&#x4E8E;&#x8BC4;&#x8BBA;&#x548C;&#x7559;&#x8A00;"><a href="#&#x5173;&#x4E8E;&#x8BC4;&#x8BBA;&#x548C;&#x7559;&#x8A00;" class="headerlink" title="&#x5173;&#x4E8E;&#x8BC4;&#x8BBA;&#x548C;&#x7559;&#x8A00;"></a>&#x5173;&#x4E8E;&#x8BC4;&#x8BBA;&#x548C;&#x7559;&#x8A00;</h3><p> &#x5982;&#x679C;&#x5BF9;&#x672C;&#x6587; <a href="/external_links/374612466724eb632f537707853701f9.html" target="blank" rel="noopener">Ruby Web &#x670D;&#x52A1;&#x5668;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#x4E0E;&#x6027;&#x80FD;</a> &#x7684;&#x5185;&#x5BB9;&#x6709;&#x7591;&#x95EE;&#xFF0C;&#x8BF7;&#x5728;&#x4E0B;&#x9762;&#x7684;&#x8BC4;&#x8BBA;&#x7CFB;&#x7EDF;&#x4E2D;&#x7559;&#x8A00;&#xFF0C;&#x8C22;&#x8C22;&#x3002;</p>
+<blockquote>
+<p>&#x539F;&#x6587;&#x94FE;&#x63A5;&#xFF1A;<a href="/external_links/374612466724eb632f537707853701f9.html" target="blank" rel="noopener">Ruby Web &#x670D;&#x52A1;&#x5668;&#x7684;&#x5E76;&#x53D1;&#x6A21;&#x578B;&#x4E0E;&#x6027;&#x80FD; &#xB7; &#x9762;&#x5411;&#x4FE1;&#x4EF0;&#x7F16;&#x7A0B;</a></p>
+<p>Follow: <a href="/external_links/050ff5f5f0ce69dc8d789199a68d09fb.html" target="blank" rel="noopener">Draveness &#xB7; GitHub</a></p>
+</blockquote>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/f9d5800f842e51043738359922ca9e06.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-Ruby/" rel="tag"># 后端,Ruby</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903512627740686.html" rel="next" title="有关数据验证的原则">
+                <i class="fa fa-chevron-left"></i> 有关数据验证的原则
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903512690655240.html" rel="prev" title="Apache Pulsar中的地域复制，第1篇：概念和功能">
+                Apache Pulsar中的地域复制，第1篇：概念和功能 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#WEBrick"><span class="nav-number">1.</span> <span class="nav-text">WEBrick</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Thin"><span class="nav-number">2.</span> <span class="nav-text">Thin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unicorn"><span class="nav-number">3.</span> <span class="nav-text">Unicorn</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Puma"><span class="nav-number">4.</span> <span class="nav-text">Puma</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对比"><span class="nav-number">5.</span> <span class="nav-text">对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">7.</span> <span class="nav-text">Reference</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于图片和转载"><span class="nav-number">7.1.</span> <span class="nav-text">关于图片和转载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于评论和留言"><span class="nav-number">7.2.</span> <span class="nav-text">关于评论和留言</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

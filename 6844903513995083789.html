@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5C0F;&amp;#x8BB0; &amp;#x597D;&amp;#x4E45;&amp;#x6CA1;&amp;#x66F4;&amp;#x535A;&amp;#xFF0C;&amp;#x7A97;&amp;#x5916;&amp;#x5149;&amp;#x8292;&amp;#x4E07;&amp;#x4E08;&amp;#xFF0C;&amp;#x51AC;&amp;#x65E5;&amp;#x7684;&amp;#x665A;&amp;#x6668;&amp;#xFF0C;&amp;#x591A;&amp;#x4E48;&amp;#x7F8E;&amp;#x597">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程条件队列ConditionObject源码解读">
+<meta property="og:url" content="https://dev.newban.cn/6844903513995083789.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x5C0F;&amp;#x8BB0; &amp;#x597D;&amp;#x4E45;&amp;#x6CA1;&amp;#x66F4;&amp;#x535A;&amp;#xFF0C;&amp;#x7A97;&amp;#x5916;&amp;#x5149;&amp;#x8292;&amp;#x4E07;&amp;#x4E08;&amp;#xFF0C;&amp;#x51AC;&amp;#x65E5;&amp;#x7684;&amp;#x665A;&amp;#x6668;&amp;#xFF0C;&amp;#x591A;&amp;#x4E48;&amp;#x7F8E;&amp;#x597">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T05:56:50.653Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程条件队列ConditionObject源码解读">
+<meta name="twitter:description" content="&amp;#x5C0F;&amp;#x8BB0; &amp;#x597D;&amp;#x4E45;&amp;#x6CA1;&amp;#x66F4;&amp;#x535A;&amp;#xFF0C;&amp;#x7A97;&amp;#x5916;&amp;#x5149;&amp;#x8292;&amp;#x4E07;&amp;#x4E08;&amp;#xFF0C;&amp;#x51AC;&amp;#x65E5;&amp;#x7684;&amp;#x665A;&amp;#x6668;&amp;#xFF0C;&amp;#x591A;&amp;#x4E48;&amp;#x7F8E;&amp;#x597">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903513995083789.html">
+
+
+
+
+
+  <title>线程条件队列ConditionObject源码解读 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">线程条件队列ConditionObject源码解读</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-26T15:17:15+08:00">
+                2017-11-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p><strong>&#x5C0F;&#x8BB0;</strong><br> &#x597D;&#x4E45;&#x6CA1;&#x66F4;&#x535A;&#xFF0C;&#x7A97;&#x5916;&#x5149;&#x8292;&#x4E07;&#x4E08;&#xFF0C;&#x51AC;&#x65E5;&#x7684;&#x665A;&#x6668;&#xFF0C;&#x591A;&#x4E48;&#x7F8E;&#x597D;&#xFF0C;&#x5C31;&#x4E0D;&#x6D6A;&#x8D39;&#x4E86;&#xFF0C;&#x5FAA;&#x7740;&#x952E;&#x76D8;&#x4E0A;&#x7684;&#x70B9;&#x70B9;&#x661F;&#x8FB0;&#xFF0C;&#x5F00;&#x5DE5;&#xFF01;</p>
+</blockquote>
+<h4 id="&#x5565;&#x5B50;&#x662F;&#x6761;&#x4EF6;&#x961F;&#x5217;&#xFF1F;"><a href="#&#x5565;&#x5B50;&#x662F;&#x6761;&#x4EF6;&#x961F;&#x5217;&#xFF1F;" class="headerlink" title="&#x5565;&#x5B50;&#x662F;&#x6761;&#x4EF6;&#x961F;&#x5217;&#xFF1F;"></a><strong>&#x5565;&#x5B50;&#x662F;&#x6761;&#x4EF6;&#x961F;&#x5217;&#xFF1F;</strong></h4><p>&#x6211;&#x4EEC;&#x90FD;&#x77E5;&#x9053;&#xFF0C;&#x5728;&#x4E07;&#x7C7B;&#x4E4B;&#x7956;Object&#x91CC;&#x9762;&#x5B9A;&#x4E49;&#x4E86;&#x51E0;&#x4E2A;&#x76D1;&#x89C6;&#x5668;&#x65B9;&#x6CD5;&#xFF1A;wait()&#xFF0C;notify<br> ()&#xFF0C;notifyAll()&#xFF0C;&#x914D;&#x5408;synchronized&#x8BED;&#x4E49;&#x6765;&#x63A7;&#x5236;&#x7EBF;&#x7A0B;&#x7684;&#x4E00;&#x4E9B;&#x72B6;&#x6001;&#xFF0C;&#x5728;JDK1.5&#x4E4B;&#x540E;&#xFF0C;&#x7531;Lock&#x66FF;&#x4EE3;&#x4E86;synchronized&#xFF0C;&#x800C;&#x8FD9;&#x51E0;&#x4E2A;&#x76D1;&#x89C6;&#x5668;&#x7531;&#x6761;&#x4EF6;&#x961F;&#x5217;Condition&#x6765;&#x5B9E;&#x73B0;&#xFF0C;&#x4EE5;&#x4FBF;&#x5728;&#x67D0;&#x4E2A;&#x72B6;&#x6001;&#x6761;&#x4EF6;&#x73B0;&#x5728;&#x53EF;&#x80FD;&#x4E3A; true &#x7684;&#x53E6;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x901A;&#x77E5;&#x5B83;&#x4E4B;&#x524D;&#xFF0C;&#x4E00;&#x76F4;&#x6302;&#x8D77;&#x8BE5;&#x7EBF;&#x7A0B;&#xFF08;&#x5373;&#x8BA9;&#x5176;&#x201C;&#x7B49;&#x5F85;&#x201D;&#xFF09;&#xFF0C;&#x4EE5;&#x539F;&#x5B50;&#x7684;&#x65B9;&#x5F0F;&#x91CA;&#x653E;&#x9501;&#xFF0C;&#x5E76;&#x6302;&#x8D77;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF0C;&#x6240;&#x4EE5;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x53EB;&#x5B83;&#x4E3A;<code>&#x7EBF;&#x7A0B;&#x7684;&#x6761;&#x4EF6;&#x961F;&#x5217;</code>(&#x81EA;&#x521B;&#x7684;)&#x3002;</p>
+<h4 id="&#x6765;&#x770B;&#x4E00;&#x4E2A;&#x5E94;&#x7528;&#x793A;&#x4F8B;"><a href="#&#x6765;&#x770B;&#x4E00;&#x4E2A;&#x5E94;&#x7528;&#x793A;&#x4F8B;" class="headerlink" title="&#x6765;&#x770B;&#x4E00;&#x4E2A;&#x5E94;&#x7528;&#x793A;&#x4F8B;"></a><strong>&#x6765;&#x770B;&#x4E00;&#x4E2A;&#x5E94;&#x7528;&#x793A;&#x4F8B;</strong></h4><p>&#x5728;&#x4EE5;&#x524D;&#x521A;&#x5B66;&#x4E60;Java&#x7684;&#x65F6;&#x5019;&#x5199;&#x8FC7;&#x4E00;&#x4E2A;&#x9898;&#xFF0C;&#x9898;&#x5E72;&#x5927;&#x6982;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;&#x5F00;&#x542F;&#x4E09;&#x4E2A;&#x7EBF;&#x7A0B;&#x4F9D;&#x6B21;&#x8F6E;&#x6D41;&#x6253;&#x5370;&#x51FA;75&#x4E2A;&#x6570;&#xFF0C;&#x4E14;&#x6B21;&#x5E8F;&#x4E0D;&#x80FD;&#x4E71;&#x3002;&#x4E0B;&#x9762;&#x662F;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;import java.util.concurrent.locks.Condition;</span><br><span class="line">import java.util.concurrent.locks.Lock;</span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">public class CountTo_75 {</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) {</span><br><span class="line">        final Box box = new Box();</span><br><span class="line"></span><br><span class="line">        new Thread(new Runnable() { // &#x7EBF;&#x7A0B;1</span><br><span class="line">            @Override</span><br><span class="line">            public void run() {</span><br><span class="line">                for (int i = 1; i &lt;= 5; i++) {</span><br><span class="line">                    box.main_1();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        },&quot;Thread-1&quot;).start();</span><br><span class="line">        new Thread(new Runnable() { // &#x7EBF;&#x7A0B;2</span><br><span class="line">            @Override</span><br><span class="line">            public void run() {</span><br><span class="line">                for (int i = 1; i &lt;= 5; i++) {</span><br><span class="line">                    box.main_2();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        },&quot;Thread-2&quot;).start();</span><br><span class="line">        new Thread(new Runnable() { // &#x7EBF;&#x7A0B;3</span><br><span class="line">            @Override</span><br><span class="line">            public void run() {</span><br><span class="line">                for (int i = 1; i &lt;= 5; i++) {</span><br><span class="line">                    box.main_3();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        },&quot;Thread-3&quot;).start();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    static class Box {</span><br><span class="line">        Lock lock = new ReentrantLock();</span><br><span class="line">        Condition condition_1 = lock.newCondition();</span><br><span class="line">        Condition condition_2 = lock.newCondition();</span><br><span class="line">        Condition condition_3 = lock.newCondition();</span><br><span class="line">        private volatile int flag = 1;</span><br><span class="line">        public static int count = 0;   //&#x7528;&#x4E8E;&#x8BA1;&#x6570;&#x7684;&#x53D8;&#x91CF;</span><br><span class="line"></span><br><span class="line">        public void main_1() {</span><br><span class="line">            lock.lock();</span><br><span class="line">            try {</span><br><span class="line">                while(flag != 1){</span><br><span class="line">                    try {</span><br><span class="line">                        condition_1.await();</span><br><span class="line">                    } catch (InterruptedException e) {</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">                for (int j = 0; j &lt; 5; j++) {</span><br><span class="line">                    count++;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() +&quot; &quot;+ count);</span><br><span class="line">                }</span><br><span class="line">                flag = 2;</span><br><span class="line">                condition_2.signal();</span><br><span class="line">            } finally {</span><br><span class="line">                lock.unlock();</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        public void main_2() {</span><br><span class="line">            lock.lock();</span><br><span class="line">            try {</span><br><span class="line">                while(flag != 2){</span><br><span class="line">                    try {</span><br><span class="line">                        condition_2.await();</span><br><span class="line">                    } catch (InterruptedException e) {</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">                for (int j = 0; j &lt; 5; j++) {</span><br><span class="line">                    count++;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() +&quot; &quot; + count);</span><br><span class="line">                }</span><br><span class="line">                flag = 3;</span><br><span class="line">                condition_3.signal();</span><br><span class="line">            } finally {</span><br><span class="line">                lock.unlock();</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        public void main_3() {</span><br><span class="line">            lock.lock();</span><br><span class="line">            try {</span><br><span class="line">                while(flag != 3){</span><br><span class="line">                    try {</span><br><span class="line">                        condition_3.await();</span><br><span class="line">                    } catch (InterruptedException e) {</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">                for (int j = 0; j &lt; 5; j++) {</span><br><span class="line">                    count++;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + &quot; &quot; + count);</span><br><span class="line">                }</span><br><span class="line">                flag = 1;</span><br><span class="line">                condition_1.signal();</span><br><span class="line">            } finally {</span><br><span class="line">                lock.unlock();</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x629B;&#x5F00;&#x5F53;&#x65F6;&#x6DF7;&#x4E71;&#x7684;&#x903B;&#x8F91;&#x548C;&#x6027;&#x80FD;&#x8003;&#x8651;&#x4E0D;&#x8DB3;&#x4E0D;&#x8C08;&#xFF0C;&#x8FD9;&#x6BB5;&#x4E11;&#x964B;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x7EC8;&#x5F52;&#x662F;&#x5B9E;&#x73B0;&#x4E86;&#x529F;&#x80FD;&#xFF0C;&#x800C;&#x4E14;&#x662F;&#x8FD0;&#x7528;&#x4E86;Lock&#x548C;Condition&#x6765;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x7528;&#x5728;&#x8FD9;&#x91CC;&#x6765;&#x8BF4;&#x660E;Condition&#x7684;&#x8BED;&#x4E49;&#x518D;&#x597D;&#x4E0D;&#x8FC7;&#x4E86;&#x3002;&#x4EE3;&#x7801;&#x4E2D;&#x521D;&#x59CB;&#x5316;&#x4E86;3&#x4E2A;&#x6761;&#x4EF6;&#x961F;&#x5217;&#xFF0C;&#x5206;&#x522B;&#x6765;&#x63A7;&#x5236;3&#x4E2A;&#x7EBF;&#x7A0B;&#x7684;&#x6302;&#x8D77;&#x72B6;&#x6001;&#xFF0C;flag&#x53D8;&#x91CF;&#x5219;&#x63A7;&#x5236;&#x5B83;&#x4EEC;&#x4E4B;&#x95F4;&#x7684;&#x5173;&#x7CFB;&#x3002;</p>
+<h4 id="&#x4E0E;Lock&#x4E4B;&#x95F4;&#x7684;&#x5B9E;&#x73B0;&#x5173;&#x7CFB;"><a href="#&#x4E0E;Lock&#x4E4B;&#x95F4;&#x7684;&#x5B9E;&#x73B0;&#x5173;&#x7CFB;" class="headerlink" title="&#x4E0E;Lock&#x4E4B;&#x95F4;&#x7684;&#x5B9E;&#x73B0;&#x5173;&#x7CFB;"></a><strong>&#x4E0E;Lock&#x4E4B;&#x95F4;&#x7684;&#x5B9E;&#x73B0;&#x5173;&#x7CFB;</strong></h4><p>Condition&#x662F;&#x4E00;&#x4E2A;&#x63A5;&#x53E3;&#xFF0C;&#x5176;&#x5B9E;&#x73B0;&#x7C7B;&#x53EA;&#x6709;&#x4E24;&#x4E2A;&#xFF1A;AQS&#x548C;AQLS&#xFF0C;&#x90FD;&#x4EE5;&#x5185;&#x90E8;&#x7C7B;&#x7684;&#x5F62;&#x5F0F;&#x5B58;&#x5728;&#xFF0C;&#x5185;&#x90E8;&#x7C7B;&#x53EB;&#x505A;ConditionObject&#xFF0C;&#x8FD9;&#x91CC;&#x6709;&#x70B9;&#x7EB3;&#x95F7;&#xFF0C;&#x65E2;&#x7136;&#x8FD9;&#x4E2A;&#x7C7B;&#x662F;&#x4E3A;Lock&#x4E13;&#x5C5E;&#x5B9A;&#x5236;&#x7684;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x4E0D;&#x5728;ReentrantLock&#x91CC;&#x9762;&#x6765;&#x5B9E;&#x73B0;&#x5462;&#xFF1F;&#x653E;&#x5728;AQS&#x4E0D;&#x4F1A;&#x592A;&#x81C3;&#x80BF;&#x5417;&#xFF1F;&#x4E0D;&#x77E5;&#x9053;Doug Lea&#x4E0A;&#x795E;&#x5F53;&#x65F6;&#x662F;&#x600E;&#x4E48;&#x8003;&#x8651;&#x7684;&#x3002; &#x7531;&#x4E8E;&#x5728;AQS&#x4E2D;&#x5DF2;&#x7ECF;&#x5B9E;&#x73B0;&#xFF0C;&#x56E0;&#x6B64;&#x5728;ReentrantLock&#x91CC;&#x9762;&#x5BF9;&#x5176;&#x64CD;&#x4F5C;&#x4E5F;&#x662F;&#x5F88;&#x7B80;&#x5355;&#x7684;&#xFF0C;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x6761;&#x4EF6;&#x961F;&#x5217;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;    public Condition newCondition() {</span><br><span class="line">        return sync.newCondition();</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>sync&#x4E2D;&#x7684;&#x5B9E;&#x73B0;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;    abstract static class Sync extends AbstractQueuedSynchronizer {</span><br><span class="line">        private static final long serialVersionUID = -5179523762034025860L;</span><br><span class="line">        final ConditionObject newCondition() {</span><br><span class="line">            return new ConditionObject();</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F88;&#x7B80;&#x5355;&#x5427;&#xFF1F;&#x5475;&#x5475;&#xFF0C;&#x4E0B;&#x9762;&#x6765;&#x770B;ConditionObject</p>
+<h4 id="ConditionObject&#x5B9E;&#x73B0;"><a href="#ConditionObject&#x5B9E;&#x73B0;" class="headerlink" title="ConditionObject&#x5B9E;&#x73B0;"></a><strong>ConditionObject&#x5B9E;&#x73B0;</strong></h4><p>&#x9996;&#x5148;&#x5B9A;&#x4E49;&#x4E86;&#x4E24;&#x4E2A;&#x6838;&#x5FC3;&#x6210;&#x5458;&#x53D8;&#x91CF;&#xFF0C;&#x6761;&#x4EF6;&#x961F;&#x5217;&#x7684;&#x5934;&#x8282;&#x70B9;&#x548C;&#x5C3E;&#x8282;&#x70B9;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;/** First node of condition queue. */</span><br><span class="line">private transient Node firstWaiter;</span><br><span class="line"></span><br><span class="line">/** Last node of condition queue. */</span><br><span class="line">private transient Node lastWaiter;</span><br></pre></td></tr></table></figure>
+
+<h5 id="1&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;await-&#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x7684;&#x6761;&#x4EF6;&#x7B49;&#x5F85;&#x5B9E;&#x73B0;"><a href="#1&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;await-&#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x7684;&#x6761;&#x4EF6;&#x7B49;&#x5F85;&#x5B9E;&#x73B0;" class="headerlink" title="1&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;await() &#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x7684;&#x6761;&#x4EF6;&#x7B49;&#x5F85;&#x5B9E;&#x73B0;"></a><strong>1&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;await() &#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x7684;&#x6761;&#x4EF6;&#x7B49;&#x5F85;&#x5B9E;&#x73B0;</strong></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public final void await() throws InterruptedException {</span><br><span class="line">     //&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x88AB;&#x4E2D;&#x65AD;&#x5219;&#x629B;&#x5F02;&#x5E38;</span><br><span class="line">     if (Thread.interrupted()) throw new InterruptedException();</span><br><span class="line">     //&#x6DFB;&#x52A0;&#x8FDB;&#x6761;&#x4EF6;&#x961F;&#x5217;</span><br><span class="line">     Node node = addConditionWaiter();</span><br><span class="line">     //&#x91CA;&#x653E;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x6301;&#x6709;&#x7684;&#x9501;</span><br><span class="line">     int savedState = fullyRelease(node);</span><br><span class="line">     int interruptMode = 0;</span><br><span class="line">     //&#x5728;&#x8FD9;&#x91CC;&#x4E00;&#x76F4;&#x67E5;&#x627E;&#x521B;&#x5EFA;&#x7684;Node&#x8282;&#x70B9;&#x5728;&#x4E0D;&#x5728;Sync&#x961F;&#x5217;&#xFF0C;&#x4E0D;&#x5728;&#x5C31;&#x4E00;&#x76F4;&#x7981;&#x7528;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;</span><br><span class="line">     while (!isOnSyncQueue(node)) {</span><br><span class="line">         //park&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF0C;&#x76F4;&#x5230;&#x5524;&#x9192;</span><br><span class="line">         LockSupport.park(this);</span><br><span class="line">         //&#x5982;&#x88AB;&#x4E2D;&#x65AD;&#x4E5F;&#x8DF3;&#x51FA;&#x5FAA;&#x73AF;</span><br><span class="line">         if ((interruptMode = checkInterruptWhileWaiting(node)) != 0) </span><br><span class="line">         break;</span><br><span class="line">     }</span><br><span class="line">     //&#x6B64;&#x65F6;&#x5DF2;&#x88AB;&#x5524;&#x9192;&#xFF0C;&#x83B7;&#x53D6;&#x4E4B;&#x524D;&#x88AB;&#x91CA;&#x653E;&#x7684;&#x9501;&#xFF0C;</span><br><span class="line">     if (acquireQueued(node, savedState) &amp;&amp; interruptMode != THROW_IE)   </span><br><span class="line">       interruptMode = REINTERRUPT;</span><br><span class="line">     //&#x79FB;&#x9664;&#x8282;&#x70B9;&#xFF0C;&#x91CA;&#x653E;&#x5185;&#x5B58;</span><br><span class="line">     if (node.nextWaiter != null) // clean up if cancelled</span><br><span class="line">       unlinkCancelledWaiters();</span><br><span class="line">     //&#x88AB;&#x4E2D;&#x65AD;&#x540E;&#x7684;&#x64CD;&#x4F5C;</span><br><span class="line">     if (interruptMode != 0)</span><br><span class="line">       reportInterruptAfterWait(interruptMode);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7B80;&#x800C;&#x8A00;&#x4E4B;&#xFF0C;await()&#x65B9;&#x6CD5;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x4E3A;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;Node&#x8282;&#x70B9;&#xFF0C;&#x52A0;&#x5165;&#x5230;Condition&#x961F;&#x5217;&#x5E76;&#x91CA;&#x653E;&#x9501;&#xFF0C;&#x4E4B;&#x540E;&#x5C31;&#x4E00;&#x76F4;&#x67E5;&#x770B;&#x8FD9;&#x4E2A;&#x8282;&#x70B9;&#x662F;&#x5426;&#x5728;Sync&#x961F;&#x5217;&#x4E2D;&#x4E86;(signal()&#x65B9;&#x6CD5;&#x5C06;&#x5B83;&#x79FB;&#x5230;Sync&#x961F;&#x5217;)&#xFF0C;&#x5982;&#x679C;&#x5728;&#x7684;&#x8BDD;&#x5C31;&#x5524;&#x9192;&#x6B64;&#x7EBF;&#x7A0B;&#xFF0C;&#x91CD;&#x65B0;&#x83B7;&#x53D6;&#x9501;&#x3002;&#x6B64;&#x5916;&#xFF0C;awaitNanos(long nanosTimeout) &#x65B9;&#x6CD5;&#x548C;await(long time, TimeUnit unit) &#x65B9;&#x6CD5;&#x7684;&#x5B9E;&#x73B0;&#x5927;&#x540C;&#x5C0F;&#x5F02;&#xFF0C;&#x53EA;&#x662F;&#x5728;&#x4F55;&#x65F6;&#x8DF3;&#x51FA;while&#x5FAA;&#x73AF;&#x7684;&#x65F6;&#x5019;&#x52A0;&#x4E86;&#x4E00;&#x4E2A;&#x8D85;&#x65F6;&#x7F62;&#x4E86;&#x3002; &#x53E6;&#x5916;&#x8FD8;&#x6709;&#x51E0;&#x4E2A;&#x76F8;&#x5173;&#x7684;&#x65B9;&#x6CD5;&#x4E5F;&#x770B;&#x4E00;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;/**</span><br><span class="line"> *  &#x6DFB;&#x52A0;&#x4E00;&#x4E2A;Node&#x8282;&#x70B9;&#x5230;Condition&#x961F;&#x5217;&#x4E2D;</span><br><span class="line"> */</span><br><span class="line">private Node addConditionWaiter() {</span><br><span class="line">  Node t = lastWaiter;</span><br><span class="line">  //&#x5982;&#x679C;&#x5C3E;&#x8282;&#x70B9;&#x88AB;&#x53D6;&#x6D88;&#xFF0C;&#x5C31;&#x6E05;&#x7406;&#x6389;</span><br><span class="line">  if (t != null &amp;&amp; t.waitStatus != Node.CONDITION) {</span><br><span class="line">      unlinkCancelledWaiters();</span><br><span class="line">      t = lastWaiter;</span><br><span class="line">  }</span><br><span class="line">  //&#x65B0;&#x5EFA;&#x72B6;&#x6001;&#x4E3A;&#x7684;CONDITION&#x8282;&#x70B9;&#xFF0C;&#x5E76;&#x6DFB;&#x52A0;&#x5728;&#x5C3E;&#x90E8;</span><br><span class="line">  Node node = new Node(Thread.currentThread(), Node.CONDITION);</span><br><span class="line">  if (t == null)</span><br><span class="line">      firstWaiter = node;</span><br><span class="line">  else</span><br><span class="line">      t.nextWaiter = node;</span><br><span class="line">  lastWaiter = node;</span><br><span class="line">  return node;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;    /**</span><br><span class="line">     *  &#x91CA;&#x653E;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x7684;state&#xFF0C;&#x5B9E;&#x9645;&#x8FD8;&#x662F;&#x8C03;&#x7528;tryRelease&#x65B9;&#x6CD5;</span><br><span class="line">     */</span><br><span class="line">   final int fullyRelease(Node node) {</span><br><span class="line">       boolean failed = true;</span><br><span class="line">       try {</span><br><span class="line">           int savedState = getState();</span><br><span class="line">           if (release(savedState)) {</span><br><span class="line">               failed = false;</span><br><span class="line">               return savedState;</span><br><span class="line">           } else {</span><br><span class="line">               throw new IllegalMonitorStateException();</span><br><span class="line">           }</span><br><span class="line">       } finally {</span><br><span class="line">           if (failed)</span><br><span class="line">               node.waitStatus = Node.CANCELLED;</span><br><span class="line">       }</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;    /**</span><br><span class="line">     *  &#x68C0;&#x67E5;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x5728;&#x4E0D;&#x5728;Sync&#x961F;&#x5217;</span><br><span class="line">     */</span><br><span class="line">   final boolean isOnSyncQueue(Node node) {</span><br><span class="line">       //&#x5982;&#x679C;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x72B6;&#x6001;&#x4E3A;CONDITION&#xFF0C;&#x4E00;&#x5B9A;&#x8FD8;&#x5728;Condition&#x961F;&#x5217;</span><br><span class="line">       //&#x5982;&#x679C;Sync&#x961F;&#x5217;&#x7684;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x4E3A;null&#xFF0C;&#x5219;&#x8868;&#x660E;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x4E00;&#x5B9A;&#x8FD8;&#x5728;Condition&#x961F;&#x5217;</span><br><span class="line">       if (node.waitStatus == Node.CONDITION || node.prev == null)</span><br><span class="line">           return false;</span><br><span class="line">       //&#x6709;&#x540E;&#x7EE7;&#x8282;&#x70B9;&#xFF0C;&#x4E5F;&#x6709;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#xFF0C;&#x90A3;&#x4E48;&#x4E00;&#x5B9A;&#x5728;Sync&#x961F;&#x5217;</span><br><span class="line">       if (node.next != null) // If has successor, it must be on queue</span><br><span class="line">           return true;</span><br><span class="line"></span><br><span class="line">       //&#x5012;&#x67E5;Node&#x8282;&#x70B9;&#xFF0C;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x4E0D;&#x80FD;&#x4E3A;null&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;if&#x5DF2;&#x7ECF;&#x505A;&#x4E86;&#x5224;&#x65AD;&#xFF0C;&#x5176;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x4E3A;non-null,&#x4F46;&#x662F;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x4E5F;&#x4E0D;&#x5728;Sync&#x4E5F;&#x662F;&#x53EF;&#x80FD;&#x7684;,&#x56E0;&#x4E3A;CAS&#x64CD;&#x4F5C;&#x5C06;&#x5176;&#x52A0;&#x5165;&#x961F;&#x5217;&#x4E5F;&#x53EF;&#x80FD;&#x5931;&#x8D25;&#xFF0C;&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x4ECE;&#x5C3E;&#x90E8;&#x5F00;&#x59CB;&#x904D;&#x5386;&#x786E;&#x4FDD;&#x5176;&#x5728;&#x961F;&#x5217;</span><br><span class="line">       return findNodeFromTail(node);</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+
+<h5 id="2&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signal-&#x5C06;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#x6700;&#x957F;&#x7684;&#x7EBF;&#x7A0B;&#xFF08;&#x5982;&#x679C;&#x5B58;&#x5728;&#xFF09;&#x4ECE;Condition&#x961F;&#x5217;&#x4E2D;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;"><a href="#2&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signal-&#x5C06;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#x6700;&#x957F;&#x7684;&#x7EBF;&#x7A0B;&#xFF08;&#x5982;&#x679C;&#x5B58;&#x5728;&#xFF09;&#x4ECE;Condition&#x961F;&#x5217;&#x4E2D;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;" class="headerlink" title="2&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signal() &#x5C06;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#x6700;&#x957F;&#x7684;&#x7EBF;&#x7A0B;&#xFF08;&#x5982;&#x679C;&#x5B58;&#x5728;&#xFF09;&#x4ECE;Condition&#x961F;&#x5217;&#x4E2D;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;"></a><strong>2&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signal() &#x5C06;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#x6700;&#x957F;&#x7684;&#x7EBF;&#x7A0B;&#xFF08;&#x5982;&#x679C;&#x5B58;&#x5728;&#xFF09;&#x4ECE;Condition&#x961F;&#x5217;&#x4E2D;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;</strong></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;   public final void signal() {</span><br><span class="line">       //&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x975E;&#x72EC;&#x5360;&#x7EBF;&#x7A0B;&#xFF0C;&#x62A5;&#x975E;&#x6CD5;&#x76D1;&#x89C6;&#x5668;&#x72B6;&#x6001;&#x5F02;&#x5E38;</span><br><span class="line">       if (!isHeldExclusively())</span><br><span class="line">           throw new IllegalMonitorStateException();</span><br><span class="line">       //&#x5934;&#x8282;&#x70B9;&#x662F;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#x6700;&#x957F;&#x7684;&#x8282;&#x70B9;</span><br><span class="line">       Node first = firstWaiter;</span><br><span class="line">       if (first != null)</span><br><span class="line">           doSignal(first);</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;   private void doSignal(Node first) {</span><br><span class="line">         do {</span><br><span class="line">             //&#x5982;&#x679C;&#x5934;&#x8282;&#x70B9;&#x7684;&#x4E0B;&#x4E00;&#x8282;&#x70B9;&#x4E3A;null&#xFF0C;&#x5219;&#x5C06;Condition&#x7684;lastWaiter&#x7F6E;&#x4E3A;null</span><br><span class="line">             if ( (firstWaiter = first.nextWaiter) == null)</span><br><span class="line">                 lastWaiter = null;</span><br><span class="line">             //&#x5C06;&#x5934;&#x7ED3;&#x70B9;&#x7684;&#x4E0B;&#x4E00;&#x4E2A;&#x8282;&#x70B9;&#x8BBE;&#x4E3A;null</span><br><span class="line">             first.nextWaiter = null;</span><br><span class="line">             //&#x88AB;&#x5524;&#x9192;&#x5E76;&#x4E14;&#x5934;&#x8282;&#x70B9;&#x4E0D;&#x4E3A;null&#x5219;&#x7ED3;&#x675F;&#x5FAA;&#x73AF;</span><br><span class="line">         } while (!transferForSignal(first) &amp;&amp;</span><br><span class="line">                  (first = firstWaiter) != null);</span><br><span class="line">     }</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;   final boolean transferForSignal(Node node) {</span><br><span class="line">       //&#x5982;&#x679C;&#x65E0;&#x6CD5;&#x6539;&#x53D8;&#x8282;&#x70B9;&#x72B6;&#x6001;&#xFF0C;&#x8BF4;&#x660E;&#x8282;&#x70B9;&#x5DF2;&#x7ECF;&#x88AB;&#x5524;&#x9192;</span><br><span class="line">       if (!compareAndSetWaitStatus(node, Node.CONDITION, 0))</span><br><span class="line">           return false;</span><br><span class="line">       //&#x5C06;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x6DFB;&#x52A0;&#x5230;Sync&#x961F;&#x5217;&#x5C3E;&#x90E8;&#xFF0C;&#x5E76;&#x8BBE;&#x7F6E;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x7684;waitStatus&#x4E3A;SIGNAL&#xFF0C;&#x8868;&#x660E;&#x540E;&#x7EE7;&#x6709;&#x8282;&#x70B9;&#xFF08;&#x53EF;&#x80FD;&#xFF09;&#x5C06;&#x88AB;&#x5524;&#x9192;&#xFF0C;&#x5982;&#x679C;&#x53D6;&#x6D88;&#x6216;&#x8005;&#x8BBE;&#x7F6E;waitStatus&#x5931;&#x8D25;&#xFF0C;&#x4F1A;&#x5524;&#x9192;&#x91CD;&#x65B0;&#x540C;&#x6B65;&#x64CD;&#x4F5C;&#xFF0C;&#x8FD9;&#x65F6;&#x5019;waitStatus&#x662F;&#x77AC;&#x65F6;&#x7684;&#xFF0C;&#x51FA;&#x73B0;&#x9519;&#x8BEF;&#x4E5F;&#x662F;&#x65E0;&#x59A8;&#x7684;</span><br><span class="line">       Node p = enq(node);</span><br><span class="line">       int ws = p.waitStatus;</span><br><span class="line">       if (ws &gt; 0 || !compareAndSetWaitStatus(p, ws, Node.SIGNAL))</span><br><span class="line">           LockSupport.unpark(node.thread);</span><br><span class="line">       return true;</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+
+<h5 id="3&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signalAll-&#x5C06;&#x6240;&#x6709;&#x7EBF;&#x7A0B;&#x4ECE;Condition&#x961F;&#x5217;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;&#x4E2D;&#x3002;"><a href="#3&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signalAll-&#x5C06;&#x6240;&#x6709;&#x7EBF;&#x7A0B;&#x4ECE;Condition&#x961F;&#x5217;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;&#x4E2D;&#x3002;" class="headerlink" title="3&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signalAll() &#x5C06;&#x6240;&#x6709;&#x7EBF;&#x7A0B;&#x4ECE;Condition&#x961F;&#x5217;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;&#x4E2D;&#x3002;"></a><strong>3&#x3001;&#x6838;&#x5FC3;&#x65B9;&#x6CD5;&#xFF1A;signalAll() &#x5C06;&#x6240;&#x6709;&#x7EBF;&#x7A0B;&#x4ECE;Condition&#x961F;&#x5217;&#x79FB;&#x52A8;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;&#x4E2D;&#x3002;</strong></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;   public final void signalAll() {</span><br><span class="line">       if (!isHeldExclusively())</span><br><span class="line">           throw new IllegalMonitorStateException();</span><br><span class="line">       Node first = firstWaiter;</span><br><span class="line">       if (first != null)</span><br><span class="line">           doSignalAll(first);</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;    /**</span><br><span class="line">     * &#x904D;&#x5386;&#x6240;&#x6709;&#x8282;&#x70B9;&#xFF0C;&#x52A0;&#x5165;&#x5230;&#x62E5;&#x6709;&#x9501;&#x7684;Sync&#x961F;&#x5217;</span><br><span class="line">     */</span><br><span class="line">   private void doSignalAll(Node first) {</span><br><span class="line">       lastWaiter = firstWaiter = null;</span><br><span class="line">       do {</span><br><span class="line">           Node next = first.nextWaiter;</span><br><span class="line">           first.nextWaiter = null;</span><br><span class="line">           transferForSignal(first);</span><br><span class="line">           first = next;</span><br><span class="line">       } while (first != null);</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/c54cf338adc1ccb6d62cf912159dd2f4.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端/" rel="tag"># 后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903513986695182.html" rel="next" title="一个朋友圈泛型问题引发的“案子”">
+                <i class="fa fa-chevron-left"></i> 一个朋友圈泛型问题引发的“案子”
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903516771713032.html" rel="prev" title="万字解读 Service Mesh服务网格新生代--Isti">
+                万字解读 Service Mesh服务网格新生代--Isti <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#啥子是条件队列？"><span class="nav-number">1.</span> <span class="nav-text">啥子是条件队列？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#来看一个应用示例"><span class="nav-number">2.</span> <span class="nav-text">来看一个应用示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#与Lock之间的实现关系"><span class="nav-number">3.</span> <span class="nav-text">与Lock之间的实现关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ConditionObject实现"><span class="nav-number">4.</span> <span class="nav-text">ConditionObject实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、核心方法：await-不可中断的条件等待实现"><span class="nav-number">4.1.</span> <span class="nav-text">1、核心方法：await() 不可中断的条件等待实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、核心方法：signal-将等待时间最长的线程（如果存在）从Condition队列中移动到拥有锁的Sync队列"><span class="nav-number">4.2.</span> <span class="nav-text">2、核心方法：signal() 将等待时间最长的线程（如果存在）从Condition队列中移动到拥有锁的Sync队列</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、核心方法：signalAll-将所有线程从Condition队列移动到拥有锁的Sync队列中。"><span class="nav-number">4.3.</span> <span class="nav-text">3、核心方法：signalAll() 将所有线程从Condition队列移动到拥有锁的Sync队列中。</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

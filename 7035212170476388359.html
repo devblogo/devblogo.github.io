@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x200B;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;13&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux之Poll机制理解 Linux内核实现过程 pol">
+<meta property="og:url" content="https://dev.newban.cn/7035212170476388359.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x200B;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;13&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T12:36:57.373Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux之Poll机制理解 Linux内核实现过程 pol">
+<meta name="twitter:description" content="&amp;#x200B;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;13&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035212170476388359.html">
+
+
+
+
+
+  <title>Linux之Poll机制理解 Linux内核实现过程 pol | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux之Poll机制理解 Linux内核实现过程 pol</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-27T19:44:38+08:00">
+                2021-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x200B;&#x8FD9;&#x662F;&#x6211;&#x53C2;&#x4E0E;11&#x6708;&#x66F4;&#x6587;&#x6311;&#x6218;&#x7684;&#x7B2C;13&#x5929;&#xFF0C;&#x6D3B;&#x52A8;&#x8BE6;&#x60C5;&#x67E5;&#x770B;&#xFF1A;<a href="https://dev.newban.cn/7023643374569816095/">2021&#x6700;&#x540E;&#x4E00;&#x6B21;&#x66F4;&#x6587;&#x6311;&#x6218;</a></p>
+<p>&#x6700;&#x8FD1;&#x770B;&#x4E86;&#x4E00;&#x4E0B;Linux Poll &#x673A;&#x5236;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x770B;&#x4E86;&#x97E6;&#x8001;&#x5E08;&#x7684;&#x5206;&#x6790;&#x6587;&#x6863;&#xFF0C;&#x603B;&#x7ED3;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><code>int poll(struct pollfd *fds,nfds_t nfds, int timeout);</code></p>
+<p>&#x603B;&#x7684;&#x6765;&#x8BF4;&#xFF0C;Poll&#x673A;&#x5236;&#x4F1A;&#x5224;&#x65AD;fds&#x4E2D;&#x7684;&#x6587;&#x4EF6;&#x662F;&#x5426;&#x53EF;&#x8BFB;&#xFF0C;&#x5982;&#x679C;&#x53EF;&#x8BFB;&#x5219;&#x4F1A;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;&#xFF0C;&#x8FD4;&#x56DE;&#x7684;&#x503C;&#x5C31;&#x662F;&#x53EF;&#x8BFB;fd&#x7684;&#x6570;&#x91CF;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x53EF;&#x8BFB;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x8FDB;&#x7A0B;&#x5C31;&#x4F1A;&#x4F11;&#x7720;timeout&#x8FD9;&#x4E48;&#x957F;&#x7684;&#x65F6;&#x95F4;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x6765;&#x5224;&#x65AD;&#x662F;&#x5426;&#x6709;&#x6587;&#x4EF6;&#x53EF;&#x8BFB;&#xFF0C;&#x5982;&#x679C;&#x6709;&#xFF0C;&#x8FD4;&#x56DE;fd&#x7684;&#x6570;&#x91CF;&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x6709;&#xFF0C;&#x5219;&#x8FD4;&#x56DE;0.  </p>
+<h1 id="Linux&#x5185;&#x6838;&#x5B9E;&#x73B0;&#x8FC7;&#x7A0B;"><a href="#Linux&#x5185;&#x6838;&#x5B9E;&#x73B0;&#x8FC7;&#x7A0B;" class="headerlink" title="Linux&#x5185;&#x6838;&#x5B9E;&#x73B0;&#x8FC7;&#x7A0B;"></a>Linux&#x5185;&#x6838;&#x5B9E;&#x73B0;&#x8FC7;&#x7A0B;</h1><p>&#x5728;&#x5185;&#x6838;&#x4E2D;&#x5927;&#x81F4;&#x4E0A;&#x5B9E;&#x73B0;&#x8FC7;&#x7A0B;&#xFF1A;</p>
+<p>&#x5F53;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x8C03;&#x7528;poll&#x51FD;&#x6570;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4F1A;&#x8C03;&#x7528;&#x5230;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;sys_poll&#x51FD;&#x6570;&#xFF0C;&#x8BE5;&#x51FD;&#x6570;&#x6700;&#x7EC8;&#x8C03;&#x7528;<strong>do_poll</strong>&#x51FD;&#x6570;&#xFF0C;do_poll&#x51FD;&#x6570;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x6B7B;&#x5FAA;&#x73AF;&#xFF0C;&#x5728;&#x91CC;&#x9762;&#x53C8;&#x4F1A;&#x5229;&#x7528;do_pollfd&#x51FD;&#x6570;&#x53BB;&#x8C03;&#x7528;&#x9A71;&#x52A8;&#x4E2D;&#x7684;poll&#x51FD;&#x6570;&#xFF08;fds&#x4E2D;&#x6BCF;&#x4E2A;&#x6210;&#x5458;&#x7684;&#x5B57;&#x7B26;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x90FD;&#x4F1A;&#x88AB;&#x626B;&#x63CF;&#x5230;&#xFF09;&#xFF0C;<strong>&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x4E2D;&#x7684;Poll&#x51FD;&#x6570;&#x7684;&#x5DE5;&#x4F5C;&#x6709;&#x4E24;&#x4E2A;</strong>&#xFF0C;&#x4E00;&#x4E2A;&#x5C31;&#x662F;&#x8C03;&#x7528;poll_wait &#x51FD;&#x6570;&#xFF0C;&#x628A;&#x8FDB;&#x7A0B;&#x6302;&#x5230;&#x7B49;&#x5F85;&#x961F;&#x5217;&#x4E2D;&#x53BB;&#xFF08;&#x8FD9;&#x4E2A;&#x662F;&#x5FC5;&#x987B;&#x7684;&#xFF0C;&#x4F60;&#x8981;&#x7761;&#x7720;&#xFF0C;&#x5FC5;&#x987B;&#x8981;&#x5728;&#x4E00;&#x4E2A;&#x7B49;&#x5F85;&#x961F;&#x5217;&#x4E0A;&#x9762;&#xFF0C;&#x5426;&#x5219;&#x5230;&#x54EA;&#x91CC;&#x53BB;&#x5524;&#x9192;&#x4F60;&#x5462;&#x3002;&#x53E6;&#x4E00;&#x4E2A;&#x662F;&#x786E;&#x5B9A;&#x76F8;&#x5173;&#x7684;fd&#x662F;&#x5426;&#x6709;&#x5185;&#x5BB9;&#x53EF; &#x8BFB;&#xFF0C;&#x5982;&#x679C;&#x53EF;&#x8BFB;&#xFF0C;&#x5C31;&#x8FD4;&#x56DE;1&#xFF0C;&#x5426;&#x5219;&#x8FD4;&#x56DE;0&#xFF0C;&#x5982;&#x679C;&#x8FD4;&#x56DE;1 &#xFF0C;do_poll&#x51FD;&#x6570;&#x4E2D;&#x7684;count++&#xFF0C;<br>&#x7136;&#x540E;  do_poll&#x51FD;&#x6570;&#x7136;&#x540E;&#x5224;&#x65AD;&#x4E09;&#x4E2A;&#x6761;&#x4EF6;&#xFF08;if (count ||!timeout || signal_pending(current))&#xFF09;&#x5982;&#x679C;&#x6210;&#x7ACB;&#x5C31;&#x76F4;&#x63A5;&#x8DF3;&#x51FA;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x6210;&#x7ACB;&#xFF0C;&#x5C31;&#x7761;&#x7720;timeout&#x4E2A;jiffes&#x8FD9;&#x4E48;&#x957F;&#x7684;&#x65F6;&#x95F4;&#xFF08;&#x8C03;&#x7528;schedule_timeout&#x5B9E;&#x73B0;&#x7761;&#x7720;&#xFF09;&#xFF0C;&#x5982;&#x679C;&#x5728;&#x8FD9;&#x6BB5;&#x65F6;&#x95F4;&#x5185;&#x6CA1;&#x6709;&#x5176;&#x4ED6;&#x8FDB;&#x7A0B;&#x53BB;&#x5524;&#x9192;&#x5B83;&#xFF0C;&#x90A3;&#x4E48;&#x7B2C;&#x4E8C;&#x6B21;&#x6267;&#x884C;&#x5224;&#x65AD;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x8DF3;&#x51FA;&#x6B7B;&#x5FAA;&#x73AF;&#x3002;&#x5982;&#x679C;&#x5728;&#x8FD9;&#x6BB5;&#x65F6;&#x95F4;&#x5185;&#x6709;&#x5176;&#x4ED6;&#x8FDB;&#x7A0B;&#x5524;&#x9192;&#x5B83;&#xFF0C;&#x90A3;&#x4E48;&#x4E5F;&#x53EF;&#x4EE5;&#x8DF3;&#x51FA;&#x6B7B;&#x5FAA;&#x73AF;&#x8FD4;&#x56DE;&#xFF08;&#x4F8B;&#x5982;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5229;&#x7528;&#x4E2D;&#x65AD;&#x5904;&#x7406;&#x51FD;&#x6570;&#x53BB;&#x5524;&#x9192;&#x5B83;&#xFF0C;&#x8FD9;&#x6837;&#x7684;&#x8BDD;&#x4E00;&#x6709;&#x6570;&#x636E;&#x53EF;&#x8BFB;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x8BA9;&#x5B83;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;&#xFF09;&#x3002;</p>
+<h1 id="poll&#x673A;&#x5236;&#x5206;&#x6790;"><a href="#poll&#x673A;&#x5236;&#x5206;&#x6790;" class="headerlink" title="poll&#x673A;&#x5236;&#x5206;&#x6790;"></a>poll&#x673A;&#x5236;&#x5206;&#x6790;</h1><p>&#x6240;&#x6709;&#x7684;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#xFF0C;&#x57FA;&#x4E8E;&#x90FD;&#x53EF;&#x4EE5;&#x5728;&#x5B83;&#x7684;&#x540D;&#x5B57;&#x524D;&#x52A0;&#x4E0A;&#x201C;sys_&#x201D;&#x524D;&#x7F00;&#xFF0C;&#x8FD9;&#x5C31;&#x662F;&#x5B83;&#x5728;&#x5185;&#x6838;&#x4E2D;&#x5BF9;&#x5E94;&#x7684;&#x51FD;&#x6570;&#x3002;&#x6BD4;&#x5982;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;open&#x3001;read&#x3001;write&#x3001;poll&#xFF0C;&#x4E0E;&#x4E4B;&#x5BF9;&#x5E94;&#x7684;&#x5185;&#x6838;&#x51FD;&#x6570;&#x4E3A;&#xFF1A;sys_open&#x3001;sys_read&#x3001;sys_write&#x3001;sys_poll&#x3002;</p>
+<h2 id="&#x5185;&#x6838;&#x6846;&#x67B6;"><a href="#&#x5185;&#x6838;&#x6846;&#x67B6;" class="headerlink" title="&#x5185;&#x6838;&#x6846;&#x67B6;"></a>&#x5185;&#x6838;&#x6846;&#x67B6;</h2><p>&#x5BF9;&#x4E8E;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;poll&#x6216;select&#xFF0C;&#x5B83;&#x4EEC;&#x5BF9;&#x5E94;&#x7684;&#x5185;&#x6838;&#x51FD;&#x6570;&#x90FD;&#x662F;sys_poll&#x3002;&#x5206;&#x6790;sys_poll&#xFF0C;&#x5373;&#x53EF;&#x7406;&#x89E3;poll&#x673A;&#x5236;&#x3002;</p>
+<ol>
+<li>sys_poll&#x51FD;&#x6570;&#x4F4D;&#x4E8E;fs/select.c&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;asmlinkagelong sys_poll(struct pollfd __user *ufds, unsigned int nfds,</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; long timeout_msecs)</span><br><span class="line"></span><br><span class="line">{</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; s64 timeout_jiffies;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if (timeout_msecs &gt; 0) {</span><br><span class="line"></span><br><span class="line">#ifHZ &gt; 1000</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; /* We can only overflow if HZ &gt;1000 */</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if (timeout_msecs / 1000 &gt;(s64)0x7fffffffffffffffULL / (s64)HZ)</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; timeout_jiffies = -1;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; else</span><br><span class="line"></span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; timeout_jiffies =msecs_to_jiffies(timeout_msecs);</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; } else {</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; /* Infinite (&lt; 0) or no (0)timeout */</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; timeout_jiffies = timeout_msecs;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; }</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; return do_sys_poll(ufds,nfds, &amp;timeout_jiffies);</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5B83;&#x5BF9;&#x8D85;&#x65F6;&#x53C2;&#x6570;&#x7A0D;&#x4F5C;&#x5904;&#x7406;&#x540E;&#xFF0C;&#x76F4;&#x63A5;&#x8C03;&#x7528;do_sys_poll&#x3002;</p>
+<ol start="2">
+<li>do_sys_poll&#x51FD;&#x6570;&#x4E5F;&#x4F4D;&#x4E8E;&#x4F4D;&#x4E8E;fs/select.c&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x5FFD;&#x7565;&#x5176;&#x4ED6;&#x4EE3;&#x7801;&#xFF1A;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;intdo_sys_poll(struct pollfd __user *ufds, unsigned int nfds, s64 *timeout)</span><br><span class="line"></span><br><span class="line">{</span><br><span class="line"></span><br><span class="line">&#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line">poll_initwait(&amp;table);</span><br><span class="line"></span><br><span class="line">&#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; fdcount = do_poll(nfds, head,&amp;table, timeout);</span><br><span class="line"></span><br><span class="line">&#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>poll_initwait&#x51FD;&#x6570;&#x975E;&#x5E38;&#x7B80;&#x5355;&#xFF0C;&#x5B83;&#x521D;&#x59CB;&#x5316;&#x4E00;&#x4E2A;poll_wqueues&#x53D8;&#x91CF;table&#xFF1A;</p>
+<p>poll_initwait&gt; init_poll_funcptr(&amp;pwq-&gt;pt, __pollwait); &gt; pt-&gt;qproc = qproc;</p>
+<p>&#x5373;table-&gt;pt-&gt;qproc= __pollwait&#xFF0C;__pollwait&#x5C06;&#x5728;&#x9A71;&#x52A8;&#x7684;poll&#x51FD;&#x6570;&#x91CC;&#x7528;&#x5230;&#x3002;</p>
+<ol start="3">
+<li>do_sys_poll&#x51FD;&#x6570;&#x4F4D;&#x4E8E;fs/select.c&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;static int do_poll(unsigned int nfds,&#xA0; struct poll_list *list,</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; &#xA0;&#xA0; struct poll_wqueues *wait, s64 *timeout)</span><br><span class="line"></span><br><span class="line">{</span><br><span class="line"></span><br><span class="line"> &#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line"> &#xA0; for (;;){</span><br><span class="line"></span><br><span class="line"> &#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line"> &#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if(do_pollfd(pfd, pt)) {</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; count++;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; pt = NULL;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; }</span><br><span class="line"></span><br><span class="line"> &#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if(count || !*timeout || signal_pending(current))</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; break;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; count= wait-&gt;error;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if(count)</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; break;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if(*timeout &lt; 0) {</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; /*Wait indefinitely */</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; __timeout= MAX_SCHEDULE_TIMEOUT;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; }else if (unlikely(*timeout &gt;= (s64)MAX_SCHEDULE_TIMEOUT-1)) {</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; /*</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; * Wait for longer than MAX_SCHEDULE_TIMEOUT. Do it in</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; * a loop</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; */</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; __timeout= MAX_SCHEDULE_TIMEOUT - 1;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; *timeout-= __timeout;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; }else {</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; __timeout= *timeout;&#xA0;</span><br><span class="line">           *timeout= 0;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; }</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; __timeout= schedule_timeout(__timeout); // &#x4F11;&#x7720;&#x65F6;&#x95F4;&#x7531;&#x5E94;&#x7528;&#x63D0;&#x4F9B;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if(*timeout &gt;= 0)</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; *timeout+= __timeout;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0; }</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0; __set_current_state(TASK_RUNNING);</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0; returncount;</span><br><span class="line"></span><br><span class="line"> }</span><br></pre></td></tr></table></figure>
+
+<p>&#x5206;&#x6790;&#x5176;&#x4E2D;&#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x53EF;&#x4EE5;&#x53D1;&#x73B0;&#xFF0C;&#x5B83;&#x7684;<strong>&#x4F5C;&#x7528;</strong>&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>&#x2460;    &#x4ECE;02&#x884C;&#x53EF;&#x4EE5;&#x77E5;&#x9053;&#xFF0C;&#x8FD9;&#x662F;&#x4E2A;&#x5FAA;&#x73AF;&#xFF0C;&#x5B83;&#x9000;&#x51FA;&#x7684;&#x6761;&#x4EF6;&#x4E3A;&#xFF1A;</p>
+<p>a.      09&#x884C;&#x7684;3&#x4E2A;&#x6761;&#x4EF6;&#x4E4B;&#x4E00;(count&#x975E;0&#xFF0C;&#x8D85;&#x65F6;&#x3001;&#x6709;&#x4FE1;&#x53F7;&#x7B49;&#x5F85;&#x5904;&#x7406;)</p>
+<p>count&#x987A;0&#x8868;&#x793A;04&#x884C;&#x7684;do_pollfd&#x81F3;&#x5C11;&#x6709;&#x4E00;&#x4E2A;&#x6210;&#x529F;&#x3002;</p>
+<p>b.      11&#x3001;12&#x884C;&#xFF1A;&#x53D1;&#x751F;&#x9519;&#x8BEF;</p>
+<p>&#x2461;    &#x91CD;&#x70B9;&#x5728;do_pollfd&#x51FD;&#x6570;&#xFF0C;&#x540E;&#x9762;&#x518D;&#x5206;&#x6790;</p>
+<p>&#x2462;    &#x7B2C;30&#x884C;&#xFF0C;&#x8BA9;&#x672C;&#x8FDB;&#x7A0B;&#x4F11;&#x7720;&#x4E00;&#x6BB5;&#x65F6;&#x95F4;&#xFF0C;&#x6CE8;&#x610F;&#xFF1A;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x6267;&#x884C;poll&#x8C03;&#x7528;&#x540E;&#xFF0C;&#x5982;&#x679C;&#x2460;&#x2461;&#x7684;&#x6761;&#x4EF6;&#x4E0D;&#x6EE1;&#x8DB3;&#xFF0C;&#x8FDB;&#x7A0B;&#x5C31;&#x4F1A;&#x8FDB;&#x5165;&#x4F11;&#x7720;&#x3002;&#x90A3;&#x4E48;&#xFF0C;&#x8C01;&#x5524;&#x9192;&#x5462;&#xFF1F;&#x9664;&#x4E86;&#x4F11;&#x7720;&#x5230;&#x6307;&#x5B9A;&#x65F6;&#x95F4;&#x88AB;&#x7CFB;&#x7EDF;&#x5524;&#x9192;&#x5916;&#xFF0C;&#x8FD8;&#x53EF;&#x4EE5;&#x88AB;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x5524;&#x9192;&#x2500;&#x2500;&#x8BB0;&#x4F4F;&#x8FD9;&#x70B9;&#xFF0C;&#x8FD9;&#x5C31;&#x662F;&#x4E3A;&#x4EC0;&#x4E48;&#x9A71;&#x52A8;&#x7684;poll&#x91CC;&#x8981;&#x8C03;&#x7528;poll_wait&#x7684;&#x539F;&#x56E0;&#xFF0C;&#x540E;&#x9762;&#x5206;&#x6790;&#x3002;</p>
+<ol start="4">
+<li>do_pollfd&#x51FD;&#x6570;&#x4F4D;&#x4E8E;fs/select.c&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;static inline unsigned int do_pollfd(struct pollfd*pollfd, poll_table *pwait)</span><br><span class="line"></span><br><span class="line">{</span><br><span class="line"></span><br><span class="line">&#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if(file-&gt;f_op &amp;&amp; file-&gt;f_op-&gt;poll)</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; mask= file-&gt;f_op-&gt;poll(file, pwait);</span><br><span class="line"></span><br><span class="line">&#x2026;&#x2026;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x89C1;&#xFF0C;&#x5B83;&#x5C31;&#x662F;&#x8C03;&#x7528;&#x6211;&#x4EEC;&#x7684;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x91CC;&#x6CE8;&#x518C;&#x7684;poll&#x51FD;&#x6570;&#x3002;</p>
+<h2 id="&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;"><a href="#&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;" class="headerlink" title="&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;"></a>&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;</h2><p>&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x91CC;&#x4E0E;poll&#x76F8;&#x5173;&#x7684;&#x5730;&#x65B9;&#x6709;&#x4E24;&#x5904;&#xFF1A;&#x4E00;&#x662F;&#x6784;&#x9020;file_operation&#x7ED3;&#x6784;&#x65F6;&#xFF0C;&#x8981;&#x5B9A;&#x4E49;&#x81EA;&#x5DF1;&#x7684;poll&#x51FD;&#x6570;&#x3002;&#x4E8C;&#x662F;&#x901A;&#x8FC7;poll_wait&#x6765;&#x8C03;&#x7528;&#x4E0A;&#x9762;&#x8BF4;&#x5230;&#x7684;__pollwait&#x51FD;&#x6570;&#xFF0C;pollwait&#x7684;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;staticinline void poll_wait(struct file * filp, wait_queue_head_t * wait_address,poll_table *p)</span><br><span class="line"></span><br><span class="line">{</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if (p &amp;&amp; wait_address)</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; p-&gt;qproc(filp, wait_address, p);</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>p-&gt;qproc&#x5C31;&#x662F;__pollwait&#x51FD;&#x6570;&#xFF0C;&#x4ECE;&#x5B83;&#x7684;&#x4EE3;&#x7801;&#x53EF;&#x77E5;&#xFF0C;&#x5B83;&#x53EA;&#x662F;&#x628A;&#x5F53;&#x524D;&#x8FDB;&#x7A0B;&#x6302;&#x5165;&#x6211;&#x4EEC;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x91CC;&#x5B9A;&#x4E49;&#x7684;&#x4E00;&#x4E2A;&#x961F;&#x5217;&#x91CC;&#x800C;&#x5DF2;&#x3002;&#x5B83;&#x7684;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">c++&#x590D;&#x5236;&#x4EE3;&#x7801;staticvoid __pollwait(struct file *filp, wait_queue_head_t *wait_address,</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; poll_table *p)</span><br><span class="line"></span><br><span class="line">{</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; struct poll_table_entry *entry =poll_get_entry(p);</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; if (!entry)</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; return;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; get_file(filp);</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; entry-&gt;filp = filp;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; entry-&gt;wait_address = wait_address;</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; init_waitqueue_entry(&amp;entry-&gt;wait,current);</span><br><span class="line"></span><br><span class="line">&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0;&#xA0; add_wait_queue(wait_address,&amp;entry-&gt;wait);</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6267;&#x884C;&#x5230;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x7684;poll_wait&#x51FD;&#x6570;&#x65F6;&#xFF0C;&#x8FDB;&#x7A0B;&#x5E76;&#x6CA1;&#x6709;&#x4F11;&#x7720;&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x91CC;&#x5B9E;&#x73B0;&#x7684;poll&#x51FD;&#x6570;&#x662F;&#x4E0D;&#x4F1A;&#x5F15;&#x8D77;&#x4F11;&#x7720;&#x7684;&#x3002;&#x8BA9;&#x8FDB;&#x7A0B;&#x8FDB;&#x5165;&#x4F11;&#x7720;&#xFF0C;&#x662F;&#x524D;&#x9762;&#x5206;&#x6790;&#x7684;do_sys_poll&#x51FD;&#x6570;&#x7684;30&#x884C;&#x201C;__timeout = schedule_timeout(__timeout)&#x201D;&#x3002;</p>
+<p>poll_wait&#x53EA;&#x662F;&#x628A;&#x672C;&#x8FDB;&#x7A0B;&#x6302;&#x5165;&#x67D0;&#x4E2A;&#x961F;&#x5217;&#xFF0C;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x8C03;&#x7528;poll &gt; sys_poll&gt; do_sys_poll &gt; poll_initwait&#xFF0C;do_poll &gt; do_pollfd &gt; &#x6211;&#x4EEC;&#x81EA;&#x5DF1;&#x5199;&#x7684;poll&#x51FD;&#x6570;&#x540E;&#xFF0C;&#x518D;&#x8C03;&#x7528;schedule_timeout&#x8FDB;&#x5165;&#x4F11;&#x7720;&#x3002;&#x5982;&#x679C;&#x6211;&#x4EEC;&#x7684;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x53D1;&#x73B0;&#x60C5;&#x51B5;&#x5C31;&#x7EEA;&#xFF0C;&#x53EF;&#x4EE5;&#x628A;&#x8FD9;&#x4E2A;&#x961F;&#x5217;&#x4E0A;&#x6302;&#x7740;&#x7684;&#x8FDB;&#x7A0B;&#x5524;&#x9192;&#x3002;&#x53EF;&#x89C1;&#xFF0C;poll_wait&#x7684;&#x4F5C;&#x7528;&#xFF0C;&#x53EA;&#x662F;&#x4E3A;&#x4E86;&#x8BA9;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x80FD;&#x627E;&#x5230;&#x8981;&#x5524;&#x9192;&#x7684;&#x8FDB;&#x7A0B;&#x3002;&#x5373;&#x4F7F;&#x4E0D;&#x7528;poll_wait&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x7A0B;&#x5E8F;&#x4E5F;&#x6709;&#x673A;&#x4F1A;&#x88AB;&#x5524;&#x9192;&#xFF1A;chedule_timeout(__timeout)&#xFF0C;&#x53EA;&#x662F;&#x4F11;&#x7720;__time_out&#x8FD9;&#x6BB5;&#x65F6;&#x95F4;&#x3002;</p>
+<h1 id="&#x603B;&#x7ED3;&#x4E00;&#x4E0B;poll&#x673A;&#x5236;"><a href="#&#x603B;&#x7ED3;&#x4E00;&#x4E0B;poll&#x673A;&#x5236;" class="headerlink" title="&#x603B;&#x7ED3;&#x4E00;&#x4E0B;poll&#x673A;&#x5236;"></a>&#x603B;&#x7ED3;&#x4E00;&#x4E0B;poll&#x673A;&#x5236;</h1><ol>
+<li>poll &gt; sys_poll &gt; do_sys_poll &gt;poll_initwait&#xFF0C;poll_initwait&#x51FD;&#x6570;&#x6CE8;&#x518C;&#x4E00;&#x4E0B;&#x56DE;&#x8C03;&#x51FD;&#x6570;__pollwait&#xFF0C;&#x5B83;&#x5C31;&#x662F;&#x6211;&#x4EEC;&#x7684;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x6267;&#x884C;poll_wait&#x65F6;&#xFF0C;&#x771F;&#x6B63;&#x88AB;&#x8C03;&#x7528;&#x7684;&#x51FD;&#x6570;&#x3002;</li>
+<li>&#x63A5;&#x4E0B;&#x6765;&#x6267;&#x884C;file-&gt;f_op-&gt;poll&#xFF0C;&#x5373;&#x6211;&#x4EEC;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x91CC;&#x81EA;&#x5DF1;&#x5B9E;&#x73B0;&#x7684;poll&#x51FD;&#x6570;</li>
+</ol>
+<p>   &#x5B83;&#x4F1A;&#x8C03;&#x7528;poll_wait&#x628A;&#x81EA;&#x5DF1;&#x6302;&#x5165;&#x67D0;&#x4E2A;&#x961F;&#x5217;&#xFF0C;&#x8FD9;&#x4E2A;&#x961F;&#x5217;&#x4E5F;&#x662F;&#x6211;&#x4EEC;&#x7684;&#x9A71;&#x52A8;&#x81EA;&#x5DF1;&#x5B9A;&#x4E49;&#x7684;&#xFF1B;</p>
+<p>   &#x5B83;&#x8FD8;&#x5224;&#x65AD;&#x4E00;&#x4E0B;&#x8BBE;&#x5907;&#x662F;&#x5426;&#x5C31;&#x7EEA;&#x3002;</p>
+<ol start="3">
+<li>&#x5982;&#x679C;&#x8BBE;&#x5907;&#x672A;&#x5C31;&#x7EEA;&#xFF0C;do_sys_poll&#x91CC;&#x4F1A;&#x8BA9;&#x8FDB;&#x7A0B;&#x4F11;&#x7720;&#x4E00;&#x5B9A;&#x65F6;&#x95F4;&#xFF0C;&#x8FD9;&#x4E2A;&#x65F6;&#x95F4;&#x662F;&#x5E94;&#x7528;&#x63D0;&#x4F9B;&#x7684;&#x201C;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x201D;</li>
+<li>&#x8FDB;&#x7A0B;&#x88AB;&#x5524;&#x9192;&#x7684;&#x6761;&#x4EF6;&#x6709;2&#xFF1A;&#x4E00;&#x662F;&#x4E0A;&#x9762;&#x8BF4;&#x7684;&#x201C;&#x4E00;&#x5B9A;&#x65F6;&#x95F4;&#x201D;&#x5230;&#x4E86;&#xFF0C;&#x4E8C;&#x662F;&#x88AB;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x5524;&#x9192;&#x3002;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x53D1;&#x73B0;&#x6761;&#x4EF6;&#x5C31;&#x7EEA;&#x65F6;&#xFF0C;&#x5C31;&#x628A;&#x201C;&#x67D0;&#x4E2A;&#x961F;&#x5217;&#x201D;&#x4E0A;&#x6302;&#x7740;&#x7684;&#x8FDB;&#x7A0B;&#x5524;&#x9192;&#xFF0C;&#x8FD9;&#x4E2A;&#x961F;&#x5217;&#xFF0C;&#x5C31;&#x662F;&#x524D;&#x9762;&#x901A;&#x8FC7;poll_wait&#x628A;&#x672C;&#x8FDB;&#x7A0B;&#x6302;&#x8FC7;&#x53BB;&#x7684;&#x961F;&#x5217;&#x3002;</li>
+<li>&#x5982;&#x679C;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#x6CA1;&#x6709;&#x53BB;&#x5524;&#x9192;&#x8FDB;&#x7A0B;&#xFF0C;&#x90A3;&#x4E48;chedule_timeout(__timeou)&#x8D85;&#x65F6;&#x540E;&#xFF0C;&#x4F1A;&#x91CD;&#x590D;2&#x3001;3&#x52A8;&#x4F5C;1&#x6B21;&#xFF0C;&#x76F4;&#x5230;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x7684;poll&#x8C03;&#x7528;&#x4F20;&#x5165;&#x7684;&#x65F6;&#x95F4;&#x5230;&#x8FBE;&#xFF0C; &#x7136;&#x540E;&#x8FD4;&#x56DE;&#x3002;</li>
+</ol>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/d5ed6528659bdfd100e26c691eb34b0c.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035201647353528334.html" rel="next" title="盒式布局">
+                <i class="fa fa-chevron-left"></i> 盒式布局
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035223864627953700.html" rel="prev" title="【Spring Boot 快速入门】二十、Spring Bo">
+                【Spring Boot 快速入门】二十、Spring Bo <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux内核实现过程"><span class="nav-number">1.</span> <span class="nav-text">Linux内核实现过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#poll机制分析"><span class="nav-number">2.</span> <span class="nav-text">poll机制分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#内核框架"><span class="nav-number">2.1.</span> <span class="nav-text">内核框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#驱动程序"><span class="nav-number">2.2.</span> <span class="nav-text">驱动程序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结一下poll机制"><span class="nav-number">3.</span> <span class="nav-text">总结一下poll机制</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

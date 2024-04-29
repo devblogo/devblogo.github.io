@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;7&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;&amp;">
+<meta name="keywords" content="Python,后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="APScheduler原理分析">
+<meta property="og:url" content="https://dev.newban.cn/7036044818467782692.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;7&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;&amp;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T08:11:18.186Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="APScheduler原理分析">
+<meta name="twitter:description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;7&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;&amp;">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7036044818467782692.html">
+
+
+
+
+
+  <title>APScheduler原理分析 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">APScheduler原理分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-30T01:46:18+08:00">
+                2021-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x300C;&#x8FD9;&#x662F;&#x6211;&#x53C2;&#x4E0E;11&#x6708;&#x66F4;&#x6587;&#x6311;&#x6218;&#x7684;&#x7B2C;7&#x5929;&#xFF0C;&#x6D3B;&#x52A8;&#x8BE6;&#x60C5;&#x67E5;&#x770B;&#xFF1A;<a href="https://dev.newban.cn/7023643374569816095">2021&#x6700;&#x540E;&#x4E00;&#x6B21;&#x66F4;&#x6587;&#x6311;&#x6218;</a>&#x300D;</p>
+<h2 id="&#x524D;&#x8BB0;"><a href="#&#x524D;&#x8BB0;" class="headerlink" title="&#x524D;&#x8BB0;"></a>&#x524D;&#x8BB0;</h2><p>&#x6700;&#x8FD1;&#x7531;&#x4E8E;&#x8D26;&#x5355;&#x63D0;&#x4EA4;&#x548C;&#x811A;&#x672C;&#x8FC7;&#x591A;&#x4E0D;&#x597D;&#x63A7;&#x5236;&#x7684;&#x539F;&#x56E0;,&#x4E00;&#x76F4;&#x5728;&#x5BFB;&#x627E;&#x89E3;&#x51B3;&#x65B9;&#x6848;,&#x53D1;&#x73B0;APScheduler&#x6BD4;&#x8F83;&#x8F7B;&#x91CF;&#x7EA7;&#x4EE5;&#x53CA;&#x9002;&#x5408;&#x6211;&#x7684;&#x8D26;&#x5355;&#x63D0;&#x4EA4;,&#x548C;&#x811A;&#x672C;&#x8FD0;&#x884C;&#x63A7;&#x5236;(&#x5982;&#x679C;&#x811A;&#x672C;&#x8FD0;&#x884C;&#x9700;&#x8981;&#x4F9D;&#x8D56;&#x7684;&#x8BDD;&#x5C31;&#x53EF;&#x4EE5;&#x4E0A;AirFlow).&#x4E3A;&#x4E86;&#x5F04;&#x6E05;&#x695A;&#x539F;&#x7406;,&#x4EE5;&#x53CA;&#x66F4;&#x597D;&#x7684;&#x4F7F;&#x7528;APScheduler,&#x6240;&#x4EE5;&#x9605;&#x8BFB;&#x4E86;APScheduler&#x4EE3;&#x7801;.&#x5176;&#x5B9E;&#x662F;APScheduler&#x4EE3;&#x7801;&#x91CF;&#x6BD4;&#x8F83;&#x5C11;&#x7684;&#x5206;&#x6790;&#x8D77;&#x6765;&#x624D;&#x5BB9;&#x6613;(&#x9003;)</p>
+<p>&#x4E0D;&#x8FC7;apscheduler&#x6709;&#x4E00;&#x4E2A;&#x81F4;&#x547D;&#x7684;&#x7F3A;&#x70B9;, &#x9664;,&#x7531;&#x4E8E;apscheduler&#x7684;&#x5B9E;&#x73B0;&#x6BD4;&#x8F83;&#x7B80;&#x5355;, &#x5728;&#x521D;&#x59CB;&#x5316;&#x65F6;, &#x80FD;&#x8FBE;&#x5230;&#x5206;&#x5E03;&#x5F0F;work&#x7684;&#x6548;&#x679C;&#x5916;, &#x5728;&#x8FD0;&#x884C;&#x65F6;&#x589E;&#x52A0;&#x4EFB;&#x52A1;&#x65F6;, &#x5E76;&#x4E0D;&#x4F1A;&#x540C;&#x6B65;&#x5230;&#x6BCF;&#x4E2A;work.</p>
+<p><strong>&#x6CE8;:</strong> &#x4E3A;&#x4E86;&#x8282;&#x7701;&#x7BC7;&#x5E45;,&#x4E0B;&#x9762;&#x5206;&#x6790;&#x4EE3;&#x7801;&#x65F6;&#x5927;&#x591A;&#x6570;&#x662F;&#x53EA;&#x8D34;github&#x7684;&#x6E90;&#x7801;&#x94FE;&#x63A5;,&#x5E76;&#x52A0;&#x4EE5;&#x8BF4;&#x660E;,&#x6E90;&#x7801;&#x662F;<a href="/external_links/66a7b319e35feedf6302432ad6182119.html" target="blank" rel="noopener">APscheduler&#x7B2C;&#x4E09;&#x7248;</a></p>
+<blockquote>
+<p>&#x6700;&#x65B0;&#x4FEE;&#x8BA2;&#x89C1;<a href="/external_links/3a86c08c17349f3f32de904da3b07efd.html" target="blank" rel="noopener">&#x539F;&#x6587;</a>, &#x5173;&#x6CE8;&#x516C;&#x4F17;&#x53F7;&lt;&#x535A;&#x6D77;&#x62FE;&#x8D1D;diary&gt;&#x53EF;&#x4EE5;&#x53CA;&#x65F6;&#x6536;&#x5230;&#x65B0;&#x63A8;&#x6587;&#x901A;&#x77E5;</p>
+</blockquote>
+<h2 id="1-&#x4E3B;&#x4F53;&#x903B;&#x8F91;"><a href="#1-&#x4E3B;&#x4F53;&#x903B;&#x8F91;" class="headerlink" title="1.&#x4E3B;&#x4F53;&#x903B;&#x8F91;"></a>1.&#x4E3B;&#x4F53;&#x903B;&#x8F91;</h2><h3 id="1-1&#x4EE3;&#x7801;&#x7ED3;&#x6784;"><a href="#1-1&#x4EE3;&#x7801;&#x7ED3;&#x6784;" class="headerlink" title="1.1&#x4EE3;&#x7801;&#x7ED3;&#x6784;"></a>1.1&#x4EE3;&#x7801;&#x7ED3;&#x6784;</h3><p>&#x9996;&#x5148;&#x770B;&#x770B;APScheduler&#x7684;&#x4EE3;&#x7801;&#x7ED3;&#x6784;,&#x9664;&#x4E86;job,event,util&#x8FD9;&#x51E0;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x5C01;&#x88C5;&#x5916;,APScheduler&#x4E2D;&#x7684;&#x7EC4;&#x4EF6;&#x90FD;&#x5404;&#x81EA;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x5939;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;&#x251C;&#x2500;&#x2500; executors      &#x6267;&#x884C;&#x5668;,&#x7528;&#x4E8E;&#x6267;&#x884C;&#x4EFB;&#x52A1;</span><br><span class="line">&#x251C;&#x2500;&#x2500; jobstores      &#x50A8;&#x5B58;&#x5668;,&#x7528;&#x4E8E;&#x5B58;&#x653E;&#x4EFB;&#x52A1;</span><br><span class="line">&#x251C;&#x2500;&#x2500; schedulers     &#x8C03;&#x5EA6;&#x5668;,&#x7528;&#x4E8E;&#x8C03;&#x5EA6;&#x4EFB;&#x52A1;&#x5B9E;&#x4F8B;,&#x7531;&#x6267;&#x884C;&#x5668;,&#x5B58;&#x50A8;&#x5668;,&#x89E6;&#x53D1;&#x5668;&#x4E09;&#x4E2A;&#x7EC4;&#x4EF6;&#x6784;&#x6210;</span><br><span class="line">&#x251C;&#x2500;&#x2500; triggers       &#x89E6;&#x53D1;&#x5668;,&#x7528;&#x4E8E;&#x8BBE;&#x5B9A;&#x89E6;&#x53D1;&#x4EFB;&#x52A1;&#x7684;&#x6761;&#x4EF6;</span><br><span class="line">&#x251C;&#x2500;&#x2500; __init__.py</span><br><span class="line">&#x251C;&#x2500;&#x2500; events.py      &#x4E8B;&#x4EF6;,&#x8C03;&#x5EA6;&#x5668;&#x89E6;&#x53D1;&#x65F6;&#x7684;&#x4E8B;&#x4EF6;&#x5C01;&#x88C5;</span><br><span class="line">&#x251C;&#x2500;&#x2500; job.py         job,&#x5BF9;&#x6DFB;&#x52A0;&#x7684;&#x4EFB;&#x52A1;&#x8FDB;&#x884C;&#x5C01;&#x88C5;,&#x65B9;&#x4FBF;&#x8C03;&#x5EA6;&#x5668;&#x8C03;&#x7528;</span><br><span class="line">&#x2514;&#x2500;&#x2500; util.py        &#x5DE5;&#x5177;&#x5305;,apscheduler&#x4E00;&#x4E9B;&#x5E38;&#x7528;&#x51FD;&#x6570;&#x5C01;&#x88C5;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2&#x7B80;&#x5355;&#x7684;&#x4F8B;&#x5B50;"><a href="#1-2&#x7B80;&#x5355;&#x7684;&#x4F8B;&#x5B50;" class="headerlink" title="1.2&#x7B80;&#x5355;&#x7684;&#x4F8B;&#x5B50;"></a>1.2&#x7B80;&#x5355;&#x7684;&#x4F8B;&#x5B50;</h3><p>&#x770B;&#x5B8C;&#x4E86;&#x4EE3;&#x7801;&#x7ED3;&#x6784;,&#x4F1A;&#x89C9;&#x5F97;APScheduler&#x4EE3;&#x7801;&#x5E76;&#x4E0D;&#x590D;&#x6742;,&#x4F46;&#x662F;APScheduler&#x5927;&#x91CF;&#x7684;&#x7528;&#x5230;&#x4E86;Python&#x52A8;&#x6001;&#x8BED;&#x8A00;&#x7684;&#x7279;&#x6027;,&#x4E00;&#x4E2A;&#x4E00;&#x4E2A;&#x770B;&#x53EF;&#x80FD;&#x6BD4;&#x8F83;&#x61F5;,&#x6240;&#x4EE5;&#x9700;&#x8981;&#x627E;&#x4E00;&#x4E2A;&#x5207;&#x5165;&#x70B9;&#x5F00;&#x59CB;&#x8FDB;&#x5165;APScheduler&#x7684;&#x4EE3;&#x7801;&#x4E16;&#x754C;,&#x800C;&#x8FD9;&#x4E2A;&#x5207;&#x5165;&#x70B9;&#x5C31;&#x662F;&#x4ECE;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x4F8B;&#x5B50;&#x5F00;&#x59CB;.&#x5148;&#x770B;APScheduler&#x7684;<code>Hello World</code>&#x7EA7;&#x522B;&#x7684;&#x5165;&#x95E8;&#x4EE3;&#x7801;:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Python&#x590D;&#x5236;&#x4EE3;&#x7801;from datetime import datetime,timedelta</span><br><span class="line">from apscheduler.schedulers.blocking import BlockingScheduler</span><br><span class="line"></span><br><span class="line">scheduler = BlockingScheduler()  # 1</span><br><span class="line"></span><br><span class="line">def so1n_job(text):   # 2</span><br><span class="line">    print(text)</span><br><span class="line"></span><br><span class="line">scheduler.add_job(so1n_job, &apos;date&apos;, run_date=datetime.now() + timeelta(hours=1), args=[&apos;test&apos;])   # 3</span><br><span class="line">scheduler.start()   # 4</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FD9;&#x4E2A;&#x7B80;&#x5355;&#x7684;&#x4EE3;&#x7801;&#x5982;&#x8981;&#x505A;&#x5982;&#x4E0B;&#x6B65;&#x9AA4;:</p>
+<ul>
+<li>1.&#x5B9E;&#x4F8B;&#x5316;&#x4E00;&#x4E2A;scheduler,&#x8FD9;&#x91CC;&#x4F7F;&#x7528;&#x7684;&#x662F;BlockingScheduler,&#x5B83;&#x5728;&#x8FD0;&#x884C;&#x65F6;&#x4F1A;&#x963B;&#x585E;&#x4EE3;&#x7801;</li>
+<li>2.&#x4E3A;&#x4E86;&#x6F14;&#x793A;&#x800C;&#x521B;&#x5EFA;&#x7684;&#x7B80;&#x5355;job&#x51FD;&#x6570;,&#x53EA;&#x6267;&#x884C;print&#x529F;&#x80FD;</li>
+<li>3.&#x901A;&#x8FC7;scheduler&#x7684;add_job&#x65B9;&#x5F0F;&#x6DFB;&#x52A0;job, &#x540C;&#x65F6;&#x5B9A;&#x4E49;&#x4E86;date&#x89E6;&#x53D1;&#x5668;&#x548C;&#x89E6;&#x53D1;&#x65F6;&#x95F4;&#x4EE5;&#x53CA;&#x8FD0;&#x884C;job&#x65F6;&#x7684;&#x53C2;&#x6570;, &#x8FD9;&#x91CC;&#x5B9A;&#x4E49;&#x7684;&#x662F;&#x4E00;&#x5C0F;&#x65F6;&#x540E;&#x6267;&#x884C;&#x4EFB;&#x52A1;.</li>
+<li>4.&#x5F00;&#x59CB;&#x8FD0;&#x884C;scheduler,&#x68C0;&#x67E5;&#x548C;&#x6267;&#x884C;&#x8C03;&#x5EA6;.</li>
+</ul>
+<h3 id="1-3-&#x521D;&#x59CB;&#x5316;scheduler"><a href="#1-3-&#x521D;&#x59CB;&#x5316;scheduler" class="headerlink" title="1.3 &#x521D;&#x59CB;&#x5316;scheduler"></a>1.3 &#x521D;&#x59CB;&#x5316;scheduler</h3><p>&#x5728;&#x5B9E;&#x4F8B;&#x5316;scheduler&#x65F6;,&#x4F1A;&#x5148;&#x628A;&#x5176;&#x4ED6;&#x4E09;&#x4E2A;&#x7EC4;&#x4EF6;&#x52A0;&#x8F7D;&#x5230;&#x81EA;&#x5DF1;&#x7684;&#x7236;&#x5C5E;&#x6027;[&#x6E90;&#x7801;]:(<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">github.com/agronholm/a&#x2026;</a>)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Python&#x590D;&#x5236;&#x4EE3;&#x7801;    _trigger_plugins = dict((ep.name, ep) for ep in iter_entry_points(&apos;apscheduler.triggers&apos;))</span><br><span class="line">    _trigger_classes = {}</span><br><span class="line">    _executor_plugins = dict((ep.name, ep) for ep in iter_entry_points(&apos;apscheduler.executors&apos;))</span><br><span class="line">    _executor_classes = {}</span><br><span class="line">    _jobstore_plugins = dict((ep.name, ep) for ep in iter_entry_points(&apos;apscheduler.jobstores&apos;))</span><br><span class="line">    _jobstore_classes = {}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x5B9E;&#x4F8B;&#x5316;&#x540E;,<code>__init__</code>&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E9B;&#x9501;&#x76F8;&#x5173;&#x7684;&#x5C5E;&#x6027;&#x4EE5;&#x53CA;&#x8C03;&#x7528;<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">configure</a>&#x65B9;&#x6CD5;&#x521D;&#x59CB;&#x5316;&#x4E00;&#x4E9B;&#x6570;&#x636E;(&#x5728;scheduler&#x8FD8;&#x6CA1;start&#x524D;,&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8C03;&#x7528;<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">configure</a>&#x65B9;&#x6CD5;&#x4FEE;&#x6539;&#x6570;&#x636E;)</p>
+<ul>
+<li>&#x52A0;&#x8F7D;&#x914D;&#x7F6E;,&#x628A;&#x6240;&#x6709;&#x6570;&#x636E;&#x52A0;&#x8F7D;&#x5230;&#x4E00;&#x4E2A;&#x53EB;config&#x7684;dict&#x91CC;&#x9762;</li>
+<li>&#x901A;&#x8FC7;&#x8C03;&#x7528;<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">_configure</a>&#x521D;&#x59CB;&#x5316;&#x5E38;&#x7528;&#x914D;&#x7F6E;, &#x5BF9;&#x4E8E;&#x4E00;&#x4E9B;&#x7279;&#x5B9A;&#x7684;scheduler, &#x8FD8;&#x4F1A;&#x521D;&#x59CB;&#x5316;&#x4E00;&#x4E9B;&#x5C5E;&#x6027;, &#x5982;<code>background</code>&#x4F1A;&#x521D;&#x59CB;&#x5316;deamon, <code>asyncio</code>&#x4F1A;&#x521D;&#x59CB;&#x5316;loop&#x7B49;:</li>
+</ul>
+<pre><code>+ logger,APScheduler&#x8FD0;&#x884C;&#x65F6;&#x6253;&#x65E5;&#x5FD7;&#x7684;logger,&#x9ED8;&#x8BA4;&#x4E3A;apscheduler.scheduler
++ timezone, &#x8BBE;&#x7F6E;&#x65F6;&#x533A;, &#x9ED8;&#x8BA4;&#x4E3A;&#x672C;&#x5730;&#x65F6;&#x533A;. &#x5BF9;&#x4E8E;&#x8C03;&#x5EA6;&#x7CFB;&#x7EDF;&#x6765;&#x8BF4;&#x65F6;&#x533A;&#x662F;&#x4E00;&#x4E2A;&#x975E;&#x5E38;&#x5173;&#x952E;&#x7684;&#x53C2;&#x6570;, &#x7279;&#x522B;&#x662F;&#x5BF9;&#x4E8E;&#x6709;&#x51AC;&#x590F;&#x4EE4;&#x65F6;&#x7684;&#x56FD;&#x5BB6;, &#x5982;&#x679C;&#x6709;&#x505A;&#x591A;&#x56FD;&#x5BB6;&#x4E1A;&#x52A1;&#x7684;, &#x5FC5;&#x987B;&#x8981;&#x7528;&#x65F6;&#x533A;.
++ jobstore\_retry\_interval, &#x91CD;&#x8BD5;&#x65F6;&#x95F4;, &#x5982;&#x679C;get\_due\_jobs()&#x8C03;&#x7528;&#x5F15;&#x53D1;&#x5F02;&#x5E38;&#xFF0C;&#x5219;&#x81F3;&#x5C11;&#x5728;&#x8BBE;&#x7F6E;n&#x79D2;&#x5185;&#x8FDB;&#x884C;&#x4E00;&#x6B21;&#x65B0;&#x7684;&#x5524;&#x9192;</code></pre><ul>
+<li>&#x540C;&#x65F6;&#x4E5F;&#x4F1A;&#x521B;&#x5EFA;&#x521B;&#x5EFA;job&#x7684;&#x9ED8;&#x8BA4;&#x914D;&#x7F6E;:</li>
+</ul>
+<pre><code>+ misfire\_grace\_time,&#x5728;&#x6307;&#x5B9A;&#x7684;&#x8FD0;&#x884C;&#x65F6;&#x4E4B;&#x540E;&#x51E0;&#x79D2;&#x949F;&#xFF0C;&#x4ECD;&#x5141;&#x8BB8;&#x8FD0;&#x884C;&#x8BE5;&#x4F5C;&#x4E1A;. &#x5982;&#x679C;&#x6709;&#x4E2A;&#x4E1A;&#x52A1;&#x662F;&#x6307;&#x5B9A;&#x4E00;&#x5206;&#x949F;&#x540E;&#x8FD0;&#x884C;, &#x4F46;apscheduler&#x9700;&#x8981;&#x5728;&#x4E24;&#x5206;&#x949F;&#x540E;&#x624D;&#x6709;&#x7A7A;&#x95F2;&#x8FD0;&#x884C;&#x8BE5;&#x4E1A;&#x52A1;, &#x90A3;&#x4E48;&#x53EF;&#x4EE5;&#x628A;`misfire_grace_time`&#x7684;&#x503C;&#x8BBE;&#x7F6E;&#x4E3A;120+.
++ coalesce,&#x4E3A;True&#x65F6;,&#x5373;&#x4F7F;&#x8C03;&#x5EA6;&#x7A0B;&#x5E8F;&#x786E;&#x5B9A;&#x8BE5;job&#x53EF;&#x4EE5;&#x8FD0;&#x884C;&#x591A;&#x6B21;&#xFF0C;&#x4E5F;&#x53EA;&#x8FD0;&#x884C;&#x4E00;&#x6B21;
++ max\_instances, apscheduler&#x540C;&#x65F6;&#x6700;&#x5927;&#x8FD0;&#x884C;&#x5B9E;&#x4F8B;&#x6570;.</code></pre><ul>
+<li>&#x914D;&#x7F6E;&#x6267;&#x884C;&#x5668;executors&#x4EE5;&#x53CA;&#x5B83;&#x7684;&#x63D2;&#x4EF6;,&#x5E76;&#x542F;&#x52A8;&#x6267;&#x884C;&#x5668;</li>
+<li>&#x914D;&#x7F6E;&#x4EFB;&#x52A1;&#x5B58;&#x50A8;&#x5668;jobstores&#x4EE5;&#x53CA;&#x5B83;&#x7684;&#x63D2;&#x4EF6;,&#x5E76;&#x542F;&#x52A8;&#x4EFB;&#x52A1;&#x5B58;&#x50A8;&#x5668;</li>
+</ul>
+<h3 id="1-4&#x6DFB;&#x52A0;job"><a href="#1-4&#x6DFB;&#x52A0;job" class="headerlink" title="1.4&#x6DFB;&#x52A0;job"></a>1.4&#x6DFB;&#x52A0;job</h3><p>scheduler&#x521D;&#x59CB;&#x5316;&#x5B8C;&#x5C31;&#x53EF;&#x4EE5;&#x5F00;&#x59CB;&#x6DFB;&#x52A0;job&#x4E86;,&#x5BF9;&#x4E8E;APScheduler&#x6765;&#x8BF4;,&#x6BCF;&#x4E2A;job&#x7684;&#x672C;&#x4F53;&#x90FD;&#x662F;&#x4E00;&#x4E2A;Python&#x51FD;&#x6570;,&#x5728;&#x6DFB;&#x52A0;job&#x672C;&#x4F53;&#x7684;&#x540C;&#x65F6;,&#x987A;&#x4FBF;&#x6DFB;&#x52A0;&#x6267;&#x884C;&#x5668;,&#x4EE5;&#x53CA;&#x5176;&#x4ED6;&#x4FE1;&#x606F;,&#x5982;&#x89E6;&#x53D1;&#x5668;,&#x6267;&#x884C;&#x5668;,&#x51FD;&#x6570;&#x7684;&#x53C2;&#x6570;,job&#x7684;&#x540D;&#x79F0;&#x548C;id&#x7B49;,&#x6784;&#x6210;&#x4E00;&#x4E2A;&#x53EF;&#x4EE5;&#x7ED9;scheduler&#x8C03;&#x7528;&#x7684;job.</p>
+<p>&#x4E0D;&#x8FC7;&#x5728;&#x6DFB;&#x52A0;job&#x7684;&#x65F6;&#x5019;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#x53EB;<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">replace_existing</a>,&#x4ED6;&#x4E0D;&#x5C5E;&#x4E8E;job&#x7684;&#x5C5E;&#x6027;,&#x5F53;&#x5B83;&#x4E3A;True&#x65F6;,scheduler&#x4F1A;&#x7528;&#x76F8;&#x540C;&#x7684;id&#x66FF;&#x6362;&#x5DF2;&#x7ECF;&#x5B58;&#x5728;&#x7684;job,&#x540C;&#x65F6;&#x4FDD;&#x7559;job&#x7684;&#x8FD0;&#x884C;&#x6B21;&#x6570;.&#x8FD8;&#x6709;&#x5B58;&#x50A8;&#x5668;&#x4E5F;&#x4E0D;&#x5C5E;&#x4E8E;job&#x7684;&#x5C5E;&#x6027;,&#x53EA;&#x662F;&#x8BA9;scheduler&#x77E5;&#x9053;&#x53EF;&#x4EE5;&#x4ECE;&#x8BE5;&#x5B58;&#x50A8;&#x5668;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x5230;&#x521A;&#x624D;&#x6DFB;&#x52A0;&#x7684;job.</p>
+<p>&#x4F8B;&#x5B50;&#x4E2D;&#x7684;job&#x6DFB;&#x52A0;&#x65F6;,scheduler&#x8FD8;&#x672A;&#x8FD0;&#x884C;,&#x6240;&#x4EE5;&#x4F1A;&#x628A;job, jobstore, replace_existing&#x62FC;&#x6210;&#x4E00;&#x4E2A;&#x5143;&#x7956;,&#x5E76;&#x5B58;&#x653E;&#x5230;&#x4E00;&#x4E2A;&#x53EB;<code>_pending_jobs</code>&#x7684;&#x7B49;&#x5F85;&#x961F;&#x5217;&#x4E2D;.</p>
+<p>&#x5982;&#x679C;job&#x6DFB;&#x52A0;&#x65F6;scheduler&#x8FD8;&#x5728;&#x8FD0;&#x884C;,&#x90A3;&#x5C31;&#x4F1A;&#x8FDB;&#x884C;&#x5982;&#x4E0B;&#x4E00;&#x4E9B;&#x5904;&#x7406;(<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">_real_add_job</a>&#x51FD;&#x6570;),&#x628A;job&#x771F;&#x6B63;&#x7684;&#x6DFB;&#x52A0;&#x5230;&#x8C03;&#x5EA6;&#x7CFB;&#x7EDF;&#x4E2D;:</p>
+<ul>
+<li>1.&#x5982;&#x679C;&#x6B64;&#x65F6;&#x7684;job&#x6CA1;&#x6709;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;,&#x5219;&#x4E3A;&#x5176;&#x521B;&#x5EFA;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;</li>
+<li>2.&#x8C03;&#x7528;job&#x7684;_modify&#x65B9;&#x6CD5;,&#x5F53;&#x914D;&#x7F6E;&#x6709;&#x6548;&#x65F6;&#x66F4;&#x65B0;job&#x7684;&#x914D;&#x7F6E;</li>
+<li>3.&#x628A;job&#x6DFB;&#x52A0;&#x5230;&#x5BF9;&#x5E94;&#x7684;store,&#x6216;&#x66F4;&#x65B0;&#x5DF2;&#x7ECF;&#x5B58;&#x5728;store&#x91CC;&#x7684;job, &#x8FD9;&#x91CC;&#x4F1A;&#x8C03;&#x7528;store&#x7684;<a href="/external_links/a4d408eaa5f35e50e28c34f2a2071ac7.html" target="blank" rel="noopener">_get_job_index</a>&#x901A;&#x8FC7;&#x4E8C;&#x5206;&#x6CD5;&#x67E5;&#x627E;job&#x9700;&#x8981;&#x63D2;&#x5165;&#x5BF9;&#x5E94;&#x7684;index&#x4E2D;.</li>
+<li>4.&#x5982;&#x679C;scheduler&#x6B63;&#x5728;&#x8FD0;&#x884C;, &#x5219;&#x5524;&#x9192;scheduler,&#x770B;&#x770B;&#x65B0;&#x6DFB;&#x52A0;&#x7684;job&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x88AB;&#x8C03;&#x5EA6;(&#x6CE8;&#x610F;,&#x6B64;&#x6B21;&#x5524;&#x9192;&#x4F1A;&#x66FF;&#x6362;&#x539F;&#x672C;&#x5DF2;&#x7ECF;&#x5B89;&#x6392;&#x7684;&#x5524;&#x9192;&#x8BA1;&#x5212;)</li>
+</ul>
+<p>&#x6CE8;&#x610F;, &#x4E0A;&#x9762;&#x7B2C;4&#x6B65;&#x53EA;&#x4F1A;&#x5524;&#x9192;&#x672C;&#x8EAB;&#x7684;apscheduler, &#x5982;&#x679C;&#x662F;&#x591A;&#x4E2A;worker,&#x90A3;&#x4E48;&#x5176;&#x4ED6;&#x7684;apscheduler&#x5E76;&#x4E0D;&#x4F1A;&#x88AB;&#x5524;&#x9192;.</p>
+<h3 id="1-5&#x5F00;&#x59CB;&#x8FD0;&#x884C;scheduler"><a href="#1-5&#x5F00;&#x59CB;&#x8FD0;&#x884C;scheduler" class="headerlink" title="1.5&#x5F00;&#x59CB;&#x8FD0;&#x884C;scheduler"></a>1.5&#x5F00;&#x59CB;&#x8FD0;&#x884C;scheduler</h3><p>&#x6DFB;&#x52A0;&#x5B8C;job&#x540E;,scheduler&#x5C31;&#x53EF;&#x4EE5;&#x5F00;&#x59CB;&#x8FD0;&#x884C;&#x4E86;,&#x901A;&#x8FC7;&#x8C03;&#x7528;scheduler&#x7684;<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">start</a>&#x5F00;&#x59CB;&#x5904;&#x7406;&#x4EFB;&#x52A1;.<br>&#x5728;&#x5F00;&#x59CB;&#x8FD0;&#x884C;&#x524D;,scheduler&#x4F1A;&#x5148;&#x53BB;<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">&#x68C0;&#x67E5;&#x662F;&#x5426;&#x5728;&#x4F7F;&#x7528;&#x7981;&#x7528;&#x7EBF;&#x7A0B;&#x7684;uWSGI&#x73AF;&#x5883;&#x4E0B;&#x8FD0;&#x884C;</a>,&#x53EA;&#x6709;&#x68C0;&#x67E5;&#x901A;&#x8FC7;&#x540E;&#x624D;&#x80FD;&#x7EE7;&#x7EED;&#x8FD0;&#x884C;.</p>
+<p>&#x68C0;&#x67E5;&#x5B8C;&#x6BD5;&#x540E;,scheduler&#x4F1A;&#x53BB;&#x8FDB;&#x884C;&#x4E00;&#x4E9B;&#x521D;&#x59CB;&#x5316;,&#x9996;&#x5148;scheduler&#x4F1A;&#x6FC0;&#x6D3B;&#x6240;&#x6709;&#x6DFB;&#x52A0;&#x5230;scheduler&#x7684;&#x6267;&#x884C;&#x5668;,&#x4EE5;&#x4FBF;&#x5F85;&#x4F1A;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;,&#x540C;&#x6837;&#x6FC0;&#x6D3B;&#x6240;&#x6709;&#x6DFB;&#x52A0;&#x5230;scheduler&#x7684;&#x50A8;&#x5B58;&#x5668;,&#x4EE5;&#x4FBF;&#x5F85;&#x4F1A;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;.&#x8FD9;&#x91CC;&#x4F1A;&#x628A;scheduler&#x521D;&#x59CB;&#x5316;&#x65F6;&#x7684;<code>_pending_jobs</code>&#x901A;&#x8FC7;<strong>1.4&#x6DFB;&#x52A0;job</strong>&#x91CC;&#x9762;&#x8BF4;&#x5230;&#x7684;<code>_real_add_job</code>&#x51FD;&#x6570;,&#x628A;job&#x771F;&#x6B63;&#x7684;&#x6DFB;&#x52A0;&#x5230;&#x8C03;&#x5EA6;&#x7CFB;&#x7EDF;&#x4E2D;.</p>
+<p>&#x521D;&#x59CB;&#x5316;&#x5B8C;&#x6210;&#x4E86;,scheduler&#x53EF;&#x4EE5;&#x771F;&#x6B63;&#x7684;&#x5F00;&#x59CB;&#x53BB;&#x68C0;&#x67E5;&#x548C;&#x8C03;&#x5EA6;job&#x4E86;,&#x8FD9;&#x4E00;&#x5207;&#x90FD;&#x53D1;&#x751F;&#x5728;scheduler&#x7684;<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">_process_jobs</a>&#x51FD;&#x6570;&#x91CC;,&#x4ED6;&#x4F1A;&#x904D;&#x5386;&#x6BCF;&#x4E2A;&#x4F5C;&#x4E1A;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x7684;job&#xFF0C;&#x7136;&#x540E;&#x6267;&#x884C;&#x53EF;&#x4EE5;&#x88AB;&#x8C03;&#x5EA6;&#x7684;job&#xFF0C;&#x6700;&#x540E;&#x68C0;&#x67E5;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;,apscheduler&#x4F1A;&#x4F11;&#x7720;&#x5230;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;&#x5728;&#x542F;&#x52A8;,&#x9632;&#x6B62;&#x4E00;&#x76F4;&#x8FD0;&#x884C;&#x5BFC;&#x81F4;&#x6D6A;&#x8D39;&#x8BA1;&#x7B97;&#x673A;&#x8D44;&#x6E90;,&#x5177;&#x4F53;&#x64CD;&#x4F5C;&#x5982;&#x4E0B;:</p>
+<ul>
+<li>1.&#x904D;&#x5386;&#x5B58;&#x50A8;&#x5668;,&#x5E76;&#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x7684;<a href="/external_links/a4d408eaa5f35e50e28c34f2a2071ac7.html" target="blank" rel="noopener">get_due_jobs</a>&#x65B9;&#x6CD5;&#x627E;&#x51FA;&#x6BD4;&#x76EE;&#x524D;&#x65F6;&#x95F4;&#x65E9;&#x7684;job&#x5217;&#x8868;,&#x5982;&#x679C;&#x5904;&#x7406;&#x5931;&#x8D25;&#x5219;&#x4F1A;&#x6839;&#x636E;scheduler&#x7684;<code>jobstore_retry_interval</code>&#x751F;&#x6210;&#x4E0B;&#x4E00;&#x6B21;&#x5524;&#x9192;scheduler&#x7684;&#x65F6;&#x95F4;.</li>
+<li>2.&#x904D;&#x5386;&#x5E76;&#x5904;&#x7406;&#x4ECE;&#x6B65;&#x9AA4;1&#x62FF;&#x5230;&#x7684;job&#x5217;&#x8868;<ul>
+<li>2.1.&#x904D;&#x5386;&#x6B65;&#x9AA4;1&#x7684;job&#x5217;&#x8868;,&#x63D0;&#x53D6;job&#x7684;&#x6267;&#x884C;&#x5668;,&#x5982;&#x679C;&#x63D0;&#x53D6;&#x5931;&#x8D25;&#x5219;&#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x5220;&#x9664;&#x6389;job.</li>
+<li>2.2.&#x4ECE;job&#x7684;<a href="/external_links/44901ff807d64064f7362d5ae40e4a55.html" target="blank" rel="noopener">_get_run_times</a>&#x65B9;&#x6CD5;&#x83B7;&#x53D6;&#x4ECB;&#x4E8E;&#x73B0;&#x5728;&#x65F6;&#x95F4;&#x5230;job&#x7684;&#x4E0B;&#x4E00;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;&#x4E2D;&#x89E6;&#x53D1;&#x5668;&#x53EF;&#x4EE5;&#x89E6;&#x53D1;&#x7684;&#x65F6;&#x95F4;,&#x5E76;&#x653E;&#x5728;run_times&#x5217;&#x8868;&#x4E2D;.</li>
+<li>2.3.&#x8C03;&#x7528;&#x6267;&#x884C;&#x5668;&#x7684;<a href="/external_links/ca72cd931a6d9b66cde1ad02e73da141.html" target="blank" rel="noopener">submit_job</a>&#x65B9;&#x6CD5;,&#x9996;&#x5148;&#x68C0;&#x67E5;&#x76EE;&#x524D;&#x8BE5;job&#x7684;&#x6267;&#x884C;&#x5B9E;&#x4F8B;&#x6570;&#x4F1A;&#x4E0D;&#x4F1A;&#x5927;&#x4E8E;&#x6216;&#x7B49;&#x4E8E;&#x5B9A;&#x4E49;&#x7684;max_instances,&#x53EA;&#x6709;&#x6CA1;&#x8D85;&#x8FC7;&#x5B9A;&#x4E49;&#x7684;max_instances&#x65F6;,&#x624D;&#x4F1A;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#x6267;&#x884C;&#x5668;&#x7684;<code>_do_submit_job</code>&#x65B9;&#x6CD5;,&#x6267;&#x884C;job.</li>
+<li>2.4.&#x8FD0;&#x884C;&#x5B8C;&#x6BD5;job&#x540E;,[&#x8BA1;&#x7B97;job&#x662F;&#x5426;&#x8FD8;&#x6709;next_run_time,&#x5982;&#x679C;&#x6709;&#x66F4;&#x65B0;job&#x4EE5;&#x53CA;&#x5BF9;&#x5E94;&#x7684;&#x5B58;&#x50A8;&#x5668;,&#x5982;&#x679C;&#x6CA1;&#x6709;&#x5219;&#x628A;job&#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x79FB;&#x9664;</li>
+</ul>
+</li>
+<li>3.&#x6267;&#x884C;&#x5B8C;job&#x540E;,&#x7B97;&#x51FA;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x6700;&#x65E9;&#x7684;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;,&#x5E76;&#x4E0E;next_wakeup_time&#x6BD4;&#x5BF9;,&#x5982;&#x679C;&#x65E9;&#x4E8E;next_wakeup_time&#x5219;&#x628A;next_wakeup_time&#x8BBE;&#x7F6E;&#x4E3A;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x6700;&#x65E9;&#x7684;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;(<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">992-997</a>)</li>
+<li>4.&#x5904;&#x7406;&#x961F;&#x5217;&#x4E2D;&#x7684;event,&#x5E76;&#x7B97;&#x51FA;&#x8DDD;&#x79BB;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;&#x4E0E;&#x73B0;&#x5728;&#x65F6;&#x95F4;&#x7684;&#x65F6;&#x95F4;&#x5DEE;wait_seconds,&#x5E76;&#x8BA9;scheduler&#x7761;&#x7720;wait_seconds,&#x9632;&#x6B62;cpu&#x7A7A;&#x8F6C;(<a href="/external_links/1e6c30558accb35146aa7ff72439591d.html" target="blank" rel="noopener">999-1004</a>).</li>
+<li>5.&#x7B49;&#x5F85;&#x4E86;wait_seconds&#x540E;scheduler&#x4ECE;&#x6B65;&#x9AA4;1&#x7EE7;&#x7EED;&#x5F00;&#x59CB;&#x6267;&#x884C;&#x64CD;&#x4F5C;.</li>
+</ul>
+<p>&#x5219;&#x6B64;,&#x6839;&#x636E;&#x4F8B;&#x5B50;&#x7684;&#x4E3B;&#x4F53;&#x903B;&#x8F91;&#x4EE3;&#x7801;&#x5206;&#x6790;&#x5DF2;&#x7ECF;&#x5206;&#x6790;&#x5B8C;&#x6BD5;&#x4E86;,&#x4F46;&#x662F;&#x8FD8;&#x6709;&#x4E00;&#x4E9B;scheduler&#x7684;&#x65B9;&#x6CD5;,event,APScheduler&#x7684;util&#x4EE5;&#x53CA;APScheduler&#x652F;&#x6301;&#x7684;gevent,async&#x7B49;&#x5E93;&#x4EE3;&#x7801;&#x8FD8;&#x6CA1;&#x6709;&#x5206;&#x6790;.</p>
+<h2 id="2-&#x6E90;&#x7801;&#x5206;&#x6790;"><a href="#2-&#x6E90;&#x7801;&#x5206;&#x6790;" class="headerlink" title="2.&#x6E90;&#x7801;&#x5206;&#x6790;"></a>2.&#x6E90;&#x7801;&#x5206;&#x6790;</h2><p>&#x4E0A;&#x4E00;&#x90E8;&#x5206;&#x4E3B;&#x8981;&#x8BF4;&#x7684;&#x662F;APScheduler&#x4E2D;&#x7684;&#x4E3B;&#x8981;&#x903B;&#x8F91;,&#x7B80;&#x5355;&#x7684;&#x4E86;&#x89E3;&#x5230;APScheduler&#x662F;&#x5982;&#x4F55;&#x8FD0;&#x884C;&#x7684;,&#x4EE5;&#x53CA;&#x8FD0;&#x884C;&#x65F6;&#x8981;&#x505A;&#x54EA;&#x4E9B;&#x64CD;&#x4F5C;,&#x5728;&#x8BF4;&#x5230;&#x4E3B;&#x8981;&#x51FD;&#x6570;&#x65F6;&#x53EA;&#x8BF4;&#x4E86;&#x662F;&#x54EA;&#x4E2A;&#x6A21;&#x5757;&#x4E0B;&#x7684;&#x54EA;&#x4E2A;&#x51FD;&#x6570;&#x4EE5;&#x53CA;&#x8FD9;&#x4E2A;&#x51FD;&#x6570;&#x505A;&#x4E86;&#x4EC0;&#x4E48;,&#x5BF9;&#x4E8E;&#x4E00;&#x4E9B;&#x7EC6;&#x8282;&#x5E76;&#x6CA1;&#x6709;&#x62AB;&#x9732;&#x51FA;&#x6765;.&#x800C;&#x8FD9;&#x4E00;&#x8282;&#x4E0D;&#x518D;&#x8DDF;&#x7740;APScheduler&#x7684;&#x8FD0;&#x884C;&#x987A;&#x5E8F;&#x8FDB;&#x884C;&#x5206;&#x6790;,&#x800C;&#x662F;&#x6839;&#x636E;APScheduler&#x7684;&#x4EE3;&#x7801;&#x7ED3;&#x6784;&#x9010;&#x4E00;&#x5206;&#x6790;&#x91CC;&#x9762;&#x7684;&#x4EE3;&#x7801;,&#x4ECE;&#x4EE3;&#x7801;&#x4E2D;&#x4E86;&#x89E3;APScheduler&#x7684;&#x539F;&#x7406;,&#x4EE5;&#x53CA;&#x4ECE;APScheduler&#x4E2D;&#x5438;&#x6536;&#x4E00;&#x4E9B;&#x6BD4;&#x8F83;&#x68D2;&#x7684;idea.</p>
+<h3 id="2-1-executors"><a href="#2-1-executors" class="headerlink" title="2.1 executors"></a>2.1 executors</h3><p>executors&#x662F;apscheduler&#x4E2D;&#x7684;&#x6267;&#x884C;&#x5668;,apscheduler&#x4E3A;python&#x4E2D;&#x5404;&#x79CD;&#x7C7B;&#x578B;&#x5C01;&#x88C5;&#x4E86;executors,&#x4F46;&#x6838;&#x5FC3;&#x7684;&#x65B9;&#x6CD5;&#x5C31;&#x53EA;&#x6709;&#x51E0;&#x4E2A;,&#x6BD4;&#x8F83;&#x7B80;&#x5355;.</p>
+<ul>
+<li><a href="/external_links/ca72cd931a6d9b66cde1ad02e73da141.html" target="blank" rel="noopener">start</a></li>
+</ul>
+<p>&#x4ECE;scheduler&#x83B7;&#x53D6;&#x8D44;&#x6E90;&#x548C;&#x90E8;&#x5206;&#x6570;&#x636E;&#x521D;&#x59CB;&#x5316;,&#x5176;&#x4F59;&#x7531;&#x5176;&#x4ED6;&#x5C01;&#x88C5;&#x5B9E;&#x73B0;</p>
+<ul>
+<li><a href="/external_links/ca72cd931a6d9b66cde1ad02e73da141.html" target="blank" rel="noopener">shutdown</a></li>
+</ul>
+<p>&#x7531;&#x5176;&#x4ED6;&#x5C01;&#x88C5;&#x5B9E;&#x73B0;,&#x505C;&#x7528;&#x6267;&#x884C;&#x5668;&#x5E76;&#x5220;&#x9664;&#x90E8;&#x5206;&#x8D44;&#x6E90;,&#x5982;&#x679C;&#x4EFB;&#x52A1;&#x5E76;&#x672A;&#x5B8C;&#x6210;,&#x5219;&#x4F1A;&#x53D6;&#x6D88;&#x6216;&#x6E05;&#x7A7A;&#x4EFB;&#x52A1;</p>
+<ul>
+<li><a href="/external_links/ca72cd931a6d9b66cde1ad02e73da141.html" target="blank" rel="noopener">submit_job</a></li>
+</ul>
+<p>&#x7528;&#x4E8E;&#x8FD0;&#x884C;&#x524D;&#x7684;&#x521D;&#x59CB;&#x5316;&#x548C;&#x68C0;&#x67E5;,&#x4E3B;&#x8981;&#x7528;&#x4E8E;&#x68C0;&#x67E5;&#x5F53;&#x524D;job&#x6709;&#x591A;&#x5C11;&#x5B9E;&#x4F8B;&#x6B63;&#x5728;&#x8FD0;&#x884C;,&#x5982;&#x679C;&#x8D85;&#x51FA;&#x9650;&#x5236;&#x5219;&#x629B;&#x51FA;&#x5F02;&#x5E38;,&#x672A;&#x8D85;&#x51FA;&#x9650;&#x5236;&#x5219;&#x6267;&#x884C;_do_submit_job</p>
+<ul>
+<li><a href="/external_links/ca72cd931a6d9b66cde1ad02e73da141.html" target="blank" rel="noopener">_do_submit_job</a></li>
+</ul>
+<p>&#x7531;&#x5176;&#x4ED6;&#x5C01;&#x88C5;&#x5B9E;&#x73B0;,&#x8D1F;&#x8D23;&#x8FD0;&#x884C;job,&#x5E76;&#x68C0;&#x67E5;&#x8FD0;&#x884C;&#x7ED3;&#x679C;,&#x6210;&#x529F;&#x5219;&#x8C03;&#x7528;_run_job_success, &#x5931;&#x8D25;&#x5219;&#x8C03;&#x7528;_run_job_error</p>
+<ul>
+<li>_run_job_success<br>&#x8FD0;&#x884C;&#x6210;&#x529F;&#x7684;&#x540E;&#x7EED;&#x64CD;&#x4F5C;</li>
+<li>_run_job_error<br>&#x8FD0;&#x884C;&#x5931;&#x8D25;&#x7684;&#x540E;&#x7EED;&#x64CD;&#x4F5C;</li>
+</ul>
+<p>&#x9664;&#x6B64;&#x4E4B;&#x5916;executors&#x6587;&#x4EF6;&#x4E2D;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x53EB;<a href="/external_links/ca72cd931a6d9b66cde1ad02e73da141.html" target="blank" rel="noopener">run_job</a>&#x7684;&#x51FD;&#x6570;,&#x5B83;&#x624D;&#x662F;&#x6B63;&#x771F;&#x7528;&#x4E8E;&#x6267;&#x884C;job&#x7684;&#x51FD;&#x6570;,&#x5B83;&#x9664;&#x4E86;&#x8C03;&#x7528;job&#x7684;func&#x548C;&#x5904;&#x7406;&#x5F02;&#x5E38;&#x5916;,&#x8FD8;&#x5BF9;&#x4EFB;&#x52A1;&#x662F;&#x5426;&#x9519;&#x8FC7;&#x8FD0;&#x884C;&#x7A97;&#x53E3;&#x8FDB;&#x884C;&#x68C0;&#x67E5;,&#x6BD4;&#x5982;&#x4EFB;&#x52A1;&#x5E94;&#x8BE5;&#x5728;9.00-9.10&#x95F4;&#x8FD0;&#x884C;,&#x7136;&#x800C;&#x76F4;&#x5230;9.15&#x7A0B;&#x5E8F;&#x6CA1;&#x6709;&#x8FD0;&#x884C;,&#x90A3;&#x4E48;apscheduler&#x4F1A;&#x629B;&#x51FA;&#x5BF9;&#x5E94;&#x7684;&#x9519;&#x8BEF;event&#x548C;job.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">python&#x590D;&#x5236;&#x4EE3;&#x7801;def run_job(job, jobstore_alias, run_times, logger_name):</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    Called by executors to run the job. Returns a list of scheduler events to be dispatched by the</span><br><span class="line">    scheduler.</span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line">    events = []</span><br><span class="line">    logger = logging.getLogger(logger_name)</span><br><span class="line">    for run_time in run_times:</span><br><span class="line">        # &#x5982;&#x679C;&#x8BBE;&#x7F6E;&#x4E86;,misfire_grace_time,&#x4E14;&#x65F6;&#x95F4;&#x5DEE;&#x5728;misfire_grace_time&#x5916;,&#x5219;&#x8D85;&#x51FA;&#x4E86;&#x4EFB;&#x52A1;&#x6267;&#x884C;&#x65F6;&#x95F4;&#x7684;&#x65F6;&#x95F4;&#x7A97;&#x53E3;,&#x653E;&#x5F03;&#x8FD0;&#x884C;</span><br><span class="line">        if job.misfire_grace_time is not None:</span><br><span class="line">            difference = datetime.now(utc) - run_time</span><br><span class="line">            grace_time = timedelta(seconds=job.misfire_grace_time)</span><br><span class="line">            if difference &gt; grace_time:</span><br><span class="line">                events.append(JobExecutionEvent(EVENT_JOB_MISSED, job.id, jobstore_alias,</span><br><span class="line">                                                run_time))</span><br><span class="line">                logger.warning(&apos;Run time of job &quot;%s&quot; was missed by %s&apos;, job, difference)</span><br><span class="line">                continue</span><br><span class="line"></span><br><span class="line">        logger.info(&apos;Running job &quot;%s&quot; (scheduled at %s)&apos;, job, run_time)</span><br><span class="line">        try:</span><br><span class="line">            # &#x6267;&#x884C;job</span><br><span class="line">            retval = job.func(*job.args, **job.kwargs)</span><br><span class="line">        except BaseException:</span><br><span class="line">            exc, tb = sys.exc_info()[1:]</span><br><span class="line">            formatted_tb = &apos;&apos;.join(format_tb(tb))</span><br><span class="line">            events.append(JobExecutionEvent(EVENT_JOB_ERROR, job.id, jobstore_alias, run_time,</span><br><span class="line">                                            exception=exc, traceback=formatted_tb))</span><br><span class="line">            logger.exception(&apos;Job &quot;%s&quot; raised an exception&apos;, job)</span><br><span class="line"></span><br><span class="line">            # &#x56DE;&#x6536;&#x5BF9;&#x8C61;</span><br><span class="line">            if six.PY2:</span><br><span class="line">                sys.exc_clear()</span><br><span class="line">                del tb</span><br><span class="line">            else:</span><br><span class="line">                import traceback</span><br><span class="line">                traceback.clear_frames(tb)</span><br><span class="line">                del tb</span><br><span class="line">        else:</span><br><span class="line">            events.append(JobExecutionEvent(EVENT_JOB_EXECUTED, job.id, jobstore_alias, run_time,</span><br><span class="line">                                            retval=retval))</span><br><span class="line">            logger.info(&apos;Job &quot;%s&quot; executed successfully&apos;, job)</span><br><span class="line"></span><br><span class="line">    return events</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-JobStore"><a href="#2-2-JobStore" class="headerlink" title="2.2 JobStore"></a>2.2 JobStore</h3><p>JobStore&#x662F;apscheduler&#x4E2D;&#x7684;&#x5B58;&#x50A8;&#x5668;,apscheduler&#x4E3A;&#x5404;&#x79CD;&#x5B58;&#x50A8;&#x5668;&#x505A;&#x4E86;&#x5C01;&#x88C5;,&#x6838;&#x5FC3;&#x7684;JobStore&#x6BD4;&#x8F83;&#x7B80;&#x5355;,&#x5404;&#x4E2A;&#x5C01;&#x88C5;&#x7684;&#x529F;&#x80FD;&#x90FD;&#x4E00;&#x6837;,&#x53EA;&#x662F;&#x5177;&#x4F53;&#x903B;&#x8F91;&#x8DDF;&#x5BF9;&#x5E94;&#x7684;&#x5BA2;&#x6237;&#x7AEF;&#x76F8;&#x5173;.&#x8FD9;&#x91CC;&#x5148;&#x4EE5;<code>MemoryJobStore</code>&#x548C;<code>BaseJobStore</code>&#x5BF9;JobStore&#x7684;&#x6240;&#x6709;&#x529F;&#x80FD;&#x51FD;&#x6570;&#x8FDB;&#x884C;&#x5206;&#x6790;.</p>
+<h4 id="2-2-1-MemoryJobStore&#x548C;BaseJobStore"><a href="#2-2-1-MemoryJobStore&#x548C;BaseJobStore" class="headerlink" title="2.2.1 MemoryJobStore&#x548C;BaseJobStore"></a>2.2.1 MemoryJobStore&#x548C;BaseJobStore</h4><ul>
+<li>start<br>&#x5F53;apscheduler&#x5F00;&#x59CB;&#x6267;&#x884C;start&#x6216;&#x8005;job&#x88AB;&#x6DFB;&#x52A0;&#x5230;jobstores&#x65F6;,&#x5F00;&#x59CB;&#x6267;&#x884C;start,&#x521D;&#x59CB;&#x5316;scheduler&#x4EE5;&#x53CA;jobstores&#x7684;&#x522B;&#x540D;.</li>
+<li>shutdown<br>&#x5173;&#x95ED;&#x5BF9;&#x5E94;stores&#x7684;&#x5BA2;&#x6237;&#x7AEF;&#x94FE;&#x63A5;&#x6216;&#x8005;&#x6E05;&#x7406;&#x5185;&#x5B58;&#x56DE;&#x6536;&#x7A7A;&#x95F4;.</li>
+<li>_fix_paused_jobs_sorting &#x8FD4;&#x56DE;&#x6CA1;&#x6709;<code>next_run_time</code>&#x5C5E;&#x6027;&#x7684;&#x4EFB;&#x52A1;(&#x6216;&#x8005;&#x8BF4;&#x6682;&#x505C;&#x7684;&#x4EFB;&#x52A1;)</li>
+<li>lookup_job &#x83B7;&#x53D6;&#x6307;&#x5B9A;&#x4EFB;&#x52A1;id&#x7684;&#x4EFB;&#x52A1;</li>
+<li>get_due_jobs &#x8FD4;&#x56DE;&#x65E9;&#x4E8E;<code>next_run_time</code>&#x6216;&#x7B49;&#x4E8E;<code>now</code>&#x7684;&#x4EFB;&#x52A1;&#x5217;&#x8868;,&#x8FD4;&#x56DE;&#x7684;&#x4EFB;&#x52A1;&#x5FC5;&#x987B;&#x6309;<code>next_run_time</code>&#xFF08;&#x5347;&#x5E8F;&#xFF09;&#x8FDB;&#x884C;&#x6392;&#x5E8F;</li>
+<li><a href="/external_links/a4d408eaa5f35e50e28c34f2a2071ac7.html" target="blank" rel="noopener">get_next_run_time</a> &#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x7684;&#x6240;&#x6709;job&#x4E2D;&#x83B7;&#x53D6;&#x6700;&#x65E9;&#x8FD0;&#x884C;&#x7684;&#x4E00;&#x4E2A;,&#x7531;&#x4E8E;&#x5728;<code>MemoryJobStore</code>&#x4E2D;&#x5BF9;&#x4FDD;&#x5B58;job&#x7684;_jobs&#x961F;&#x5217;&#x8FDB;&#x884C;&#x4E86;&#x6392;&#x5E8F;&#x7EF4;&#x62A4;,&#x4E0D;&#x7BA1;&#x6DFB;&#x52A0;&#x548C;&#x5220;&#x9664;&#x90FD;&#x786E;&#x4FDD;&#x4ED6;&#x662F;&#x6709;&#x5E8F;&#x7684;,&#x6240;&#x4EE5;<code>MemoryJobStore</code>&#x7684;<code>get_next_run_time</code>&#x53EA;&#x8981;&#x4ECE;_jobs[0]&#x83B7;&#x53D6;&#x7684;job&#x5C31;&#x662F;&#x5373;&#x5C06;&#x6700;&#x65E9;&#x8FD0;&#x884C;&#x7684;job</li>
+<li>get_all_jobs &#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x83B7;&#x53D6;&#x6240;&#x6709;&#x4EFB;&#x52A1;</li>
+<li>add_job &#x5411;&#x5B58;&#x50A8;&#x5668;&#x6DFB;&#x52A0;&#x4EFB;&#x52A1;</li>
+<li>update_job &#x66F4;&#x65B0;&#x5DF2;&#x7ECF;&#x5B58;&#x50A8;&#x5728;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x7684;&#x4EFB;&#x52A1;</li>
+<li>remove_job &#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x5220;&#x9664;&#x6307;&#x5B9A;&#x7684;&#x4EFB;&#x52A1;(&#x6839;&#x636E;job id)</li>
+<li>remove_all_jobs &#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x5220;&#x9664;&#x6240;&#x6709;&#x4EFB;&#x52A1;</li>
+<li><a href="/external_links/a4d408eaa5f35e50e28c34f2a2071ac7.html" target="blank" rel="noopener">_get_job_index(<code>MemoryJobStore</code>&#x7279;&#x6709;&#x65B9;&#x6CD5;)</a> &#x901A;&#x8FC7;&#x4E8C;&#x5206;&#x6CD5;&#x67E5;&#x627E;&#x5FEB;&#x901F;&#x67E5;&#x627E;job&#x7684;&#x7D22;&#x5F15;&#xFF0C;&#x6216;&#x8005;&#x5982;&#x679C;&#x627E;&#x4E0D;&#x5230;&#x7D22;&#x5F15;&#xFF0C;&#x5219;&#x6839;&#x636E;&#x7ED9;&#x5B9A;&#x7684;&#x65F6;&#x95F4;&#x6233;&#x8BB0;&#x5C06;job&#x63D2;&#x5165;&#x7684;&#x7D22;&#x5F15;&#x3002;</li>
+</ul>
+<h4 id="2-2-2-&#x5176;&#x4ED6;JobStore"><a href="#2-2-2-&#x5176;&#x4ED6;JobStore" class="headerlink" title="2.2.2 &#x5176;&#x4ED6;JobStore"></a>2.2.2 &#x5176;&#x4ED6;JobStore</h4><p>&#x5176;&#x4ED6;JobStore&#x63D0;&#x4F9B;&#x7684;&#x529F;&#x80FD;&#x4E5F;&#x662F;&#x4E0E;MemoryJobStore&#x4E00;&#x6837;,&#x4F46;&#x662F;&#x7531;&#x4E8E;&#x5404;&#x4E2A;&#x5B58;&#x50A8;&#x5BB9;&#x5668;/&#x6570;&#x636E;&#x5E93;&#x4E0D;&#x540C;,&#x5B9E;&#x73B0;&#x7684;&#x903B;&#x8F91;&#x90FD;&#x662F;&#x4E0D;&#x540C;,&#x4F46;&#x539F;&#x7406;&#x8FD8;&#x662F;&#x4E00;&#x6837;&#x7684;.Apschedulers&#x9664;&#x4E86;MemoryJobStore&#x5916;,&#x901A;&#x8FC7;&#x628A;Job&#x5E8F;&#x5217;&#x5316;&#x5B58;&#x5230;JobStore&#x4E2D;,&#x4F7F;&#x5F97;job&#x53EF;&#x4EE5;&#x4E0E;add_job&#x7684;&#x8FDB;&#x7A0B;&#x5206;&#x79BB;,&#x8FBE;&#x5230;&#x5206;&#x5E03;&#x5F0F;&#x8C03;&#x7528;&#x7684;&#x6548;&#x679C;,&#x4F46;&#x662F;&#x7531;&#x4E8E;&#x6BCF;&#x4E2A;Apschedulers&#x5E76;&#x4E0D;&#x4F1A;&#x4E92;&#x76F8;&#x901A;&#x4FE1;,&#x6240;&#x4EE5;&#x53EF;&#x80FD;&#x5B58;&#x5728;&#x591A;&#x4E2A;Apschedulers&#x83B7;&#x5F97;&#x5230;&#x76F8;&#x540C;&#x7684;Job,&#x6240;&#x4EE5;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x6DFB;&#x52A0;&#x4E00;&#x4E2A;&#x9501;&#x6765;&#x89E3;&#x51B3;&#x8BE5;&#x95EE;&#x9898;.</p>
+<h3 id="2-3-schedulers"><a href="#2-3-schedulers" class="headerlink" title="2.3 schedulers"></a>2.3 schedulers</h3><p>schedulers&#x662F;Apschedulers&#x7684;&#x8C03;&#x5EA6;&#x5668;,&#x8D1F;&#x8D23;Apschedulers&#x7684;&#x6838;&#x5FC3;&#x529F;&#x80FD;,&#x6240;&#x4EE5;&#x5728;&#x4E0A;&#x9762;&#x7684;<code>&#x4E3B;&#x4F53;&#x903B;&#x8F91;</code>&#x4E2D;&#x57FA;&#x672C;&#x90FD;&#x8BF4;&#x4E86;,&#x8FD9;&#x91CC;&#x53EA;&#x8BF4;&#x4E00;&#x4E9B;&#x4E0A;&#x9762;&#x6CA1;&#x63D0;&#x5230;&#x7684;&#x529F;&#x80FD;&#x51FD;&#x6570;.</p>
+<ul>
+<li>&#x72B6;&#x6001;</li>
+</ul>
+<p>Apschedulers&#x4E2D;&#x63D0;&#x4F9B;&#x4EE5;&#x4E0B;&#x4E09;&#x79CD;&#x72B6;&#x6001;&#xFF0C;&#x901A;&#x8FC7;&#x72B6;&#x6001;&#x673A;&#x5207;&#x6362;&#x72B6;&#x6001;&#x4F7F;Apschedulers&#x53EF;&#x4EE5;&#x6B63;&#x786E;&#x7684;&#x542F;&#x52A8;&#x505C;&#x6B62;&#xFF0C;&#x4EE5;&#x53CA;&#x5728;<code>_process_jobs</code>&#x4E2D;&#x901A;&#x8FC7;&#x5224;&#x65AD;&#x5F53;&#x524D;&#x72B6;&#x6001;&#x662F;&#x5426;&#x4E3A;<code>STATE_PAUSED</code>&#x6765;&#x5B9E;&#x73B0;&#x6682;&#x505C;&#x7684;&#x529F;&#x80FD;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;STATE_STOPPED = 0  # &#x505C;&#x6B62;</span><br><span class="line">STATE_RUNNING = 1  # &#x8FD0;&#x884C;</span><br><span class="line">STATE_PAUSED = 2   #&#x6682;&#x505C;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>_process_jobs</code><br>process_jobs&#x51FD;&#x6570;&#x4E3A;&#x4E86;&#x5904;&#x7406;job,&#x51FD;&#x6570;&#x6BD4;&#x8F83;&#x957F;, &#x8FD9;&#x91CC;&#x770B;&#x5B9E;&#x9645;&#x4EE3;&#x7801;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line">Python&#x590D;&#x5236;&#x4EE3;&#x7801;    def _process_jobs(self):</span><br><span class="line">        # &#x5982;&#x679C;&#x662F;&#x6682;&#x505C;&#x72B6;&#x6001;,&#x5219;&#x6682;&#x505C;&#x8FD0;&#x884C;</span><br><span class="line">        if self.state == STATE_PAUSED:</span><br><span class="line">            self._logger.debug(&apos;Scheduler is paused -- not processing jobs&apos;)</span><br><span class="line">            return None</span><br><span class="line">		</span><br><span class="line">        self._logger.debug(&apos;Looking for jobs to run&apos;)</span><br><span class="line">        now = datetime.now(self.timezone)</span><br><span class="line">        next_wakeup_time = None</span><br><span class="line">        events = []</span><br><span class="line"></span><br><span class="line">        with self._jobstores_lock:</span><br><span class="line">            # &#x83B7;&#x53D6;&#x5B58;&#x50A8;job&#x7684;jobstore</span><br><span class="line">            for jobstore_alias, jobstore in six.iteritems(self._jobstores):</span><br><span class="line">                try:</span><br><span class="line">                    # &#x4ECE;jobstore&#x4E2D;&#x83B7;&#x53D6;&#x6EE1;&#x8DB3;&#x6761;&#x4EF6;&#x7684;job list</span><br><span class="line">                    due_jobs = jobstore.get_due_jobs(now)</span><br><span class="line">                except Exception as e:</span><br><span class="line">                    # &#x8BA1;&#x7B97;&#x8BE5;jobstore&#x81F3;&#x5C11;&#x9700;&#x8981;n&#x79D2;&#x5185;&#x5524;&#x9192;&#x4E00;&#x6B21;</span><br><span class="line">                    self._logger.warning(&apos;Error getting due jobs from job store %r: %s&apos;,</span><br><span class="line">                                         jobstore_alias, e)</span><br><span class="line">                    retry_wakeup_time = now + timedelta(seconds=self.jobstore_retry_interval)</span><br><span class="line">                    if not next_wakeup_time or next_wakeup_time &gt; retry_wakeup_time:</span><br><span class="line">                        next_wakeup_time = retry_wakeup_time</span><br><span class="line"></span><br><span class="line">                    continue</span><br><span class="line"></span><br><span class="line">                for job in due_jobs:</span><br><span class="line">                    try:</span><br><span class="line">                        # &#x83B7;&#x53D6;job&#x7684;&#x5B58;&#x50A8;&#x5668;</span><br><span class="line">                        executor = self._lookup_executor(job.executor)</span><br><span class="line">                    except BaseException:</span><br><span class="line">                        self._logger.error(</span><br><span class="line">                            &apos;Executor lookup (&quot;%s&quot;) failed for job &quot;%s&quot; -- removing it from the &apos;</span><br><span class="line">                            &apos;job store&apos;, job.executor, job)</span><br><span class="line">                        # &#x4ECE;&#x5B58;&#x50A8;&#x5668;&#x4E2D;&#x79FB;&#x9664;&#x6389;job</span><br><span class="line">                        self.remove_job(job.id, jobstore_alias)</span><br><span class="line">                        continue</span><br><span class="line">					# &#x83B7;&#x53D6;job&#x7684;&#x8FD0;&#x884C;&#x65F6;&#x95F4;</span><br><span class="line">                    run_times = job._get_run_times(now)</span><br><span class="line">                    run_times = run_times[-1:] if run_times and job.coalesce else run_times</span><br><span class="line">                    if run_times:</span><br><span class="line">                        try:</span><br><span class="line">                            # &#x8FD0;&#x884C;job</span><br><span class="line">                            executor.submit_job(job, run_times)</span><br><span class="line">                        except MaxInstancesReachedError:</span><br><span class="line">                            self._logger.warning(</span><br><span class="line">                                &apos;Execution of job &quot;%s&quot; skipped: maximum number of running &apos;</span><br><span class="line">                                &apos;instances reached (%d)&apos;, job, job.max_instances)</span><br><span class="line">                            # &#x63D0;&#x4EA4;job&#x8FD0;&#x884C;&#x5B9E;&#x4F8B;&#x8FC7;&#x5927;&#x7684;event</span><br><span class="line">                            event = JobSubmissionEvent(EVENT_JOB_MAX_INSTANCES, job.id,</span><br><span class="line">                                                       jobstore_alias, run_times)</span><br><span class="line">                            events.append(event)</span><br><span class="line">                        except BaseException:</span><br><span class="line">                            self._logger.exception(&apos;Error submitting job &quot;%s&quot; to executor &quot;%s&quot;&apos;,</span><br><span class="line">                                                   job, job.executor)</span><br><span class="line">                        else:</span><br><span class="line">                            # &#x63D0;&#x4EA4;job&#x8FD0;&#x884C;&#x6210;&#x529F;&#x7684;event</span><br><span class="line">                            event = JobSubmissionEvent(EVENT_JOB_SUBMITTED, job.id, jobstore_alias,</span><br><span class="line">                                                       run_times)</span><br><span class="line">                            events.append(event)</span><br><span class="line"></span><br><span class="line">                        # &#x5982;&#x679C;&#x6709;&#x4E0B;&#x4E00;&#x4E2A;&#x6267;&#x884C;&#x65F6;&#x95F4;&#xFF0C;&#x5219;&#x66F4;&#x65B0;job&#xFF0C;&#x5426;&#x5219;&#x5C06;job&#x4ECE;jobstore&#x4E2D;&#x5220;&#x9664;&#x3002;</span><br><span class="line">                        job_next_run = job.trigger.get_next_fire_time(run_times[-1], now)</span><br><span class="line">                        if job_next_run:</span><br><span class="line">                            job._modify(next_run_time=job_next_run)</span><br><span class="line">                            jobstore.update_job(job)</span><br><span class="line">                        else:</span><br><span class="line">                            self.remove_job(job.id, jobstore_alias)</span><br><span class="line"></span><br><span class="line">                # &#x8BA1;&#x7B97;jobstore&#x4E0B;&#x6B21;&#x5524;&#x9192;&#x65F6;&#x95F4;</span><br><span class="line">                jobstore_next_run_time = jobstore.get_next_run_time()</span><br><span class="line">                if jobstore_next_run_time and (next_wakeup_time is None or</span><br><span class="line">                                               jobstore_next_run_time &lt; next_wakeup_time):</span><br><span class="line">                    next_wakeup_time = jobstore_next_run_time.astimezone(self.timezone)</span><br><span class="line"></span><br><span class="line">        # &#x89E6;&#x53D1;&#x6240;&#x6709;event</span><br><span class="line">        for event in events:</span><br><span class="line">            self._dispatch_event(event)</span><br><span class="line"></span><br><span class="line">        # &#x8BA1;&#x7B97;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;</span><br><span class="line">        if self.state == STATE_PAUSED:</span><br><span class="line">            wait_seconds = None</span><br><span class="line">            self._logger.debug(&apos;Scheduler is paused; waiting until resume() is called&apos;)</span><br><span class="line">        elif next_wakeup_time is None:</span><br><span class="line">            wait_seconds = None</span><br><span class="line">            self._logger.debug(&apos;No jobs; waiting until a job is added&apos;)</span><br><span class="line">        else:</span><br><span class="line">            wait_seconds = min(max(timedelta_seconds(next_wakeup_time - now), 0), TIMEOUT_MAX)</span><br><span class="line">            self._logger.debug(&apos;Next wakeup is due at %s (in %f seconds)&apos;, next_wakeup_time,</span><br><span class="line">                               wait_seconds)</span><br><span class="line"></span><br><span class="line">        return wait_seconds</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-triggers"><a href="#2-4-triggers" class="headerlink" title="2.4 triggers"></a>2.4 triggers</h3><p>&#x9996;&#x5148;<code>BaseTrigger</code>&#x63D0;&#x4F9B;&#x4E00;&#x4E2A;&#x89E6;&#x53D1;&#x5668;&#x7684;&#x57FA;&#x672C;&#x65B9;&#x6CD5;,&#x7528;&#x4E8E;&#x7ED9;<code>get_next_fire_time</code>&#x6DFB;&#x52A0;&#x6296;&#x52A8;&#x65F6;&#x95F4;,&#x9632;&#x6B62;&#x5927;&#x91CF;&#x4EFB;&#x52A1;&#x5728;&#x540C;&#x4E00;&#x65F6;&#x95F4;&#x8FD0;&#x884C;.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Python&#x590D;&#x5236;&#x4EE3;&#x7801;    def _apply_jitter(self, next_fire_time, jitter, now):</span><br><span class="line">        if next_fire_time is None or not jitter:</span><br><span class="line">            return next_fire_time</span><br><span class="line"></span><br><span class="line">		# &#x4E3B;&#x8981;&#x7684;&#x4EE3;&#x7801;,&#x901A;&#x8FC7;&#x968F;&#x673A;&#x9009;&#x62E9;+-jitter&#x503C;&#x4E0E;next_fire_time&#x8FDB;&#x884C;&#x548C;&#x8FD0;&#x7B97;</span><br><span class="line">        next_fire_time_with_jitter = next_fire_time + timedelta(</span><br><span class="line">                seconds=random.uniform(-jitter, jitter))</span><br><span class="line"></span><br><span class="line">        if next_fire_time_with_jitter &lt; now:</span><br><span class="line">        	# &#x5982;&#x679C;&#x65B0;&#x7684;&#x65F6;&#x95F4;&#x503C;&#x5C0F;&#x4E8E;&#x5F53;&#x524D;&#x65F6;&#x95F4;,&#x5219;&#x8FD4;&#x56DE;&#x65E7;&#x65F6;&#x95F4;</span><br><span class="line">            return next_fire_time</span><br><span class="line">        return next_fire_time_with_jitter</span><br></pre></td></tr></table></figure>
+
+<p>&#x800C;&#x5176;&#x4ED6;&#x7EC6;&#x8282;&#x6BD4;&#x8F83;&#x7B80;&#x5355;,&#x5404;&#x79CD;&#x89E6;&#x53D1;&#x5668;&#x90FD;&#x662F;&#x6309;&#x7167;&#x8BBE;&#x7F6E;&#x7684;&#x65F6;&#x95F4;&#x8FDB;&#x884C;&#x8FD0;&#x884C;,&#x5982;&#x679C;&#x80FD;&#x7B97;&#x51FA;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;,&#x5219;&#x5728;&#x8FD0;&#x884C;&#x540E;&#x6309;&#x7167;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;&#x7EE7;&#x7EED;&#x8FD0;&#x884C;,&#x7B97;&#x4E0D;&#x51FA;&#x4E0B;&#x6B21;&#x8FD0;&#x884C;&#x65F6;&#x95F4;&#x8BE5;job&#x5C06;&#x505C;&#x6B62;&#x8FD0;&#x884C;</p>
+<h3 id="2-5-job-py"><a href="#2-5-job-py" class="headerlink" title="2.5 job.py"></a>2.5 job.py</h3><p>job&#x6BD4;&#x8F83;&#x7B80;&#x5355;,&#x4E3B;&#x8981;&#x662F;&#x63D0;&#x4F9B;&#x4E00;&#x4E9B;&#x7ED9;scheduler&#x8C03;&#x7528;&#x7684;&#x65B9;&#x6CD5;.<br>job&#x7684;&#x65B9;&#x6CD5;&#x5206;&#x4E3A;&#x4E24;&#x5927;&#x7C7B;,&#x4E00;&#x7C7B;&#x662F;&#x7C7B;&#x4F3C;&#x4E8E;&#x4EE3;&#x7406;,&#x901A;&#x8FC7;&#x8C03;&#x7528;scheduler&#x7684;&#x65B9;&#x6CD5;&#x6765;&#x4FEE;&#x6539;&#x81EA;&#x5DF1;&#x672C;&#x8EAB;,&#x5982;<code>modify</code>,<code>reschedule</code>,<code>pause</code>,<code>resume</code>,<code>remove</code>.<br>&#x8FD9;&#x7C7B;&#x65B9;&#x6CD5;&#x6BD4;&#x8F83;&#x7B80;&#x5355;,&#x800C;&#x4E14;&#x4E3B;&#x8981;&#x903B;&#x8F91;&#x5728;&#x4E8E;scheduler,&#x4E0D;&#x5728;&#x4E8E;job,&#x53E6;&#x5916;&#x7684;&#x5C31;&#x662F;&#x4E3B;&#x8981;&#x903B;&#x8F91;&#x5728;job&#x7684;&#x65B9;&#x6CD5;.&#x5982;<code>__getstate__</code>&#x4EE5;&#x53CA;<code>__setstate__</code>&#x7684;&#x5E8F;&#x5217;&#x5316;&#x76F8;&#x5173;&#x65B9;&#x6CD5;,&#x540C;&#x65F6;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;<code>_modify</code>&#x7528;&#x6765;&#x63A5;&#x53D7;&#x66F4;&#x65B0;job&#x7684;&#x65B9;&#x6CD5;,&#x867D;&#x7136;&#x8BE5;&#x65B9;&#x6CD5;&#x5F88;&#x957F;,&#x4F46;&#x4E3B;&#x8981;&#x903B;&#x8F91;&#x4E5F;&#x662F;&#x5404;&#x79CD;&#x5224;&#x65AD;&#x518D;&#x66F4;&#x65B0;&#x6307;</p>
+<h2 id="3-&#x603B;&#x7ED3;"><a href="#3-&#x603B;&#x7ED3;" class="headerlink" title="3.&#x603B;&#x7ED3;"></a>3.&#x603B;&#x7ED3;</h2><p>&#x8868;&#x9762;&#x4E0A;&#x770B;APScheduler&#x7684;&#x4EE3;&#x7801;&#x4F1A;&#x6BD4;&#x8F83;&#x590D;&#x6742;,&#x4F46;&#x7ECF;&#x8FC7;&#x62C6;&#x89E3;&#x540E;,Apscheduler&#x7684;&#x4EE3;&#x7801;&#x9664;&#x4E86;scheduler&#x7684;&#x4EE3;&#x7801;&#x662F;&#x975E;&#x5E38;&#x7B80;&#x5355;&#x7684;,&#x4E3B;&#x8981;&#x662F;&#x9488;&#x5BF9;&#x5404;&#x79CD;&#x4E0D;&#x540C;&#x7684;&#x8FD0;&#x884C;&#x73AF;&#x5883;&#x800C;&#x5C01;&#x88C5;&#x7684;&#x4EE3;&#x7801;&#x6BD4;&#x8F83;&#x591A;,&#x5BFC;&#x81F4;&#x5728;&#x5206;&#x6790;&#x4EE3;&#x7801;&#x65F6;,&#x89C9;&#x5F97;&#x8FD9;&#x4E9B;&#x4EE3;&#x7801;&#x7ECF;&#x4E0D;&#x8D77;&#x5206;&#x6790;,&#x4F46;&#x662F;APScheduler&#x7684;&#x6838;&#x5FC3;&#x8BBE;&#x8BA1;&#x8FD8;&#x662F;&#x5F88;&#x4E0D;&#x9519;&#x7684;.</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/1bb7943a5e8b4878803ad1fe65f636d5.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Python-后端/" rel="tag"># Python,后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7036038345062875149.html" rel="next" title="SpringMvc-DispatcherServlet原理分">
+                <i class="fa fa-chevron-left"></i> SpringMvc-DispatcherServlet原理分
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7036073145471598606.html" rel="prev" title="6 k8s + jenkins 实现持续集成(完) 一 ">
+                6 k8s + jenkins 实现持续集成(完) 一  <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前记"><span class="nav-number">1.</span> <span class="nav-text">前记</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-主体逻辑"><span class="nav-number">2.</span> <span class="nav-text">1.主体逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1代码结构"><span class="nav-number">2.1.</span> <span class="nav-text">1.1代码结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2简单的例子"><span class="nav-number">2.2.</span> <span class="nav-text">1.2简单的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-初始化scheduler"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 初始化scheduler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4添加job"><span class="nav-number">2.4.</span> <span class="nav-text">1.4添加job</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5开始运行scheduler"><span class="nav-number">2.5.</span> <span class="nav-text">1.5开始运行scheduler</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-源码分析"><span class="nav-number">3.</span> <span class="nav-text">2.源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-executors"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 executors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-JobStore"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 JobStore</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-MemoryJobStore和BaseJobStore"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.2.1 MemoryJobStore和BaseJobStore</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-其他JobStore"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2.2 其他JobStore</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-schedulers"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 schedulers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-triggers"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 triggers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-job-py"><span class="nav-number">3.5.</span> <span class="nav-text">2.5 job.py</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-总结"><span class="nav-number">4.</span> <span class="nav-text">3.总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

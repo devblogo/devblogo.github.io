@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Redis,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4EC0;&amp;#x4E48;&amp;#x662F;&amp;#x538B;&amp;#x7F29;&amp;#x5217;&amp;#x8868;&amp;#x538B;&amp;#x7F29;&amp;#x5217;&amp;#x8868; ziplist &amp;#x5728; redis &amp;#x4E2D;&amp;#x7684;&amp;#x5E94;&amp;#x7528;&amp;#x4E5F;&amp;#x975E;&amp;#x5E38;&amp;#x5E7F;&amp;#x6CDB;&amp;#xFF0C;&amp;#x5B83;">
+<meta name="keywords" content="Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【最完整系列】Redis-结构篇-压缩列表">
+<meta property="og:url" content="https://dev.newban.cn/6844904053579710478.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4EC0;&amp;#x4E48;&amp;#x662F;&amp;#x538B;&amp;#x7F29;&amp;#x5217;&amp;#x8868;&amp;#x538B;&amp;#x7F29;&amp;#x5217;&amp;#x8868; ziplist &amp;#x5728; redis &amp;#x4E2D;&amp;#x7684;&amp;#x5E94;&amp;#x7528;&amp;#x4E5F;&amp;#x975E;&amp;#x5E38;&amp;#x5E7F;&amp;#x6CDB;&amp;#xFF0C;&amp;#x5B83;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/a8574e0a31ab89d90c09414d55edebad8eb50a54ff102dac2976144fd3594920">
+<meta property="og:updated_time" content="2024-04-28T10:12:46.220Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【最完整系列】Redis-结构篇-压缩列表">
+<meta name="twitter:description" content="&amp;#x4EC0;&amp;#x4E48;&amp;#x662F;&amp;#x538B;&amp;#x7F29;&amp;#x5217;&amp;#x8868;&amp;#x538B;&amp;#x7F29;&amp;#x5217;&amp;#x8868; ziplist &amp;#x5728; redis &amp;#x4E2D;&amp;#x7684;&amp;#x5E94;&amp;#x7528;&amp;#x4E5F;&amp;#x975E;&amp;#x5E38;&amp;#x5E7F;&amp;#x6CDB;&amp;#xFF0C;&amp;#x5B83;">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/a8574e0a31ab89d90c09414d55edebad8eb50a54ff102dac2976144fd3594920">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844904053579710478.html">
+
+
+
+
+
+  <title>【最完整系列】Redis-结构篇-压缩列表 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">【最完整系列】Redis-结构篇-压缩列表</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-28T13:24:31+08:00">
+                2020-01-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="&#x4EC0;&#x4E48;&#x662F;&#x538B;&#x7F29;&#x5217;&#x8868;"><a href="#&#x4EC0;&#x4E48;&#x662F;&#x538B;&#x7F29;&#x5217;&#x8868;" class="headerlink" title="&#x4EC0;&#x4E48;&#x662F;&#x538B;&#x7F29;&#x5217;&#x8868;"></a>&#x4EC0;&#x4E48;&#x662F;&#x538B;&#x7F29;&#x5217;&#x8868;</h3><p>&#x538B;&#x7F29;&#x5217;&#x8868; ziplist &#x5728; redis &#x4E2D;&#x7684;&#x5E94;&#x7528;&#x4E5F;&#x975E;&#x5E38;&#x5E7F;&#x6CDB;&#xFF0C;&#x5B83;&#x662F;&#x6211;&#x4EEC;&#x5E38;&#x7528;&#x7684; zset &#xFF0C;list &#x548C; hash &#x7ED3;&#x6784;&#x7684;&#x5E95;&#x5C42;&#x5B9E;&#x73B0;&#x4E4B;&#x4E00;&#x3002;&#x5F53;&#x6211;&#x4EEC;&#x7684;&#x5BB9;&#x5668;&#x5BF9;&#x8C61;&#x7684;&#x5143;&#x7D20;&#x4E2A;&#x6570;&#x5C0F;&#x4E8E;&#x4E00;&#x5B9A;&#x6761;&#x4EF6;&#x65F6;&#xFF0C;redis &#x4F1A;&#x4F7F;&#x7528; ziplist &#x7684;&#x65B9;&#x5F0F;&#x50A8;&#x5B58;&#xFF0C;&#x6765;&#x51CF;&#x5C11;&#x5185;&#x5B58;&#x7684;&#x4F7F;&#x7528;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;    &gt; hset test_hash me sidfate</span><br><span class="line">    (integer) 1</span><br><span class="line">    &gt; object encoding test_hash</span><br><span class="line">    &quot;ziplist&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x5728;&#x5143;&#x7D20;&#x8F83;&#x5C11;&#x7684;&#x65F6;&#x5019;&#x4F7F;&#x7528; ziplist &#xFF1F;</strong></p>
+<p>&#x56E0;&#x4E3A; redis &#x4E2D;&#x7684;&#x96C6;&#x5408;&#x5BB9;&#x5668;&#x4E2D;&#xFF0C;&#x5F88;&#x591A;&#x60C5;&#x51B5;&#x90FD;&#x7528;&#x5230;&#x4E86;&#x94FE;&#x8868;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x5143;&#x7D20;&#x548C;&#x5143;&#x7D20;&#x4E4B;&#x95F4;&#x901A;&#x8FC7;&#x50A8;&#x5B58;&#x7684;&#x5173;&#x8054;&#x6307;&#x9488;&#x6709;&#x5E8F;&#x7684;&#x4E32;&#x8054;&#x8D77;&#x6765;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x6837;&#x7684;&#x6307;&#x9488;&#x5F80;&#x5F80;&#x662F; <strong>&#x968F;&#x673A;I/O</strong>&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x6307;&#x9488;&#x5730;&#x5740;&#x662F;&#x4E0D;&#x8FDE;&#x7EED;&#x7684;&#xFF08;&#x5206;&#x5E03;&#x4E0D;&#x5747;&#x5300;&#xFF09;&#x3002;&#x800C;&#x6211;&#x4EEC;&#x7684; ziplist &#x5B83;&#x672C;&#x8EAB;&#x662F;&#x4E00;&#x5757;&#x8FDE;&#x7EED;&#x7684;&#x5185;&#x5B58;&#x5757;&#xFF0C;&#x6240;&#x4EE5;&#x5B83;&#x7684;&#x8BFB;&#x5199;&#x662F; <strong>&#x987A;&#x5E8F;I/O</strong>&#xFF0C;&#x4ECE;&#x5E95;&#x5C42;&#x7684;&#x78C1;&#x76D8;&#x8BFB;&#x5199;&#x6765;&#x8BF4;&#xFF0C;<strong>&#x987A;&#x5E8F;I/O</strong> &#x7684;&#x6548;&#x7387;&#x80AF;&#x5B9A;&#x662F;&#x9AD8;&#x4E8E; <strong>&#x968F;&#x673A;I/O</strong> &#x3002;&#x4F60;&#x53EF;&#x80FD;&#x4F1A;&#x95EE;&#x4E86;&#xFF0C;&#x90A3;&#x4E3A;&#x4EC0;&#x4E48;&#x4E0D;&#x90FD;&#x7528; <strong>&#x987A;&#x5E8F;I/O</strong> &#x7684; ziplist &#x4EE3;&#x66FF; <strong>&#x968F;&#x673A;I/O</strong> &#x5462;&#xFF0C;&#x56E0;&#x4E3A; ziplist &#x662F;&#x8FDE;&#x7EED;&#x5185;&#x5B58;&#xFF0C;&#x5F53;&#x4F60;&#x5143;&#x7D20;&#x6570;&#x91CF;&#x591A;&#x4E86;&#xFF0C;&#x610F;&#x5473;&#x7740;&#x5F53;&#x4F60;&#x521B;&#x5EFA;&#x548C;&#x6269;&#x5C55;&#x7684;&#x65F6;&#x5019;&#x9700;&#x8981;&#x64CD;&#x4F5C;&#x66F4;&#x591A;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x6240;&#x4EE5; ziplist &#x9488;&#x5BF9;&#x5143;&#x7D20;&#x5C11;&#x7684;&#x65F6;&#x5019;&#x624D;&#x80FD;&#x63D0;&#x5347;&#x6548;&#x7387;&#x3002;</p>
+<p><strong>ziplist &#x5982;&#x4F55;&#x51CF;&#x5C11;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x7684;&#x5462;&#xFF1F;</strong></p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#x8BA9;&#x6211;&#x4EEC;&#x4ECE;&#x6E90;&#x7801;&#x4E2D;&#x4E00;&#x63A2;&#x7A76;&#x7ADF;&#x3002;</p>
+<h3 id="&#x6E90;&#x7801;&#x7ED3;&#x6784;"><a href="#&#x6E90;&#x7801;&#x7ED3;&#x6784;" class="headerlink" title="&#x6E90;&#x7801;&#x7ED3;&#x6784;"></a>&#x6E90;&#x7801;&#x7ED3;&#x6784;</h3><blockquote>
+<p>&#x9898;&#x5916;&#x8BDD;&#xFF1A;&#x6BCF;&#x5F53;&#x4F60;&#x60F3;&#x8981;&#x53BB;&#x63A2;&#x7A76;&#x4E00;&#x4E2A;&#x9879;&#x76EE;&#x7684;&#x6E90;&#x7801;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x9996;&#x5148;&#x5E94;&#x8BE5;&#x53BB;&#x770B;&#x7684;&#x5C31;&#x662F;&#x5B83;&#x7684;&#x6CE8;&#x91CA;&#xFF0C;&#x597D;&#x7684;&#x6CE8;&#x91CA;&#x5373;&#x662F;&#x6587;&#x6863;&#x3002;&#x540C;&#x65F6;&#x4E5F;&#x544A;&#x8BC9;&#x6211;&#x4EEC;&#x5E73;&#x65F6;&#x5F00;&#x59CB;&#x4E5F;&#x8981;&#x6CE8;&#x610F;&#x6CE8;&#x91CA;&#x7684;&#x7F16;&#x5199;&#x3002;</p>
+</blockquote>
+<p>&#x9996;&#x5148;&#x4ECE;&#x6E90;&#x7801;&#x7684;&#x6CE8;&#x91CA;&#x4E2D;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x4E86;&#x89E3;&#x4E00;&#x4E9B;&#x57FA;&#x7840;&#x4FE1;&#x606F;&#xFF1A;</p>
+<p>ziplist &#x662F;&#x7ECF;&#x8FC7;&#x7279;&#x6B8A;&#x7F16;&#x7801;&#x7684;&#x53CC;&#x5411;&#x5217;&#x8868;&#x7ED3;&#x6784;&#xFF0C;&#x7528;&#x6765;&#x63D0;&#x9AD8;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x6548;&#x7387;&#x3002;&#x5B83;&#x53EF;&#x4EE5;&#x50A8;&#x5B58;&#x5B57;&#x7B26;&#x4E32;&#x6216;&#x8005;&#x6574;&#x6570;&#x503C;&#xFF0C;&#x5176;&#x4E2D;&#x6574;&#x6570;&#x503C;&#x88AB;&#x7F16;&#x7801;&#x6210;&#x5B9E;&#x9645;&#x7684;&#x6574;&#x6570;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x5B57;&#x7B26;&#x4E32;&#x5F62;&#x5F0F;&#x3002;&#x5B83;&#x53EF;&#x4EE5;&#x5728; <strong>O(1)</strong> &#x65F6;&#x95F4;&#x5185;&#x5BF9;&#x5217;&#x8868;&#x7684;&#x4E24;&#x7AEF;&#x8FDB;&#x884C; push &#x548C; pop &#x64CD;&#x4F5C;&#x3002;&#x4F46;&#x662F;&#xFF0C;&#x56E0;&#x4E3A;&#x6BCF;&#x4E2A;&#x64CD;&#x4F5C;&#x90FD;&#x9700;&#x8981;&#x91CD;&#x65B0;&#x5206;&#x914D; ziplist &#x4F7F;&#x7528;&#x7684;&#x5185;&#x5B58;&#xFF0C;&#x6240;&#x4EE5;&#x5B9E;&#x9645;&#x7684;&#x590D;&#x6742;&#x5EA6;&#x4E0E; ziplist &#x4F7F;&#x7528;&#x7684;&#x5185;&#x5B58;&#x5927;&#x5C0F;&#x6709;&#x5173;&#x3002;</p>
+<p>ziplist &#x7ED3;&#x6784;&#x7684;&#x5E03;&#x5C40;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;zlbytes&gt; &lt;zltail&gt; &lt;zllen&gt; &lt;entry&gt; &lt;entry&gt; ... &lt;entry&gt; &lt;zlend&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/a8574e0a31ab89d90c09414d55edebad8eb50a54ff102dac2976144fd3594920" alt></p>
+<table>
+<thead>
+<tr>
+<th>&#x5C5E;&#x6027;</th>
+<th>&#x5B57;&#x8282;&#x6570;</th>
+<th>&#x542B;&#x4E49;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zlbytes</td>
+<td>4</td>
+<td>&#x538B;&#x7F29;&#x5217;&#x8868;&#x5360;&#x7528;&#x7684;&#x5185;&#x5B58;&#x5B57;&#x8282;&#x6570;&#xFF1A;&#x5728;&#x5BF9;&#x538B;&#x7F29;&#x5217;&#x8868;&#x8FDB;&#x884C;&#x5185;&#x5B58;&#x91CD;&#x5206;&#x914D;&#xFF0C; &#x6216;&#x8005;&#x8BA1;&#x7B97; zlend &#x7684;&#x4F4D;&#x7F6E;&#x65F6;&#x4F7F;&#x7528;&#x3002;</td>
+</tr>
+<tr>
+<td>zltail</td>
+<td>4</td>
+<td>&#x538B;&#x7F29;&#x5217;&#x8868;&#x8868;&#x5C3E;&#x8282;&#x70B9;&#x7684;&#x504F;&#x79FB;&#x91CF;&#xFF1A;&#x7528;&#x6765;&#x5012;&#x5E8F;&#x904D;&#x5386;&#x538B;&#x7F29;&#x5217;&#x8868;&#x3002;</td>
+</tr>
+<tr>
+<td>zllen</td>
+<td>2</td>
+<td>&#x8BB0;&#x5F55;&#x4E86;&#x538B;&#x7F29;&#x5217;&#x8868;&#x5305;&#x542B;&#x7684;&#x8282;&#x70B9;&#x6570;&#x91CF;&#xFF1A; &#x5F53;&#x8FD9;&#x4E2A;&#x5C5E;&#x6027;&#x7684;&#x503C;&#x5C0F;&#x4E8E; UINT16_MAX &#xFF08;65535&#xFF09;&#x65F6;&#xFF0C; &#x8FD9;&#x4E2A;&#x5C5E;&#x6027;&#x7684;&#x503C;&#x5C31;&#x662F;&#x538B;&#x7F29;&#x5217;&#x8868;&#x5305;&#x542B;&#x8282;&#x70B9;&#x7684;&#x6570;&#x91CF;&#xFF1B; &#x5F53;&#x8FD9;&#x4E2A;&#x503C;&#x7B49;&#x4E8E; UINT16_MAX &#x65F6;&#xFF0C; &#x8282;&#x70B9;&#x7684;&#x771F;&#x5B9E;&#x6570;&#x91CF;&#x9700;&#x8981;&#x904D;&#x5386;&#x6574;&#x4E2A;&#x538B;&#x7F29;&#x5217;&#x8868;&#x624D;&#x80FD;&#x8BA1;&#x7B97;&#x5F97;&#x51FA;&#x3002;</td>
+</tr>
+<tr>
+<td>entry[]</td>
+<td>&#x5F85;&#x5B9A;</td>
+<td>&#x8282;&#x70B9;&#x6570;&#x7EC4;&#xFF0C;&#x5305;&#x542B;&#x5143;&#x7D20;&#x7684;&#x5177;&#x4F53;&#x4FE1;&#x606F;</td>
+</tr>
+<tr>
+<td>zlend</td>
+<td>1</td>
+<td>&#x7279;&#x6B8A;&#x503C; 0xFF &#xFF08;&#x5341;&#x8FDB;&#x5236; 255 &#xFF09;&#xFF0C;&#x7528;&#x4E8E;&#x6807;&#x8BB0;&#x538B;&#x7F29;&#x5217;&#x8868;&#x7684;&#x672B;&#x7AEF;&#x3002;</td>
+</tr>
+</tbody></table>
+<p>ziplist&#x4E2D;&#x7684;&#x6BCF;&#x4E2A;&#x8282;&#x70B9; entry &#x7684;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;prevlen&gt; &lt;encoding&gt; &lt;entry-data&gt;</span><br></pre></td></tr></table></figure>
+
+<p>redis &#x4E3A;&#x4E86;&#x8282;&#x7EA6;&#x5185;&#x5B58;&#x5728; ziplist &#x7684; entry &#x8FD9;&#x4E2A;&#x7ED3;&#x6784;&#x4E0A;&#x6709;&#x5F88;&#x591A;&#x9A9A;&#x64CD;&#x4F5C;&#xFF0C;&#x8BA9;&#x6211;&#x6765;&#x4E00;&#x4E00;&#x8BF4;&#x660E;&#x3002;</p>
+<p><strong>prevlen</strong></p>
+<p>prevlen &#x8868;&#x793A;&#x524D;&#x4E00;&#x4E2A;&#x5143;&#x7D20;&#x7684;&#x957F;&#x5EA6;&#xFF0C;&#x4EE5;&#x4FBF;&#x80FD;&#x591F;&#x4ECE;&#x540E;&#x5411;&#x524D;&#x904D;&#x5386;&#x5217;&#x8868;&#x3002;&#x5B83;&#x6709;&#x4E00;&#x5957;&#x7279;&#x522B;&#x7684;&#x7F16;&#x7801;&#x65B9;&#x5F0F;&#xFF1A;&#x5982;&#x679C;&#x8FD9;&#x4E2A;&#x957F;&#x5EA6;&#x5C0F;&#x4E8E;254&#x5B57;&#x8282;&#xFF0C;&#x90A3;&#x4E48;&#x5B83;&#x5360;&#x7528;1&#x4E2A;&#x5B57;&#x8282;&#xFF1B;&#x5F53;&#x957F;&#x5EA6;&#x5927;&#x4E8E;&#x6216;&#x7B49;&#x4E8E;254&#x65F6;&#xFF0C;&#x5360;&#x7528;5&#x4E2A;&#x5B57;&#x8282;&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x5B57;&#x8282;&#x88AB;&#x8BBE;&#x7F6E;&#x4E3A;254 (0xFE)&#xFF0C;&#x5176;&#x4F59;&#x7684;4&#x4E2A;&#x5B57;&#x8282;&#x91C7;&#x7528;&#x524D;&#x4E00;&#x4E2A;&#x6761;&#x76EE;&#x7684;&#x957F;&#x5EA6;&#x4F5C;&#x4E3A;&#x503C;&#x3002;prevlen &#x7528; 5 bytes&#x8868;&#x793A;&#x65F6;&#xFF0C;&#x4E0D;&#x4EE3;&#x8868;&#x957F;&#x5EA6;&#x4E00;&#x5B9A;&#x5927;&#x4E8E;&#x7B49;&#x4E8E;254&#xFF0C;&#x8FD9;&#x662F;&#x4E3A;&#x4E86;&#x51CF;&#x5C11; realloc &#x548C; memmove &#x63D0;&#x9AD8;&#x6548;&#x7387;&#x3002;</p>
+<blockquote>
+<p>&#x4E3A;&#x4EC0;&#x4E48;&#x4E34;&#x754C;&#x503C;&#x662F; 254 &#xFF1F;&#x6211;&#x4EEC;&#x6765;&#x7B97;&#x4E00;&#x7B14;&#xFF0C;&#x4E00;&#x4E2A;&#x5B57;&#x8282;&#x6700;&#x5927;&#x80FD;&#x50A8;&#x5B58;&#x503C;&#x4E3A;255&#xFF0C;&#x90A3;&#x4E34;&#x754C;&#x503C;&#x5E94;&#x8BE5;&#x662F;255&#x554A;&#xFF0C;&#x522B;&#x5FD8;&#x4E86;&#x6211;&#x4EEC;&#x8FD8;&#x6709;&#x4E2A; zlend&#xFF0C;&#x5B83;&#x7684;&#x503C;&#x662F;0xFF&#xFF08;255&#xFF09;&#xFF0C;&#x4E3A;&#x4E86;&#x907F;&#x514D;&#x6DF7;&#x6DC6;&#xFF0C;&#x6240;&#x4EE5;&#x7528;254&#x533A;&#x5206;&#x3002;</p>
+</blockquote>
+<p><strong>encoding</strong></p>
+<p>encoding &#x8868;&#x793A;&#x5143;&#x7D20;&#x7684;&#x7F16;&#x7801;&#xFF0C;&#x5B83;&#x53D6;&#x51B3;&#x4E8E;&#x5143;&#x7D20;&#x7684;&#x5185;&#x5BB9;&#x3002;&#x5F53;&#x5143;&#x7D20;&#x662F;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#x4E32;&#x65F6;&#xFF0C;&#x7F16;&#x7801;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x5B57;&#x8282;&#x7684;&#x524D;2&#x4F4D;&#x5C06;&#x4FDD;&#x5B58;&#x7528;&#x4E8E;&#x5B58;&#x50A8;&#x5B57;&#x7B26;&#x4E32;&#x957F;&#x5EA6;&#x7684;&#x7F16;&#x7801;&#x7C7B;&#x578B;&#xFF0C;&#x7136;&#x540E;&#x662F;&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x5B9E;&#x9645;&#x957F;&#x5EA6;&#x3002;&#x5F53;&#x6761;&#x76EE;&#x662F;&#x6574;&#x6570;&#x65F6;&#xFF0C;&#x524D;2&#x4F4D;&#x90FD;&#x8BBE;&#x7F6E;&#x4E3A;1&#x3002;&#x4E0B;&#x9762;&#x7684;2&#x4F4D;&#x7528;&#x4E8E;&#x6307;&#x5B9A;&#x5728;&#x8FD9;&#x4E2A;&#x62A5;&#x5934;&#x4E4B;&#x540E;&#x5C06;&#x5B58;&#x50A8;&#x54EA;&#x79CD;&#x7C7B;&#x578B;&#x7684;&#x6574;&#x6570;&#x3002;&#x5BF9;&#x4E0D;&#x540C;&#x7C7B;&#x578B;&#x548C;&#x7F16;&#x7801;&#x7684;&#x6982;&#x8FF0;&#x5982;&#x4E0B;&#x3002;&#x7B2C;&#x4E00;&#x4E2A;&#x5B57;&#x8282;&#x603B;&#x662F;&#x8DB3;&#x4EE5;&#x786E;&#x5B9A;&#x6761;&#x76EE;&#x7684;&#x7C7B;&#x578B;&#x3002;</p>
+<ul>
+<li><strong>|00pppppp| - 1 &#x5B57;&#x8282;</strong></li>
+</ul>
+<p>&#x957F;&#x5EA6;&#x5C0F;&#x4E8E;&#x6216;&#x7B49;&#x4E8E;63&#x5B57;&#x8282;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;63&#x53EF;&#x4EE5;&#x7528;6&#x4E2A;&#x5B57;&#x8282;&#x8868;&#x793A;&#xFF0C;&#x6240;&#x4EE5; pppppp &#x8868;&#x793A;&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x5B9E;&#x9645;&#x957F;&#x5EA6;&#x3002;</p>
+<ul>
+<li><strong>|01pppppp|qqqqqqqq| - 2 &#x5B57;&#x8282;</strong></li>
+</ul>
+<p>&#x957F;&#x5EA6;&#x5C0F;&#x4E8E;&#x6216;&#x7B49;&#x4E8E;16383&#x5B57;&#x8282;&#xFF08;14 &#x4F4D;&#xFF09;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x3002;</p>
+<ul>
+<li><strong>|10000000|qqqqqqqq|rrrrrrrr|ssssssss|tttttttt| - 5 &#x5B57;&#x8282;</strong></li>
+</ul>
+<p>&#x957F;&#x5EA6;&#x5927;&#x4E8E;16383&#xFF08;14&#x4F4D;&#xFF09;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;&#x540E;4&#x4E2A;&#x5B57;&#x8282;&#x4EE3;&#x8868;&#x957F;&#x5EA6;&#x3002;</p>
+<ul>
+<li><strong>|11000000| - 3 &#x5B57;&#x8282;</strong></li>
+</ul>
+<p>11000000 + int16&#xFF08;2&#x5B57;&#x8282;&#xFF09;&#x3002;</p>
+<ul>
+<li><strong>|11010000| - 5 &#x5B57;&#x8282;</strong></li>
+</ul>
+<p>11010000 + int32&#xFF08;4&#x5B57;&#x8282;&#xFF09;&#x3002;</p>
+<ul>
+<li><strong>|11100000| - 9 bytes</strong></li>
+</ul>
+<p>11010000 + int64&#xFF08;8&#x5B57;&#x8282;&#xFF09;&#x3002;</p>
+<ul>
+<li><strong>|11110000| - 4 bytes</strong></li>
+</ul>
+<p>11110000 + 24&#x4F4D;&#x6709;&#x7B26;&#x53F7;&#x6574;&#x6570;&#xFF08;3&#x5B57;&#x8282;&#xFF09;&#x3002;</p>
+<ul>
+<li><strong>|11111110| - 2 bytes</strong></li>
+</ul>
+<p>11110000 + int8&#xFF08;1&#x5B57;&#x8282;&#xFF09;&#x3002;</p>
+<ul>
+<li><strong>|1111xxxx|</strong></li>
+</ul>
+<p>&#x6781;&#x5C0F;&#x6574;&#x6570;&#xFF0C;xxxx &#x7684;&#x8303;&#x56F4;&#x53EA;&#x80FD;&#x662F; (0001<del>1101)&#xFF0C;&#x4E5F;&#x5C31;&#x662F;1</del>13&#xFF0C;&#x4F46;&#x662F;&#x56E0;&#x4E3A;0000&#x3001;1110&#x3001;1111&#x90FD;&#x88AB;&#x5360;&#x7528;&#x4E86;&#x3002;&#x8BFB;&#x53D6;&#x5230;&#x7684; value &#x9700;&#x8981;&#x5C06; xxxx &#x51CF; 1&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x6574;&#x6570; 0~12 &#x5C31;&#x662F;&#x6700;&#x7EC8;&#x7684; value&#x3002;</p>
+<ul>
+<li><strong>|11111111|</strong></li>
+</ul>
+<p>&#x8868;&#x793A; ziplist &#x7684;&#x7ED3;&#x675F;&#xFF0C;&#x4E5F;&#x5C31;&#x662F; zlend &#x7684;&#x503C; 0xFF&#x3002;</p>
+<p>&#x5982;&#x679C;&#x4F60;&#x89C9;&#x5F97;&#x770B;&#x7684;&#x6DF7;&#x4E71;&#x4E86;&#xFF0C;&#x522B;&#x614C;&#xFF0C;&#x4E0A;&#x9762;&#x7684;&#x4E0D;&#x9700;&#x8981;&#x5168;&#x90E8;&#x8BB0;&#x4F4F;&#xFF0C;&#x4E0B;&#x9762;&#x6211;&#x4F1A;&#x7528;&#x4E00;&#x4E2A;&#x9C9C;&#x6D3B;&#x7684;&#x6817;&#x5B50;&#xFF08;&#x5B98;&#x65B9;&#x4F8B;&#x5B50;&#xFF09;&#x6765;&#x603B;&#x7ED3;&#x4E0B;&#x3002;&#x4EE5;&#x4E0B;&#x662F;&#x4E00;&#x4E2A;&#x5305;&#x542B;&#x4E86;&#x5B57;&#x7B26;&#x4E32; &#x201C;2&#x201D; &#x548C; &#x201C;5&#x201D; &#x7684;&#x538B;&#x7F29;&#x5217;&#x8868;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;[0f 00 00 00] [0c 00 00 00] [02 00] [00 f3] [02 f6] [ff]</span><br><span class="line">      |             |          |       |       |     |</span><br><span class="line">   zlbytes        zltail    zllen     &quot;2&quot;     &quot;5&quot;   end</span><br></pre></td></tr></table></figure>
+
+<p>&#x6700;&#x524D;&#x9762;&#x7684;4&#x4E2A;&#x5B57;&#x8282;&#x7684;&#x4EE3;&#x8868;&#x7740;&#x6570;&#x5B57; 0x0f = 15&#xFF08;zlbytes = 15&#xFF09;&#xFF0C;&#x8868;&#x793A;&#x8FD9;&#x4E2A; ziplist &#x603B;&#x5171;&#x5360;&#x7528;&#x4E86;15&#x4E2A;&#x5B57;&#x8282;&#x3002;&#x7D27;&#x8DDF;&#x7740;&#x7684;4&#x4E2A;&#x5B57;&#x8282;&#x4EE3;&#x8868;&#x6570;&#x5B57; 0x0c = 12&#xFF08;zltail = 12&#xFF09;&#xFF0C;&#x8BF4;&#x660E;&#x6700;&#x540E;&#x4E00;&#x4E2A;&#x5143;&#x7D20;&#x7684;&#x504F;&#x79FB;&#x91CF;&#x662F;12&#xFF0C;&#x4E5F;&#x5C31;&#x662F; &#x201C;5&#x201D; &#x8FD9;&#x4E2A;&#x5143;&#x7D20;&#x5230; ziplist &#x5F00;&#x5934;&#x7684;&#x957F;&#x5EA6;&#x3002;&#x63A5;&#x7740;&#x662F; zllen = 2&#xFF0C;&#x4EE3;&#x8868;&#x603B;&#x5171;&#x6709;2&#x4E2A;&#x5143;&#x7D20;&#x3002;&#x4E4B;&#x540E;&#x5C31;&#x662F;&#x5B9E;&#x9645;&#x50A8;&#x5B58; &#x201C;2&#x201D; &#x548C; &#x201C;5&#x201D; &#x7684; entry&#x3002;&#x89E3;&#x8BFB;&#x4E0B; &#x201C;2&#x201D; &#x4E3A;&#x4EC0;&#x4E48;&#x662F; 00 f3&#xFF0C;00&#x8868;&#x793A;&#x524D;&#x4E00;&#x4E2A;&#x5143;&#x7D20;&#x957F;&#x5EA6;&#x4E3A;0&#xFF0C;&#x56E0;&#x4E3A;&#x5B83;&#x662F;&#x7B2C;&#x4E00;&#x4E2A;&#x5143;&#x7D20;&#xFF0C;f3 &#x662F; 0x11110011&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x6211;&#x4EEC;&#x7684; <strong>1111xxxx</strong> encoding&#x7C7B;&#x578B;&#xFF0C;3 - 1 = 2&#x6B63;&#x597D;&#x662F;&#x6211;&#x4EEC;&#x7684; &#x201C;2&#x201D;&#xFF0C;&#x201C;5&#x201D; &#x4E5F;&#x540C;&#x7406;&#x3002;<br>&#x6700;&#x540E;&#x662F; ff &#x7ED3;&#x5C3E;&#x8868;&#x793A;&#x7ED3;&#x675F;&#x3002;</p>
+<blockquote>
+<p>&#x6709;&#x6CA1;&#x6709;&#x7AE5;&#x978B;&#x6CE8;&#x610F;&#x5230;&#x5B98;&#x65B9;&#x4F8B;&#x5B50;&#x603B;&#x6211;&#x4EEC;&#x50A8;&#x5B58;&#x7684;&#x662F;&#x5B57;&#x7B26;&#x4E32;&#x7684; &#x201C;2&#x201D; &#x548C; &#x201C;5&#x201D;&#xFF0C;&#x4F46;&#x662F; redis &#x628A;&#x5B83;&#x5F53;&#x6210;&#x4E86;&#x6574;&#x6570;&#x6765;&#x50A8;&#x5B58; &#xFF1F;&#x8FD9;&#x4E00;&#x70B9;&#x5176;&#x5B9E;&#x662F; redis &#x6545;&#x610F;&#x505A;&#x7684;&#xFF0C;&#x5F88;&#x591A;&#x5730;&#x65B9;&#x90FD;&#x4F1A;&#x505A;&#x7C7B;&#x4F3C;&#x5904;&#x7406;&#xFF0C;&#x76EE;&#x7684;&#x4E48;&#xFF0C;&#x8FD8;&#x662F;&#x4E3A;&#x4E86;&#x51CF;&#x5C11;&#x5185;&#x5B58;&#x6D88;&#x8017;&#x3002;</p>
+</blockquote>
+<p>&#x6700;&#x540E;&#x6211;&#x4EEC;&#x518D;&#x770B;&#x4E00;&#x4E2A;&#x50A8;&#x5B58;&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x4F8B;&#x5B50;&#xFF0C;&#x6211;&#x4EEC;&#x628A;&#x4E0A;&#x9762;&#x7684; &#x201C;5&#x201D; &#x6362;&#x6210; &#x201C;Hello World&#x201D;&#xFF0C;&#x90A3;&#x4E48;&#x539F;&#x5148;&#x7684; &#x201C;5&#x201D; &#x8FD9;&#x4E2A; entry &#x4F1A;&#x53D8;&#x6210;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;[02] [0b] [48 65 6c 6c 6f 20 57 6f 72 6c 64]</span><br></pre></td></tr></table></figure>
+
+<p>&#x81F3;&#x4E8E;&#x4E3A;&#x4EC0;&#x4E48;&#x7684;&#x8BDD;&#xFF0C;&#x4F60;&#x4EEC;&#x5C31;&#x5BF9;&#x7167;&#x7684;&#x4E0A;&#x9762;&#x7684;&#x81EA;&#x5DF1;&#x8BD5;&#x4E00;&#x904D;&#xFF0C;&#x5C31;&#x5F53;&#x505A;&#x7EC3;&#x4E60;&#x9898;&#x4E86;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/b0adf48e818d3b019d3c4f31b7a800ea.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Redis/" rel="tag"># Redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903527895007245.html" rel="next" title="Falco 进入 CNCF Incubator 项目   云">
+                <i class="fa fa-chevron-left"></i> Falco 进入 CNCF Incubator 项目   云
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844904057530908679.html" rel="prev" title="Kotlin Coroutines Flow 系列(一) F">
+                Kotlin Coroutines Flow 系列(一) F <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是压缩列表"><span class="nav-number">1.</span> <span class="nav-text">什么是压缩列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码结构"><span class="nav-number">2.</span> <span class="nav-text">源码结构</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

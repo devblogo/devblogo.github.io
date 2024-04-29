@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="MySQL,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="1&amp;#x3001;&amp;#x5199;&amp;#x5728;&amp;#x6700;&amp;#x524D;&amp;#x9762;&amp;#x8FD1;&amp;#x671F;&amp;#x5728;&amp;#x5904;&amp;#x7406;&amp;#x4E00;&amp;#x4E2A;&amp;#x6279;&amp;#x91CF;&amp;#x8868;&amp;#x5355;&amp;#x4E0A;&amp;#x4F20;&amp;#x7684;&amp;#x4F18;&amp;#x5316;&amp;#x9700;&amp;#x6C42;&amp;#x65F6">
+<meta name="keywords" content="MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的 InnoDB 锁介绍">
+<meta property="og:url" content="https://dev.newban.cn/6844903518936137741.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="1&amp;#x3001;&amp;#x5199;&amp;#x5728;&amp;#x6700;&amp;#x524D;&amp;#x9762;&amp;#x8FD1;&amp;#x671F;&amp;#x5728;&amp;#x5904;&amp;#x7406;&amp;#x4E00;&amp;#x4E2A;&amp;#x6279;&amp;#x91CF;&amp;#x8868;&amp;#x5355;&amp;#x4E0A;&amp;#x4F20;&amp;#x7684;&amp;#x4F18;&amp;#x5316;&amp;#x9700;&amp;#x6C42;&amp;#x65F6">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/5464d167755347b0a8f8ae0f777000ddef578fbe9f3cff698d913b477ea1f0ed">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3c934f7ec05a0930af95399e8e94cbd4c5ad8f821f7bf4b9908da9b7b7643f24">
+<meta property="og:updated_time" content="2024-04-28T04:40:38.205Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见的 InnoDB 锁介绍">
+<meta name="twitter:description" content="1&amp;#x3001;&amp;#x5199;&amp;#x5728;&amp;#x6700;&amp;#x524D;&amp;#x9762;&amp;#x8FD1;&amp;#x671F;&amp;#x5728;&amp;#x5904;&amp;#x7406;&amp;#x4E00;&amp;#x4E2A;&amp;#x6279;&amp;#x91CF;&amp;#x8868;&amp;#x5355;&amp;#x4E0A;&amp;#x4F20;&amp;#x7684;&amp;#x4F18;&amp;#x5316;&amp;#x9700;&amp;#x6C42;&amp;#x65F6">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/5464d167755347b0a8f8ae0f777000ddef578fbe9f3cff698d913b477ea1f0ed">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903518936137741.html">
+
+
+
+
+
+  <title>常见的 InnoDB 锁介绍 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">常见的 InnoDB 锁介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-05T10:25:01+08:00">
+                2017-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="1&#x3001;&#x5199;&#x5728;&#x6700;&#x524D;&#x9762;"><a href="#1&#x3001;&#x5199;&#x5728;&#x6700;&#x524D;&#x9762;" class="headerlink" title="1&#x3001;&#x5199;&#x5728;&#x6700;&#x524D;&#x9762;"></a>1&#x3001;&#x5199;&#x5728;&#x6700;&#x524D;&#x9762;</h4><p>&#x8FD1;&#x671F;&#x5728;&#x5904;&#x7406;&#x4E00;&#x4E2A;&#x6279;&#x91CF;&#x8868;&#x5355;&#x4E0A;&#x4F20;&#x7684;&#x4F18;&#x5316;&#x9700;&#x6C42;&#x65F6;&#xFF0C;&#x9047;&#x5230;&#x4E00;&#x4E2A;innoDB&#x7684;&#x52A0;&#x9501;&#x95EE;&#x9898;&#xFF0C;&#x5BFC;&#x81F4;&#x591A;&#x7EBF;&#x7A0B;&#x5728;&#x6279;&#x91CF;&#x5904;&#x7406;&#x8868;&#x5355;&#x5E76;&#x63D2;&#x5165;&#x6570;&#x636E;&#x5E93;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#x51FA;&#x73B0;<code>LockTimeOutException</code>&#x7B49;&#x5F85;&#x9501;&#x8D85;&#x65F6;&#x5F02;&#x5E38;&#x3002;&#x9519;&#x8BEF;&#x5F02;&#x5E38;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;org.springframework.dao.CannotAcquireLockException: could not</span><br><span class="line">execute statement; SQL [n/a]; nested exception is</span><br><span class="line">org.hibernate.exception.LockTimeoutException: could not execute</span><br><span class="line">statement...</span><br></pre></td></tr></table></figure>
+
+<p>&#x7F51;&#x4E0A;&#x627E;&#x4E86;&#x5F88;&#x591A;&#x8D44;&#x6599;&#x4E5F;&#x6BD4;&#x8F83;&#x96F6;&#x788E;&#xFF0C;&#x901A;&#x8FC7;&#x81EA;&#x5DF1;&#x5BF9;<code>Mysql</code>&#x4EE5;&#x53CA;innodb&#x7684;&#x7406;&#x89E3;&#xFF0C;&#x7ED3;&#x5408;Mysql&#x5B98;&#x65B9;&#x6587;&#x6863;&#x5BF9;Mysql&#x7684;&#x9501;&#x4EE5;&#x53CA;&#x52A0;&#x9501;&#x673A;&#x5236;&#x505A;&#x4E00;&#x6B21;&#x7B80;&#x5355;&#x7684;&#x4ECB;&#x7ECD;&#x3002;</p>
+<h4 id="2&#x3001;&#x4E8B;&#x52A1;&#x7684;&#x9694;&#x79BB;&#x7EA7;&#x522B;"><a href="#2&#x3001;&#x4E8B;&#x52A1;&#x7684;&#x9694;&#x79BB;&#x7EA7;&#x522B;" class="headerlink" title="2&#x3001;&#x4E8B;&#x52A1;&#x7684;&#x9694;&#x79BB;&#x7EA7;&#x522B;"></a>2&#x3001;&#x4E8B;&#x52A1;&#x7684;&#x9694;&#x79BB;&#x7EA7;&#x522B;</h4><p>&#x5148;&#x6765;&#x56DE;&#x987E;&#x4E00;&#x4E0B;&#x4E8B;&#x52A1;&#x7684;&#x9694;&#x79BB;&#x7EA7;&#x522B;&#xFF1A;</p>
+<ul>
+<li>Read-Uncommitted:&#x672A;&#x63D0;&#x4EA4;&#x8BFB;&#xFF0C;&#x53EF;&#x4EE5;&#x8BFB;&#x53D6;&#x5230;&#x5176;&#x4ED6;&#x672A;&#x63D0;&#x4EA4;&#x7684;&#x4E8B;&#x52A1;&#x4FEE;&#x6539;&#x7684;&#x6570;&#x636E;&#x3002;</li>
+<li>Read-Committed:&#x63D0;&#x4EA4;&#x8BFB;&#xFF0C;&#x53EA;&#x5141;&#x8BB8;&#x8BFB;&#x53D6;&#x5DF2;&#x63D0;&#x4EA4;&#x4E8B;&#x52A1;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x4E0D;&#x53EF;&#x91CD;&#x590D;&#x8BFB;&#x3001;&#x5E7B;&#x8BFB;&#x95EE;&#x9898;&#x3002;</li>
+<li>RePeatable-Read:&#x53EF;&#x91CD;&#x590D;&#x8BFB;&#xFF0C;&#x540C;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x5185;&#x591A;&#x6B21;&#x76F8;&#x540C;&#x7684;&#x67E5;&#x8BE2;&#x7ED3;&#x679C;&#x662F;&#x4E00;&#x81F4;&#x7684;&#xFF0C;&#x53EF;&#x4EE5;&#x89E3;&#x51B3;&#x91CD;&#x590D;&#x8BFB;&#x95EE;&#x9898;&#x3002;</li>
+<li>serializable:&#x4E32;&#x884C;&#x5316;&#xFF0C;&#x6700;&#x9AD8;&#x9694;&#x79BB;&#x7EA7;&#x522B;&#xFF0C;&#x6BCF;&#x6B21;&#x90FD;&#x8981;&#x83B7;&#x53D6;&#x8868;&#x7EA7;&#x9501;&#xFF0C;&#x5E76;&#x53D1;&#x6027;&#x80FD;&#x5F88;&#x5DEE;&#x3002;</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>&#x9694;&#x79BB;&#x7EA7;&#x522B;</th>
+<th>Dirty-Read</th>
+<th>NonRepeatable-Read</th>
+<th>Phantm-Read</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Read-Uncommitted</td>
+<td>YES</td>
+<td>YES</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>Read-Committed</td>
+<td>NO</td>
+<td>YES</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>Repeatable-Read</td>
+<td>NO</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+</tbody></table>
+<p>&#x8868;&#x6CE8;&#xFF1A;&#x4E0D;&#x540C;&#x7684;&#x9694;&#x79BB;&#x7EA7;&#x522B;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x7684;&#x8BFB;&#x53D6;&#x95EE;&#x9898;</p>
+<p>&#x67E5;&#x770B;&#x6570;&#x636E;&#x5E93;&#x7684;&#x9694;&#x79BB;&#x7EA7;&#x522B;<br><code>mysql&gt; select @@global.tx_isolation, @@session.tx_isolation, @@tx_isolation;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/5464d167755347b0a8f8ae0f777000ddef578fbe9f3cff698d913b477ea1f0ed" alt="image"></p>
+<p>&#x53EF;&#x770B;&#x51FA;Mysql&#x7684;&#x9ED8;&#x8BA4;&#x9694;&#x79BB;&#x7EA7;&#x522B;&#x662F;Repeatable-Read</p>
+<h4 id="3&#x3001;InnoDB-Locking"><a href="#3&#x3001;InnoDB-Locking" class="headerlink" title="3&#x3001;InnoDB Locking"></a>3&#x3001;InnoDB Locking</h4><ul>
+<li>&#x5171;&#x4EAB;&#x9501;&#x548C;&#x6392;&#x5B83;&#x9501; (shared locks&#x3001;exclusive (X) locks)</li>
+<li>&#x610F;&#x5411;&#x9501; (Intention Locks)</li>
+<li>&#x8BB0;&#x5F55;&#x9501; (Record Locks)</li>
+<li>&#x95F4;&#x9699;&#x9501; (Gap Locks)</li>
+<li>&#x81EA;&#x589E;&#x9501; (AUTO-INC Locks)</li>
+</ul>
+<h5 id="3-1-&#x5171;&#x4EAB;&#x9501;&#x548C;&#x6392;&#x5B83;&#x9501;"><a href="#3-1-&#x5171;&#x4EAB;&#x9501;&#x548C;&#x6392;&#x5B83;&#x9501;" class="headerlink" title="3.1 &#x5171;&#x4EAB;&#x9501;&#x548C;&#x6392;&#x5B83;&#x9501;"></a>3.1 &#x5171;&#x4EAB;&#x9501;&#x548C;&#x6392;&#x5B83;&#x9501;</h5><p>InnoDB&#x5B9E;&#x73B0;&#x4E86;&#x4E24;&#x79CD;&#x6807;&#x51C6;&#x7684;&#x884C;&#x7EA7;&#x9501;&#xFF0C;&#x5171;&#x4EAB;&#x9501;(shared (S) locks) &#x548C;&#x6392;&#x4ED6;&#x9501; (exclusive (X) locks).</p>
+<ul>
+<li>&#x5171;&#x4EAB;&#x9501;&#x5141;&#x8BB8;&#x4E00;&#x4E2A;&#x5360;&#x6709;&#x9501;&#x7684;&#x4E8B;&#x52A1;&#x53BB;&#x8BFB;&#x53D6;&#x4E00;&#x884C;&#x6570;&#x636E;</li>
+<li>&#x6392;&#x5B83;&#x9501;&#x5219;&#x5141;&#x8BB8;&#x4E8B;&#x52A1;&#x5BF9;&#x67D0;&#x4E00;&#x884C;&#x8BB0;&#x5F55;&#x8FDB;&#x884C;&#x5199;&#x64CD;&#x4F5C;</li>
+</ul>
+<p>&#x5982;&#x679C;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x6301;&#x6709;&#x4E86;&#x4E00;&#x4E2A;&#x5171;&#x4EAB;&#x9501;&#xFF0C;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x4ECD;&#x7136;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x8FD9;&#x884C;&#x8BB0;&#x5F55;&#x7684;&#x5171;&#x4EAB;&#x9501;&#xFF0C;&#x4F46;&#x4E0D;&#x80FD;&#x83B7;&#x53D6;&#x5230;&#x8FD9;&#x884C;&#x8BB0;&#x5F55;&#x7684;&#x6392;&#x5B83;&#x9501;&#x3002;&#x5F53;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x83B7;&#x53D6;&#x5230;&#x4E86;&#x67D0;&#x4E00;&#x884C;&#x7684;&#x6392;&#x5B83;&#x9501;&#xFF0C;&#x5219;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x5C06;&#x65E0;&#x6CD5;&#x518D;&#x83B7;&#x53D6;&#x8FD9;&#x884C;&#x8BB0;&#x5F55;&#x7684;&#x5171;&#x4EAB;&#x9501;&#x548C;&#x6392;&#x5B83;&#x9501;&#x3002;</p>
+<table>
+<thead>
+<tr>
+<th>transaction T1</th>
+<th>transaction T2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>begin;</td>
+<td>begin;</td>
+</tr>
+<tr>
+<td>update user set name=&#x2019;loy&#x2019; where id = 1;</td>
+<td>update user set name=&#x2019;loy&#x2019; where id = 1;</td>
+</tr>
+<tr>
+<td></td>
+<td>ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</td>
+</tr>
+<tr>
+<td>commit;</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>&#x5206;&#x6790;&#x4E00;&#x4E0B;&#x4E0A;&#x9762;&#x51FA;&#x73B0;&#x9519;&#x8BEF;&#x7684;&#x539F;&#x56E0;&#xFF0C;&#x5F53;T1&#x6267;&#x884C; <code>update user set name=&apos;loy&apos; where id = 1;</code>&#x65F6;T1&#x5148;&#x83B7;&#x53D6;&#x5230;X&#x9501;&#x7531;&#x4E8E;T1&#x6CA1;&#x6709;&#x6267;&#x884C;commit; &#x6240;&#x4EE5;&#x4ED6;&#x4E00;&#x76F4;&#x6301;&#x6709;<br>&#x8FD9;&#x628A;&#x9501;&#x5F53;T2&#x4E5F;&#x6267;&#x884C;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x4F1A;&#x4E00;&#x76F4;&#x7B49;&#x5F85;X&#x5BFC;&#x81F4;&#x83B7;&#x53D6;&#x9501;&#x8D85;&#x65F6;&#x3002;</p>
+<h5 id="3-2-&#x610F;&#x5411;&#x9501;"><a href="#3-2-&#x610F;&#x5411;&#x9501;" class="headerlink" title="3.2 &#x610F;&#x5411;&#x9501;"></a>3.2 &#x610F;&#x5411;&#x9501;</h5><p>&#x610F;&#x5411;&#x9501;&#x662F;&#x4E00;&#x79CD;&#x8868;&#x7EA7;&#x9501;&#xFF0C;&#x548C;&#x57FA;&#x672C;&#x9501;&#x4E00;&#x6837;&#x4E5F;&#x5206;&#x4E3A;&#x5171;&#x4EAB;&#x9501;&#x548C;&#x6392;&#x4ED6;&#x9501;&#x3002;</p>
+<ul>
+<li>&#x610F;&#x5411;&#x5171;&#x4EAB;&#x9501; (Intention shared (IS)) &#x5C06;&#x8981;&#x53BB;&#x83B7;&#x53D6;&#x67D0;&#x4E00;&#x884C;&#x7684;&#x5171;&#x4EAB;&#x9501;&#x3002;</li>
+<li>&#x610F;&#x5411;&#x6392;&#x5B83;&#x9501; (Intention exclusive (IX)) &#x5C06;&#x8981;&#x53BB;&#x83B7;&#x53D6;&#x67D0;&#x4E00;&#x884C;&#x7684;&#x6392;&#x5B83;&#x9501;&#x3002;</li>
+</ul>
+<p>&#x4E8B;&#x52A1;&#x5728;&#x83B7;&#x53D6;&#x5171;&#x4EAB;&#x9501;&#x4E4B;&#x524D;&#x5FC5;&#x987B;&#x5148;&#x83B7;&#x53D6;&#x610F;&#x5411;&#x5171;&#x4EAB;&#x9501;&#xFF0C;&#x540C;&#x7406;&#x83B7;&#x53D6;&#x6392;&#x4ED6;&#x9501;&#x4E4B;&#x524D;&#x5FC5;&#x987B;&#x5148;&#x83B7;&#x53D6;&#x610F;&#x5411;&#x6392;&#x5B83;&#x9501;&#xFF0C;&#x610F;&#x5411;&#x9501;&#x4E0D;&#x4F1A;&#x963B;&#x585E;&#x5176;&#x4ED6;&#x4EFB;&#x4F55;&#x5BF9;&#x8868;&#x7684;&#x64CD;&#x4F5C;&#xFF0C;&#x4ED6;&#x53EA;&#x662F;&#x544A;&#x8BC9;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x4ED6;&#x5C06;&#x8981;&#x53BB;&#x83B7;&#x53D6;&#x67D0;&#x4E00;&#x884C;&#x7684;&#x5171;&#x4EAB;&#x9501;&#x6216;&#x8005;&#x6392;&#x4ED6;&#x9501;&#x3002;</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>X</th>
+<th>IX</th>
+<th>S</th>
+<th>IS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>X</td>
+<td>Conflict</td>
+<td>Conflict</td>
+<td>Conflict</td>
+<td>Conflict</td>
+</tr>
+<tr>
+<td>IX</td>
+<td>Conflict</td>
+<td>Compatible</td>
+<td>Conflict</td>
+<td>Compatible</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Conflict</td>
+<td>Conflict</td>
+<td>Compatible</td>
+<td>Compatible</td>
+</tr>
+<tr>
+<td>IS</td>
+<td>Conflict</td>
+<td>Compatible</td>
+<td>Compatible</td>
+<td>Compatible</td>
+</tr>
+</tbody></table>
+<p>&#x6CE8;&#xFF1A;&#x57FA;&#x672C;&#x9501;&#x548C;&#x610F;&#x5411;&#x9501;&#x517C;&#x5BB9;&#x77E9;&#x9635;</p>
+<h5 id="3-3-&#x8BB0;&#x5F55;&#x9501;"><a href="#3-3-&#x8BB0;&#x5F55;&#x9501;" class="headerlink" title="3.3 &#x8BB0;&#x5F55;&#x9501;"></a>3.3 &#x8BB0;&#x5F55;&#x9501;</h5><p>&#x8BB0;&#x5F55;&#x662F;&#x662F;&#x4F5C;&#x7528;&#x5728;&#x7D22;&#x5F15;&#x4E0A;&#x7684;&#x4E00;&#x79CD;&#x9501;&#xFF0C;&#x4ED6;&#x9501;&#x4F4F;&#x7684;&#x662F;&#x67D0;&#x4E00;&#x6761;&#x8BB0;&#x5F55;&#x7684;&#x7D22;&#x5F15;&#x800C;&#x975E;&#x8BB0;&#x5F55;&#x672C;&#x8EAB;&#xFF0C;&#x5982;&#x679C;&#x5F53;&#x524D;&#x8868;&#x6CA1;&#x6709;&#x7D22;&#x5F15;&#x90A3;&#x4E48; InnoDB&#x5C06;&#x4F1A;&#x4E3A;&#x5176;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x9690;&#x85CF;&#x7684;&#x805A;&#x5408;&#x7D22;&#x5F15;&#xFF0C;&#x800C;<code>Record Locks</code>&#x5C06;&#x4F1A;&#x9501;&#x4F4F;&#x8FD9;&#x4E2A;&#x9690;&#x85CF;&#x7684;&#x805A;&#x5408;&#x7D22;&#x5F15;&#x3002;</p>
+<h5 id="3-4-&#x95F4;&#x9699;&#x9501;"><a href="#3-4-&#x95F4;&#x9699;&#x9501;" class="headerlink" title="3.4 &#x95F4;&#x9699;&#x9501;"></a>3.4 &#x95F4;&#x9699;&#x9501;</h5><p>&#x95F4;&#x9699;&#x9501;&#x548C;&#x8BB0;&#x5F55;&#x9501;&#x4E00;&#x6837;&#x4E5F;&#x662F;&#x4F5C;&#x7528;&#x5728;&#x7D22;&#x5F15;&#x4E0A;&#x3002;&#x4E0D;&#x540C;&#x7684;&#x662F;&#x8BB0;&#x5F55;&#x9501;&#x53EA;&#x4F5C;&#x7528;&#x4E8E;&#x4E00;&#x6761;&#x7D22;&#x5F15;&#x8BB0;&#x5F55;&#x800C;&#x95F4;&#x9699;&#x9501;&#x53EF;&#x4EE5;&#x9501;&#x4F4F;&#x4E00;&#x4E2A;&#x8303;&#x56F4;&#x5185;&#x7684;&#x7D22;&#x5F15;&#x3002;&#x4E3E;&#x4E2A;&#x4F8B;&#x5B50;:</p>
+<p><code>SELECT id from t_user where id BETWEEN 5 AND 10 FOR UPDATE;</code><br>&#x95F4;&#x9699;&#x9501;&#x5C06;&#x4F1A;&#x5728;(4,5)&#x548C;(10,11)&#x4E4B;&#x95F4;&#x52A0;&#x9501;&#xFF0C;&#x4ED6;&#x5C06;&#x963B;&#x6B62;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x5728;&#x8FD9;&#x4E2A;&#x8303;&#x56F4;&#x5185;&#x63D2;&#x5165;&#x6570;&#x636E;&#x3002;</p>
+<h5 id="3-5-&#x81EA;&#x589E;&#x9501;"><a href="#3-5-&#x81EA;&#x589E;&#x9501;" class="headerlink" title="3.5 &#x81EA;&#x589E;&#x9501;"></a>3.5 &#x81EA;&#x589E;&#x9501;</h5><p>&#x81EA;&#x589E;&#x9501;&#x662F;&#x4E00;&#x79CD;&#x7279;&#x6B8A;&#x7684;&#x8868;&#x7EA7;&#x9501;&#xFF0C;&#x4ED6;&#x53EA;&#x4F5C;&#x7528;&#x5728;&#x5305;&#x542B;&#x81EA;&#x589E;&#x5217;&#x7684;&#x63D2;&#x5165;&#x64CD;&#x4F5C;&#x65F6;&#x3002;&#x5F53;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x6B63;&#x5728;&#x63D2;&#x5165;&#x4E00;&#x6761;&#x6570;&#x636E;&#x65F6;&#xFF0C;&#x5176;&#x4ED6;&#x7684;&#x4EFB;&#x4F55;&#x4E8B;&#x52A1;&#x90FD;&#x5FC5;&#x987B;&#x7B49;&#x5F85;&#x6574;&#x4E2A;&#x4E8B;&#x52A1;&#x5B8C;&#x6210;&#x63D2;&#x5165;&#x64CD;&#x4F5C;&#xFF0C;&#x5728;&#x53D6;&#x83B7;&#x53D6;&#x9501;&#x6765;&#x6267;&#x884C;&#x63D2;&#x5165;&#x64CD;&#x4F5C;&#x3002;<br>&#x5B98;&#x65B9;&#x6587;&#x6863;&#x662F;&#x8FD9;&#x6837;&#x63CF;&#x8FF0;&#x7684;&#xFF1A;<br><code>An AUTO-INC lock is a special table-level lock taken by transactions inserting into tables with AUTO_INCREMENT columns. In the simplest case, if one transaction is inserting values into the table, any other transactions must wait to do their own inserts into that table, so that rows inserted by the first transaction receive consecutive primary key values.</code></p>
+<p>&#x770B;&#x5230;&#x8FD9;&#x91CC;&#x6211;&#x4EEC;&#x5728;&#x56DE;&#x5230;&#x6587;&#x7AE0;&#x5F00;&#x5934;&#x7684;&#x5730;&#x65B9;&#xFF0C;&#x91CD;&#x65B0;&#x601D;&#x8003;&#x5F02;&#x5E38;&#x51FA;&#x73B0;&#x7684;&#x539F;&#x56E0;&#x3002;&#x5176;&#x5B9E;&#x5C31;&#x5F88;&#x660E;&#x4E86;&#x4E86;&#x3002;&#x5728;&#x9700;&#x8981;&#x4FDD;&#x5B58;&#x6570;&#x636E;&#x7684;&#x8868;&#x4E2D;&#x5C31;&#x5305;&#x542B;&#x6709;&#x81EA;&#x52A8;&#x589E;&#x957F;&#x7684;&#x5217; <code>id</code>&#x5F53;&#x591A;&#x7EBF;&#x5728;&#x540C;&#x65F6;&#x63D2;&#x5165;&#x6570;&#x636E;&#x65F6;&#x5C31;&#x4F1A;&#x5BFC;&#x81F4; AUTO-INC Locks &#x9501;&#x7ADE;&#x4E89;&#x6FC0;&#x70C8;&#xFF0C;&#x5F53;&#x7EBF;&#x7A0B;&#x7B49;&#x5F85;&#x9501;&#x7684;&#x65F6;&#x95F4;&#x8FC7;&#x957F;&#x5C31;&#x4F1A;&#x6709;&#x4E0A;&#x8BC9;&#x7684;&#x5F02;&#x5E38;&#x629B;&#x51FA;&#x3002;</p>
+<h4 id="4&#x3001;&#x6B7B;&#x9501;&#x5206;&#x6790;"><a href="#4&#x3001;&#x6B7B;&#x9501;&#x5206;&#x6790;" class="headerlink" title="4&#x3001;&#x6B7B;&#x9501;&#x5206;&#x6790;"></a>4&#x3001;&#x6B7B;&#x9501;&#x5206;&#x6790;</h4><p>&#x5E76;&#x53D1;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x7684;&#x6B7B;&#x9501;&#x5206;&#x6790;</p>
+<p>&#x6570;&#x636E;&#x5E93;&#x5EFA;&#x8868;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;CREATE TABLE `user` (</span><br><span class="line">  `id` int(20) unsigned NOT NULL AUTO_INCREMENT,</span><br><span class="line">  `name` varchar(11) DEFAULT NULL,</span><br><span class="line">  `age` int(11) DEFAULT NULL,</span><br><span class="line">  PRIMARY KEY (`id`)</span><br><span class="line">) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>T1</th>
+<th>T2</th>
+<th>T3</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>begin</td>
+<td>begin</td>
+<td>begin</td>
+</tr>
+<tr>
+<td>INSERT INTO user values(2, &#x2018;tom&#x2019;, 10)</td>
+<td>INSTERT INTO user values(2, &#x2018;tom&#x2019;, 10)</td>
+<td>INSTERT INTO user values(2, &#x2018;tom&#x2019;, 10)</td>
+</tr>
+<tr>
+<td>rollback;</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Query OK, 1 row affected (47.29 sec)</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>ERROR 1213 (40001): Deadlock found when trying to get lock; try restarting transaction</td>
+</tr>
+</tbody></table>
+<p>&#x770B;&#x4E00;&#x4E0B;&#x5728;T1 roolback&#x4E4B;&#x524D;&#x5404;&#x4E8B;&#x52A1;&#x9501;&#x7684;&#x5360;&#x7528;&#x60C5;&#x51B5;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/3c934f7ec05a0930af95399e8e94cbd4c5ad8f821f7bf4b9908da9b7b7643f24" alt="image"></p>
+<p>&#x6B64;&#x65F6;T1&#x83B7;&#x53D6;&#x5230;&#x7684;id=2&#x8FD9;&#x4E00;&#x884C;&#x7684;X&#x6392;&#x5B83;&#x9501;&#xFF0C;T2&#x548C;T3&#x83B7;&#x53D6;&#x5230;&#x7684;&#x5219;&#x662F;S&#x5171;&#x4EAB;&#x9501;&#xFF0C;&#x5F53;&#x6211;&#x4EEC;&#x628A;T1 <code>rollback</code> &#x4EE5;&#x540E;T1&#x5C06;&#x91CA;&#x653E;&#x4EE5;&#x83B7;&#x53D6;&#x5230;&#x7684;X&#x9501;&#xFF0C;&#x6B64;&#x65F6;&#x7684;T2&#x548C;T3&#x90FD;&#x6301;&#x6709;S&#x9501;&#xFF0C;&#x56DE;&#x987E;S&#x3001;X&#x9501;&#x7684;&#x517C;&#x5BB9;&#x77E9;&#x9635;&#xFF0C;&#x56E0;&#x4E3A;S&#x9501;&#x548C;X&#x9501;&#x662F;&#x51B2;&#x7A81;&#x7684;&#xFF0C;T2&#x548C;T3&#x90FD;&#x5728;&#x7B49;&#x5F85;&#x5BF9;&#x65B9;&#x91CA;&#x653E;S&#x9501;&#xFF0C;&#x5BFC;&#x81F4;&#x6B7B;&#x9501;&#x3002;</p>
+<h4 id="5&#x3001;&#x603B;&#x7ED3;"><a href="#5&#x3001;&#x603B;&#x7ED3;" class="headerlink" title="5&#x3001;&#x603B;&#x7ED3;"></a>5&#x3001;&#x603B;&#x7ED3;</h4><p>&#x5C3D;&#x7BA1;&#x5728;&#x65E5;&#x5E38;&#x5F00;&#x53D1;&#x4E2D;&#x5BF9;InnoDB&#x9501;&#x6CA1;&#x6709;&#x592A;&#x591A;&#x7684;&#x63A5;&#x89E6;&#xFF0C;&#x4F46;&#x662F;&#x4E86;&#x89E3;InnoDB&#x52A0;&#x9501;&#x673A;&#x5236;&#x5728;&#x9047;&#x5230;&#x76F8;&#x5173;&#x95EE;&#x9898;&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x8BA9;&#x4F60;&#x5904;&#x7406;&#x8D77;&#x6765;&#x66F4;&#x5F97;&#x5FC3;&#x5E94;&#x624B;&#x3002;InnoDB&#x8FD8;&#x6709;&#x5176;&#x4ED6;&#x4E00;&#x4E9B;&#x6BD4;&#x8F83;&#x6709;&#x610F;&#x601D;&#x7684;&#x9501;&#x611F;&#x5174;&#x8DA3;&#x7684;&#x540C;&#x5B66;&#x53EF;&#x4EE5;&#x79FB;&#x6B65;<a href="/external_links/ac21817c48ed86ef02aadeaf363e2ad8.html" target="blank" rel="noopener">Mysql&#x5B98;&#x65B9;&#x6587;&#x6863;</a>&#x5B66;&#x4E60;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/2b3d7cbbfc44eae30998d1ddedc376fc.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/MySQL/" rel="tag"># MySQL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903518935973902.html" rel="next" title="Spring MVC源码解析（一）——概况">
+                <i class="fa fa-chevron-left"></i> Spring MVC源码解析（一）——概况
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903518948556807.html" rel="prev" title="如何在不会导致服务器宕机的情况下，用 PHP 读取大文件">
+                如何在不会导致服务器宕机的情况下，用 PHP 读取大文件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、写在最前面"><span class="nav-number">1.</span> <span class="nav-text">1、写在最前面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、事务的隔离级别"><span class="nav-number">2.</span> <span class="nav-text">2、事务的隔离级别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、InnoDB-Locking"><span class="nav-number">3.</span> <span class="nav-text">3、InnoDB Locking</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-共享锁和排它锁"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 共享锁和排它锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-意向锁"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 意向锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-3-记录锁"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 记录锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-4-间隙锁"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 间隙锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-5-自增锁"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 自增锁</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、死锁分析"><span class="nav-number">4.</span> <span class="nav-text">4、死锁分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5、总结"><span class="nav-number">5.</span> <span class="nav-text">5、总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

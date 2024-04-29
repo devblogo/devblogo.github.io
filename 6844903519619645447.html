@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Table of contents Breaking changes: removed reinforce() New features Unreduced losses A profiler for the autograd engine More functions support Higher order gradients New features in Optimizers New la">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 030 发布、性能大幅提升、支持 Cud">
+<meta property="og:url" content="https://dev.newban.cn/6844903519619645447.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="Table of contents Breaking changes: removed reinforce() New features Unreduced losses A profiler for the autograd engine More functions support Higher order gradients New features in Optimizers New la">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T04:49:29.359Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PyTorch 030 发布、性能大幅提升、支持 Cud">
+<meta name="twitter:description" content="Table of contents Breaking changes: removed reinforce() New features Unreduced losses A profiler for the autograd engine More functions support Higher order gradients New features in Optimizers New la">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903519619645447.html">
+
+
+
+
+
+  <title>PyTorch 030 发布、性能大幅提升、支持 Cud | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PyTorch 030 发布、性能大幅提升、支持 Cud</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T18:06:14+08:00">
+                2017-12-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Table-of-contents"><a href="#Table-of-contents" class="headerlink" title="Table of contents"></a>Table of contents</h2><ul>
+<li>Breaking changes: removed <code>reinforce()</code></li>
+<li>New features<ul>
+<li>Unreduced losses</li>
+<li>A profiler for the autograd engine</li>
+<li>More functions support Higher order gradients</li>
+<li>New features in Optimizers</li>
+<li>New layers and nn functionality</li>
+<li>New Tensor functions and Features</li>
+<li>Other additions</li>
+</ul>
+</li>
+<li>API changes</li>
+<li>Performance improvements<ul>
+<li>Big reduction in framework overhead (helps small models)</li>
+<li>4x to 256x faster Softmax/LogSoftmax</li>
+<li>More&#x2026;</li>
+</ul>
+</li>
+<li>Framework Interoperability<ul>
+<li>DLPack Interoperability</li>
+<li>Model Exporter to ONNX (ship PyTorch to Caffe2, CoreML, CNTK, MXNet, Tensorflow)</li>
+</ul>
+</li>
+<li>Bug Fixes (a lot of them)</li>
+</ul>
+<h2 id="Breaking-changes"><a href="#Breaking-changes" class="headerlink" title="Breaking changes"></a>Breaking changes</h2><p>Stochastic functions, i.e. <code>Variable.reinforce()</code> were removed because of their limited functionality and broad performance implications. The motivation for stochastic functions was to avoid book-keeping of sampled values. In practice,<br> users were still book-keeping in their code for various reasons. We constructed an alternative, equally effective API, but did not have a reasonable deprecation path to the new API. Hence this removal is a breaking change.</p>
+<p>We introduce the <a href="/external_links/fa879d95e49f29777f4f5ae07264f4ea.html" target="blank" rel="noopener">torch.distributions</a> package to replace Stochastic functions.</p>
+<p>Your previous code typically looked like this:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;probs = policy_network(state)</span><br><span class="line">action = probs.multinomial()</span><br><span class="line">next_state, reward = env.step(action)</span><br><span class="line">action.reinforce(reward)</span><br><span class="line">action.backward()</span><br></pre></td></tr></table></figure>
+
+<p>This is the new equivalent code:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;probs = policy_network(state)</span><br><span class="line"># NOTE: categorical is equivalent to what used to be called multinomial</span><br><span class="line">m = torch.distributions.Categorical(probs)</span><br><span class="line">action = m.sample()</span><br><span class="line">next_state, reward = env.step(action)</span><br><span class="line">loss = -m.log_prob(action) * reward</span><br><span class="line">loss.backward()</span><br></pre></td></tr></table></figure>
+
+<h2 id="New-features"><a href="#New-features" class="headerlink" title="New features"></a>New features</h2><h3 id="Unreduced-losses"><a href="#Unreduced-losses" class="headerlink" title="Unreduced losses"></a>Unreduced losses</h3><p>Now, Some loss functions can compute per-sample losses in a mini-batch</p>
+<ul>
+<li>By default PyTorch sums losses over the mini-batch and returns a single scalar loss. This was limiting to users.</li>
+<li>Now, a subset of loss functions allow specifying <code>reduce=False</code> to return individual losses for each sample in the mini-batch</li>
+<li>Example: <code>loss = nn.CrossEntropyLoss(..., reduce=False)</code></li>
+<li>Currently supported losses: <code>MSELoss</code>, <code>NLLLoss</code>, <code>NLLLoss2d</code>, <code>KLDivLoss</code>, <code>CrossEntropyLoss</code>, <code>SmoothL1Loss</code>, <code>L1Loss</code></li>
+<li>More loss functions will be covered in the next release</li>
+</ul>
+<h3 id="An-in-built-Profiler-in-the-autograd-engine"><a href="#An-in-built-Profiler-in-the-autograd-engine" class="headerlink" title="An in-built Profiler in the autograd engine"></a>An in-built Profiler in the autograd engine</h3><p>We built a low-level profiler to help you identify bottlenecks in your models</p>
+<p>Let us start with an example:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&gt;&gt;&gt; x = Variable(torch.randn(1, 1), requires_grad=True)</span><br><span class="line">&gt;&gt;&gt; with torch.autograd.profiler.profile() as prof:</span><br><span class="line">...     y = x ** 2</span><br><span class="line">...     y.backward()</span><br><span class="line">&gt;&gt;&gt; # NOTE: some columns were removed for brevity</span><br><span class="line">... print(prof)</span><br><span class="line">--------------------------------  ----------  ---------</span><br><span class="line">Name                               CPU time   CUDA time</span><br><span class="line">-------------------------------   ----------  ---------</span><br><span class="line">PowConstant                        142.036us    0.000us</span><br><span class="line">N5torch8autograd9GraphRootE         63.524us    0.000us</span><br><span class="line">PowConstantBackward                184.228us    0.000us</span><br><span class="line">MulConstant                         50.288us    0.000us</span><br><span class="line">PowConstant                         28.439us    0.000us</span><br><span class="line">Mul                                 20.154us    0.000us</span><br><span class="line">N5torch8autograd14AccumulateGradE   13.790us    0.000us</span><br><span class="line">N5torch8autograd5CloneE              4.088us    0.000us</span><br></pre></td></tr></table></figure>
+
+<p>The profiler works for both CPU and CUDA models.<br> For CUDA models, you have to run your python program with a special <code>nvprof</code> prefix. For example:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;nvprof --profile-from-start off -o trace_name.prof -- python &lt;your arguments&gt;</span><br><span class="line"></span><br><span class="line"># in python</span><br><span class="line">&gt;&gt;&gt; with torch.cuda.profiler.profile():</span><br><span class="line">...     model(x) # Warmup CUDA memory allocator and profiler</span><br><span class="line">...     with torch.autograd.profiler.emit_nvtx():</span><br><span class="line">...         model(x)</span><br></pre></td></tr></table></figure>
+
+<p>Then, you can load <code>trace_name.prof</code> in PyTorch and print a summary profile report.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&gt;&gt;&gt; prof = torch.autograd.profiler.load_nvprof(&apos;trace_name.prof&apos;)</span><br><span class="line">&gt;&gt;&gt; print(prof)</span><br></pre></td></tr></table></figure>
+
+<p><a href="/external_links/fdd4e280c84fc31c032657c59055b197.html" target="blank" rel="noopener">Read additional documentation here</a></p>
+<h3 id="Higher-order-gradients"><a href="#Higher-order-gradients" class="headerlink" title="Higher order gradients"></a>Higher order gradients</h3><p>Added higher-order gradients support for the following layers</p>
+<ul>
+<li>ConvTranspose, AvgPool1d, AvgPool2d, LPPool2d, AvgPool3d, MaxPool1d, MaxPool2d, AdaptiveMaxPool, AdaptiveAvgPool, FractionalMaxPool2d, MaxUnpool1d, MaxUnpool2d, nn.Upsample, ReplicationPad2d, ReplicationPad3d, ReflectionPad2d</li>
+<li>PReLU, HardTanh, L1Loss, SoftSign, ELU, RReLU, Hardshrink, Softplus, SoftShrink, LogSigmoid, Softmin, GLU</li>
+<li>MSELoss, SmoothL1Loss, KLDivLoss, HingeEmbeddingLoss, SoftMarginLoss, MarginRankingLoss, CrossEntropyLoss</li>
+<li>DataParallel</li>
+</ul>
+<h3 id="Optimizers"><a href="#Optimizers" class="headerlink" title="Optimizers"></a>Optimizers</h3><ul>
+<li><a href="/external_links/8cd68bb7ae5175ba829e2b680ea5ddfe.html" target="blank" rel="noopener">optim.SparseAdam</a>: Implements a lazy version of Adam algorithm suitable for sparse tensors.<ul>
+<li>In this variant, only moments that show up in the gradient get updated, and only those portions of the gradient get applied to the parameters.</li>
+</ul>
+</li>
+<li>Optimizers now have an <a href="/external_links/8cd68bb7ae5175ba829e2b680ea5ddfe.html" target="blank" rel="noopener">add_param_group</a> function that lets you add new parameter groups to an already constructed optimizer.</li>
+</ul>
+<h3 id="New-layers-and-nn-functionality"><a href="#New-layers-and-nn-functionality" class="headerlink" title="New layers and nn functionality"></a>New layers and nn functionality</h3><ul>
+<li><p>Added AdpativeMaxPool3d and AdaptiveAvgPool3d</p>
+</li>
+<li><p>Added LPPool1d</p>
+</li>
+<li><p><a href="/external_links/db310df3f988f69924fc6a921f35b8ec.html" target="blank" rel="noopener">F.pad</a> now has support for:</p>
+<ul>
+<li>&#x2018;reflection&#x2019; and &#x2018;replication&#x2019; padding on 1d, 2d, 3d signals (so 3D, 4D and 5D Tensors)</li>
+<li>constant padding on n-d signals</li>
+</ul>
+</li>
+<li><p>nn.Upsample now works for 1D signals (i.e. B x C x L Tensors) in <code>nearest</code> and <code>linear</code> modes.</p>
+</li>
+<li><p><a href="/external_links/d44466dd8139f793a45e66e6d8523822.html" target="blank" rel="noopener">grid_sample</a> now allows padding with the border value via <code>padding_mode=&quot;border&quot;</code>. <code>grid_sample</code> expects a grid in<br>the range of <code>[-1, 1]</code>, and if the values are out of these bounds, padding with the value <code>0.0</code> is applied by default. However, in a lot of cases, using the border value (i.e. the nearest valid value) helps improve accuracy<br>of the overall model.</p>
+</li>
+<li><p>Introducing <code>nn.utils.parameters_to_vector</code> and <code>nn.utils.vector_to_parameters</code></p>
+<ul>
+<li><code>parameters_to_vector</code> takes <code>net.parameters()</code> and return a 1D vector that contains all the parameters</li>
+<li><code>vector_to_parameters</code> takes a vector of flattened parameters and copies the values over to a network&#x2019;s parameters</li>
+<li>Convenient for some reinforcement learning algorithms, such as cross-entropy method, TRPO etc., which need to pull all network parameters as one big vector, modify them, and put the modified vector back.</li>
+</ul>
+</li>
+<li><p>Allow user to not specify certain input dimensions for <code>AdaptivePool*d</code> and infer them at runtime.</p>
+<ul>
+<li>For example:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;# target output size of 10x7</span><br><span class="line">m = nn.AdaptiveMaxPool2d((None, 7))</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>DataParallel container on CPU is now a no-op (instead of erroring out)</p>
+</li>
+</ul>
+<h3 id="New-Tensor-functions-and-features"><a href="#New-Tensor-functions-and-features" class="headerlink" title="New Tensor functions and features"></a>New Tensor functions and features</h3><ul>
+<li>Introduced <code>torch.erf</code> and <code>torch.erfinv</code> that compute the error function and the inverse error function of each element in the Tensor.</li>
+<li>adds broadcasting support to bitwise operators</li>
+<li>Added <code>Tensor.put_</code> and <code>torch.take</code> similar to <code>numpy.take</code> and <code>numpy.put</code>.<ul>
+<li>The take function allows you to linearly index into a tensor without viewing it as a 1D tensor<br>first. The output has the same shape as the indices.</li>
+<li>The put function copies value into a tensor also using linear indices.</li>
+<li>Differences from <code>numpy</code> equivalents:<ul>
+<li><code>numpy.take</code> has an optional axis argument, which behaves like <code>index_select</code>. This <code>axis</code> argument is not yet present.</li>
+<li><code>numpy.put</code> repeats the values if necessary to make them as long as indices. This behavior is not yet replicated.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>add <code>zeros</code> and <code>zeros_like</code> for sparse Tensors.</li>
+<li>1-element Tensors can now be casted to Python scalars. For example: <code>int(torch.Tensor([5]))</code> works now.</li>
+</ul>
+<h3 id="Other-additions"><a href="#Other-additions" class="headerlink" title="Other additions"></a>Other additions</h3><ul>
+<li>Added <code>torch.cuda.get_device_name</code> and <code>torch.cuda.get_device_capability</code> that do what the names say. Example:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&gt;&gt;&gt; torch.cuda.get_device_name(0)</span><br><span class="line">&apos;Quadro GP100&apos;</span><br><span class="line">&gt;&gt;&gt; torch.cuda.get_device_capability(0)</span><br><span class="line">(6, 0)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>If one sets <code>torch.backends.cudnn.deterministic = True</code>, then the CuDNN convolutions use deterministic algorithms</li>
+<li><code>torch.cuda_get_rng_state_all</code> and <code>torch.cuda_set_rng_state_all</code> are introduced to let you save / load the state of the random number generator over all GPUs at once</li>
+<li><code>torch.cuda.emptyCache()</code> frees the cached memory blocks in PyTorch&#x2019;s caching allocator. This is useful when having long-running ipython notebooks while sharing the GPU with other processes.</li>
+</ul>
+<h2 id="API-changes"><a href="#API-changes" class="headerlink" title="API changes"></a>API changes</h2><ul>
+<li><code>softmax</code> and <code>log_softmax</code> now take a <code>dim</code> argument that specifies the dimension in which slices are taken for the softmax operation. <code>dim</code> allows negative dimensions as well (<code>dim = -1</code> will be the last dimension)</li>
+<li><code>torch.potrf</code> (Cholesky decomposition) is now differentiable and defined on <code>Variable</code></li>
+<li>Remove all instances of <code>device_id</code> and replace it with <code>device</code>, to make things consistent</li>
+<li><code>torch.autograd.grad</code> now allows you to specify inputs that are unused in the autograd graph if you use <code>allow_unused=True</code><br>This gets useful when using <code>torch.autograd.grad</code> in large graphs with lists of inputs<br>/ outputs<br>For example:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;x, y = Variable(...), Variable(...)</span><br><span class="line">torch.autograd.grad(x * 2, [x, y]) # errors</span><br><span class="line">torch.autograd.grad(x * 2, [x, y], allow_unused=True) # works</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>pad_packed_sequence</code> now allows a <code>padding_value</code> argument that can be used instead of zero-padding</li>
+<li><code>Dataset</code> now has a <code>+</code> operator (which uses <code>ConcatDataset</code>). You can do something like <code>MNIST(...) + FashionMNIST(...)</code> for example, and you will get a concatenated dataset containing samples from<br>both.</li>
+<li><code>torch.distributed.recv</code> allows Tensors to be received from any sender (hence, <code>src</code> is optional). <code>recv</code> returns the rank of the sender.</li>
+<li>adds <code>zero_()</code> to <code>Variable</code></li>
+<li><code>Variable.shape</code> returns the size of the Tensor (now made consistent with Tensor)</li>
+<li><code>torch.version.cuda</code> specifies the CUDA version that PyTorch was compiled with</li>
+<li>Add a missing function <code>random_</code> for CUDA.</li>
+<li>torch.load and torch.save can now take a <code>pathlib.Path</code> object, which is a standard Python3 typed filepath object</li>
+<li>If you want to load a model&#x2019;s <code>state_dict</code> into another model (for example to fine-tune a pre-trained network), <code>load_state_dict</code> was strict on matching the key names of the parameters. Now we provide a <code>strict=False</code> option to <code>load_state_dict</code> where it only loads in parameters where the keys match, and ignores the other parameter keys.</li>
+<li>added <code>nn.functional.embedding_bag</code> that is equivalent to <code>nn.EmbeddingBag</code></li>
+</ul>
+<h2 id="Performance-Improvements"><a href="#Performance-Improvements" class="headerlink" title="Performance Improvements"></a>Performance Improvements</h2><ul>
+<li>The overhead of <code>torch</code> functions on Variables was around 10 microseconds. This has been brought down to ~1.5 microseconds by moving most of the core autograd formulas into C++ using our ATen library. This speeds-up models that are<br>very small, such as small LSTMs and other common models seen in NLP.</li>
+<li>softmax and log_softmax are now <a href="/external_links/f569060dc98ebc83f9a7bf92099b7fee.html" target="blank" rel="noopener">4x to 256x faster</a> on the GPU after rewriting the gpu kernels</li>
+<li>2.5x to 3x performance improvement of the distributed AllReduce (gloo backend) by enabling GPUDirect</li>
+<li>nn.Embedding&#x2019;s renorm option is much faster on the GPU. For embedding dimensions of <code>100k x 128</code> and a batch size of 1024, it is 33x faster.</li>
+<li>All pointwise ops now use OpenMP and get multi-core CPU benefits</li>
+<li>Added dedicated CUDA kernels for group convolutions where <code>groups == nInputPlane</code> (depthwise convolution). Speedups range from 5x to 1000x for tested layer sizes. See the <a href="/external_links/bd7993bd6d7dd1e4af74955c627153db.html" target="blank" rel="noopener">benchmark table</a> for more details as well as <a href="/external_links/6c03f0bdc68eb12b7df4a12c6fd4936a.html" target="blank" rel="noopener">this table</a>.</li>
+<li>Fixed <code>optim.SGD</code>&#x2018;s memory usage for sparse gradients (for ex. <code>nn.Embedding(..., sparse=True)</code>), reducing the usage on a user-provided test script by 10x.</li>
+<li>Optional NNPack integration for faster CPU convolutions (not part of binaries)</li>
+<li>Reduce overhead of broadcasting if Tensors aren&#x2019;t broadcastable</li>
+<li><code>torch.nn.utils.weight_norm</code> over the right-most dimensions is faster</li>
+<li>Backward of <code>torch.norm</code> is sped up by ~1.5x</li>
+<li>Improve the performance of <code>pack_padded_sequence</code></li>
+<li>Add a single-argument version of <code>torch.arange</code>. For example <code>torch.arange(10)</code></li>
+</ul>
+<h2 id="Framework-Interoperability"><a href="#Framework-Interoperability" class="headerlink" title="Framework Interoperability"></a>Framework Interoperability</h2><h3 id="DLPack-Interoperability"><a href="#DLPack-Interoperability" class="headerlink" title="DLPack Interoperability"></a>DLPack Interoperability</h3><p><a href="/external_links/8de327c2ae0fadb41ea8b9c3a16fd2a9.html" target="blank" rel="noopener">DLPack Tensors</a> are cross-framework Tensor formats. We now have <code>torch.utils.to_dlpack(x)</code> and <code>torch.utils.from_dlpack(x)</code> to convert between DLPack and torch Tensor formats. The conversion<br> has zero memory copy and hence is very efficient.</p>
+<h3 id="Model-exporter-to-ONNX"><a href="#Model-exporter-to-ONNX" class="headerlink" title="Model exporter to ONNX"></a>Model exporter to ONNX</h3><p><a href="/external_links/264c10d31dc2281557c0cf056e7faf39.html" target="blank" rel="noopener">ONNX</a> is a common model interchange format that can be executed in Caffe2, CoreML, CNTK, MXNet, Tensorflow at the moment. PyTorch models that are ConvNet-like and RNN-like (static graphs) can now be shipped to the ONNX<br> format.</p>
+<ul>
+<li>There is a new module torch.onnx (<a href="/external_links/6ec8da5556d02594d86710473a9a6b6a.html" target="blank" rel="noopener">pytorch.org/docs/0.3.0/&#x2026;</a>) which provides the API for exporting ONNX models.</li>
+<li>The operations supported in this release are:</li>
+</ul>
+<pre><code>+ add, sub (nonzero alpha not supported), mul, div, cat, mm, addmm, neg, tanh, sigmoid, mean, t, transpose, view, split, squeeze
++ expand (only when used before a broadcasting ONNX operator; e.g., add)
++ prelu (single weight shared among input channels not supported)
++ threshold (non-zero threshold/non-zero value not supported)
++ Conv, ConvTranspose, BatchNorm, MaxPool, RNN, Dropout, ConstantPadNd, Negate
++ elu, leaky\_relu, glu, softmax, log\_softmax, avg\_pool2d
++ unfold (experimental support with ATen-Caffe2 integration)
++ Embedding (no optional arguments supported)
++ RNN
++ FeatureDropout (training mode not supported)
++ Index (constant integer and tuple indices supported)</code></pre><h2 id="Usability-Improvements"><a href="#Usability-Improvements" class="headerlink" title="Usability Improvements"></a>Usability Improvements</h2><ul>
+<li>More cogent error messages during indexing of Tensors / Variables<br>Breaking changes</li>
+<li>Add proper error message for specifying dimension on a tensor with no dimensions</li>
+<li>better error messages for Conv*d input shape checking</li>
+<li>More user-friendly error messages for LongTensor indexing</li>
+<li>Better error messages and argument checking for Conv*d routines</li>
+<li>Trying to construct a Tensor from a Variable fails more appropriately</li>
+<li>If you are using a PyTorch binary with insufficient CUDA version, then a <code>warning</code> is printed to the user.</li>
+<li>Fixed incoherent error messages in <code>load_state_dict</code></li>
+<li>Fix error message for type mismatches with sparse tensors</li>
+</ul>
+<h2 id="Bug-fixes"><a href="#Bug-fixes" class="headerlink" title="Bug fixes"></a>Bug fixes</h2><h4 id="torch"><a href="#torch" class="headerlink" title="torch"></a>torch</h4><ul>
+<li>Fix CUDA lazy initialization to not trigger on calls to <code>torch.manual_seed</code> (instead, the calls are queued and run when CUDA is initialized)</li>
+</ul>
+<h4 id="Tensor"><a href="#Tensor" class="headerlink" title="Tensor"></a>Tensor</h4><ul>
+<li>if <code>x</code> is 2D, <code>x[[0, 3],]</code> was needed to trigger advanced indexing. The trailing comma is no longer needed, and you can do <code>x[[0, 3]]</code></li>
+<li><code>x.sort(descending=True)</code> used to incorrectly fail for Tensors. Fixed a bug in the argument checking logic to allow this.</li>
+<li>Tensor constructors with numpy input: <code>torch.DoubleTensor(np.array([0,1,2], dtype=np.float32))</code><ul>
+<li>torch will now copy the contents of the array in a storage of appropriate type.</li>
+<li>If types match, it will share the underlying array (no-copy), with equivalent semantics to initializing a tensor with another tensor.</li>
+<li>On CUDA, <code>torch.cuda.FloatTensor(np.random.rand(10,2).astype(np.float32))</code> will now work by making a copy.</li>
+</ul>
+</li>
+<li><code>ones_like</code> and <code>zeros_like</code> now create Tensors on the same device as the original Tensor</li>
+<li><code>torch.multinomial</code> on the CPU would reshape the input <code>prob_dist</code> in-place. Fixed this to make sure the <code>prob_dist</code> input&#x2019;s shape is unchanged after the call to <code>multinomial</code></li>
+<li><code>expand</code> and <code>expand_as</code> allow expanding an empty Tensor to another empty Tensor</li>
+<li>when <code>[..., None, ...]</code> was given (i.e. newaxis placement in indexing was specified), PyTorch had different behavior from NumPy. This is made consistent with NumPy in all cases.</li>
+<li>Fix exponential distribution implementation to never sample infinity - cuRAND returns numbers in (0, 1]</li>
+<li>torch.HalfTensor supports <code>numpy()</code> and <code>torch.from_numpy</code></li>
+<li>Add additional size checking for <code>torch.scatter</code></li>
+<li>fix <code>torch.tril</code> and <code>torch.triu</code> on the GPU for storage-offset Tensors (would return incorrect result).</li>
+<li>Fix a memory leak in CUDA qr decomposition</li>
+<li>Fix stream-awareness issues in THCUNN kernels</li>
+<li>Fix kwargs parsing in <code>torch.topk</code></li>
+<li>Fixed <code>random_</code> on CPU (which previously had a max value of 2^32) for DoubleTensor and LongTensor</li>
+<li>Fix <code>ZeroDivisionError: float division by zero</code> when printing certain Tensors</li>
+<li><code>torch.gels</code> when <code>m &gt; n</code> had a truncation bug on the CPU and returned incorrect results. Fixed.</li>
+<li>Add a check in tensor.numpy() that checks if no positional arguments are passed</li>
+<li>Before a Tensor is moved to CUDA pinned memory, added a check to ensure that it is <code>contiguous</code></li>
+<li><code>any</code> and <code>all</code> work on empty Tensors on the cpu (previously errored out)</li>
+<li>Fix <code>symeig</code> on CUDA for large matrices. The bug is that not enough space was being allocated for the workspace, causing some undefined behavior.</li>
+<li>Improved the numerical stability of <code>torch.var</code> and <code>torch.std</code> by using Welford&#x2019;s algorithm</li>
+<li>The Random Number Generator returned <code>uniform</code> samples with inconsistent bounds (inconsistency in cpu implementation and running into a cublas bug).<ul>
+<li>Now, all <code>uniform</code> sampled numbers will return within the bounds <code>[0, 1)</code>, across all types and devices</li>
+</ul>
+</li>
+<li>Fix <code>torch.svd</code> to not segfault on large CUDA Tensors (fixed an overflow error in the magma bindings)</li>
+<li>Allows empty index Tensor for <code>index_select</code> (instead of erroring out)</li>
+<li>Previously when <code>eigenvector=False</code>, <code>symeig</code> returns some unknown value for the eigenvectors. Now we zero them out.</li>
+</ul>
+<h4 id="sparse"><a href="#sparse" class="headerlink" title="sparse"></a>sparse</h4><ul>
+<li>Fix bug with &#x2018;coalesced&#x2019; calculation in sparse &#x2018;cadd&#x2019;</li>
+<li>Fixes <code>.type()</code> not converting indices tensor.</li>
+<li>Fixes sparse tensor coalesce on the GPU in corner cases</li>
+</ul>
+<h4 id="autograd"><a href="#autograd" class="headerlink" title="autograd"></a>autograd</h4><ul>
+<li>Fixed crashes when calling backwards on leaf variable with requires_grad=False</li>
+<li>fix bug on Variable <code>type()</code> around non-default GPU input.</li>
+<li>when <code>torch.norm</code> returned <code>0.0</code>, the gradient was <code>NaN</code>. We now use the subgradient at <code>0.0</code>, so the gradient is <code>0.0</code>.</li>
+<li>Fix an correctness issue with advanced indexing and higher-order gradients</li>
+<li><code>torch.prod</code>&#x2018;s backward was failing on the GPU due to a type error, fixed.</li>
+<li>Advanced Indexing on Variables now allows the index to be a LongTensor backed Variable</li>
+<li>Variable.cuda() and Tensor.cuda() are consistent in kwargs options</li>
+</ul>
+<h4 id="optim"><a href="#optim" class="headerlink" title="optim"></a>optim</h4><ul>
+<li><code>torch.optim.lr_scheduler</code> is now imported by default.</li>
+</ul>
+<h4 id="nn"><a href="#nn" class="headerlink" title="nn"></a>nn</h4><ul>
+<li>Returning a dictionary from a nn.Module&#x2019;s forward function is now supported (used to throw an error)</li>
+<li>When <code>register_buffer(&quot;foo&quot;, ...)</code> is called, and self.foo already exists, then instead of silently failing, now raises a <code>KeyError</code></li>
+<li>Fixed loading of older checkpoints of RNN/LSTM which were missing <code>_data_ptrs</code> attributes.</li>
+<li><code>nn.Embedding</code> had a hard error when using the <code>max_norm</code> option. This is fixed now.</li>
+<li>when using the <code>max_norm</code> option, the passed-in indices are written upon (by the underlying implementation). To fix this, pass a clone of the indices to the renorm kernel.</li>
+<li><code>F.affine_grid</code> now can take non-contiguous inputs</li>
+<li>EmbeddingBag can accept both 1D and 2D inputs now.</li>
+<li>Workaround a CuDNN bug where batch sizes greater than 131070 fail in CuDNN BatchNorm</li>
+<li>fix nn.init.orthogonal to correctly return orthonormal vectors when rows &lt; cols</li>
+<li>if BatchNorm has only <code>1</code> value per channel in total, raise an error in training mode.</li>
+<li>Make cuDNN bindings respect the current cuda stream (previously raised incoherent error)</li>
+<li>fix grid_sample backward when gradOutput is a zero-strided Tensor</li>
+<li>Fix a segmentation fault when reflection padding is out of Tensor bounds.</li>
+<li>If LogSoftmax has only 1 element, <code>-inf</code> was returned. Now this correctly returns <code>0.0</code></li>
+<li>Fix pack_padded_sequence to accept inputs of arbitrary sizes (not just 3D inputs)</li>
+<li>Detect pointer aliasing in cuDNN RNN flatten_parameters and avoid that path.</li>
+<li>Fixed ELU higher order gradients when applied in-place</li>
+<li>Workaround a CuDNN RNN bug for half-precision</li>
+<li>Prevent numerical issues with <code>poisson_nll_loss</code> when <code>log_input=False</code> by adding a small epsilon</li>
+</ul>
+<h4 id="distributed-and-multi-gpu"><a href="#distributed-and-multi-gpu" class="headerlink" title="distributed and multi-gpu"></a>distributed and multi-gpu</h4><ul>
+<li>Allow kwargs-only inputs to DataParallel. This used to fail: <code>n = nn.DataParallel(Net()); out = n(input=i)</code></li>
+<li>DistributedDataParallel calculates num_samples correctly in python2</li>
+<li>Fix the case of DistributedDataParallel when 1-GPU per process is used.</li>
+<li>Allow some params to be <code>requires_grad=False</code> in DistributedDataParallel</li>
+<li>Fixed DataParallel to specify GPUs that don&#x2019;t include GPU-0</li>
+<li>DistributedDataParallel&#x2019;s exit doesn&#x2019;t error out anymore, the daemon flag is set.</li>
+<li>Fix a bug in DistributedDataParallel in the case when model has no <code>buffers</code> (previously raised incoherent error)</li>
+<li>Fix <code>__get_state__</code> to be functional in <code>DistributedDataParallel</code> (was returning nothing)</li>
+<li>Fix a deadlock in the NCCL bindings when GIL and CudaFreeMutex were starving each other</li>
+</ul>
+<h4 id="Others"><a href="#Others" class="headerlink" title="Others"></a>Others</h4><ul>
+<li><code>model.zoo.load_url</code> now first attempts to use the <code>requests</code> library if available, and then falls back to <code>urllib</code></li>
+<li>Fix error when default_collate is passed a collection of <code>numpy.str_</code></li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/b031092bd4e823bc7563d7398ed8d29f.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Python/" rel="tag"># Python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903519615467527.html" rel="next" title="关于 PyTorch 030 在Windows下的安装和">
+                <i class="fa fa-chevron-left"></i> 关于 PyTorch 030 在Windows下的安装和
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903519640633351.html" rel="prev" title="支持向量机通俗导论（理解SVM的三层境界）">
+                支持向量机通俗导论（理解SVM的三层境界） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Table-of-contents"><span class="nav-number">1.</span> <span class="nav-text">Table of contents</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Breaking-changes"><span class="nav-number">2.</span> <span class="nav-text">Breaking changes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#New-features"><span class="nav-number">3.</span> <span class="nav-text">New features</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Unreduced-losses"><span class="nav-number">3.1.</span> <span class="nav-text">Unreduced losses</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#An-in-built-Profiler-in-the-autograd-engine"><span class="nav-number">3.2.</span> <span class="nav-text">An in-built Profiler in the autograd engine</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Higher-order-gradients"><span class="nav-number">3.3.</span> <span class="nav-text">Higher order gradients</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Optimizers"><span class="nav-number">3.4.</span> <span class="nav-text">Optimizers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#New-layers-and-nn-functionality"><span class="nav-number">3.5.</span> <span class="nav-text">New layers and nn functionality</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#New-Tensor-functions-and-features"><span class="nav-number">3.6.</span> <span class="nav-text">New Tensor functions and features</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Other-additions"><span class="nav-number">3.7.</span> <span class="nav-text">Other additions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-changes"><span class="nav-number">4.</span> <span class="nav-text">API changes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Performance-Improvements"><span class="nav-number">5.</span> <span class="nav-text">Performance Improvements</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Framework-Interoperability"><span class="nav-number">6.</span> <span class="nav-text">Framework Interoperability</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DLPack-Interoperability"><span class="nav-number">6.1.</span> <span class="nav-text">DLPack Interoperability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-exporter-to-ONNX"><span class="nav-number">6.2.</span> <span class="nav-text">Model exporter to ONNX</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Usability-Improvements"><span class="nav-number">7.</span> <span class="nav-text">Usability Improvements</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bug-fixes"><span class="nav-number">8.</span> <span class="nav-text">Bug fixes</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#torch"><span class="nav-number">8.0.1.</span> <span class="nav-text">torch</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tensor"><span class="nav-number">8.0.2.</span> <span class="nav-text">Tensor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sparse"><span class="nav-number">8.0.3.</span> <span class="nav-text">sparse</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#autograd"><span class="nav-number">8.0.4.</span> <span class="nav-text">autograd</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#optim"><span class="nav-number">8.0.5.</span> <span class="nav-text">optim</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nn"><span class="nav-number">8.0.6.</span> <span class="nav-text">nn</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#distributed-and-multi-gpu"><span class="nav-number">8.0.7.</span> <span class="nav-text">distributed and multi-gpu</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Others"><span class="nav-number">8.0.8.</span> <span class="nav-text">Others</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

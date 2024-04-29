@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数据库,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="What is Citus? Open-source PostgreSQL extension (not a fork) Scalable across multiple machines through sharding and replication Distributed engine for query parallelization Database designed to sc">
+<meta name="keywords" content="数据库">
+<meta property="og:type" content="article">
+<meta property="og:title" content="citus，一个PostgreSQL的扩展">
+<meta property="og:url" content="https://dev.newban.cn/6844903511977639950.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="What is Citus? Open-source PostgreSQL extension (not a fork) Scalable across multiple machines through sharding and replication Distributed engine for query parallelization Database designed to sc">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6f6f7f1867388caa341cbfaaa60198a69e01b899f5b4bd2cbdbe1b9ed3539127">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/744edb7369c62c645b9133e0873891fc68ce1a09f48c410b4c4952e468561431">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e86577ba33a32e294db2d0a222c77ff50d96e5baba978a2d1431c06e16f3f3de">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/8f3340ebf7c141b66b56bb2f8a621f202030b943712d33797d2754a5452fb92c">
+<meta property="og:updated_time" content="2024-04-28T05:29:40.981Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="citus，一个PostgreSQL的扩展">
+<meta name="twitter:description" content="What is Citus? Open-source PostgreSQL extension (not a fork) Scalable across multiple machines through sharding and replication Distributed engine for query parallelization Database designed to sc">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6f6f7f1867388caa341cbfaaa60198a69e01b899f5b4bd2cbdbe1b9ed3539127">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903511977639950.html">
+
+
+
+
+
+  <title>citus，一个PostgreSQL的扩展 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">citus，一个PostgreSQL的扩展</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-17T13:46:32+08:00">
+                2017-11-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a href="/external_links/aac2876f8f8b3f32e07a973aab264691.html" target="blank" rel="noopener"><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6f6f7f1867388caa341cbfaaa60198a69e01b899f5b4bd2cbdbe1b9ed3539127" alt="Citus Banner"></a></p>
+<p><a href="/external_links/4299164ba04eceb664501c7b6ef3324d.html" target="blank" rel="noopener"><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/744edb7369c62c645b9133e0873891fc68ce1a09f48c410b4c4952e468561431" alt="Build Status"></a> <a href="/external_links/dcea6e2b1fb4f39e45c066ba61f17f7d.html" target="blank" rel="noopener"><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/e86577ba33a32e294db2d0a222c77ff50d96e5baba978a2d1431c06e16f3f3de" alt="Slack Status"></a> <a href="/external_links/2288c075eb787d134b8a32ae219833c8.html" target="blank" rel="noopener"><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/8f3340ebf7c141b66b56bb2f8a621f202030b943712d33797d2754a5452fb92c" alt="Latest Docs"></a></p>
+<h3 id="What-is-Citus"><a href="#What-is-Citus" class="headerlink" title="What is Citus?"></a>What is Citus?</h3><ul>
+<li><strong>Open-source</strong> PostgreSQL extension (not a fork)</li>
+<li><strong>Scalable</strong> across multiple machines through sharding and replication</li>
+<li><strong>Distributed</strong> engine for query parallelization</li>
+<li><strong>Database</strong> designed to scale multi-tenant applications</li>
+</ul>
+<p>Citus is a distributed database that scales across commodity servers using transparent sharding and replication. Citus extends the underlying database rather than forking it, giving developers and enterprises the power and familiarity of a relational<br> database. As an extension, Citus supports new PostgreSQL releases, and allows you to benefit from new features while maintaining compatibility with existing PostgreSQL tools.</p>
+<p>Citus serves many use cases. Two common ones are:</p>
+<ol>
+<li><a href="/external_links/a18e9303e0fc3e989461dcdda7f4374b.html" target="blank" rel="noopener">Multi-tenant database</a>: Most B2B applications already have the notion of a tenant / customer / account built into their data model.<br>Citus allows you to scale out your transactional relational database to 100K+ tenants with minimal changes to your application.</li>
+<li><a href="/external_links/316f49150d88a608757002c8464b1233.html" target="blank" rel="noopener">Real-time analytics</a>: Citus enables ingesting large volumes of data and running analytical queries on that data in human real-time. Example<br>applications include analytic dashboards with subsecond response times and exploratory queries on unfolding events.</li>
+</ol>
+<p>To learn more, visit <a href="/external_links/4919bd5ce53ceaf1900639b6596c1d77.html" target="blank" rel="noopener">citusdata.com</a> and join the <a href="/external_links/c06bd29e34df46aa2c379cccb57bbc0f.html" target="blank" rel="noopener">mailing list</a> to stay on top of the latest developments.</p>
+<h3 id="Getting-started-with-Citus"><a href="#Getting-started-with-Citus" class="headerlink" title="Getting started with Citus"></a>Getting started with Citus</h3><p>The fastest way to get up and running is to create a Citus Cloud account. You can also setup a local Citus cluster with Docker.</p>
+<h4 id="Citus-Cloud"><a href="#Citus-Cloud" class="headerlink" title="Citus Cloud"></a>Citus Cloud</h4><p>Citus Cloud runs on top of AWS as a fully managed database as a service and has development plans available for getting started. You can provision a Citus Cloud account at <a href="/external_links/5c66e6fb29c34bacfd6f308a54d8122a.html" target="blank" rel="noopener">console.citusdata.com</a> and get started with just a few clicks.</p>
+<h4 id="Local-Citus-Cluster"><a href="#Local-Citus-Cluster" class="headerlink" title="Local Citus Cluster"></a>Local Citus Cluster</h4><p>If you&#x2019;re looking to get started locally, you can follow the following steps to get up and running.</p>
+<ol>
+<li>Install Docker Community Edition and Docker Compose</li>
+</ol>
+<ul>
+<li>Mac:<ol>
+<li><a href="/external_links/7fd02d459604251300e57f1649db456f.html" target="blank" rel="noopener">Download</a> and install Docker.</li>
+<li>Start Docker by clicking on the application&#x2019;s icon.</li>
+</ol>
+</li>
+<li>Linux:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;curl -sSL https://get.docker.com/ | sh</span><br><span class="line">sudo usermod -aG docker $USER &amp;&amp; exec sg docker newgrp `id -gn`</span><br><span class="line">sudo systemctl start docker</span><br><span class="line"></span><br><span class="line">sudo curl -sSL https://github.com/docker/compose/releases/download/1.11.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose</span><br><span class="line">sudo chmod +x /usr/local/bin/docker-compose</span><br></pre></td></tr></table></figure>
+
+<p> The above version of Docker Compose is sufficient for running Citus, or you can install the <a href="/external_links/d75c7813cfa1bdcbd86b33259ea64dda.html" target="blank" rel="noopener">latest version</a>.</p>
+<ol>
+<li>Pull and start the Docker images</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;curl -sSLO https://raw.githubusercontent.com/citusdata/docker/master/docker-compose.yml</span><br><span class="line">docker-compose -p citus up -d</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>Connect to the master database</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;docker exec -it citus_master psql -U postgres</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>Follow the <a href="/external_links/8b932874ee2ade49a15dcc6e7d1316c8.html" target="blank" rel="noopener">first tutorial</a> instructions</li>
+<li>To shut the cluster down, run</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;docker-compose -p citus down</span><br></pre></td></tr></table></figure>
+
+<h3 id="Talk-to-Contributors-and-Learn-More"><a href="#Talk-to-Contributors-and-Learn-More" class="headerlink" title="Talk to Contributors and Learn More"></a>Talk to Contributors and Learn More</h3><table>
+<thead>
+<tr>
+<th>Documentation</th>
+<th>Try the <a href="/external_links/8b932874ee2ade49a15dcc6e7d1316c8.html" target="blank" rel="noopener">Citus  tutorial</a> for a hands-on introduction or the <a href="/external_links/00fa9b12ee695cd79180e7c4f59a0dc7.html" target="blank" rel="noopener">documentation</a> for a more comprehensive reference.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Google Groups</td>
+<td>The <a href="/external_links/c06bd29e34df46aa2c379cccb57bbc0f.html" target="blank" rel="noopener">Citus Google  Group</a> is our place for detailed questions and discussions.</td>
+</tr>
+<tr>
+<td>Slack</td>
+<td>Chat with us in our community <a href="/external_links/dcea6e2b1fb4f39e45c066ba61f17f7d.html" target="blank" rel="noopener">Slack channel</a>.</td>
+</tr>
+<tr>
+<td>Github Issues</td>
+<td>We track specific bug reports and feature requests on our <a href="/external_links/c3f7a1f7b24a114850ca6a2b4768c27e.html" target="blank" rel="noopener">project  issues</a>.</td>
+</tr>
+<tr>
+<td>Twitter</td>
+<td>Follow <a href="/external_links/659671497f7617a5e39a842423af2331.html" target="blank" rel="noopener">@citusdata</a> for general updates and PostgreSQL scaling tips.</td>
+</tr>
+</tbody></table>
+<h3 id="Contributing"><a href="#Contributing" class="headerlink" title="Contributing"></a>Contributing</h3><p>Citus is built on and of open source, and we welcome your contributions. The <a href="/external_links/91a4e040caa92143ae9f06552600c023.html" target="blank" rel="noopener">CONTRIBUTING.md</a> file explains how to get started developing the Citus extension itself and<br> our code quality guidelines.</p>
+<h3 id="Who-is-Using-Citus"><a href="#Who-is-Using-Citus" class="headerlink" title="Who is Using Citus?"></a>Who is Using Citus?</h3><p>Citus is deployed in production by many customers, ranging from technology start-ups to large enterprises. Here are some examples:</p>
+<ul>
+<li><a href="/external_links/d678df251a098ddc964aef3c14805166.html" target="blank" rel="noopener">CloudFlare</a> uses Citus to provide real-time analytics on 100 TBs of data from over 4 million customer websites. <a href="/external_links/533d27f042f9306de687bbaac5ac03be.html" target="blank" rel="noopener">Case<br>Study</a></li>
+<li><a href="/external_links/fe423b166f629bd8d16828b5fa36466d.html" target="blank" rel="noopener">MixRank</a> uses Citus to efficiently collect and analyze vast amounts of data to allow inside B2B sales teams to find new customers. <a href="/external_links/e963832f23393e1a6ed8c2e1780ed215.html" target="blank" rel="noopener">Case<br>Study</a></li>
+<li><a href="/external_links/0629ce3e0c2256d74b751656f71ec8dd.html" target="blank" rel="noopener">Neustar</a> builds and maintains scalable ad-tech infrastructure that counts billions of events per day using Citus and HyperLogLog.</li>
+<li><a href="/external_links/1ee11c643d24c79e1a429042e0b99868.html" target="blank" rel="noopener">Agari</a> uses Citus to secure more than 85 percent of U.S. consumer emails on two 6-8 TB clusters. <a href="/external_links/10efeff4d131a145af6fa4d19b4fa2fd.html" target="blank" rel="noopener">Case<br>Study</a></li>
+<li><a href="/external_links/43f79da6be4c6aa3b1c2563f4b4f8635.html" target="blank" rel="noopener">Heap</a> uses Citus to run dynamic funnel, segmentation, and cohort queries across billions of users and tens of billions of events. <a href="/external_links/67b441a3553aae735d2181888efa6730.html" target="blank" rel="noopener">Watch<br>Video</a></li>
+</ul>
+<hr>
+<p>Copyright &#xA9; 2012&#x2013;2017 Citus Data, Inc.</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/fc7a05e1aed3a355f23e5c04acb03a5d.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/数据库/" rel="tag"># 数据库</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903511973429261.html" rel="next" title="异步加载的基本逻辑与浏览器抓包一般流程">
+                <i class="fa fa-chevron-left"></i> 异步加载的基本逻辑与浏览器抓包一般流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903511981834248.html" rel="prev" title="PHP 代码复用的方式">
+                PHP 代码复用的方式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#What-is-Citus"><span class="nav-number">1.</span> <span class="nav-text">What is Citus?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Getting-started-with-Citus"><span class="nav-number">2.</span> <span class="nav-text">Getting started with Citus</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Citus-Cloud"><span class="nav-number">2.1.</span> <span class="nav-text">Citus Cloud</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Local-Citus-Cluster"><span class="nav-number">2.2.</span> <span class="nav-text">Local Citus Cluster</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Talk-to-Contributors-and-Learn-More"><span class="nav-number">3.</span> <span class="nav-text">Talk to Contributors and Learn More</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Contributing"><span class="nav-number">4.</span> <span class="nav-text">Contributing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Who-is-Using-Citus"><span class="nav-number">5.</span> <span class="nav-text">Who is Using Citus?</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

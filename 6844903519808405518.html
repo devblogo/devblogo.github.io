@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="面试,Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4ECA;&amp;#x5929;&amp;#x8BB2;&amp;#x4E00;&amp;#x4E2A;&amp;#x725B;&amp;#x903C;&amp;#x800C;&amp;#x5B9E;&amp;#x7528;&amp;#x7684;&amp;#x6982;&amp;#x5FF5;&amp;#xFF0C;&amp;#x4E32;&amp;#x884C;&amp;#x7EBF;&amp;#x7A0B;&amp;#x5C01;&amp;#x95ED;&amp;#x3002;&amp;#x5BF9;&amp;#x8C61;&amp;#x6C60;&amp;#x662F;">
+<meta name="keywords" content="面试,Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="源码 从串行线程封闭到对象池、线程池 线程封闭与串行线程封闭">
+<meta property="og:url" content="https://dev.newban.cn/6844903519808405518.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4ECA;&amp;#x5929;&amp;#x8BB2;&amp;#x4E00;&amp;#x4E2A;&amp;#x725B;&amp;#x903C;&amp;#x800C;&amp;#x5B9E;&amp;#x7528;&amp;#x7684;&amp;#x6982;&amp;#x5FF5;&amp;#xFF0C;&amp;#x4E32;&amp;#x884C;&amp;#x7EBF;&amp;#x7A0B;&amp;#x5C01;&amp;#x95ED;&amp;#x3002;&amp;#x5BF9;&amp;#x8C61;&amp;#x6C60;&amp;#x662F;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/351053b2e6d9d702fca3cce2fcb786c76e66e6acea4e8df6b641c2c12fadd211">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6302fab85c9712c65e12472580dbf651c956d09c5ab2b53beb89f4c4bfb17ca5">
+<meta property="og:updated_time" content="2024-04-28T04:50:41.673Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="源码 从串行线程封闭到对象池、线程池 线程封闭与串行线程封闭">
+<meta name="twitter:description" content="&amp;#x4ECA;&amp;#x5929;&amp;#x8BB2;&amp;#x4E00;&amp;#x4E2A;&amp;#x725B;&amp;#x903C;&amp;#x800C;&amp;#x5B9E;&amp;#x7528;&amp;#x7684;&amp;#x6982;&amp;#x5FF5;&amp;#xFF0C;&amp;#x4E32;&amp;#x884C;&amp;#x7EBF;&amp;#x7A0B;&amp;#x5C01;&amp;#x95ED;&amp;#x3002;&amp;#x5BF9;&amp;#x8C61;&amp;#x6C60;&amp;#x662F;">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/351053b2e6d9d702fca3cce2fcb786c76e66e6acea4e8df6b641c2c12fadd211">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903519808405518.html">
+
+
+
+
+
+  <title>源码 从串行线程封闭到对象池、线程池 线程封闭与串行线程封闭 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">源码 从串行线程封闭到对象池、线程池 线程封闭与串行线程封闭</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-07T14:07:08+08:00">
+                2017-12-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x4ECA;&#x5929;&#x8BB2;&#x4E00;&#x4E2A;&#x725B;&#x903C;&#x800C;&#x5B9E;&#x7528;&#x7684;&#x6982;&#x5FF5;&#xFF0C;<code>&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;</code>&#x3002;<code>&#x5BF9;&#x8C61;&#x6C60;</code>&#x662F;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x7684;&#x5178;&#x578B;&#x5E94;&#x7528;&#x573A;&#x666F;&#xFF1B;<code>&#x7EBF;&#x7A0B;&#x6C60;</code>&#x7CC5;&#x5408;&#x4E86;&#x5BF9;&#x8C61;&#x6C60;&#x6280;&#x672F;&#xFF0C;&#x4F46;&#x6838;&#x5FC3;&#x5B9E;&#x73B0;&#x4E0D;&#x4F9D;&#x8D56;&#x4E8E;&#x5BF9;&#x8C61;&#x6C60;&#xFF0C;&#x5F88;&#x5BB9;&#x6613;&#x4EA7;&#x751F;&#x8BEF;&#x4F1A;&#x3002;&#x672C;&#x6587;&#x4ECE;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x548C;&#x5BF9;&#x8C61;&#x6C60;&#x5165;&#x624B;&#xFF0C;&#x6700;&#x540E;&#x901A;&#x8FC7;&#x6E90;&#x7801;&#x5206;&#x6790;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x6838;&#x5FC3;&#x539F;&#x7406;&#xFF0C;&#x5398;&#x6E05;&#x5BF9;&#x8C61;&#x6C60;&#x4E0E;&#x7EBF;&#x7A0B;&#x6C60;&#x4E4B;&#x95F4;&#x7684;&#x8BEF;&#x4F1A;&#x3002;</p>
+<blockquote>
+<p>JDK&#x7248;&#x672C;&#xFF1A;oracle java 1.8.0_102</p>
+</blockquote>
+<h1 id="&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x4E0E;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;"><a href="#&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x4E0E;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;" class="headerlink" title="&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x4E0E;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;"></a>&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x4E0E;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;</h1><h2 id="&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;"><a href="#&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;" class="headerlink" title="&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;"></a>&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;</h2><p>&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x662F;&#x4E00;&#x79CD;&#x5E38;&#x89C1;&#x7684;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x8BBE;&#x8BA1;&#x7B56;&#x7565;&#xFF1A;<em>&#x4EC5;&#x5728;&#x56FA;&#x5B9A;&#x7684;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5185;&#x8BBF;&#x95EE;&#x5BF9;&#x8C61;&#xFF0C;&#x4E0D;&#x5BF9;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x5171;&#x4EAB;</em>&#x3002;</p>
+<p>&#x4F7F;&#x7528;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x6280;&#x672F;&#xFF0C;&#x5BF9;&#x8C61;O&#x59CB;&#x7EC8;&#x53EA;&#x5BF9;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;T1&#x53EF;&#x89C1;&#xFF0C;&#x201C;&#x5355;&#x7EBF;&#x7A0B;&#x201D;&#x4E2D;&#x81EA;&#x7136;&#x4E0D;&#x5B58;&#x5728;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;&#x95EE;&#x9898;&#x3002;</p>
+<p>ThreadLocal&#x662F;&#x5E38;&#x7528;&#x7684;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x5DE5;&#x5177;&#xFF0C;&#x89C1;<a href="/external_links/d5c2a974946a2342bc80d4e581f33d02.html" target="blank" rel="noopener">&#x6E90;&#x7801;|ThreadLocal&#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;</a>&#x3002;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x5728;Servlet&#x53CA;&#x9AD8;&#x5C42;&#x7684;web&#x6846;&#x67B6;Spring&#x7B49;&#x4E2D;&#x5E94;&#x7528;&#x4E0D;&#x5C11;&#x3002;</p>
+<h2 id="&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;"><a href="#&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;" class="headerlink" title="&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;"></a>&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;</h2><p>&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x867D;&#x7136;&#x597D;&#x7528;&#xFF0C;&#x5374;&#x9650;&#x5236;&#x4E86;&#x5BF9;&#x8C61;&#x7684;&#x5171;&#x4EAB;&#x3002;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x6539;&#x8FDB;&#x4E86;&#x8FD9;&#x4E00;&#x70B9;&#xFF1A;<em>&#x5BF9;&#x8C61;O&#x53EA;&#x80FD;&#x7531;&#x5355;&#x4E2A;&#x7EBF;&#x7A0B;T1&#x62E5;&#x6709;&#xFF0C;&#x4F46;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x5B89;&#x5168;&#x7684;&#x53D1;&#x5E03;&#x5BF9;&#x8C61;O&#x6765;&#x8F6C;&#x79FB;O&#x7684;&#x6240;&#x6709;&#x6743;&#xFF1B;&#x5728;&#x8F6C;&#x79FB;&#x6240;&#x6709;&#x6743;&#x540E;&#xFF0C;&#x4E5F;&#x53EA;&#x6709;&#x53E6;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;T2&#x80FD;&#x83B7;&#x5F97;&#x8FD9;&#x4E2A;O&#x7684;&#x6240;&#x6709;&#x6743;&#xFF0C;&#x5E76;&#x4E14;&#x53D1;&#x5E03;O&#x7684;T1&#x4E0D;&#x4F1A;&#x518D;&#x8BBF;&#x95EE;O</em>&#x3002;</p>
+<blockquote>
+<p>&#x6240;&#x8C13;&#x201C;&#x6240;&#x6709;&#x6743;&#x201D;&#xFF0C;&#x6307;&#x4FEE;&#x6539;&#x5BF9;&#x8C61;&#x7684;&#x6743;&#x5229;&#x3002;</p>
+</blockquote>
+<p>&#x76F8;&#x5BF9;&#x4E8E;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#xFF0C;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x4F7F;&#x5F97;&#x4EFB;&#x610F;&#x65F6;&#x523B;&#xFF0C;&#x6700;&#x591A;&#x4EC5;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x62E5;&#x6709;&#x5BF9;&#x8C61;&#x7684;&#x6240;&#x6709;&#x6743;&#x3002;&#x5F53;&#x7136;&#xFF0C;&#x8FD9;&#x4E0D;&#x662F;&#x7EDD;&#x5BF9;&#x7684;&#xFF0C;&#x53EA;&#x8981;&#x7EBF;&#x7A0B;T1&#x4E8B;&#x5B9E;&#x4E0D;&#x4F1A;&#x518D;&#x4FEE;&#x6539;&#x5BF9;&#x8C61;O&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x76F8;&#x5F53;&#x4E8E;&#x4EC5;&#x6709;T2&#x62E5;&#x6709;&#x5BF9;&#x8C61;&#x7684;&#x6240;&#x6709;&#x6743;&#x3002;&#x4E32;&#x884C;&#x7EBF;&#x5C42;&#x5C01;&#x95ED;&#x8BA9;&#x5BF9;&#x8C61;&#x53D8;&#x5F97;&#x53EF;&#x4EE5;&#x5171;&#x4EAB;&#xFF08;&#x867D;&#x7136;&#x53EA;&#x80FD;&#x4E32;&#x884C;&#x7684;&#x62E5;&#x6709;&#x6240;&#x6709;&#x6743;&#xFF09;&#xFF0C;&#x7075;&#x6D3B;&#x6027;&#x5F97;&#x5230;&#x5927;&#x5927;&#x63D0;&#x9AD8;&#xFF1B;&#x76F8;&#x5BF9;&#x7684;&#xFF0C;&#x8981;&#x5171;&#x4EAB;&#x5BF9;&#x8C61;&#x5C31;&#x6D89;&#x53CA;&#x5B89;&#x5168;&#x53D1;&#x5E03;&#x7684;&#x95EE;&#x9898;&#xFF0C;&#x4F9D;&#x9760;BlockingQueue&#x7B49;&#x540C;&#x6B65;&#x5DE5;&#x5177;&#x5F88;&#x5BB9;&#x6613;&#x5B9E;&#x73B0;&#x8FD9;&#x4E00;&#x70B9;&#x3002;</p>
+<p>&#x5BF9;&#x8C61;&#x6C60;&#x662F;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x7684;&#x7ECF;&#x5178;&#x5E94;&#x7528;&#x573A;&#x666F;&#xFF0C;&#x5982;&#x6570;&#x636E;&#x5E93;&#x8FDE;&#x63A5;&#x6C60;&#x7B49;&#x3002;</p>
+<h1 id="&#x5BF9;&#x8C61;&#x6C60;"><a href="#&#x5BF9;&#x8C61;&#x6C60;" class="headerlink" title="&#x5BF9;&#x8C61;&#x6C60;"></a>&#x5BF9;&#x8C61;&#x6C60;</h1><p>&#x5BF9;&#x8C61;&#x6C60;&#x5229;&#x7528;&#x4E86;&#x4E32;&#x884C;&#x5C01;&#x95ED;&#xFF1A;<em>&#x5C06;&#x5BF9;&#x8C61;O&#x201C;&#x501F;&#x7ED9;&#x201D;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#x7EBF;&#x7A0B;T1&#xFF0C;T1&#x4F7F;&#x7528;&#x5B8C;&#x518D;&#x4EA4;&#x8FD8;&#x7ED9;&#x5BF9;&#x8C61;&#x6C60;&#xFF0C;&#x5E76;&#x4FDD;&#x8BC1;&#x201C;&#x672A;&#x64C5;&#x81EA;&#x53D1;&#x5E03;&#x8BE5;&#x5BF9;&#x8C61;&#x201D;&#x4E14;&#x201C;&#x4EE5;&#x540E;&#x4E0D;&#x518D;&#x4F7F;&#x7528;&#x201D;&#xFF1B;&#x5BF9;&#x8C61;&#x6C60;&#x6536;&#x56DE;O&#x540E;&#xFF0C;&#x7B49;T2&#x6765;&#x501F;&#x7684;&#x65F6;&#x5019;&#x518D;&#x628A;&#x5B83;&#x501F;&#x7ED9;T2&#xFF0C;&#x5B8C;&#x6210;&#x5BF9;&#x8C61;&#x6240;&#x6709;&#x6743;&#x7684;&#x4F20;&#x9012;</em>&#x3002;</p>
+<p>&#x7334;&#x5B50;&#x64B8;&#x4E86;&#x4E00;&#x4E2A;&#x7B80;&#x5316;&#x7248;&#x7684;&#x7EBF;&#x7A0B;&#x6C60;&#xFF0C;&#x7528;&#x6237;&#x53EA;&#x9700;&#x8981;&#x8986;&#x5199;newObject()&#x65B9;&#x6CD5;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public abstract class AbstractObjectPool&lt;T&gt; {</span><br><span class="line">  protected final int min;</span><br><span class="line">  protected final int max;</span><br><span class="line">  protected final List&lt;T&gt; usings = new LinkedList&lt;&gt;();</span><br><span class="line">  protected final List&lt;T&gt; buffer = new LinkedList&lt;&gt;();</span><br><span class="line">  private volatile boolean inited = false;</span><br><span class="line"></span><br><span class="line">  public AbstractObjectPool(int min, int max) {</span><br><span class="line">    this.min = min;</span><br><span class="line">    this.max = max;</span><br><span class="line">    if (this.min &lt; 0 || this.min &gt; this.max) {</span><br><span class="line">      throw new IllegalArgumentException(String.format(</span><br><span class="line">          &quot;need 0 &lt;= min &lt;= max &lt;= Integer.MAX_VALUE, given min: %s, max: %s&quot;, this.min, this.max));</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  public void init() {</span><br><span class="line">    for (int i = 0; i &lt; min; i++) {</span><br><span class="line">      buffer.add(newObject());</span><br><span class="line">    }</span><br><span class="line">    inited = true;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  protected void checkInited() {</span><br><span class="line">    if (!inited) {</span><br><span class="line">      throw new IllegalStateException(&quot;not inited&quot;);</span><br><span class="line">    }</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  abstract protected T newObject();</span><br><span class="line"></span><br><span class="line">  public synchronized T getObject() {</span><br><span class="line">    checkInited();</span><br><span class="line"></span><br><span class="line">    if (usings.size() == max) {</span><br><span class="line">      return null;</span><br><span class="line">    }</span><br><span class="line">    if (buffer.size() == 0) {</span><br><span class="line">      T newObj = newObject();</span><br><span class="line">      usings.add(newObj);</span><br><span class="line">      return newObj;</span><br><span class="line">    }</span><br><span class="line">    T oldObj = buffer.remove(0);</span><br><span class="line">    usings.add(oldObj);</span><br><span class="line">    return oldObj;</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  public synchronized void freeObject(T obj) {</span><br><span class="line">    checkInited();</span><br><span class="line">    if (!usings.contains(obj)) {</span><br><span class="line">      throw new IllegalArgumentException(String.format(&quot;obj not in using queue: %s&quot;, obj));</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    usings.remove(usings.indexOf(obj));</span><br><span class="line">    buffer.add(obj);</span><br><span class="line">  }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>AbstractObjectPool&#x5177;&#x6709;&#x4EE5;&#x4E0B;&#x7279;&#x6027;&#xFF1A;</p>
+<ul>
+<li>&#x652F;&#x6301;&#x8BBE;&#x7F6E;&#x6700;&#x5C0F;&#x3001;&#x6700;&#x5927;&#x5BB9;&#x91CF;</li>
+<li>&#x5BF9;&#x8C61;&#x4E00;&#x65E6;&#x7533;&#x8BF7;&#x5C31;&#x4E0D;&#x518D;&#x91CA;&#x653E;&#xFF0C;&#x907F;&#x514D;&#x4E86;GC</li>
+</ul>
+<p>&#x867D;&#x7136;&#x5F88;&#x7B80;&#x5355;&#xFF0C;&#x4F46;&#x5927;&#x53EF;&#x4EE5;&#x7528;&#x4E8E;&#x4E00;&#x4E9B;&#x65F6;&#x95F4;&#x654F;&#x611F;&#x3001;&#x8D44;&#x6E90;&#x5145;&#x88D5;&#x7684;&#x573A;&#x666F;&#x3002;&#x5982;&#x679C;&#x65F6;&#x95F4;&#x8FDB;&#x4E00;&#x6B65;&#x654F;&#x611F;&#xFF0C;&#x53EF;&#x5C06;getObject()&#x3001;freeObject()&#x6539;&#x5199;&#x4E3A;&#x5E76;&#x53D1;&#x7A0B;&#x5EA6;&#x66F4;&#x9AD8;&#x7684;&#x7248;&#x672C;&#xFF0C;&#x4F46;&#x8BB0;&#x5F97;&#x4FDD;&#x8BC1;&#x5B89;&#x5168;&#x53D1;&#x5E03;&#x5B89;&#x5168;&#x56DE;&#x6536;&#xFF1B;&#x5982;&#x679C;&#x8D44;&#x6E90;&#x4E0D;&#x90A3;&#x4E48;&#x5145;&#x88D5;&#xFF0C;&#x53EF;&#x4EE5;&#x9002;&#x5F53;&#x589E;&#x52A0;&#x5BF9;&#x8C61;&#x56DE;&#x6536;&#x7B56;&#x7565;&#x3002;</p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#x6C60;&#x7684;&#x57FA;&#x672C;&#x884C;&#x4E3A;&#x5305;&#x62EC;&#xFF1A;</p>
+<ul>
+<li>&#x521B;&#x5EFA;&#x5BF9;&#x8C61;newObject()</li>
+<li>&#x501F;&#x53D6;&#x5BF9;&#x8C61;getObject()</li>
+<li>&#x5F52;&#x8FD8;&#x5BF9;&#x8C61;freeObject()</li>
+</ul>
+<p>&#x5178;&#x578B;&#x7684;&#x5BF9;&#x8C61;&#x6C60;&#x6709;&#x5404;&#x79CD;&#x8FDE;&#x63A5;&#x6C60;&#x3001;&#x5E38;&#x91CF;&#x6C60;&#x7B49;&#xFF0C;&#x5E94;&#x7528;&#x975E;&#x5E38;&#x591A;&#xFF0C;&#x6A21;&#x578B;&#x4E5F;&#x5927;&#x540C;&#x5C0F;&#x5F02;&#xFF0C;&#x4E0D;&#x505A;&#x89E3;&#x6790;&#x3002;&#x4EE4;&#x4EBA;&#x8FF7;&#x60D1;&#x7684;&#x662F;&#x7EBF;&#x7A0B;&#x6C60;&#xFF0C;&#x5F88;&#x5BB9;&#x6613;&#x8BA9;&#x4EBA;&#x8BEF;&#x4EE5;&#x4E3A;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x6838;&#x5FC3;&#x539F;&#x7406;&#x4E5F;&#x662F;&#x5BF9;&#x8C61;&#x6C60;&#xFF0C;&#x4E0B;&#x9762;&#x6765;&#x8FFD;&#x4E00;&#x904D;&#x6E90;&#x7801;&#x3002;</p>
+<h1 id="&#x7EBF;&#x7A0B;&#x6C60;"><a href="#&#x7EBF;&#x7A0B;&#x6C60;" class="headerlink" title="&#x7EBF;&#x7A0B;&#x6C60;"></a>&#x7EBF;&#x7A0B;&#x6C60;</h1><p>&#x9996;&#x5148;&#x6446;&#x51FA;&#x7ED3;&#x8BBA;&#xFF1A;<strong>&#x7EBF;&#x7A0B;&#x6C60;&#x7CC5;&#x5408;&#x4E86;&#x5BF9;&#x8C61;&#x6C60;&#x6A21;&#x578B;&#xFF0C;&#x4F46;&#x6838;&#x5FC3;&#x539F;&#x7406;&#x662F;&#x751F;&#x4EA7;&#x8005;-&#x6D88;&#x8D39;&#x8005;&#x6A21;&#x578B;</strong>&#x3002;</p>
+<p>&#x7EE7;&#x627F;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/351053b2e6d9d702fca3cce2fcb786c76e66e6acea4e8df6b641c2c12fadd211" alt="image.png"></p>
+<p>&#x7528;&#x6237;&#x53EF;&#x4EE5;&#x5C06;Runnable&#xFF08;&#x6216;Callables&#xFF09;&#x5B9E;&#x4F8B;&#x63D0;&#x4EA4;&#x7ED9;&#x7EBF;&#x7A0B;&#x6C60;&#xFF0C;&#x7EBF;&#x7A0B;&#x6C60;&#x4F1A;&#x5F02;&#x6B65;&#x6267;&#x884C;&#x8BE5;&#x4EFB;&#x52A1;&#xFF0C;&#x8FD4;&#x56DE;&#x54CD;&#x5E94;&#x7684;&#x7ED3;&#x679C;&#xFF08;&#x5B8C;&#x6210;/&#x8FD4;&#x56DE;&#x503C;&#xFF09;&#x3002;</p>
+<p>&#x7334;&#x5B50;&#x6700;&#x559C;&#x6B22;&#x7684;&#x662F;<code>submit(Callable&lt;T&gt; task)</code>&#x65B9;&#x6CD5;&#x3002;&#x6211;&#x4EEC;&#x4ECE;&#x8BE5;&#x65B9;&#x6CD5;&#x5165;&#x624B;&#xFF0C;&#x9010;&#x6B65;&#x6DF1;&#x5165;&#x51FD;&#x6570;&#x6808;&#xFF0C;&#x63A2;&#x7A76;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x5B9E;&#x73B0;&#x539F;&#x7406;&#x3002;</p>
+<h2 id="submit"><a href="#submit" class="headerlink" title="submit()"></a>submit()</h2><p>submit()&#x65B9;&#x6CD5;&#x5728;ExecutorService&#x63A5;&#x53E3;&#x4E2D;&#x5B9A;&#x4E49;&#xFF0C;AbstractExecutorService&#x5B9E;&#x73B0;&#xFF0C;ThreadPoolExecutor&#x76F4;&#x63A5;&#x7EE7;&#x627F;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public abstract class AbstractExecutorService implements ExecutorService {</span><br><span class="line">...</span><br><span class="line">    public &lt;T&gt; Future&lt;T&gt; submit(Callable&lt;T&gt; task) {</span><br><span class="line">        if (task == null) throw new NullPointerException();</span><br><span class="line">        RunnableFuture&lt;T&gt; ftask = newTaskFor(task);</span><br><span class="line">        execute(ftask);</span><br><span class="line">        return ftask;</span><br><span class="line">    }</span><br><span class="line">...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>AbstractExecutorService#newTaskFor()&#x521B;&#x5EFA;&#x4E00;&#x4E2A;RunnableFuture&#x7C7B;&#x578B;&#x7684;FutureTask&#x3002;</p>
+<p>&#x6838;&#x5FC3;&#x662F;execute()&#x65B9;&#x6CD5;&#x3002;</p>
+<h2 id="execute"><a href="#execute" class="headerlink" title="execute()"></a>execute()</h2><p>execute()&#x65B9;&#x6CD5;&#x5728;Executor&#x63A5;&#x53E3;&#x4E2D;&#x5B9A;&#x4E49;&#xFF0C;ThreadPoolExecutor&#x5B9E;&#x73B0;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class ThreadPoolExecutor extends AbstractExecutorService {</span><br><span class="line">...</span><br><span class="line">    public void execute(Runnable command) {</span><br><span class="line">        if (command == null)</span><br><span class="line">            throw new NullPointerException();</span><br><span class="line">        int c = ctl.get();</span><br><span class="line">        if (workerCountOf(c) &lt; corePoolSize) {</span><br><span class="line">            if (addWorker(command, true))</span><br><span class="line">                return;</span><br><span class="line">            c = ctl.get();</span><br><span class="line">        }</span><br><span class="line">        if (isRunning(c) &amp;&amp; workQueue.offer(command)) {</span><br><span class="line">            int recheck = ctl.get();</span><br><span class="line">            if (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">                reject(command);</span><br><span class="line">            else if (workerCountOf(recheck) == 0)</span><br><span class="line">                addWorker(null, false);</span><br><span class="line">        }</span><br><span class="line">        else if (!addWorker(command, false))</span><br><span class="line">            reject(command);</span><br><span class="line">    }</span><br><span class="line">...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x6682;&#x4E14;&#x5FFD;&#x7565;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x6C60;&#x5316;&#x7B56;&#x7565;&#x3002;&#x5173;&#x6CE8;&#x4E00;&#x4E2A;&#x6700;&#x7B80;&#x5355;&#x7684;&#x573A;&#x666F;&#xFF0C;&#x770B;&#x80FD;&#x4E0D;&#x80FD;&#x5148;&#x56DE;&#x7B54;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#xFF1A;&#x7EBF;&#x7A0B;&#x6C60;&#x4E2D;&#x7684;&#x4EFB;&#x52A1;&#x5982;&#x4F55;&#x6267;&#x884C;&#xFF1F;</p>
+<p>&#x6838;&#x5FC3;&#x662F;addWorker()&#x65B9;&#x6CD5;&#x3002;&#x4EE5;8&#x884C;&#x7684;&#x53C2;&#x6570;&#x4E3A;&#x4F8B;&#xFF0C;&#x6B64;&#x65F6;&#xFF0C;&#x7EBF;&#x7A0B;&#x6C60;&#x4E2D;&#x7684;&#x7EBF;&#x7A0B;&#x6570;&#x672A;&#x8FBE;&#x5230;&#x6700;&#x5C0F;&#x7EBF;&#x7A0B;&#x6C60;&#x5927;&#x5C0F;corePoolSize&#xFF0C;&#x901A;&#x5E38;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x5728;9&#x884C;&#x8FD4;&#x56DE;&#x3002;</p>
+<h2 id="addWorker"><a href="#addWorker" class="headerlink" title="addWorker()"></a>addWorker()</h2><p>&#x7B80;&#x5316;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class ThreadPoolExecutor extends AbstractExecutorService {</span><br><span class="line">...</span><br><span class="line">    private boolean addWorker(Runnable firstTask, boolean core) {</span><br><span class="line">        boolean workerStarted = false;</span><br><span class="line">        boolean workerAdded = false;</span><br><span class="line">        Worker w = null;</span><br><span class="line">        try {</span><br><span class="line">            w = new Worker(firstTask);</span><br><span class="line">            final Thread t = w.thread;</span><br><span class="line">            if (t != null) {</span><br><span class="line">                final ReentrantLock mainLock = this.mainLock;</span><br><span class="line">                mainLock.lock();</span><br><span class="line">                try {</span><br><span class="line">                    int rs = runStateOf(ctl.get());</span><br><span class="line">                    if (rs &lt; SHUTDOWN) {</span><br><span class="line">                        workers.add(w);</span><br><span class="line">                        workerAdded = true;</span><br><span class="line">                    }</span><br><span class="line">                } finally {</span><br><span class="line">                    mainLock.unlock();</span><br><span class="line">                }</span><br><span class="line">                if (workerAdded) {</span><br><span class="line">                    t.start();</span><br><span class="line">                    workerStarted = true;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        } finally {</span><br><span class="line">            if (! workerStarted)</span><br><span class="line">                addWorkerFailed(w);</span><br><span class="line">        }</span><br><span class="line">        return workerStarted;</span><br><span class="line">    }</span><br><span class="line">...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x53BB;&#x6389;&#x4E86;&#x5F88;&#x591A;&#x7528;&#x4E8E;&#x7BA1;&#x7406;&#x7EBF;&#x7A0B;&#x6C60;&#x3001;&#x7EF4;&#x62A4;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;&#x4EE3;&#x7801;&#x3002;&#x5047;&#x8BBE;&#x7EBF;&#x7A0B;&#x6C60;&#x672A;&#x5173;&#x95ED;&#xFF0C;worker&#xFF08;&#x5373;w&#xFF0C;&#x4E0B;&#x540C;&#xFF09;&#x6DFB;&#x52A0;&#x6210;&#x529F;&#xFF0C;&#x5219;&#x5FC5;&#x7136;&#x80FD;&#x591F;&#x5C06;worker&#x6DFB;&#x52A0;&#x81F3;workers&#x4E2D;&#x3002;workers&#x662F;&#x4E00;&#x4E2A;HashSet&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private final HashSet&lt;Worker&gt; workers = new HashSet&lt;Worker&gt;();</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x54EA;&#x91CC;&#x662F;&#x5BF9;&#x8C61;&#x6C60;&#xFF1F;"><a href="#&#x54EA;&#x91CC;&#x662F;&#x5BF9;&#x8C61;&#x6C60;&#xFF1F;" class="headerlink" title="&#x54EA;&#x91CC;&#x662F;&#x5BF9;&#x8C61;&#x6C60;&#xFF1F;"></a>&#x54EA;&#x91CC;&#x662F;&#x5BF9;&#x8C61;&#x6C60;&#xFF1F;</h3><p><strong>&#x5982;&#x679C;&#x8BF4;&#x4E0E;&#x5BF9;&#x8C61;&#x6C60;&#x6709;&#x5173;&#xFF0C;&#x90A3;&#x4E48;workers&#x5373;&#x76F8;&#x5F53;&#x4E8E;&#x793A;&#x4F8B;&#x4EE3;&#x7801;&#x4E2D;&#x7684;using&#xFF0C;&#x5E94;&#x7528;&#x4E86;&#x5BF9;&#x8C61;&#x6C60;&#x6A21;&#x578B;</strong>;&#x53EA;&#x4E0D;&#x8FC7;&#x8FD9;&#x91CC;&#x7684;using&#x662F;&#x4E00;&#x76F4;&#x589E;&#x957F;&#x7684;&#xFF0C;&#x76F4;&#x5230;&#x8FBE;&#x5230;&#x6700;&#x5927;&#x7EBF;&#x7A0B;&#x6C60;&#x5927;&#x5C0F;maximumPoolSize&#x3002;</p>
+<p>&#x4F46;&#x662F;&#x5F88;&#x660E;&#x663E;&#xFF0C;&#x7EBF;&#x7A0B;&#x6C60;&#x5E76;&#x6CA1;&#x6709;&#x5C06;&#x7EBF;&#x7A0B;&#x53D1;&#x5E03;&#x51FA;&#x53BB;&#xFF0C;workers&#x4E5F;&#x4EC5;&#x4EC5;&#x5B8C;&#x6210;using&#x201C;&#x4FDD;&#x5B58;&#x7EBF;&#x7A0B;&#x201D;&#x7684;&#x529F;&#x80FD;&#x3002;&#x90A3;&#x4E48;&#xFF0C;&#x7EBF;&#x7A0B;&#x6C60;&#x4E2D;&#x7684;&#x4EFB;&#x52A1;&#x5982;&#x4F55;&#x6267;&#x884C;&#x5462;&#xFF1F;&#x8DDF;&#x7EBF;&#x7A0B;&#x6C60;&#x6709;&#x6CA1;&#x6709;&#x5173;&#x7CFB;&#xFF1F;</p>
+<h3 id="&#x54EA;&#x91CC;&#x53C8;&#x4E0D;&#x662F;&#xFF1F;"><a href="#&#x54EA;&#x91CC;&#x53C8;&#x4E0D;&#x662F;&#xFF1F;" class="headerlink" title="&#x54EA;&#x91CC;&#x53C8;&#x4E0D;&#x662F;&#xFF1F;"></a>&#x54EA;&#x91CC;&#x53C8;&#x4E0D;&#x662F;&#xFF1F;</h3><p>&#x6CE8;&#x610F;9&#x3001;17&#x3001;24&#x884C;&#xFF1A;</p>
+<ul>
+<li>9&#x884C;&#x5C06;&#x6211;&#x4EEC;&#x63D0;&#x4EA4;&#x5230;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;firstTask&#x5C01;&#x88C5;&#x5165;&#x4E00;&#x4E2A;worker&#x3002;</li>
+<li>17&#x884C;&#x5C06;worker&#x52A0;&#x5165;workers&#xFF0C;&#x7EF4;&#x62A4;&#x8D77;&#x6765;</li>
+<li>24&#x884C;&#x5219;&#x542F;&#x52A8;&#x4E86;worker&#x4E2D;&#x7684;&#x7EBF;&#x7A0B;t</li>
+</ul>
+<p>&#x6838;&#x5FC3;&#x5728;&#x4E0E;&#x8FD9;&#x4E09;&#x884C;&#xFF0C;&#x4F46;&#x7EBF;&#x7A0B;&#x6C60;&#x5E76;&#x6CA1;&#x6709;&#x76F4;&#x63A5;&#x5728;addWorker()&#x4E2D;&#x542F;&#x52A8;&#x4EFB;&#x52A1;firstTask&#xFF0C;&#x4EE3;&#x4E4B;&#x4EE5;&#x542F;&#x52A8;&#x4E00;&#x4E2A;worker&#x3002;&#x6700;&#x7EC8;&#x4EFB;&#x52A1;&#x5FC5;&#x7136;&#x88AB;&#x542F;&#x52A8;&#xFF0C;&#x90A3;&#x4E48;&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x770B;Worker&#x5982;&#x4F55;&#x542F;&#x52A8;&#x8FD9;&#x4E2A;&#x4EFB;&#x52A1;&#x3002;</p>
+<h2 id="Worker"><a href="#Worker" class="headerlink" title="Worker"></a>Worker</h2><p>Worker&#x5B9E;&#x73B0;&#x4E86;Runnable&#x63A5;&#x53E3;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private final class Worker</span><br><span class="line">    extends AbstractQueuedSynchronizer</span><br><span class="line">    implements Runnable</span><br><span class="line">{</span><br><span class="line">...</span><br><span class="line">    Worker(Runnable firstTask) {</span><br><span class="line">        setState(-1); // inhibit interrupts until runWorker</span><br><span class="line">        this.firstTask = firstTask;</span><br><span class="line">        this.thread = getThreadFactory().newThread(this);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /** Delegates main run loop to outer runWorker  */</span><br><span class="line">    public void run() {</span><br><span class="line">        runWorker(this);</span><br><span class="line">    }</span><br><span class="line">...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x5C06;&#x6784;&#x9020;Worker&#x65F6;&#x7684;&#x53C2;&#x6570;&#x547D;&#x540D;&#x4E3A;firstTask&#xFF1F;&#x56E0;&#x4E3A;&#x5F53;&#x4E14;&#x4EC5;&#x5F53;&#x9700;&#x8981;&#x5EFA;&#x7ACB;&#x65B0;&#x7684;Worker&#x4EE5;&#x6267;&#x884C;&#x4EFB;&#x52A1;task&#x65F6;&#xFF0C;&#x624D;&#x4F1A;&#x8C03;&#x7528;&#x6784;&#x9020;&#x51FD;&#x6570;&#x3002;&#x56E0;&#x6B64;&#xFF0C;&#x4EFB;&#x52A1;task&#x5BF9;&#x4E8E;&#x65B0;Worker&#x800C;&#x8A00;&#xFF0C;&#x662F;&#x7B2C;&#x4E00;&#x4E2A;&#x4EFB;&#x52A1;firstTask&#x3002;</p>
+</blockquote>
+<p>Worker&#x7684;&#x5B9E;&#x73B0;&#x975E;&#x5E38;&#x7B80;&#x5355;&#xFF1A;&#x5C06;&#x81EA;&#x5DF1;&#x4F5C;&#x4E3A;Runable&#x5B9E;&#x4F8B;&#xFF0C;&#x6784;&#x9020;&#x65F6;&#x5728;&#x5185;&#x90E8;&#x521B;&#x5EFA;&#x5E76;&#x6301;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;thread&#x3002;Thread&#x548C;Runable&#x7684;&#x4F7F;&#x7528;&#x5927;&#x5BB6;&#x5F88;&#x719F;&#x6089;&#x4E86;&#xFF0C;&#x6838;&#x5FC3;&#x662F;Worker&#x7684;run&#x65B9;&#x6CD5;&#xFF0C;&#x5B83;&#x76F4;&#x63A5;&#x8C03;&#x7528;&#x4E86;runWorker()&#x65B9;&#x6CD5;&#x3002;</p>
+<h2 id="runWorker"><a href="#runWorker" class="headerlink" title="runWorker()"></a>runWorker()</h2><p><strong>&#x6572;&#x9ED1;&#x677F;&#xFF01;&#xFF01;&#xFF01;</strong></p>
+<p>&#x91CD;&#x5934;&#x620F;&#x6765;&#x4E86;&#x3002;&#x7B80;&#x5316;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class ThreadPoolExecutor extends AbstractExecutorService {</span><br><span class="line">...</span><br><span class="line">    final void runWorker(Worker w) {</span><br><span class="line">        Thread wt = Thread.currentThread();</span><br><span class="line">        Runnable task = w.firstTask;</span><br><span class="line">        w.firstTask = null;</span><br><span class="line">        w.unlock(); // allow interrupts</span><br><span class="line">        boolean completedAbruptly = true;</span><br><span class="line">        try {</span><br><span class="line">            while (task != null || (task = getTask()) != null) {</span><br><span class="line">                w.lock();</span><br><span class="line">                try {</span><br><span class="line">                    beforeExecute(wt, task);</span><br><span class="line">                    Throwable thrown = null;</span><br><span class="line">                    try {</span><br><span class="line">                        task.run();</span><br><span class="line">                    } catch (RuntimeException x) {</span><br><span class="line">                        thrown = x; throw x;</span><br><span class="line">                    } catch (Error x) {</span><br><span class="line">                        thrown = x; throw x;</span><br><span class="line">                    } catch (Throwable x) {</span><br><span class="line">                        thrown = x; throw new Error(x);</span><br><span class="line">                    } finally {</span><br><span class="line">                        afterExecute(task, thrown);</span><br><span class="line">                    }</span><br><span class="line">                } finally {</span><br><span class="line">                    task = null;</span><br><span class="line">                    w.completedTasks++;</span><br><span class="line">                    w.unlock();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            completedAbruptly = false;</span><br><span class="line">        } finally {</span><br><span class="line">            processWorkerExit(w, completedAbruptly);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x5728;&#x524D;&#x9762;&#x5C06;&#x8981;&#x6267;&#x884C;&#x7684;&#x4EFB;&#x52A1;&#x8D4B;&#x503C;&#x7ED9;firstTask&#xFF0C;5-6&#x884C;&#x9996;&#x5148;&#x53D6;&#x51FA;&#x4EFB;&#x52A1;task&#xFF0C;&#x5E76;&#x5C06;firstTask&#x7F6E;&#x4E3A;null&#x3002;&#x56E0;&#x4E3A;&#x63A5;&#x4E0B;&#x6765;&#x8981;&#x6267;&#x884C;task&#xFF0C;firstTask&#x5B57;&#x6BB5;&#x5C31;&#x6CA1;&#x6709;&#x7528;&#x4E86;&#x3002;</p>
+<p>&#x91CD;&#x70B9;&#x662F;10-31&#x884C;&#x7684;while&#x5FAA;&#x73AF;&#x3002;&#x4E0B;&#x9762;&#x5206;&#x60C5;&#x51B5;&#x8BA8;&#x8BBA;&#x3002;</p>
+<h3 id="case1&#xFF1A;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E0D;&#x4E3A;null"><a href="#case1&#xFF1A;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E0D;&#x4E3A;null" class="headerlink" title="case1&#xFF1A;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E0D;&#x4E3A;null"></a>case1&#xFF1A;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E0D;&#x4E3A;null</h3><p>case1&#x5BF9;&#x5E94;&#x524D;&#x9762;&#x4F5C;&#x51FA;&#x7684;&#x8BF8;&#x591A;&#x5047;&#x8BBE;&#x3002;</p>
+<p>&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#x65F6;&#xFF0C;task==firstTask&#xFF0C;&#x4E0D;&#x4E3A;null&#xFF0C;&#x4F7F;10&#x884C;&#x5E03;&#x5C14;&#x77ED;&#x8DEF;&#x76F4;&#x63A5;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF1B;&#x4ECE;&#x800C;16&#x884C;&#x6267;&#x884C;&#x7684;&#x662F;firstTask&#x7684;run()&#x65B9;&#x6CD5;&#xFF1B;&#x5F02;&#x5E38;&#x5904;&#x7406;&#x4E0D;&#x8868;&#xFF1B;&#x6700;&#x540E;&#xFF0C;finally&#x4EE3;&#x7801;&#x5757;&#x4E2D;&#xFF0C;task&#x4F1A;&#x88AB;&#x7F6E;&#x4E3A;null&#xFF0C;&#x5BFC;&#x81F4;&#x4E0B;&#x4E00;&#x8F6E;&#x5FAA;&#x73AF;&#x4F1A;&#x8FDB;&#x5165;case2&#x3002;</p>
+<h3 id="case2&#xFF1A;&#x975E;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E3A;null"><a href="#case2&#xFF1A;&#x975E;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E3A;null" class="headerlink" title="case2&#xFF1A;&#x975E;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E3A;null"></a>case2&#xFF1A;&#x975E;&#x7B2C;&#x4E00;&#x6B21;&#x8FDB;&#x5165;&#x5FAA;&#x73AF;&#xFF0C;task&#x4E3A;null</h3><p>case2&#x662F;&#x66F4;&#x666E;&#x904D;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x6838;&#x5FC3;&#x3002;</p>
+<p>case1&#x4E2D;&#xFF0C;task&#x88AB;&#x7F6E;&#x4E3A;&#x4E86;null&#xFF0C;&#x4F7F;10&#x884C;&#x5E03;&#x5C14;&#x8868;&#x8FBE;&#x5F0F;&#x6267;&#x884C;&#x7B2C;&#x4E8C;&#x90E8;&#x5206;<code>(task = getTask()) != null</code>(getTask()&#x7A0D;&#x540E;&#x518D;&#x8BB2;&#xFF0C;&#x5B83;&#x8FD4;&#x56DE;&#x4E00;&#x4E2A;&#x7528;&#x6237;&#x5DF2;&#x63D0;&#x4EA4;&#x7684;&#x4EFB;&#x52A1;)&#x3002;&#x5047;&#x8BBE;task&#x5F97;&#x5230;&#x4E86;&#x4E00;&#x4E2A;&#x5DF2;&#x63D0;&#x4EA4;&#x7684;&#x4EFB;&#x52A1;&#xFF0C;&#x4ECE;&#x800C;16&#x884C;&#x6267;&#x884C;&#x7684;&#x662F;&#x65B0;&#x83B7;&#x5F97;&#x7684;&#x4EFB;&#x52A1;task&#x7684;run()&#x65B9;&#x6CD5;&#x3002;&#x540E;&#x540C;case1&#xFF0C;&#x6700;&#x540E;task&#x4ECD;&#x7136;&#x4F1A;&#x88AB;&#x7F6E;&#x4E3A;null&#xFF0C;&#x4EE5;&#x540E;&#x5FAA;&#x73AF;&#x90FD;&#x5C06;&#x8FDB;&#x5165;case2&#x3002;</p>
+<h4 id="getTask"><a href="#getTask" class="headerlink" title="getTask()"></a>getTask()</h4><p>&#x4EFB;&#x52A1;&#x4ECE;&#x54EA;&#x6765;&#x5462;&#xFF1F;&#x7B80;&#x5316;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class ThreadPoolExecutor extends AbstractExecutorService {</span><br><span class="line">...</span><br><span class="line">    private Runnable getTask() {</span><br><span class="line">        boolean timedOut = false;</span><br><span class="line"></span><br><span class="line">        for (;;) {</span><br><span class="line">            try {</span><br><span class="line">                Runnable r = timed ?</span><br><span class="line">                    workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :</span><br><span class="line">                    workQueue.take();</span><br><span class="line">                if (r != null)</span><br><span class="line">                    return r;</span><br><span class="line">                timedOut = true;</span><br><span class="line">            } catch (InterruptedException retry) {</span><br><span class="line">                timedOut = false;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x5148;&#x770B;&#x6700;&#x7B80;&#x5355;&#x7684;&#xFF0C;19-28&#x884C;&#x3002;</p>
+<p>&#x9996;&#x5148;&#xFF0C;workQueue&#x662F;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;BlockingQueue&#xFF0C;&#x5927;&#x90E8;&#x5206;&#x65F6;&#x5019;&#x4F7F;&#x7528;&#x7684;&#x5B9E;&#x73B0;&#x7C7B;&#x662F;LinkedBlockingQueue&#xFF0C;&#x89C1;<a href="/external_links/0f354d5435a8d87b6641a16afe348381.html" target="blank" rel="noopener">&#x6E90;&#x7801;|&#x5E76;&#x53D1;&#x4E00;&#x679D;&#x82B1;&#x4E4B;BlockingQueue</a>&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private final BlockingQueue&lt;Runnable&gt; workQueue;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5047;&#x8BBE;timed&#x4E3A;false&#xFF0C;&#x5219;&#x8C03;&#x7528;&#x963B;&#x585E;&#x7684;take()&#x65B9;&#x6CD5;&#xFF0C;&#x8FD4;&#x56DE;&#x7684;r&#x4E00;&#x5B9A;&#x4E0D;&#x662F;null&#xFF0C;&#x4ECE;&#x800C;12&#x884C;&#x9000;&#x51FA;&#xFF0C;&#x5C06;&#x4EFB;&#x52A1;&#x4EA4;&#x7ED9;&#x4E86;&#x67D0;&#x4E2A;worker&#x7EBF;&#x7A0B;&#x3002;</p>
+<blockquote>
+<p>&#x4E00;&#x4E2A;&#x5C0F;&#x7EC6;&#x8282;&#x6709;&#x70B9;&#x610F;&#x601D;&#xFF1A;&#x524D;&#x9762;&#x6BCF;&#x4E2A;worker&#x7EBF;&#x7A0B;runWorker()&#x65B9;&#x6CD5;&#x65F6;&#xFF0C;&#x5728;&#x5FAA;&#x73AF;&#x4E2D;&#x52A0;&#x9501;&#x7C92;&#x5EA6;&#x5728;worker&#x7EA7;&#x522B;&#xFF0C;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x7684;lock&#x540C;&#x6B65;&#xFF1B;&#x4F46;&#x56E0;&#x4E3A;&#x6BCF;&#x4E00;&#x4E2A;woker&#x90FD;&#x4F1A;&#x8C03;&#x7528;getTask()&#xFF0C;&#x8003;&#x8651;&#x5230;&#x6027;&#x80FD;&#x56E0;&#x7D20;&#xFF0C;&#x6E90;&#x7801;&#x4E2D;getTask()&#x4E2D;&#x4F7F;&#x7528;&#x4E50;&#x89C2;&#x7684;CAS+SPIN&#x5B9E;&#x73B0;&#x65E0;&#x9501;&#x540C;&#x6B65;&#x3002;&#x5173;&#x4E8E;&#x4E50;&#x89C2;&#x9501;&#x548C;CAS&#xFF0C;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x6211;&#x7684;&#x53E6;&#x4E00;&#x7BC7;&#x6587;&#x7AE0;<a href="/external_links/03eb359cc5c141123c4283a57f4df420.html" target="blank" rel="noopener">&#x6E90;&#x7801;|&#x5E76;&#x53D1;&#x4E00;&#x679D;&#x82B1;&#x4E4B;ConcurrentLinkedQueue&#x3010;&#x4F2A;&#x3011;</a>&#x3002;</p>
+</blockquote>
+<p>workQueue&#x4E2D;&#x7684;&#x5143;&#x7D20;&#x4ECE;&#x54EA;&#x6765;&#x5462;&#xFF1F;&#x8FD9;&#x5C31;&#x8981;&#x56DE;&#x987E;execute()&#x65B9;&#x6CD5;&#x4E86;&#x3002;</p>
+<h4 id="execute-1"><a href="#execute-1" class="headerlink" title="execute()"></a>execute()</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public class ThreadPoolExecutor extends AbstractExecutorService {</span><br><span class="line">...</span><br><span class="line">    public void execute(Runnable command) {</span><br><span class="line">        if (command == null)</span><br><span class="line">            throw new NullPointerException();</span><br><span class="line">        int c = ctl.get();</span><br><span class="line">        if (workerCountOf(c) &lt; corePoolSize) {</span><br><span class="line">            if (addWorker(command, true))</span><br><span class="line">                return;</span><br><span class="line">            c = ctl.get();</span><br><span class="line">        }</span><br><span class="line">        if (isRunning(c) &amp;&amp; workQueue.offer(command)) {</span><br><span class="line">            int recheck = ctl.get();</span><br><span class="line">            if (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">                reject(command);</span><br><span class="line">            else if (workerCountOf(recheck) == 0)</span><br><span class="line">                addWorker(null, false);</span><br><span class="line">        }</span><br><span class="line">        else if (!addWorker(command, false))</span><br><span class="line">            reject(command);</span><br><span class="line">    }</span><br><span class="line">...</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x524D;&#x9762;&#x4EE5;8&#x884C;&#x7684;&#x53C2;&#x6570;&#x4E3A;&#x4F8B;&#xFF0C;&#x6B64;&#x65F6;&#xFF0C;&#x7EBF;&#x7A0B;&#x6C60;&#x4E2D;&#x7684;&#x7EBF;&#x7A0B;&#x6570;&#x672A;&#x8FBE;&#x5230;&#x6700;&#x5C0F;&#x7EBF;&#x7A0B;&#x6C60;&#x5927;&#x5C0F;corePoolSize&#xFF0C;&#x901A;&#x5E38;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x5728;9&#x884C;&#x8FD4;&#x56DE;&#x3002;&#x8FDB;&#x5165;8&#x884C;&#x7684;&#x6761;&#x4EF6;&#x662F;<code>&#x201C;&#x5F53;&#x524D;worker&#x6570;&#x5C0F;&#x4E8E;&#x6700;&#x5C0F;&#x7EBF;&#x7A0B;&#x6C60;&#x5927;&#x5C0F;corePoolSize&#x201D;</code>&#x3002;</p>
+<p>&#x5982;&#x679C;&#x4E0D;&#x6EE1;&#x8DB3;&#xFF0C;&#x4F1A;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#x5230;12&#x884C;&#x3002;<code>isRunning(c)</code>&#x5224;&#x65AD;&#x7EBF;&#x7A0B;&#x6C60;&#x662F;&#x5426;&#x672A;&#x5173;&#x95ED;&#xFF0C;&#x6211;&#x4EEC;&#x5173;&#x6CE8;&#x672A;&#x5173;&#x95ED;&#x7684;&#x60C5;&#x51B5;&#xFF1B;&#x5219;&#x4F1A;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#x5E03;&#x5C14;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x7B2C;&#x4E8C;&#x90E8;&#x5206;<code>workQueue.offer(command)</code>&#xFF0C;&#x5C1D;&#x8BD5;&#x5C06;&#x4EFB;&#x52A1;command&#x653E;&#x5165;&#x961F;&#x5217;workQueue&#x3002;</p>
+<p>workQueue.offer()&#x7684;&#x884C;&#x4E3A;&#x53D6;&#x51B3;&#x4E8E;&#x7EBF;&#x7A0B;&#x6C60;&#x6301;&#x6709;&#x7684;BlockingQueue&#x5B9E;&#x4F8B;&#x3002;Executors.newFixedThreadPool()&#x3001;Executors.newSingleThreadExecutor()&#x521B;&#x5EFA;&#x7684;&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;LinkedBlockingQueue&#xFF0C;&#x800C;Executors.newCachedThreadPool()&#x521B;&#x5EFA;&#x7684;&#x7EBF;&#x7A0B;&#x6C60;&#x5219;&#x4F7F;&#x7528;SynchronousQueue&#x3002;&#x4EE5;LinkedBlockingQueue&#x4E3A;&#x4F8B;&#xFF0C;&#x521B;&#x5EFA;&#x65F6;&#x4E0D;&#x914D;&#x7F6E;&#x5BB9;&#x91CF;&#xFF0C;&#x5373;&#x521B;&#x5EFA;&#x4E3A;&#x65E0;&#x754C;&#x961F;&#x5217;&#xFF0C;&#x5219;LinkedBlockingQueue#offer()&#x6C38;&#x8FDC;&#x8FD4;&#x56DE;true&#xFF0C;&#x4ECE;&#x800C;&#x8FDB;&#x5165;12-18&#x884C;&#x3002;</p>
+<p>&#x66F4;&#x7EC6;&#x8282;&#x7684;&#x5185;&#x5BB9;&#x4E0D;&#x5FC5;&#x5173;&#x5FC3;&#x4E86;&#xFF0C;&#x5F53;workQueue.offer()&#x8FD4;&#x56DE;true&#x65F6;&#xFF0C;&#x5DF2;&#x7ECF;&#x5C06;&#x4EFB;&#x52A1;command&#x653E;&#x5165;&#x4E86;&#x961F;&#x5217;workQueue&#x3002;&#x5F53;&#x672A;&#x6765;&#x7684;&#x67D0;&#x4E2A;&#x65F6;&#x523B;&#xFF0C;<strong>&#x67D0;worker&#x6267;&#x884C;&#x5B8C;&#x67D0;&#x4E00;&#x4E2A;&#x4EFB;&#x52A1;&#x4E4B;&#x540E;&#xFF0C;&#x4F1A;&#x4ECE;workQueue&#x4E2D;&#x518D;&#x53D6;&#x51FA;&#x4E00;&#x4E2A;&#x4EFB;&#x52A1;&#x7EE7;&#x7EED;&#x6267;&#x884C;</strong>&#xFF0C;&#x76F4;&#x5230;&#x7EBF;&#x7A0B;&#x6C60;&#x5173;&#x95ED;&#xFF0C;&#x76F4;&#x5230;&#x6D77;&#x67AF;&#x77F3;&#x70C2;&#x3002;</p>
+<blockquote>
+<p>CachedThreadPool&#x662F;&#x4E00;&#x79CD;&#x65E0;&#x754C;&#x7EBF;&#x7A0B;&#x6C60;&#xFF0C;&#x4F7F;&#x7528;SynchronousQueue&#x80FD;&#x8FDB;&#x4E00;&#x6B65;&#x63D0;&#x5347;&#x6027;&#x80FD;&#xFF0C;&#x7B80;&#x5316;&#x4EE3;&#x7801;&#x7ED3;&#x6784;&#x3002;&#x7559;&#x7ED9;&#x8BFB;&#x8005;&#x5206;&#x6790;&#x3002;</p>
+</blockquote>
+<h4 id="case2&#x5C0F;&#x7ED3;"><a href="#case2&#x5C0F;&#x7ED3;" class="headerlink" title="case2&#x5C0F;&#x7ED3;"></a>case2&#x5C0F;&#x7ED3;</h4><p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5B9E;&#x9645;&#x4E0A;&#xFF0C;<strong>&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x6838;&#x5FC3;&#x539F;&#x7406;&#x4E0E;&#x5BF9;&#x8C61;&#x6C60;&#x6A21;&#x578B;&#x65E0;&#x5173;&#xFF0C;&#x800C;&#x662F;&#x751F;&#x4EA7;&#x8005;-&#x6D88;&#x8D39;&#x8005;&#x6A21;&#x578B;</strong>&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p4/raw/master/img/6302fab85c9712c65e12472580dbf651c956d09c5ab2b53beb89f4c4bfb17ca5" alt="image.png"></p>
+<ul>
+<li>&#x751F;&#x4EA7;&#x8005;&#xFF08;&#x8C03;&#x7528;submit()&#x6216;execute()&#x65B9;&#x6CD5;&#xFF09;&#x5C06;&#x4EFB;&#x52A1;task&#x653E;&#x5165;&#x961F;&#x5217;</li>
+<li>&#x6D88;&#x8D39;&#x8005;&#xFF08;worker&#x7EBF;&#x7A0B;&#xFF09;&#x5FAA;&#x73AF;&#x4ECE;&#x961F;&#x5217;&#x4E2D;&#x53D6;&#x51FA;&#x4EFB;&#x52A1;&#x5904;&#x7406;&#x4EFB;&#x52A1;&#xFF08;&#x6267;&#x884C;task.run()&#xFF09;&#x3002;</li>
+</ul>
+<h3 id="&#x94A9;&#x5B50;&#x65B9;&#x6CD5;"><a href="#&#x94A9;&#x5B50;&#x65B9;&#x6CD5;" class="headerlink" title="&#x94A9;&#x5B50;&#x65B9;&#x6CD5;"></a>&#x94A9;&#x5B50;&#x65B9;&#x6CD5;</h3><p>&#x56DE;&#x5230;runWorker()&#x65B9;&#x6CD5;&#xFF0C;&#x5728;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;&#x7EBF;&#x7A0B;&#x6C60;&#x4FDD;&#x7559;&#x4E86;&#x4E00;&#x4E9B;&#x94A9;&#x5B50;&#x65B9;&#x6CD5;&#xFF0C;&#x5982;beforeExecute()&#x3001;afterExecute()&#x3002;&#x7528;&#x6237;&#x53EF;&#x4EE5;&#x5728;&#x5B9E;&#x73B0;&#x81EA;&#x5DF1;&#x7684;&#x7EBF;&#x7A0B;&#x6C60;&#x65F6;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x8986;&#x5199;&#x94A9;&#x5B50;&#x65B9;&#x6CD5;&#x4E3A;&#x7EBF;&#x7A0B;&#x6C60;&#x6DFB;&#x52A0;&#x529F;&#x80FD;&#x3002;</p>
+<blockquote>
+<p>&#x4F46;<strong>&#x7334;&#x5B50;&#x4E0D;&#x8BA4;&#x4E3A;&#x94A9;&#x5B50;&#x65B9;&#x6CD5;&#x662F;&#x4E00;&#x79CD;&#x597D;&#x7684;&#x8BBE;&#x8BA1;</strong>&#x3002;&#x56E0;&#x4E3A;&#x94A9;&#x5B50;&#x65B9;&#x6CD5;&#x5927;&#x591A;&#x4F9D;&#x8D56;&#x4E8E;&#x6E90;&#x7801;&#x5B9E;&#x73B0;&#xFF0C;&#x90A3;&#x4E48;&#x9664;&#x975E;&#x4E86;&#x89E3;&#x6E90;&#x7801;&#x6216;API&#x58F0;&#x660E;&#x7EDD;&#x5BF9;&#x7684;&#x4E25;&#x8C28;&#x6B63;&#x786E;&#xFF0C;&#x5426;&#x5219;&#x5F88;&#x96BE;&#x6B63;&#x786E;&#x4F7F;&#x7528;&#x94A9;&#x5B50;&#x65B9;&#x6CD5;&#x3002;&#x7B49;&#x53D1;&#x751F;&#x9519;&#x8BEF;&#x65F6;&#x518D;&#x53BB;&#x4E86;&#x89E3;&#x5B9E;&#x73B0;&#xFF0C;&#x53EF;&#x80FD;&#x5C31;&#x592A;&#x665A;&#x4E86;&#x3002;&#x8BF4;&#x5230;&#x5E95;&#xFF0C;&#x8FD8;&#x662F;<strong>&#x4E0D;&#x8981;&#x4F7F;&#x7528;&#x7C7B;&#x4F3C;extends&#x8FD9;&#x79CD;&#x8868;&#x8FBE;&#x201C;&#x6269;&#x5C55;&#x201D;&#x8BED;&#x4E49;&#x7684;&#x8BED;&#x6CD5;&#x6765;&#x5B9E;&#x73B0;&#x7EE7;&#x627F;</strong>&#xFF0C;&#x8BE6;&#x89C1;<a href="/external_links/eb2538769aaac5b4d07f2c90ad1579ae.html" target="blank" rel="noopener">Java&#x4E2D;&#x5982;&#x4F55;&#x6070;&#x5F53;&#x7684;&#x8868;&#x8FBE;&#x201C;&#x7EE7;&#x627F;&#x201D;&#x4E0E;&#x201C;&#x6269;&#x5C55;&#x201D;&#x7684;&#x8BED;&#x4E49;&#xFF1F;</a>&#x3002;</p>
+<p>&#x5F53;&#x7136;&#xFF0C;&#x94A9;&#x5B50;&#x65B9;&#x6CD5;&#x4E5F;&#x662F;&#x6781;&#x5176;&#x65B9;&#x4FBF;&#x7684;&#x3002;&#x6743;&#x8861;&#x770B;&#x5F85;&#x3002;</p>
+</blockquote>
+<h1 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h1><p>&#x76F8;&#x5BF9;&#x4E8E;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#xFF0C;<strong>&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x79BB;&#x7528;&#x6237;&#x7684;&#x8DDD;&#x79BB;&#x66F4;&#x8FD1;&#x4E00;&#x4E9B;&#xFF0C;&#x7B80;&#x5355;&#x7075;&#x6D3B;&#xFF0C;&#x5B9E;&#x7528;&#x6027;&#x5F3A;&#xFF0C;&#x5F88;&#x5BB9;&#x6613;&#x638C;&#x63E1;</strong>&#x3002;&#x800C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x66F4;&#x591A;&#x6CA6;&#x4E3A;&#x5355;&#x7EAF;&#x7684;&#x8BBE;&#x8BA1;&#x7B56;&#x7565;&#xFF0C;&#x5355;&#x7EAF;&#x4F7F;&#x7528;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x7684;&#x573A;&#x666F;&#x4E0D;&#x591A;&#x3002;</p>
+<p>&#x7EBF;&#x7A0B;&#x6C60;&#x4E0E;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x3001;&#x5BF9;&#x8C61;&#x6C60;&#x7684;&#x5173;&#x7CFB;&#x4E0D;&#x5927;&#xFF0C;&#x4F46;&#x7ECF;&#x5E38;&#x88AB;&#x6DF7;&#x4E3A;&#x4E00;&#x8C08;&#xFF1B;&#x6CA1;&#x770B;&#x8FC7;&#x6E90;&#x7801;&#x7684;&#x5F88;&#x96BE;&#x60F3;&#x5230;&#x5176;&#x5B9E;&#x73B0;&#x65B9;&#x6848;&#xFF0C;&#x9762;&#x8BD5;&#x65F6;&#x4E5F;&#x80FD;&#x7ACB;&#x5206;&#x9AD8;&#x4E0B;&#x3002;</p>
+<blockquote>
+<p>&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x5B9E;&#x73B0;&#x5F88;&#x6709;&#x610F;&#x601D;&#x3002;&#x5728;&#x8FFD;&#x6E90;&#x7801;&#x4E4B;&#x524D;&#xFF0C;&#x7334;&#x5B50;&#x4E00;&#x76F4;&#x4EE5;&#x4E3A;&#x7EBF;&#x7A0B;&#x6C60;&#x5C31;&#x662F;&#x628A;&#x7EBF;&#x7A0B;&#x5B58;&#x8D77;&#x6765;&#xFF0C;&#x7528;&#x7684;&#x65F6;&#x5019;&#x53D6;&#x51FA;&#x6765;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#xFF1B;&#x770B;&#x4E86;&#x6E90;&#x7801;&#x624D;&#x77E5;&#x9053;&#x5B9E;&#x73B0;&#x5982;&#x6B64;&#x4E4B;&#x5999;&#xFF0C;&#x7B80;&#x6D01;&#x4F18;&#x96C5;&#x6548;&#x7387;&#x9AD8;&#x3002;&#x6E90;&#x7801;&#x624D;&#x662F;&#x6700;&#x597D;&#x7684;&#x8001;&#x5E08;&#x3002;</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>&#x672C;&#x6587;&#x94FE;&#x63A5;&#xFF1A;<a href="/external_links/2279509c4c6f2d2140c37a73928428de.html" target="blank" rel="noopener">&#x6E90;&#x7801;|&#x4ECE;&#x4E32;&#x884C;&#x7EBF;&#x7A0B;&#x5C01;&#x95ED;&#x5230;&#x5BF9;&#x8C61;&#x6C60;&#x3001;&#x7EBF;&#x7A0B;&#x6C60;</a>  </p>
+<p>&#x4F5C;&#x8005;&#xFF1A;<a href="mailto:monkeysayhi7@gmail.com" target="_blank" rel="noopener">&#x7334;&#x5B50;007</a>  </p>
+<p>&#x51FA;&#x5904;&#xFF1A;<a href="/external_links/8bfa8dc3a9648d74d2788759ace24805.html" target="blank" rel="noopener">monkeysayhi.github.io</a>  </p>
+<p>&#x672C;&#x6587;&#x57FA;&#x4E8E;<a href="/external_links/6f1da3ff281999354d4abd56d1551468.html" target="blank" rel="noopener">&#x77E5;&#x8BC6;&#x5171;&#x4EAB;&#x7F72;&#x540D;-&#x76F8;&#x540C;&#x65B9;&#x5F0F;&#x5171;&#x4EAB; 4.0</a>&#x56FD;&#x9645;&#x8BB8;&#x53EF;&#x534F;&#x8BAE;&#x53D1;&#x5E03;&#xFF0C;&#x6B22;&#x8FCE;&#x8F6C;&#x8F7D;&#xFF0C;&#x6F14;&#x7ECE;&#x6216;&#x7528;&#x4E8E;&#x5546;&#x4E1A;&#x76EE;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x5FC5;&#x987B;&#x4FDD;&#x7559;&#x672C;&#x6587;&#x7684;&#x7F72;&#x540D;&#x53CA;&#x94FE;&#x63A5;&#x3002;</p>
+</blockquote>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/49d5e46721c98fcb3f0def0a4f40be00.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/面试-Java/" rel="tag"># 面试,Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903519779028999.html" rel="next" title="Java Executor 框架最佳实践   开发者秘籍_开">
+                <i class="fa fa-chevron-left"></i> Java Executor 框架最佳实践   开发者秘籍_开
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903519862915079.html" rel="prev" title="go语言死循环分析">
+                go语言死循环分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#线程封闭与串行线程封闭"><span class="nav-number">1.</span> <span class="nav-text">线程封闭与串行线程封闭</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程封闭"><span class="nav-number">1.1.</span> <span class="nav-text">线程封闭</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#串行线程封闭"><span class="nav-number">1.2.</span> <span class="nav-text">串行线程封闭</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对象池"><span class="nav-number">2.</span> <span class="nav-text">对象池</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程池"><span class="nav-number">3.</span> <span class="nav-text">线程池</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#submit"><span class="nav-number">3.1.</span> <span class="nav-text">submit()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#execute"><span class="nav-number">3.2.</span> <span class="nav-text">execute()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#addWorker"><span class="nav-number">3.3.</span> <span class="nav-text">addWorker()</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#哪里是对象池？"><span class="nav-number">3.3.1.</span> <span class="nav-text">哪里是对象池？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哪里又不是？"><span class="nav-number">3.3.2.</span> <span class="nav-text">哪里又不是？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Worker"><span class="nav-number">3.4.</span> <span class="nav-text">Worker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#runWorker"><span class="nav-number">3.5.</span> <span class="nav-text">runWorker()</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#case1：第一次进入循环，task不为null"><span class="nav-number">3.5.1.</span> <span class="nav-text">case1：第一次进入循环，task不为null</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#case2：非第一次进入循环，task为null"><span class="nav-number">3.5.2.</span> <span class="nav-text">case2：非第一次进入循环，task为null</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#getTask"><span class="nav-number">3.5.2.1.</span> <span class="nav-text">getTask()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#execute-1"><span class="nav-number">3.5.2.2.</span> <span class="nav-text">execute()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#case2小结"><span class="nav-number">3.5.2.3.</span> <span class="nav-text">case2小结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#钩子方法"><span class="nav-number">3.5.3.</span> <span class="nav-text">钩子方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

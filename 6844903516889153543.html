@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,Node.js,Rust,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="TL:DR - Use Rust instead of C++ to write native Node.js modules!  RisingStack faced a shocking event last year: we reached the maximum speed that Node.js had to offer at the time, while our server co">
+<meta name="keywords" content="后端,Node.js,Rust">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【英】 使用 Rust 来写原生 Nodejs 模块">
+<meta property="og:url" content="https://dev.newban.cn/6844903516889153543.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="TL:DR - Use Rust instead of C++ to write native Node.js modules!  RisingStack faced a shocking event last year: we reached the maximum speed that Node.js had to offer at the time, while our server co">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/b58cf7ebfba209d7613a2cb14ca5794e66b721587ef3a720b29d77a66a852cd2">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/cebc89aa2dd1621c385ccc61ab2c89c323ec0ea141b4067f4f0fe1ac499db967">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/8338b73f80299e2d23f0aa2865087767f3d8f24b4ce370cd876d966d589c523c">
+<meta property="og:updated_time" content="2024-04-28T05:59:03.309Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【英】 使用 Rust 来写原生 Nodejs 模块">
+<meta name="twitter:description" content="TL:DR - Use Rust instead of C++ to write native Node.js modules!  RisingStack faced a shocking event last year: we reached the maximum speed that Node.js had to offer at the time, while our server co">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/b58cf7ebfba209d7613a2cb14ca5794e66b721587ef3a720b29d77a66a852cd2">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903516889153543.html">
+
+
+
+
+
+  <title>【英】 使用 Rust 来写原生 Nodejs 模块 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">【英】 使用 Rust 来写原生 Nodejs 模块</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-27T14:18:36+08:00">
+                2017-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>TL:DR - Use Rust instead of C++ to write native Node.js modules!</p>
+</blockquote>
+<p>RisingStack faced a shocking event last year: we reached the maximum speed that Node.js had to offer at the time, while our server costs went over the roof. To increase the performance of our application (and decrease our costs), we decided to<br> completely rewrite it, and migrate our system to a different infrastructure - which was a lot of work, needless to say.</p>
+<p>I figured out later that <strong>we could have just implemented a native module instead!</strong></p>
+<p>Back then, we weren&#x2019;t aware that there was a better method to solve our performance issue. Just a few weeks ago I found out that another option could have been available. <strong>That&#x2019;s when I picked up Rust instead of C++ to implement a native module.</strong> I figured out that it is a great choice thanks to the safety and ease of use it provides.</p>
+<blockquote>
+<p>In this Rust tutorial, I&#x2019;m going to walk you through the steps of writing a modern, fast and safe native module.</p>
+</blockquote>
+<h2 id="The-Problem-with-our-Node-js-Server-Speed"><a href="#The-Problem-with-our-Node-js-Server-Speed" class="headerlink" title="The Problem with our Node.js Server Speed"></a>The Problem with our Node.js Server Speed</h2><p>Our issue began in late 2016 when we&#x2019;ve been working on Trace, our Node.js monitoring product, which was recently merged with <a href="/external_links/2f665d1d3e75cc1b123978eadbcf2392.html" target="blank" rel="noopener">Keymetrics</a> in October 2017.</p>
+<p>Like every other tech startup at the time, we&#x2019;ve been running our services on Heroku to spare some expenses on infrastructure costs and maintenance. We&#x2019;ve been building a microservice architecture application, which meant that our services have<br> been communicating a lot over HTTP(S).</p>
+<p><strong>This is where the tricky part comes in:</strong> we wanted to communicate securely between the services, but Heroku did not offer private networking, so we had to implement our own solution. Therefore, we looked into a few solutions for<br> authentication, and the one we eventually settled with was http signatures.</p>
+<blockquote>
+<p>To explain it briefly; http signatures are based on public-key cryptography. To create an http signature, you take all parts of a request: the URL, the body and the headers and you sign them with your private key. Then, you can give your public<br> key to those who would receive your signed requests so they can validate them.</p>
+</blockquote>
+<p>Time passed by and we noticed that CPU utilization went over the roof in most of our http server processes. We suspected an obvious reason - if you&#x2019;re doing crypto, it&#x2019;s like that all the time.</p>
+<p>However, after doing some serious profiling with the <a href="/external_links/b213dc8a4be5fe97b513bf2ae8b1dc76.html" target="blank" rel="noopener">v8-profiler</a> we figured out that it actually wasn&#x2019;t the crypto! It was the <a href="/external_links/26c4859035d4a73990a3ce76cbdd0dcf.html" target="blank" rel="noopener">URL parsing</a> that took the most CPU time. Why? Because to do the authentication, we had to parse the URL to validate request signatures.</p>
+<p>To solve this issue, we decided to leave Heroku (what we wanted to do for other reasons too), and create a Google Cloud infrastructure with Kubernetes &amp; internal networking - instead of optimizing our URL parsing.</p>
+<p>The reason for writing this story/tutorial is that just a few weeks ago I realized that we could have optimized URL parsing in an other way - by writing a native library with Rust.</p>
+<h2 id="Naive-developer-going-native-the-need-for-a-Rust-module"><a href="#Naive-developer-going-native-the-need-for-a-Rust-module" class="headerlink" title="Naive developer going native - the need for a Rust module"></a>Naive developer going native - the need for a Rust module</h2><p><strong>It shouldn&#x2019;t be that hard to write native code, right?</strong></p>
+<p>Here at RisingStack, we&#x2019;ve always said that we want to use the right tool for the job. To do so, we&#x2019;re always doing research to create better software, including some on C++ native modules when necessary.</p>
+<blockquote>
+<p>Shameless plug: I&#x2019;ve written a blogpost about my learning <a href="/external_links/aef538e0bd9a11b85c9e696e62001523.html" target="blank" rel="noopener">journey on native Node.js modules</a> too. Take a look!</p>
+</blockquote>
+<p>Back then I thought that in most cases C++ is the right way to write fast and efficient software.. However, as now we have modern tooling at our disposal (in this example - Rust), we can use it to write more efficient, safe and fast code with<br> much less effort than it ever required.</p>
+<p>Let&#x2019;s get back to our initial problem: parsing an URL shouldn&#x2019;t be that hard right? It contains a protocol, host, query parameters&#x2026;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/b58cf7ebfba209d7613a2cb14ca5794e66b721587ef3a720b29d77a66a852cd2" alt="URL-parsing-protocol">)<br> (Source the <a href="/external_links/ef28912e9f7f98c4e0b99c3f5fb8ce31.html" target="blank" rel="noopener">Node.js documentation</a>)</p>
+<p>That looks pretty complex. After reading through <a href="/external_links/aab83c91b5866f6ed0e30644b207a5ee.html" target="blank" rel="noopener">the URL standard</a> I figured out that I don&#x2019;t want to implement it myself, so I started to look for alternatives.</p>
+<p>I thought that surely I&#x2019;m not the only person who wants to parse URLs. Browsers probably have already solved this issue, so I checked out chromium&#x2019;s solution: <a href="/external_links/8a97b990a45229638b90cb571411e73d.html" target="blank" rel="noopener">google-url</a>. While<br> that implementation can be easily called from Node.js using the N-API, I have a few reasons not to do so:</p>
+<ul>
+<li><strong>Updates:</strong> when I just copy-paste some code from the internet I immediately get the feeling of danger. People have been doing it for a long time, and there are so many reasons it didn&#x2019;t work out so well.. There is just no easy<br>way of updating a huge block of code that is sitting in my repository.</li>
+<li><strong>Safety:</strong> a person with not so much C++ experience cannot validate that the code is right, but we&#x2019;ll eventually have to run it on our servers. C++ has a steep learning curve, and it takes a long time to master it.</li>
+<li><strong>Security:</strong> we all heard about exploitable C++ code that is out there, which I&#x2019;d rather avoid because I have no way to audit it myself. Using well maintained open-source modules gives me enough confidence to not worry about<br>security.</li>
+</ul>
+<p><strong>So I&#x2019;d much prefer a more approachable language, with an easy to use update mechanism and modern tooling: Rust!</strong></p>
+<h2 id="A-few-words-about-Rust"><a href="#A-few-words-about-Rust" class="headerlink" title="A few words about Rust"></a>A few words about Rust</h2><p>Rust allows us to write fast and efficient code.</p>
+<p>All of the Rust projects are managed with <code>cargo</code> - think about it as <code>npm</code> for Rust. Project dependencies can be installed with <code>cargo</code>, and there is a registry full of packages waiting for you to use.</p>
+<p>I found a library which we can use in this example - <a href="/external_links/d521858702048b73a9df0a887adcdc8a.html" target="blank" rel="noopener">rust-url</a>, so shout out to the Servo team for their work.</p>
+<p>We&#x2019;re going to use Rust FFI too! We had already covered <a href="/external_links/c610e33986ef7c460f92119625d8da1a.html" target="blank" rel="noopener">using Rust FFI with Node.js</a> in a previous blogpost two years ago. Since then quite a lot has<br> changed in the Rust ecosystem.</p>
+<p>We have a supposedly working library (rust-url), so let&#x2019;s try to build it!</p>
+<h3 id="How-do-I-build-a-Rust-app"><a href="#How-do-I-build-a-Rust-app" class="headerlink" title="How do I build a Rust app?"></a>How do I build a Rust app?</h3><p>After following instructions on <a href="/external_links/bbb4a03070c2d27c521baa8cb3666f0c.html" target="blank" rel="noopener">rustup.rs</a>, we can have a working <code>rustc</code> compiler, but all we should care about now is <code>cargo</code>. I don&#x2019;t want to go into much detail about how it works,<br> so please check out our <a href="/external_links/c610e33986ef7c460f92119625d8da1a.html" target="blank" rel="noopener">previous Rust blogpost</a> if you&#x2019;re interested.</p>
+<h3 id="Creating-a-new-Rust-Project"><a href="#Creating-a-new-Rust-Project" class="headerlink" title="Creating a new Rust Project"></a>Creating a new Rust Project</h3><p>Creating a new Rust project is as simple as <code>cargo new --lib &lt;projectname&gt;</code>.</p>
+<blockquote>
+<p>You can check out all of the code in my example repository <a href="/external_links/31c86469d20452767e271b4aa628828e.html" target="blank" rel="noopener">github.com/peteyy/rust&#x2026;</a></p>
+</blockquote>
+<p>To use the Rust library that we have, we can just list it as a dependency in our <code>Cargo.toml</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">[package]</span><br><span class="line">name = &quot;ffi&quot;</span><br><span class="line">version = &quot;1.0.0&quot;</span><br><span class="line">authors = [&quot;Peter Czibik &lt;p.czibik@gmail.com&gt;&quot;]</span><br><span class="line"></span><br><span class="line">[dependencies]</span><br><span class="line">url = &quot;1.6&quot;</span><br></pre></td></tr></table></figure>
+
+<p>There is no short (built in) form for adding a dependency as you do with <code>npm install</code> - you have to manually add it yourself. However, there is a crate called <a href="/external_links/12352f8d9669365694f413e8c5c8becb.html" target="blank" rel="noopener"><code>cargo edit</code></a> that adds a similar functionality.</p>
+<h3 id="Rust-FFI"><a href="#Rust-FFI" class="headerlink" title="Rust FFI"></a>Rust FFI</h3><p>To be able to use Rust modules from Node.js, we can use the FFI provided by Rust. FFI is a short-term for Foreign Function Interface. Foreign function interface (FFI) is a mechanism by which a program written in one programming language can call<br> routines or make use of services written in another.</p>
+<p>To be able to link to our library we have to add two things to <code>Cargo.toml</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">[lib]</span><br><span class="line">crate-type = [&quot;dylib&quot;]</span><br><span class="line"></span><br><span class="line">[dependencies]</span><br><span class="line">libc = &quot;0.2&quot;</span><br><span class="line">url = &quot;1.6&quot;</span><br></pre></td></tr></table></figure>
+
+<p>We have to declare that our library is a dynamic library. A file ending with the extension <code>.dylib</code> is a dynamic library: it&#x2019;s a library that&#x2019;s loaded at runtime instead of at compile time.</p>
+<p>We will also have to link our program against <code>libc</code>. <code>libc</code> is the standard library for the C programming language, as specified in the ANSI C standard.</p>
+<p>The <code>libc</code> crate is a Rust library with native bindings to the types and functions commonly found on various systems, including libc. This allows us to use C types from our Rust code, which we will have to do if we&#x2019;d like to accept<br> or return anything from our Rust functions. :)</p>
+<p>Our code is fairly simple - I&#x2019;m using the <code>url</code> and <code>libc</code> crate with the <code>extern crate</code> keyword. To expose this to the outer world through FFI, it is important to mark our function as <code>pub extern</code>.<br> Our function takes a <code>c_char</code> pointer which represents the <code>String</code> types coming from Node.js.</p>
+<p>We need to mark our conversion as <code>unsafe</code>. A block of code that is prefixed with the unsafe keyword is used to permit calling unsafe functions or dereferencing raw pointers within a safe function.</p>
+<p>Rust uses the <code>Option&lt;T&gt;</code> type to represent a value that can be empty. Think of it as a value that can be <code>null</code> or <code>undefined</code> in your JavaScript. You can (and should) explicitly check every time you try<br> to access a value that can be null. There are a few ways to address this in Rust, but this time I&#x2019;m going with the simplest method: <a href="/external_links/86589928b758927575ab97dc0cc5819e.html" target="blank" rel="noopener"><code>unwrap</code></a> which<br> will simply throw an error (panic in Rust terms) if the value is not present.</p>
+<p>When the URL parsing is done, we have to convert it to a <code>CString</code>, that can be passed back to JavaScript.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">extern crate libc;</span><br><span class="line">extern crate url;</span><br><span class="line"></span><br><span class="line">use std::ffi::{CStr,CString};</span><br><span class="line">use url::{Url};</span><br><span class="line"></span><br><span class="line">#[no_mangle]</span><br><span class="line">pub extern &quot;C&quot; fn get_query (arg1: *const libc::c_char) -&gt; *const libc::c_char {</span><br><span class="line"></span><br><span class="line">    let s1 = unsafe { CStr::from_ptr(arg1) };</span><br><span class="line"></span><br><span class="line">    let str1 = s1.to_str().unwrap();</span><br><span class="line"></span><br><span class="line">    let parsed_url = Url::parse(</span><br><span class="line">        str1</span><br><span class="line">    ).unwrap();</span><br><span class="line"></span><br><span class="line">    CString::new(parsed_url.query().unwrap().as_bytes()).unwrap().into_raw()</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>To build this Rust code, you can use <code>cargo build --release</code> command. Before compilation, make sure you add the <code>url</code> library to your list of dependencies in <code>Cargo.toml</code> for this project too!</p>
+<p>We can use the <code>ffi</code> Node.js package to create a module that exposes the Rust code.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">const path = require(&apos;path&apos;);</span><br><span class="line">const ffi = require(&apos;ffi&apos;);</span><br><span class="line"></span><br><span class="line">const library_name = path.resolve(__dirname, &apos;./target/release/libffi&apos;);</span><br><span class="line">const api = ffi.Library(library_name, {</span><br><span class="line">  get_query: [&apos;string&apos;, [&apos;string&apos;]]</span><br><span class="line">});</span><br><span class="line"></span><br><span class="line">module.exports = {</span><br><span class="line">  getQuery: api.get_query</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p>The naming convention is <code>lib*</code>, where <code>*</code> is the name of your library, for the <code>.dylib</code> file that <code>cargo build --release</code> builds.</p>
+<p>This is great; we have a working Rust code that we called from Node.js! It works, but you can already see that we had to do a bunch of conversion between the types, which can add a bit of an overhead to our function calls. There should be a much<br> better way to integrate our code with JavaScript.</p>
+<h2 id="Meet-Neon"><a href="#Meet-Neon" class="headerlink" title="Meet Neon"></a>Meet Neon</h2><blockquote>
+<p>Rust bindings for writing safe and fast native Node.js modules.</p>
+</blockquote>
+<p>Neon allows us to use JavaScript types in our Rust code. To create a new Neon project, we can use their own cli. Use <code>npm install neon-cli --global</code> to install it.</p>
+<p><code>neon new &lt;projectname&gt;</code> will create a new neon project with zero configuration.</p>
+<p>With our neon project done, we can rewrite the code from above as the following:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">#[macro_use]</span><br><span class="line">extern crate neon;</span><br><span class="line"></span><br><span class="line">extern crate url;</span><br><span class="line"></span><br><span class="line">use url::{Url};</span><br><span class="line">use neon::vm::{Call, JsResult};</span><br><span class="line">use neon::js::{JsString, JsObject};</span><br><span class="line"></span><br><span class="line">fn get_query(call: Call) -&gt; JsResult&lt;JsString&gt; {</span><br><span class="line">    let scope = call.scope;</span><br><span class="line">    let url = call.arguments.require(scope, 0)?.check::&lt;JsString&gt;()?.value();</span><br><span class="line"></span><br><span class="line">    let parsed_url = Url::parse(</span><br><span class="line">        &amp;url</span><br><span class="line">    ).unwrap();</span><br><span class="line"></span><br><span class="line">    Ok(JsString::new(scope, parsed_url.query().unwrap()).unwrap())</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">register_module!(m, {</span><br><span class="line">    m.export(&quot;getQuery&quot;, get_query)</span><br><span class="line">});</span><br></pre></td></tr></table></figure>
+
+<p>Those new types that we&#x2019;re using on the top <code>JsString</code>, <code>Call</code> and <code>JsResult</code> are wrappers for JavaScript types that allows us to hook into the JavaScript VM and execute code on top of it. The <code>Scope</code> allows us to bind our new variables to existing JavaScript scopes, so our variables can be garbage collected.</p>
+<p>This is much like <a href="/external_links/aef538e0bd9a11b85c9e696e62001523.html" target="blank" rel="noopener">writing native Node.js modules in C++</a> which I&#x2019;ve explained in a previous blogpost.</p>
+<p>Notice the <code>#[macro_use]</code> attribute that allows us to use the <code>register_module!</code> macro, which allows us to create modules just like in Node.js <code>module.exports</code>.</p>
+<p>The only tricky part here is accessing arguments:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;let url = call.arguments.require(scope, 0)?.check::&lt;JsString&gt;()?.value();</span><br></pre></td></tr></table></figure>
+
+<p>We have to accept all kinds of arguments (as any other JavaScript function does) so we cannot be sure if the function was called with single or multiple arguments. That is why we have to check for the first element&#x2019;s existence.</p>
+<p>Other than that change, we can get rid of most of the serialization and just use <code>Js</code> types directly.</p>
+<p><strong>Now let&#x2019;s try to run them!</strong></p>
+<p>If you downloaded my example first, you have to go into the ffi folder and do a <code>cargo build --release</code> and then into the neon folder and (with previously globally installed neon-cli) run <code>neon build</code>.</p>
+<p>If you&#x2019;re ready, you can use Node.js to generate a new list of urls with the <a href="/external_links/36c46f650378c8f33bd3e584d8641fd2.html" target="blank" rel="noopener">faker library</a>.</p>
+<p>Run the <code>node generateUrls.js</code> command which will place a <code>urls.json</code> file in your folder, what our tests will read and try to parse. When that is ready, you can run the &#x201C;benchmarks&#x201D; with <code>node urlParser.js</code>. If<br> everything was successful, you should see something like this:</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/cebc89aa2dd1621c385ccc61ab2c89c323ec0ea141b4067f4f0fe1ac499db967" alt="Rust-Node-js-success-screen"></p>
+<p>This test was done with 100 URLs (randomly generated) and our app parsed them only once to give a result. If you&#x2019;d like to benchmark parsing, increase the number (<code>tryCount</code> in urlParser.js) of URLs or the number of times (<code>urlLength</code> in urlGenerator.js).</p>
+<p>You can see the winner in my benchmark is the Rust neon version, but as the length of the array increases, there will be more optimization V8 can do, and they will get closer. Eventually, it will surpass the Rust neon implementation.</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/8338b73f80299e2d23f0aa2865087767f3d8f24b4ce370cd876d966d589c523c" alt="Rust-node-js-benchmark"></p>
+<p>This was just a simple example, so of course, there is much to learn for us in this field,</p>
+<p>We can further optimize this calculation in the future, potentially utilizing concurrency libraries provided by some crates like <a href="/external_links/75835a7c91499b8f306ed80d10d79b88.html" target="blank" rel="noopener"><code>rayon</code></a>.</p>
+<h2 id="Implementing-Rust-modules-in-Node-js"><a href="#Implementing-Rust-modules-in-Node-js" class="headerlink" title="Implementing Rust modules in Node.js"></a>Implementing Rust modules in Node.js</h2><p>Hopefully, you&#x2019;ve also learned something today about implementing Rust modules in Node.js along with me, and you can benefit from a new tool in your toolchain from now on. I wanted to demonstrate that while this is possible (and fun), it is not<br> a silver bullet that will solve all of the performance problems.</p>
+<p><strong>Just keep in mind that knowing Rust may come handy in certain situations.</strong></p>
+<p><em>If you have any questions or comments, let me know in the section below - I&#x2019;ll be here to answer them!</em></p>
+<p><a href="/external_links/572b169d2fd3807ed2756ad24bef5e35.html" target="blank" rel="noopener">Follow @RisingStack</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/d6411c7ab40f6d40dea2607875ea5554.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-Node-js-Rust/" rel="tag"># 后端,Node.js,Rust</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903516868198407.html" rel="next" title="曲线点抽稀算法- Python 实现 何为抽稀 道格拉斯-普">
+                <i class="fa fa-chevron-left"></i> 曲线点抽稀算法- Python 实现 何为抽稀 道格拉斯-普
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903516889333774.html" rel="prev" title="PHP 的 错误/异常 处理总结">
+                PHP 的 错误/异常 处理总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Problem-with-our-Node-js-Server-Speed"><span class="nav-number">1.</span> <span class="nav-text">The Problem with our Node.js Server Speed</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Naive-developer-going-native-the-need-for-a-Rust-module"><span class="nav-number">2.</span> <span class="nav-text">Naive developer going native - the need for a Rust module</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-few-words-about-Rust"><span class="nav-number">3.</span> <span class="nav-text">A few words about Rust</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#How-do-I-build-a-Rust-app"><span class="nav-number">3.1.</span> <span class="nav-text">How do I build a Rust app?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Creating-a-new-Rust-Project"><span class="nav-number">3.2.</span> <span class="nav-text">Creating a new Rust Project</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rust-FFI"><span class="nav-number">3.3.</span> <span class="nav-text">Rust FFI</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Meet-Neon"><span class="nav-number">4.</span> <span class="nav-text">Meet Neon</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implementing-Rust-modules-in-Node-js"><span class="nav-number">5.</span> <span class="nav-text">Implementing Rust modules in Node.js</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

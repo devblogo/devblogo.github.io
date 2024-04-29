@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,Docker,后端,Node.js,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="namespace&amp;#x53C2;&amp;#x8003;   coolshell.cn/articles/17&amp;#x2026; coolshell.cn/articles/17&amp;#x2026; www.infoq.com/cn/articles&amp;#x2026; www.ibm.com/developerwo&amp;#x2026; yeasy.gitbooks.io/docker_prac&amp;#x2026; co">
+<meta name="keywords" content="Linux,Docker,后端,Node.js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux namespace and cgroup nam">
+<meta property="og:url" content="https://dev.newban.cn/6844903512325750797.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="namespace&amp;#x53C2;&amp;#x8003;   coolshell.cn/articles/17&amp;#x2026; coolshell.cn/articles/17&amp;#x2026; www.infoq.com/cn/articles&amp;#x2026; www.ibm.com/developerwo&amp;#x2026; yeasy.gitbooks.io/docker_prac&amp;#x2026; co">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/fe581ad351c2a796148ed49b5d19f7f995b911733db2d26ca1e54aece5681100">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/e194f606c4632d62b20cc244f33994c4e8b89289b812b766259dfacc058d725a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/7cec89dfc91eb3df234c07d5772f6ae6f0b047007d4a8d4531a26e51be653f90">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/1deb6215b34d7b38a4a9966b876fb8d0c8b8b7a1b4bec16a659971bf169c4355">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/b2ecb4620cea557a645d7a6fa5776be50dbc7bf6e3a215560673ef3f552fad30">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/229cec92b4fa1401e3e4e8b2607e9135a9f11cf24c452d2b44ec07fa41f46935">
+<meta property="og:updated_time" content="2024-04-28T05:35:19.842Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux namespace and cgroup nam">
+<meta name="twitter:description" content="namespace&amp;#x53C2;&amp;#x8003;   coolshell.cn/articles/17&amp;#x2026; coolshell.cn/articles/17&amp;#x2026; www.infoq.com/cn/articles&amp;#x2026; www.ibm.com/developerwo&amp;#x2026; yeasy.gitbooks.io/docker_prac&amp;#x2026; co">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/fe581ad351c2a796148ed49b5d19f7f995b911733db2d26ca1e54aece5681100">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903512325750797.html">
+
+
+
+
+
+  <title>linux namespace and cgroup nam | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">linux namespace and cgroup nam</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-20T12:09:21+08:00">
+                2017-11-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="namespace"><a href="#namespace" class="headerlink" title="namespace"></a>namespace</h1><p>&#x53C2;&#x8003; </p>
+<ul>
+<li><a href="/external_links/52cfb7f4b076cadb79c6b0c73dfd7519.html" target="blank" rel="noopener">coolshell.cn/articles/17&#x2026;</a></li>
+<li><a href="/external_links/6f7e00949d277ca2e4748094bdfcb062.html" target="blank" rel="noopener">coolshell.cn/articles/17&#x2026;</a></li>
+<li><a href="/external_links/32ade2c59223296ac862c5167e83c4f5.html" target="blank" rel="noopener">www.infoq.com/cn/articles&#x2026;</a></li>
+<li><a href="/external_links/894161647814104476c6321ec005161e.html" target="blank" rel="noopener">www.ibm.com/developerwo&#x2026;</a></li>
+<li><a href="/external_links/41dd984862d502e81fc8027cdbd3806f.html" target="blank" rel="noopener">yeasy.gitbooks.io/docker_prac&#x2026;</a></li>
+<li><a href="/external_links/33f559671e764e7c4d29cdce16522ad3.html" target="blank" rel="noopener">coolshell.cn/articles/17&#x2026;</a></li>
+<li><a href="/external_links/85079190a8d7a7b4b6d522ae2444930f.html" target="blank" rel="noopener">www.infoq.com/cn/articles&#x2026;</a></li>
+<li><a href="/external_links/9c36c04d97a63b859404cf31e4705700.html" target="blank" rel="noopener">www.infoq.com/cn/articles&#x2026;</a></li>
+<li><a href="/external_links/bc9e927e63fdf6df2d1aecd320ebcea1.html" target="blank" rel="noopener">www.infoq.com/cn/articles&#x2026;</a></li>
+<li><a href="/external_links/3f070f51eba2513ac3faa36fd621a86c.html" target="blank" rel="noopener">lecury.cn/linux_names&#x2026;</a></li>
+<li><a href="/external_links/ae1da467693264c8d5887473e3751da4.html" target="blank" rel="noopener">lwn.net/Articles/53&#x2026;</a></li>
+<li><a href="/external_links/33f559671e764e7c4d29cdce16522ad3.html" target="blank" rel="noopener">coolshell.cn/articles/17&#x2026;</a></li>
+<li><a href="/external_links/208774bdb769bbd4aa0df7ff5de66e47.html" target="blank" rel="noopener">www.cnblogs.com/caoxiaojian&#x2026;</a></li>
+<li><a href="/external_links/9a5d1897eb6ddef90281a5d0877d5610.html" target="blank" rel="noopener">blog.csdn.net/zhangyifei2&#x2026;</a></li>
+</ul>
+<h2 id="&#x7B80;&#x4ECB;"><a href="#&#x7B80;&#x4ECB;" class="headerlink" title="&#x7B80;&#x4ECB;"></a>&#x7B80;&#x4ECB;</h2><p>Linux Namespace&#x662F;Linux&#x63D0;&#x4F9B;&#x7684;&#x4E00;&#x79CD;&#x5185;&#x6838;&#x7EA7;&#x522B;&#x73AF;&#x5883;&#x9694;&#x79BB;&#x7684;&#x65B9;&#x6CD5;&#x3002;<br>&#x63D0;&#x4F9B;&#x4E86;&#x5BF9;UTS&#x3001;IPC&#x3001;mount&#x3001;PID&#x3001;network&#x3001;User&#x7B49;&#x7684;&#x9694;&#x79BB;&#x673A;&#x5236;&#x3002;</p>
+<h3 id="&#x5206;&#x7C7B;"><a href="#&#x5206;&#x7C7B;" class="headerlink" title="&#x5206;&#x7C7B;"></a>&#x5206;&#x7C7B;</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>&#x5206;&#x7C7B;</th>
+<th>&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x53C2;&#x6570;</th>
+<th>&#x76F8;&#x5173;&#x5185;&#x6838;&#x7248;&#x672C;</th>
+<th>&#x9694;&#x79BB;&#x5185;&#x5BB9;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td>Mount namespaces</td>
+<td>CLONE_NEWNS</td>
+<td>Linux 2.4.19</td>
+<td>&#x6302;&#x8F7D;&#x70B9;&#xFF08;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF09;</td>
+</tr>
+<tr>
+<td></td>
+<td>UTS namespaces</td>
+<td>CLONE_NEWUTS</td>
+<td>Linux 2.6.19</td>
+<td>&#x4E3B;&#x673A;&#x540D;&#x4E0E;&#x57DF;&#x540D;,&#x5F71;&#x54CD;uname(hostname, domainname)</td>
+</tr>
+<tr>
+<td></td>
+<td>IPC namespaces</td>
+<td>CLONE_NEWIPC</td>
+<td>Linux 2.6.19</td>
+<td>&#x4FE1;&#x53F7;&#x91CF;&#x3001;&#x6D88;&#x606F;&#x961F;&#x5217;&#x548C;&#x5171;&#x4EAB;&#x5185;&#x5B58;, inter-process communication&#xFF0C;&#x6709;&#x5168;&#x5C40;id</td>
+</tr>
+<tr>
+<td></td>
+<td>PID namespaces</td>
+<td>CLONE_NEWPID</td>
+<td>Linux 2.6.24</td>
+<td>&#x8FDB;&#x7A0B;&#x7F16;&#x53F7;</td>
+</tr>
+<tr>
+<td></td>
+<td>Network namespaces</td>
+<td>CLONE_NEWNET</td>
+<td>&#x59CB;&#x4E8E;Linux 2.6.24 &#x5B8C;&#x6210;&#x4E8E; Linux 2.6.29</td>
+<td>&#x7F51;&#x7EDC;&#x8BBE;&#x5907;&#x3001;&#x7F51;&#x7EDC;&#x6808;&#x3001;&#x7AEF;&#x53E3;&#x7B49;&#x7B49;</td>
+</tr>
+<tr>
+<td></td>
+<td>User namespaces</td>
+<td>CLONE_NEWUSER</td>
+<td>&#x59CB;&#x4E8E; Linux 2.6.23 &#x5B8C;&#x6210;&#x4E8E; Linux 3.8)</td>
+<td>&#x7528;&#x6237;&#x548C;&#x7528;&#x6237;&#x7EC4;</td>
+</tr>
+</tbody></table>
+<h3 id="&#x4E09;&#x4E2A;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;"><a href="#&#x4E09;&#x4E2A;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;" class="headerlink" title="&#x4E09;&#x4E2A;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;"></a>&#x4E09;&#x4E2A;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;</h3><table>
+<thead>
+<tr>
+<th>&#x8C03;&#x7528;</th>
+<th>&#x4F5C;&#x7528;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>clone()</td>
+<td>&#x5B9E;&#x73B0;&#x7EBF;&#x7A0B;&#x7684;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#xFF0C;&#x7528;&#x6765;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x8FDB;&#x7A0B;&#xFF0C;&#x5E76;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x8BBE;&#x8BA1;&#x4E0A;&#x8FF0;&#x53C2;&#x6570;&#x8FBE;&#x5230;&#x9694;&#x79BB;&#x3002;</td>
+</tr>
+<tr>
+<td>unshare()</td>
+<td>&#x4F7F;&#x67D0;&#x8FDB;&#x7A0B;&#x8131;&#x79BB;&#x67D0;&#x4E2A;namespace</td>
+</tr>
+<tr>
+<td>setns()</td>
+<td>&#x628A;&#x67D0;&#x8FDB;&#x7A0B;&#x52A0;&#x5165;&#x5230;&#x67D0;&#x4E2A;namespace</td>
+</tr>
+</tbody></table>
+<h2 id="&#x8BE6;&#x89E3;"><a href="#&#x8BE6;&#x89E3;" class="headerlink" title="&#x8BE6;&#x89E3;"></a>&#x8BE6;&#x89E3;</h2><p>&#x6D4B;&#x8BD5;&#x4EE3;&#x7801;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;#define _GNU_SOURCE</span><br><span class="line">#include &lt;sys/types.h&gt;</span><br><span class="line">#include &lt;sys/wait.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;sched.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line"></span><br><span class="line">/* &#x5B9A;&#x4E49;&#x4E00;&#x4E2A;&#x7ED9; clone &#x7528;&#x7684;&#x6808;&#xFF0C;&#x6808;&#x5927;&#x5C0F;1M */</span><br><span class="line">#define STACK_SIZE (1024 * 1024)</span><br><span class="line">static char container_stack[STACK_SIZE];</span><br><span class="line"></span><br><span class="line">char* const container_args[] = {</span><br><span class="line">    &quot;/bin/bash&quot;,</span><br><span class="line">    NULL</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">int container_main(void* arg)</span><br><span class="line">{</span><br><span class="line">    printf(&quot;Container - inside the container!\n&quot;);</span><br><span class="line">    /* &#x76F4;&#x63A5;&#x6267;&#x884C;&#x4E00;&#x4E2A;shell&#xFF0C;&#x4EE5;&#x4FBF;&#x6211;&#x4EEC;&#x89C2;&#x5BDF;&#x8FD9;&#x4E2A;&#x8FDB;&#x7A0B;&#x7A7A;&#x95F4;&#x91CC;&#x7684;&#x8D44;&#x6E90;&#x662F;&#x5426;&#x88AB;&#x9694;&#x79BB;&#x4E86; */</span><br><span class="line">    sethostname(&quot;container&quot;,10); /* &#x8BBE;&#x7F6E;hostname */</span><br><span class="line"></span><br><span class="line">    execv(container_args[0], container_args); </span><br><span class="line">    printf(&quot;Something&apos;s wrong!\n&quot;);</span><br><span class="line">    return 1;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">{</span><br><span class="line">    printf(&quot;Parent - start a container!\n&quot;);</span><br><span class="line">    /* &#x8C03;&#x7528;clone&#x51FD;&#x6570;&#xFF0C;&#x5176;&#x4E2D;&#x4F20;&#x51FA;&#x4E00;&#x4E2A;&#x51FD;&#x6570;&#xFF0C;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x6808;&#x7A7A;&#x95F4;&#x7684;&#xFF08;&#x4E3A;&#x4EC0;&#x4E48;&#x4F20;&#x5C3E;&#x6307;&#x9488;&#xFF0C;&#x56E0;&#x4E3A;&#x6808;&#x662F;&#x53CD;&#x7740;&#x7684;&#xFF09; */</span><br><span class="line">    // int container_pid = clone(container_main, container_stack+STACK_SIZE, SIGCHLD, NULL);</span><br><span class="line">    // int container_pid = clone(container_main, container_stack+STACK_SIZE, </span><br><span class="line">            CLONE_NEWUTS | SIGCHLD, NULL); /*&#x542F;&#x7528;CLONE_NEWUTS Namespace&#x9694;&#x79BB; */</span><br><span class="line">    int container_pid = clone(container_main, container_stack+STACK_SIZE, </span><br><span class="line">            CLONE_NEWUTS | CLONE_NEWIPC | SIGCHLD, NULL);</span><br><span class="line"></span><br><span class="line">    /* &#x7B49;&#x5F85;&#x5B50;&#x8FDB;&#x7A0B;&#x7ED3;&#x675F; */</span><br><span class="line">    waitpid(container_pid, NULL, 0);</span><br><span class="line">    printf(&quot;Parent - container stopped!\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="UTS-Namespace"><a href="#UTS-Namespace" class="headerlink" title="UTS Namespace"></a>UTS Namespace</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x52A0;&#x5165; </span><br><span class="line">sethostname(&quot;container&quot;,10); /* &#x8BBE;&#x7F6E;hostname */</span><br><span class="line"></span><br><span class="line">int container_pid = clone(container_main, container_stack+STACK_SIZE, </span><br><span class="line">            CLONE_NEWUTS | SIGCHLD, NULL); /*&#x542F;&#x7528;CLONE_NEWUTS Namespace&#x9694;&#x79BB; */</span><br><span class="line"></span><br><span class="line">root@container:~/testnamespace# uname -a</span><br><span class="line">Linux container 4.4.0-96-generic #119-Ubuntu SMP Tue Sep 12 14:59:54 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux</span><br><span class="line">root@container:~/testnamespace# hostname</span><br><span class="line">container</span><br></pre></td></tr></table></figure>
+
+<h3 id="IPC-Namespace"><a href="#IPC-Namespace" class="headerlink" title="IPC Namespace"></a>IPC Namespace</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">// &#x5982;&#x679C;&#x9694;&#x79BB;&#x4E86; ipcs -q &#x770B;&#x4E0D;&#x5230;&#x5916;&#x9762;&#x7684;&#xFF0C;&#x5426;&#x5219;&#x80FD;&#x770B;&#x5230;</span><br><span class="line"></span><br><span class="line">root@kube-master:~/testnamespace# ipcs -a</span><br><span class="line"></span><br><span class="line">------ Message Queues --------</span><br><span class="line">key        msqid      owner      perms      used-bytes   messages</span><br><span class="line">0x10d91bac 0          root       644        0            0</span><br><span class="line">0xb92f99fd 32769      root       644        0            0</span><br><span class="line">0xfcebd528 65538      root       644        0            0</span><br><span class="line"></span><br><span class="line">------ Shared Memory Segments --------</span><br><span class="line">key        shmid      owner      perms      bytes      nattch     status</span><br><span class="line">0x00000000 0          root       644        80         2</span><br><span class="line">0x00000000 32769      root       644        16384      2</span><br><span class="line">0x00000000 65538      root       644        280        2</span><br><span class="line"></span><br><span class="line">------ Semaphore Arrays --------</span><br><span class="line">key        semid      owner      perms      nsems</span><br><span class="line">0x000000a7 0          root       600        1</span><br></pre></td></tr></table></figure>
+
+<h3 id="PID-Namespace"><a href="#PID-Namespace" class="headerlink" title="PID Namespace"></a>PID Namespace</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801; int container_pid = clone(container_main, container_stack+STACK_SIZE, </span><br><span class="line">            CLONE_NEWUTS | CLONE_NEWPID | SIGCHLD, NULL); </span><br><span class="line"></span><br><span class="line">&#x6CA1;&#x6709;&#x9694;&#x79BB;</span><br><span class="line">root@container:~/testnamespace# ps -a</span><br><span class="line">  PID TTY          TIME CMD</span><br><span class="line">10079 pts/0    00:00:00 a.out</span><br><span class="line"></span><br><span class="line">&#x9694;&#x79BB;&#x4E4B;&#x540E;</span><br><span class="line">root@container:~# echo ?</span><br><span class="line">1</span><br><span class="line"></span><br><span class="line">&#x4F46;&#x662F; ps -a&#x6CA1;&#x6709;&#x53D8;&#x5316;&#xFF0C;&#x8FD9;&#x662F;&#x56E0;&#x4E3A;ps, top&#x8FD9;&#x4E9B;&#x547D;&#x4EE4;&#x4F1A;&#x53BB;&#x8BFB;/proc&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x6240;&#x4EE5;&#xFF0C;&#x56E0;&#x4E3A;/proc&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5728;&#x7236;&#x8FDB;&#x7A0B;&#x548C;&#x5B50;&#x8FDB;&#x7A0B;&#x90FD;&#x662F;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x4E9B;&#x547D;&#x4EE4;&#x663E;&#x793A;&#x7684;&#x4E1C;&#x897F;&#x90FD;&#x662F;&#x4E00;&#x6837;&#x7684;</span><br></pre></td></tr></table></figure>
+
+<p>pid 1 &#x662F;&#x4E00;&#x4E2A;&#x7279;&#x6B8A;&#x7684;pid&#x9700;&#x8981;&#x6709;&#x8FDB;&#x7A0B;&#x76D1;&#x63A7;&#x548C;&#x8D44;&#x6E90;&#x56DE;&#x6536;&#x7684;&#x80FD;&#x529B;&#xFF0C; docker 1.13 &#x5F15;&#x5165;&#x4E86;&#x4E00;&#x4E2A; &#x2013;init &#x53C2;&#x6570;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;<br>&#x2013;init false Run an init inside the container that forwards signals and reaps processes<br>&#x53C2;&#x8003; <a href="/external_links/e22a95dc9130565e89e7f39c7cb795f0.html" target="blank" rel="noopener">blog.phusion.nl/2015/01/20/&#x2026;</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x279C;  ke git:(alb) &#x2717; docker run  alpine  ps</span><br><span class="line">PID   USER     TIME   COMMAND</span><br><span class="line">    1 root       0:00 ps</span><br><span class="line">&#x279C;  ke git:(alb) &#x2717; docker run --init  alpine  ps</span><br><span class="line">PID   USER     TIME   COMMAND</span><br><span class="line">    1 root       0:00 /dev/init -- ps</span><br><span class="line">    5 root       0:00 ps</span><br></pre></td></tr></table></figure>
+
+<p>unshare()&#x548C;setns()&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x5BF9;PID Namespace&#x7684;&#x5904;&#x7406;&#x4E0D;&#x592A;&#x76F8;&#x540C;&#xFF0C;&#x5F53;unshare PID namespace&#x65F6;&#xFF0C;&#x8C03;&#x7528;&#x8FDB;&#x7A0B;&#x4F1A;&#x4E3A;&#x5B83;&#x7684;&#x5B50;&#x8FDB;&#x7A0B;&#x5206;&#x914D;&#x4E00;&#x4E2A;&#x65B0;&#x7684;PID Namespace&#xFF0C;&#x4F46;&#x662F;&#x8C03;&#x7528;&#x8FDB;&#x7A0B;&#x672C;&#x8EAB;&#x4E0D;&#x4F1A;&#x88AB;&#x79FB;&#x5230;&#x65B0;&#x7684;Namespace&#x4E2D;&#x3002;&#x800C;&#x4E14;&#x8C03;&#x7528;&#x8FDB;&#x7A0B;&#x7B2C;&#x4E00;&#x4E2A;&#x521B;&#x5EFA;&#x7684;&#x5B50;&#x8FDB;&#x7A0B;&#x5728;&#x65B0;Namespace&#x4E2D;&#x7684;PID&#x4E3A;1&#xFF0C;&#x5E76;&#x6210;&#x4E3A;&#x65B0;Namespace&#x4E2D;&#x7684;init&#x8FDB;&#x7A0B;&#x3002;&#x4E3A;&#x4EC0;&#x4E48;&#x521B;&#x5EFA;&#x5176;&#x4ED6;&#x7684;Namespace&#x65F6;unshare()&#x548C;setns()&#x4F1A;&#x76F4;&#x63A5;&#x8FDB;&#x5165;&#x65B0;&#x7684;Namespace&#xFF0C;&#x800C;&#x552F;&#x72EC;PID Namespace&#x4E0D;&#x662F;&#x5982;&#x6B64;&#x5462;&#xFF1F;&#x56E0;&#x4E3A;&#x8C03;&#x7528;getpid()&#x51FD;&#x6570;&#x5F97;&#x5230;&#x7684;PID&#x662F;&#x6839;&#x636E;&#x8C03;&#x7528;&#x8005;&#x6240;&#x5728;&#x7684;PID Namespace&#x800C;&#x51B3;&#x5B9A;&#x8FD4;&#x56DE;&#x54EA;&#x4E2A;PID&#xFF0C;&#x8FDB;&#x5165;&#x65B0;&#x7684;PID namespace&#x4F1A;&#x5BFC;&#x81F4;PID&#x4EA7;&#x751F;&#x53D8;&#x5316;&#x3002;&#x800C;&#x5BF9;&#x7528;&#x6237;&#x6001;&#x7684;&#x7A0B;&#x5E8F;&#x548C;&#x5E93;&#x51FD;&#x6570;&#x6765;&#x8BF4;&#xFF0C;&#x4ED6;&#x4EEC;&#x90FD;&#x8BA4;&#x4E3A;&#x8FDB;&#x7A0B;&#x7684;PID&#x662F;&#x4E00;&#x4E2A;&#x5E38;&#x91CF;&#xFF0C;PID&#x7684;&#x53D8;&#x5316;&#x4F1A;&#x5F15;&#x8D77;&#x8FD9;&#x4E9B;&#x8FDB;&#x7A0B;&#x5954;&#x6E83;&#x3002;&#x6362;&#x53E5;&#x8BDD;&#x8BF4;&#xFF0C;&#x4E00;&#x65E6;&#x7A0B;&#x5E8F;&#x8FDB;&#x7A0B;&#x521B;&#x5EFA;&#x4EE5;&#x540E;&#xFF0C;&#x90A3;&#x4E48;&#x5B83;&#x7684;PID namespace&#x7684;&#x5173;&#x7CFB;&#x5C31;&#x786E;&#x5B9A;&#x4E0B;&#x6765;&#x4E86;&#xFF0C;&#x8FDB;&#x7A0B;&#x4E0D;&#x4F1A;&#x53D8;&#x66F4;&#x4ED6;&#x4EEC;&#x5BF9;&#x5E94;&#x7684;PID namespace&#x3002;</p>
+<h3 id="Mount-Namespace"><a href="#Mount-Namespace" class="headerlink" title="Mount Namespace"></a>Mount Namespace</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;#include &lt;stdlib.h&gt;</span><br><span class="line">system(&quot;mount -t proc proc /proc&quot;);</span><br><span class="line"> /* &#x542F;&#x7528;Mount Namespace - &#x589E;&#x52A0;CLONE_NEWNS&#x53C2;&#x6570; */</span><br><span class="line">int container_pid = clone(container_main, container_stack+STACK_SIZE, </span><br><span class="line">        CLONE_NEWUTS | CLONE_NEWPID | CLONE_NEWNS | SIGCHLD, NULL);</span><br><span class="line"></span><br><span class="line">// &#x8FD9;&#x65F6;&#x5019; ps&#x5C31;&#x5E72;&#x51C0;&#x591A;&#x4E86;</span><br><span class="line">root@vm-master:~/testnamespace# ps -aux</span><br><span class="line">USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</span><br><span class="line">root         1  0.0  0.0  20036  3868 pts/1    S    12:24   0:00 /bin/bash</span><br><span class="line">root        15  0.0  0.0  36084  3228 pts/1    R+   12:24   0:00 ps -aux</span><br></pre></td></tr></table></figure>
+
+<p>&#x5173;&#x4E8E;mount&#x547D;&#x4EE4;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x6A21;&#x4EFF;Docker&#x7684;Mount Namespace&#x3002;</span><br><span class="line">&#x5148;&#x8981;&#x505A;&#x4E00;&#x4E2A;rootfs&#x6587;&#x4EF6;&#x5939;</span><br><span class="line">hchen@ubuntu:~/rootfs$ ls</span><br><span class="line">bin  dev  etc  home  lib  lib64  mnt  opt  proc  root  run  sbin  sys  tmp  usr  var</span><br><span class="line"></span><br><span class="line">// &#x62F7;&#x8D1D;&#x5FC5;&#x8981;&#x7684;&#x547D;&#x4EE4;</span><br><span class="line">hchen@ubuntu:~/rootfs$ ls ./bin ./usr/bin</span><br><span class="line"></span><br><span class="line">./bin:</span><br><span class="line">bash   chown  gzip      less  mount       netstat  rm     tabs  tee      top       tty</span><br><span class="line">cat    cp     hostname  ln    mountpoint  ping     sed    tac   test     touch     umount</span><br><span class="line">chgrp  echo   ip        ls    mv          ps       sh     tail  timeout  tr        uname</span><br><span class="line">chmod  grep   kill      more  nc          pwd      sleep  tar   toe      truncate  which</span><br><span class="line"></span><br><span class="line">./usr/bin:</span><br><span class="line">awk  env  groups  head  id  mesg  sort  strace  tail  top  uniq  vi  wc  xargs</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// &#x62F7;&#x8D1D;&#x547D;&#x4EE4;&#x8981;&#x7528;&#x7684;sso</span><br><span class="line">hchen@ubuntu:~/rootfs$ ls ./lib64 ./lib/x86_64-linux-gnu/</span><br><span class="line"></span><br><span class="line">./lib64:</span><br><span class="line">ld-linux-x86-64.so.2</span><br><span class="line"></span><br><span class="line">./lib/x86_64-linux-gnu/:</span><br><span class="line">libacl.so.1      libmemusage.so         libnss_files-2.19.so    libpython3.4m.so.1</span><br><span class="line">libacl.so.1.1.0  libmount.so.1          libnss_files.so.2       libpython3.4m.so.1.0</span><br><span class="line">libattr.so.1     libmount.so.1.1.0      libnss_hesiod-2.19.so   libresolv-2.19.so</span><br><span class="line">libblkid.so.1    libm.so.6              libnss_hesiod.so.2      libresolv.so.2</span><br><span class="line">libc-2.19.so     libncurses.so.5        libnss_nis-2.19.so      libselinux.so.1</span><br><span class="line">libcap.a         libncurses.so.5.9      libnss_nisplus-2.19.so  libtinfo.so.5</span><br><span class="line">libcap.so        libncursesw.so.5       libnss_nisplus.so.2     libtinfo.so.5.9</span><br><span class="line">libcap.so.2      libncursesw.so.5.9     libnss_nis.so.2         libutil-2.19.so</span><br><span class="line">libcap.so.2.24   libnsl-2.19.so         libpcre.so.3            libutil.so.1</span><br><span class="line">libc.so.6        libnsl.so.1            libprocps.so.3          libuuid.so.1</span><br><span class="line">libdl-2.19.so    libnss_compat-2.19.so  libpthread-2.19.so      libz.so.1</span><br><span class="line">libdl.so.2       libnss_compat.so.2     libpthread.so.0</span><br><span class="line">libgpm.so.2      libnss_dns-2.19.so     libpython2.7.so.1</span><br><span class="line">libm-2.19.so     libnss_dns.so.2        libpython2.7.so.1.0</span><br><span class="line"></span><br><span class="line">// &#x62F7;&#x8D1D;&#x5FC5;&#x8981;&#x7684;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span><br><span class="line">hchen@ubuntu:~/rootfs$ ls ./etc</span><br><span class="line">bash.bashrc  group  hostname  hosts  ld.so.cache  nsswitch.conf  passwd  profile  </span><br><span class="line">resolv.conf  shadow</span><br><span class="line"></span><br><span class="line">// &#x4F9B;&#x6302;&#x8F7D;&#x7528;&#x7684;&#x914D;&#x7F6E;&#x6587;&#x4EF6;</span><br><span class="line">hchen@ubuntu:~$ ls ./conf</span><br><span class="line">hostname     hosts     resolv.conf</span><br><span class="line"></span><br><span class="line">#define _GNU_SOURCE</span><br><span class="line">#include &lt;sys/types.h&gt;</span><br><span class="line">#include &lt;sys/wait.h&gt;</span><br><span class="line">#include &lt;sys/mount.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;sched.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line"></span><br><span class="line">#define STACK_SIZE (1024 * 1024)</span><br><span class="line"></span><br><span class="line">static char container_stack[STACK_SIZE];</span><br><span class="line">char* const container_args[] = {</span><br><span class="line">    &quot;/bin/bash&quot;,</span><br><span class="line">    &quot;-l&quot;,</span><br><span class="line">    NULL</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">int container_main(void* arg)</span><br><span class="line">{</span><br><span class="line">    printf(&quot;Container [%5d] - inside the container!\n&quot;, getpid());</span><br><span class="line"></span><br><span class="line">    //set hostname</span><br><span class="line">    sethostname(&quot;container&quot;,10);</span><br><span class="line"></span><br><span class="line">    //remount &quot;/proc&quot; to make sure the &quot;top&quot; and &quot;ps&quot; show container&apos;s information</span><br><span class="line">    if (mount(&quot;proc&quot;, &quot;rootfs/proc&quot;, &quot;proc&quot;, 0, NULL) !=0 ) {</span><br><span class="line">        perror(&quot;proc&quot;);</span><br><span class="line">    }</span><br><span class="line">    if (mount(&quot;sysfs&quot;, &quot;rootfs/sys&quot;, &quot;sysfs&quot;, 0, NULL)!=0) {</span><br><span class="line">        perror(&quot;sys&quot;);</span><br><span class="line">    }</span><br><span class="line">    if (mount(&quot;none&quot;, &quot;rootfs/tmp&quot;, &quot;tmpfs&quot;, 0, NULL)!=0) {</span><br><span class="line">        perror(&quot;tmp&quot;);</span><br><span class="line">    }</span><br><span class="line">    if (mount(&quot;udev&quot;, &quot;rootfs/dev&quot;, &quot;devtmpfs&quot;, 0, NULL)!=0) {</span><br><span class="line">        perror(&quot;dev&quot;);</span><br><span class="line">    }</span><br><span class="line">    if (mount(&quot;devpts&quot;, &quot;rootfs/dev/pts&quot;, &quot;devpts&quot;, 0, NULL)!=0) {</span><br><span class="line">        perror(&quot;dev/pts&quot;);</span><br><span class="line">    }</span><br><span class="line">    if (mount(&quot;shm&quot;, &quot;rootfs/dev/shm&quot;, &quot;tmpfs&quot;, 0, NULL)!=0) {</span><br><span class="line">        perror(&quot;dev/shm&quot;);</span><br><span class="line">    }</span><br><span class="line">    if (mount(&quot;tmpfs&quot;, &quot;rootfs/run&quot;, &quot;tmpfs&quot;, 0, NULL)!=0) {</span><br><span class="line">        perror(&quot;run&quot;);</span><br><span class="line">    }</span><br><span class="line">    /* </span><br><span class="line">     * &#x6A21;&#x4EFF;Docker&#x7684;&#x4ECE;&#x5916;&#x5411;&#x5BB9;&#x5668;&#x91CC;mount&#x76F8;&#x5173;&#x7684;&#x914D;&#x7F6E;&#x6587;&#x4EF6; </span><br><span class="line">     * &#x4F60;&#x53EF;&#x4EE5;&#x67E5;&#x770B;&#xFF1A;/var/lib/docker/containers/&lt;container_id&gt;/&#x76EE;&#x5F55;&#xFF0C;</span><br><span class="line">     * &#x4F60;&#x4F1A;&#x770B;&#x5230;docker&#x7684;&#x8FD9;&#x4E9B;&#x6587;&#x4EF6;&#x7684;&#x3002;</span><br><span class="line">     */</span><br><span class="line">    if (mount(&quot;conf/hosts&quot;, &quot;rootfs/etc/hosts&quot;, &quot;none&quot;, MS_BIND, NULL)!=0 ||</span><br><span class="line">          mount(&quot;conf/hostname&quot;, &quot;rootfs/etc/hostname&quot;, &quot;none&quot;, MS_BIND, NULL)!=0 ||</span><br><span class="line">          mount(&quot;conf/resolv.conf&quot;, &quot;rootfs/etc/resolv.conf&quot;, &quot;none&quot;, MS_BIND, NULL)!=0 ) {</span><br><span class="line">        perror(&quot;conf&quot;);</span><br><span class="line">    }</span><br><span class="line">    /* &#x6A21;&#x4EFF;docker run&#x547D;&#x4EE4;&#x4E2D;&#x7684; -v, --volume=[] &#x53C2;&#x6570;&#x5E72;&#x7684;&#x4E8B; */</span><br><span class="line">    if (mount(&quot;/tmp/t1&quot;, &quot;rootfs/mnt&quot;, &quot;none&quot;, MS_BIND, NULL)!=0) {</span><br><span class="line">        perror(&quot;mnt&quot;);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /* chroot &#x9694;&#x79BB;&#x76EE;&#x5F55; */</span><br><span class="line">    if ( chdir(&quot;./rootfs&quot;) != 0 || chroot(&quot;./&quot;) != 0 ){</span><br><span class="line">        perror(&quot;chdir/chroot&quot;);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    execv(container_args[0], container_args);</span><br><span class="line">    perror(&quot;exec&quot;);</span><br><span class="line">    printf(&quot;Something&apos;s wrong!\n&quot;);</span><br><span class="line">    return 1;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">{</span><br><span class="line">    printf(&quot;Parent [%5d] - start a container!\n&quot;, getpid());</span><br><span class="line">    int container_pid = clone(container_main, container_stack+STACK_SIZE, </span><br><span class="line">            CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWPID | CLONE_NEWNS | SIGCHLD, NULL);</span><br><span class="line">    waitpid(container_pid, NULL, 0);</span><br><span class="line">    printf(&quot;Parent - container stopped!\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x8FDB;&#x7A0B;&#x5728;&#x521B;&#x5EFA;mount namespace&#x65F6;&#xFF0C;&#x4F1A;&#x628A;&#x5F53;&#x524D;&#x7684;&#x6587;&#x4EF6;&#x7ED3;&#x6784;&#x590D;&#x5236;&#x7ED9;&#x65B0;&#x7684;namespace&#x3002;&#x65B0;namespace&#x4E2D;&#x7684;&#x6240;&#x6709;mount&#x64CD;&#x4F5C;&#x90FD;&#x53EA;&#x5F71;&#x54CD;&#x81EA;&#x8EAB;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#xFF0C;&#x800C;&#x5BF9;&#x5916;&#x754C;&#x4E0D;&#x4F1A;&#x4EA7;&#x751F;&#x4EFB;&#x4F55;&#x5F71;&#x54CD;&#x3002;&#x8FD9;&#x6837;&#x505A;&#x975E;&#x5E38;&#x4E25;&#x683C;&#x5730;&#x5B9E;&#x73B0;&#x4E86;&#x9694;&#x79BB;&#xFF0C;&#x4F46;&#x662F;&#x67D0;&#x4E9B;&#x60C5;&#x51B5;&#x53EF;&#x80FD;&#x5E76;&#x4E0D;&#x9002;&#x7528;&#x3002;&#x6BD4;&#x5982;&#x7236;&#x8282;&#x70B9;namespace&#x4E2D;&#x7684;&#x8FDB;&#x7A0B;&#x6302;&#x8F7D;&#x4E86;&#x4E00;&#x5F20;CD-ROM&#xFF0C;&#x8FD9;&#x65F6;&#x5B50;&#x8282;&#x70B9;namespace&#x62F7;&#x8D1D;&#x7684;&#x76EE;&#x5F55;&#x7ED3;&#x6784;&#x5C31;&#x65E0;&#x6CD5;&#x81EA;&#x52A8;&#x6302;&#x8F7D;&#x4E0A;&#x8FD9;&#x5F20;CD-ROM&#xFF0C;&#x56E0;&#x4E3A;&#x8FD9;&#x79CD;&#x64CD;&#x4F5C;&#x4F1A;&#x5F71;&#x54CD;&#x5230;&#x7236;&#x8282;&#x70B9;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x3002;</p>
+<p>2006 &#x5E74;&#x5F15;&#x5165;&#x7684;&#x6302;&#x8F7D;&#x4F20;&#x64AD;&#xFF08;mount propagation&#xFF09;&#x89E3;&#x51B3;&#x4E86;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x6302;&#x8F7D;&#x4F20;&#x64AD;&#x5B9A;&#x4E49;&#x4E86;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#xFF08;mount object&#xFF09;&#x4E4B;&#x95F4;&#x7684;&#x5173;&#x7CFB;&#xFF0C;&#x7CFB;&#x7EDF;&#x7528;&#x8FD9;&#x4E9B;&#x5173;&#x7CFB;&#x51B3;&#x5B9A;&#x4EFB;&#x4F55;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#x4E2D;&#x7684;&#x6302;&#x8F7D;&#x4E8B;&#x4EF6;&#x5982;&#x4F55;&#x4F20;&#x64AD;&#x5230;&#x5176;&#x4ED6;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#xFF08;&#x53C2;&#x8003;&#x81EA;&#xFF1A;<a href="/external_links/23fe52d97ce3b5bab634c8c365b055da.html" target="blank" rel="noopener">www.ibm.com/developerwo&#x2026;</a></p>
+<p>&#x8FDB;&#x7A0B;&#x5728;&#x521B;&#x5EFA;Mount Namespace&#x65F6;&#xFF0C;&#x4F1A;&#x628A;&#x5F53;&#x524D;&#x7684;&#x6587;&#x4EF6;&#x7ED3;&#x6784;&#x590D;&#x5236;&#x7ED9;&#x65B0;&#x7684;Namespace&#xFF0C;&#x65B0;&#x7684;Namespace&#x4E2D;&#x7684;&#x6240;&#x6709;mount&#x64CD;&#x4F5C;&#x4EC5;&#x5F71;&#x54CD;&#x81EA;&#x8EAB;&#x7684;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x3002;&#x4F46;&#x968F;&#x7740;&#x5F15;&#x5165;&#x6302;&#x8F7D;&#x4F20;&#x64AD;&#x7684;&#x7279;&#x6027;&#xFF0C;Mount Namespace&#x53D8;&#x5F97;&#x5E76;&#x4E0D;&#x662F;&#x5B8C;&#x5168;&#x610F;&#x4E49;&#x4E0A;&#x7684;&#x8D44;&#x6E90;&#x9694;&#x79BB;&#xFF0C;&#x8FD9;&#x79CD;&#x4F20;&#x64AD;&#x7279;&#x6027;&#x4F7F;&#x5F97;&#x591A;Mount Namespace&#x4E4B;&#x95F4;&#x7684;&#x6302;&#x8F7D;&#x4E8B;&#x4EF6;&#x53EF;&#x4EE5;&#x76F8;&#x4E92;&#x5F71;&#x54CD;&#x3002;</p>
+<p>&#x6302;&#x8F7D;&#x4F20;&#x64AD;&#x5B9A;&#x4E49;&#x4E86;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#x4E4B;&#x95F4;&#x7684;&#x5173;&#x7CFB;&#xFF0C;&#x7CFB;&#x7EDF;&#x5229;&#x7528;&#x8FD9;&#x4E9B;&#x5173;&#x7CFB;&#x6765;&#x51B3;&#x5B9A;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#x4E2D;&#x7684;&#x6302;&#x8F7D;&#x4E8B;&#x4EF6;&#x5BF9;&#x5176;&#x4ED6;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#x7684;&#x5F71;&#x54CD;&#x3002;&#x5176;&#x4E2D;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#x4E4B;&#x95F4;&#x7684;&#x5173;&#x7CFB;&#x63CF;&#x8FF0;&#x5982;&#x4E0B;&#xFF1A;</p>
+<ul>
+<li>&#x5171;&#x4EAB;&#x5173;&#x7CFB;(MS_SHARED)&#xFF1A;&#x4E00;&#x4E2A;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#x7684;&#x6302;&#x8F7D;&#x4E8B;&#x4EF6;&#x4F1A;&#x8DE8;Namespace&#x5171;&#x4EAB;&#x5230;&#x5176;&#x4ED6;&#x6302;&#x8F7D;&#x5BF9;&#x8C61;&#x3002;</li>
+<li>&#x4ECE;&#x5C5E;&#x5173;&#x7CFB;(MS_SLAVE): &#x4F20;&#x64AD;&#x7684;&#x65B9;&#x5411;&#x662F;&#x5355;&#x5411;&#x7684;&#xFF0C;&#x5373;&#x53EA;&#x80FD;&#x4ECE;Master&#x4F20;&#x64AD;&#x5230;Slave&#x65B9;&#x5411;&#x3002;</li>
+<li>&#x79C1;&#x6709;&#x5173;&#x7CFB;(MS_PRIVATE): &#x4E0D;&#x540C;Namespace&#x7684;&#x6302;&#x8F7D;&#x4E8B;&#x4EF6;&#x662F;&#x4E92;&#x4E0D;&#x5F71;&#x54CD;&#x7684;(&#x9ED8;&#x8BA4;&#x9009;&#x9879;)&#x3002;</li>
+<li>&#x4E0D;&#x53EF;&#x7ED1;&#x5B9A;&#x5173;&#x7CFB;(MS_UNBINDABLE): &#x4E00;&#x4E2A;&#x4E0D;&#x53EF;&#x7ED1;&#x5B9A;&#x7684;&#x79C1;&#x6709;&#x6302;&#x8F7D;&#xFF0C;&#x4E0E;&#x79C1;&#x6709;&#x6302;&#x8F7D;&#x7C7B;&#x4F3C;&#xFF0C;&#x4F46;&#x662F;&#x4E0D;&#x80FD;&#x6267;&#x884C;&#x6302;&#x8F7D;&#x64CD;&#x4F5C;</li>
+</ul>
+<p>&#x4E00;&#x4E2A;&#x6302;&#x8F7D;&#x72B6;&#x6001;&#x53EF;&#x80FD;&#x4E3A;&#x5982;&#x4E0B;&#x7684;&#x5176;&#x4E2D;&#x4E00;&#x79CD;&#xFF1A;</p>
+<ul>
+<li>&#x5171;&#x4EAB;&#x6302;&#x8F7D;&#xFF08;shared&#xFF09;</li>
+<li>&#x4ECE;&#x5C5E;&#x6302;&#x8F7D;&#xFF08;slave&#xFF09;</li>
+<li>&#x5171;&#x4EAB;/&#x4ECE;&#x5C5E;&#x6302;&#x8F7D;&#xFF08;shared and slave&#xFF09;</li>
+<li>&#x79C1;&#x6709;&#x6302;&#x8F7D;&#xFF08;private&#xFF09;</li>
+<li>&#x4E0D;&#x53EF;&#x7ED1;&#x5B9A;&#x6302;&#x8F7D;&#xFF08;unbindable&#xFF09;</li>
+</ul>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/fe581ad351c2a796148ed49b5d19f7f995b911733db2d26ca1e54aece5681100" alt="image"></p>
+<p>image</p>
+<p>&#x6302;&#x8F7D;&#x7684;&#x8FC7;&#x7A0B;&#x662F;&#x901A;&#x8FC7;mount&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x5B8C;&#x6210;&#x7684;&#xFF0C;&#x5B83;&#x6709;&#x4E24;&#x4E2A;&#x53C2;&#x6570;&#xFF1A;&#x4E00;&#x4E2A;&#x662F;&#x5DF2;&#x5B58;&#x5728;&#x7684;&#x666E;&#x901A;&#x6587;&#x4EF6;&#x540D;&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x8BBF;&#x95EE;&#x7684;&#x7279;&#x6B8A;&#x6587;&#x4EF6;&#xFF0C;&#x4E00;&#x4E2A;&#x662F;&#x7279;&#x6B8A;&#x6587;&#x4EF6;&#x7684;&#x540D;&#x5B57;&#x3002;&#x8FD9;&#x4E2A;&#x7279;&#x6B8A;&#x6587;&#x4EF6;&#x4E00;&#x822C;&#x7528;&#x6765;&#x5173;&#x8054;&#x4E00;&#x4E9B;&#x5B58;&#x50A8;&#x5377;&#xFF0C;&#x8FD9;&#x4E2A;&#x5B58;&#x50A8;&#x5377;&#x53EF;&#x4EE5;&#x5305;&#x542B;&#x81EA;&#x5DF1;&#x7684;&#x76EE;&#x5F55;&#x5C42;&#x7EA7;&#x548C;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7ED3;&#x6784;&#x3002;mount&#x6240;&#x8FBE;&#x5230;&#x7684;&#x6548;&#x679C;&#x662F;&#xFF1A;&#x50CF;&#x8BBF;&#x95EE;&#x4E00;&#x4E2A;&#x666E;&#x901A;&#x7684;&#x6587;&#x4EF6;&#x4E00;&#x6837;&#x8BBF;&#x95EE;&#x4F4D;&#x4E8E;&#x5176;&#x4ED6;&#x8BBE;&#x5907;&#x4E0A;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x6839;&#x76EE;&#x5F55;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x5C06;&#x8BE5;&#x8BBE;&#x5907;&#x4E0A;&#x76EE;&#x5F55;&#x7684;&#x6839;&#x8282;&#x70B9;&#x6302;&#x5230;&#x4E86;&#x53E6;&#x5916;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x9875;&#x8282;&#x70B9;&#x4E0A;&#xFF0C;&#x8FBE;&#x5230;&#x4E86;&#x7ED9;&#x8FD9;&#x4E2A;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6269;&#x5145;&#x5BB9;&#x91CF;&#x7684;&#x76EE;&#x7684;&#x3002;</p>
+<p>&#x53EF;&#x4EE5;&#x901A;&#x8FC7;/proc&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x67E5;&#x770B;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#x7684;&#x6302;&#x8F7D;&#x4FE1;&#x606F;&#xFF0C;&#x5177;&#x4F53;&#x505A;&#x6CD5;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;cat /proc/$pid/mountinfo</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x7ED1;&#x5B9A;&#x6302;&#x8F7D;</code>&#x7684;&#x5F15;&#x5165;&#x4F7F;&#x5F97;mount&#x7684;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#x53C2;&#x6570;&#x4E0D;&#x4E00;&#x5B9A;&#x8981;&#x662F;&#x4E00;&#x4E2A;&#x7279;&#x6B8A;&#x6587;&#x4EF6;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x662F;&#x8BE5;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x4E0A;&#x7684;&#x4E00;&#x4E2A;&#x666E;&#x901A;&#x6587;&#x4EF6;&#x76EE;&#x5F55;&#x3002;Linux&#x4E2D;&#x7ED1;&#x5B9A;&#x6302;&#x8F7D;&#x7684;&#x7528;&#x6CD5;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;mount --bind /home/work /home/qiniu  </span><br><span class="line">mount -o bind /home/work /home/qiniu</span><br></pre></td></tr></table></figure>
+
+<h3 id="User-Namespace"><a href="#User-Namespace" class="headerlink" title="User Namespace"></a>User Namespace</h3><p>&#x8981;&#x628A;&#x5BB9;&#x5668;&#x4E2D;&#x7684;uid&#x548C;&#x771F;&#x5B9E;&#x7CFB;&#x7EDF;&#x7684;uid&#x7ED9;&#x6620;&#x5C04;&#x5728;&#x4E00;&#x8D77;&#xFF0C;&#x9700;&#x8981;&#x4FEE;&#x6539; /proc//uid_map &#x548C; /proc//gid_map &#x8FD9;&#x4E24;&#x4E2A;&#x6587;&#x4EF6;&#x3002;&#x8FD9;&#x4E24;&#x4E2A;&#x6587;&#x4EF6;&#x7684;&#x683C;&#x5F0F;&#x4E3A;&#xFF1A;<br><code>ID-inside-ns ID-outside-ns length</code></p>
+<ul>
+<li>&#x7B2C;&#x4E00;&#x4E2A;&#x5B57;&#x6BB5;ID-inside-ns&#x8868;&#x793A;&#x5728;&#x5BB9;&#x5668;&#x663E;&#x793A;&#x7684;UID&#x6216;GID&#xFF0C;</li>
+<li>&#x7B2C;&#x4E8C;&#x4E2A;&#x5B57;&#x6BB5;ID-outside-ns&#x8868;&#x793A;&#x5BB9;&#x5668;&#x5916;&#x6620;&#x5C04;&#x7684;&#x771F;&#x5B9E;&#x7684;UID&#x6216;GID&#x3002;</li>
+<li>&#x7B2C;&#x4E09;&#x4E2A;&#x5B57;&#x6BB5;&#x8868;&#x793A;&#x6620;&#x5C04;&#x7684;&#x8303;&#x56F4;&#xFF0C;&#x4E00;&#x822C;&#x586B;1&#xFF0C;&#x8868;&#x793A;&#x4E00;&#x4E00;&#x5BF9;&#x5E94;&#x3002;</li>
+</ul>
+<p>User namespace&#x4E3B;&#x8981;&#x9694;&#x79BB;&#x4E86;&#x5B89;&#x5168;&#x76F8;&#x5173;&#x7684;&#x6807;&#x8BC6;&#x7B26;&#xFF08;identifiers&#xFF09;&#x548C;&#x5C5E;&#x6027;&#xFF08;attributes&#xFF09;&#xFF0C;&#x5305;&#x62EC;&#x7528;&#x6237;ID&#x3001;&#x7528;&#x6237;&#x7EC4;ID&#x3001;root&#x76EE;&#x5F55;&#x3001;key&#xFF08;&#x6307;&#x5BC6;&#x94A5;&#xFF09;&#x4EE5;&#x53CA;&#x7279;&#x6B8A;&#x6743;&#x9650;&#x3002;&#x8BF4;&#x5F97;&#x901A;&#x4FD7;&#x4E00;&#x70B9;&#xFF0C;&#x4E00;&#x4E2A;&#x666E;&#x901A;&#x7528;&#x6237;&#x7684;&#x8FDB;&#x7A0B;&#x901A;&#x8FC7;clone()&#x521B;&#x5EFA;&#x7684;&#x65B0;&#x8FDB;&#x7A0B;&#x5728;&#x65B0;user namespace&#x4E2D;&#x53EF;&#x4EE5;&#x62E5;&#x6709;&#x4E0D;&#x540C;&#x7684;&#x7528;&#x6237;&#x548C;&#x7528;&#x6237;&#x7EC4;&#x3002;&#x8FD9;&#x610F;&#x5473;&#x7740;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#x5728;&#x5BB9;&#x5668;&#x5916;&#x5C5E;&#x4E8E;&#x4E00;&#x4E2A;&#x6CA1;&#x6709;&#x7279;&#x6743;&#x7684;&#x666E;&#x901A;&#x7528;&#x6237;&#xFF0C;&#x4F46;&#x662F;&#x4ED6;&#x521B;&#x5EFA;&#x7684;&#x5BB9;&#x5668;&#x8FDB;&#x7A0B;&#x5374;&#x5C5E;&#x4E8E;&#x62E5;&#x6709;&#x6240;&#x6709;&#x6743;&#x9650;&#x7684;&#x8D85;&#x7EA7;&#x7528;&#x6237;&#xFF0C;&#x8FD9;&#x4E2A;&#x6280;&#x672F;&#x4E3A;&#x5BB9;&#x5668;&#x63D0;&#x4F9B;&#x4E86;&#x6781;&#x5927;&#x7684;&#x81EA;&#x7531;&#x3002;<br>User Namespace&#x9664;&#x4E86;&#x9694;&#x79BB;&#x7528;&#x6237;ID&#x548C;&#x7528;&#x6237;&#x7EC4;ID&#x4E4B;&#x5916;&#xFF0C;&#x8FD8;&#x5BF9;&#x6BCF;&#x4E2A;Namespace&#x8FDB;&#x884C;&#x4E86;Capability&#x7684;&#x9694;&#x79BB;&#x548C;&#x63A7;&#x5236;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x6DFB;&#x52A0;&#x548C;&#x5220;&#x9664;&#x76F8;&#x5E94;&#x7684;Capability&#x6765;&#x63A7;&#x5236;&#x65B0;Namespace&#x4E2D;&#x8FDB;&#x7A0B;&#x6240;&#x62E5;&#x6709;&#x7684;&#x6743;&#x9650;&#xFF0C;&#x6BD4;&#x5982;&#x4E3A;&#x65B0;&#x7684;Namespace&#x4E2D;&#x589E;&#x52A0;CAP_CHOWN&#x6743;&#x9650;&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x8FD9;&#x4E2A;Namespace&#x7684;&#x8FDB;&#x7A0B;&#x62E5;&#x6709;&#x6539;&#x53D8;&#x6587;&#x4EF6;&#x5C5E;&#x4E3B;&#x7684;&#x6743;&#x9650;&#x3002;</p>
+<ul>
+<li>user namespace&#x88AB;&#x521B;&#x5EFA;&#x540E;&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#x88AB;&#x8D4B;&#x4E88;&#x4E86;&#x8BE5;namespace&#x4E2D;&#x7684;&#x5168;&#x90E8;&#x6743;&#x9650;&#xFF0C;&#x8FD9;&#x6837;&#x8FD9;&#x4E2A;init&#x8FDB;&#x7A0B;&#x5C31;&#x53EF;&#x4EE5;&#x5B8C;&#x6210;&#x6240;&#x6709;&#x5FC5;&#x8981;&#x7684;&#x521D;&#x59CB;&#x5316;&#x5DE5;&#x4F5C;&#xFF0C;&#x800C;&#x4E0D;&#x4F1A;&#x56E0;&#x6743;&#x9650;&#x4E0D;&#x8DB3;&#x800C;&#x51FA;&#x73B0;&#x9519;&#x8BEF;&#x3002;</li>
+<li>&#x6211;&#x4EEC;&#x770B;&#x5230;namespace&#x5185;&#x90E8;&#x770B;&#x5230;&#x7684;UID&#x548C;GID&#x5DF2;&#x7ECF;&#x4E0E;&#x5916;&#x90E8;&#x4E0D;&#x540C;&#x4E86;&#xFF0C;&#x9ED8;&#x8BA4;&#x663E;&#x793A;&#x4E3A;65534&#xFF0C;&#x8868;&#x793A;&#x5C1A;&#x672A;&#x4E0E;&#x5916;&#x90E8;namespace&#x7528;&#x6237;&#x6620;&#x5C04;&#x3002;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5BF9;user namespace&#x5185;&#x90E8;&#x7684;&#x8FD9;&#x4E2A;&#x521D;&#x59CB;user&#x548C;&#x5176;&#x5916;&#x90E8;namespace&#x67D0;&#x4E2A;&#x7528;&#x6237;&#x5EFA;&#x7ACB;&#x6620;&#x5C04;&#xFF0C;&#x8FD9;&#x6837;&#x53EF;&#x4EE5;&#x4FDD;&#x8BC1;&#x5F53;&#x6D89;&#x53CA;&#x5230;&#x4E00;&#x4E9B;&#x5BF9;&#x5916;&#x90E8;namespace&#x7684;&#x64CD;&#x4F5C;&#x65F6;&#xFF0C;&#x7CFB;&#x7EDF;&#x53EF;&#x4EE5;&#x68C0;&#x9A8C;&#x5176;&#x6743;&#x9650;&#xFF08;&#x6BD4;&#x5982;&#x53D1;&#x9001;&#x4E00;&#x4E2A;&#x4FE1;&#x53F7;&#x6216;&#x64CD;&#x4F5C;&#x67D0;&#x4E2A;&#x6587;&#x4EF6;&#xFF09;&#x3002;&#x540C;&#x6837;&#x7528;&#x6237;&#x7EC4;&#x4E5F;&#x8981;&#x5EFA;&#x7ACB;&#x6620;&#x5C04;&#x3002;</li>
+<li>&#x8FD8;&#x6709;&#x4E00;&#x70B9;&#x867D;&#x7136;&#x4E0D;&#x80FD;&#x4ECE;&#x8F93;&#x51FA;&#x4E2D;&#x770B;&#x51FA;&#x6765;&#xFF0C;&#x4F46;&#x662F;&#x503C;&#x5F97;&#x6CE8;&#x610F;&#x3002;&#x7528;&#x6237;&#x5728;&#x65B0;namespace&#x4E2D;&#x6709;&#x5168;&#x90E8;&#x6743;&#x9650;&#xFF0C;&#x4F46;&#x662F;&#x4ED6;&#x5728;&#x521B;&#x5EFA;&#x4ED6;&#x7684;&#x7236;namespace&#x4E2D;&#x4E0D;&#x542B;&#x4EFB;&#x4F55;&#x6743;&#x9650;&#x3002;&#x5C31;&#x7B97;&#x8C03;&#x7528;&#x548C;&#x521B;&#x5EFA;&#x4ED6;&#x7684;&#x8FDB;&#x7A0B;&#x6709;&#x5168;&#x90E8;&#x6743;&#x9650;&#x4E5F;&#x662F;&#x5982;&#x6B64;&#x3002;&#x6240;&#x4EE5;&#x54EA;&#x6015;&#x662F;root&#x7528;&#x6237;&#x8C03;&#x7528;&#x4E86;clone()&#x5728;user namespace&#x4E2D;&#x521B;&#x5EFA;&#x51FA;&#x7684;&#x65B0;&#x7528;&#x6237;&#x5728;&#x5916;&#x90E8;&#x4E5F;&#x6CA1;&#x6709;&#x4EFB;&#x4F55;&#x6743;&#x9650;&#x3002;</li>
+<li>&#x6700;&#x540E;&#xFF0C;user namespace&#x7684;&#x521B;&#x5EFA;&#x5176;&#x5B9E;&#x662F;&#x4E00;&#x4E2A;&#x5C42;&#x5C42;&#x5D4C;&#x5957;&#x7684;&#x6811;&#x72B6;&#x7ED3;&#x6784;&#x3002;&#x6700;&#x4E0A;&#x5C42;&#x7684;&#x6839;&#x8282;&#x70B9;&#x5C31;&#x662F;root namespace&#xFF0C;&#x65B0;&#x521B;&#x5EFA;&#x7684;&#x6BCF;&#x4E2A;user namespace&#x90FD;&#x6709;&#x4E00;&#x4E2A;&#x7236;&#x8282;&#x70B9;user namespace&#x4EE5;&#x53CA;&#x96F6;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x5B50;&#x8282;&#x70B9;user namespace&#xFF0C;&#x8FD9;&#x4E00;&#x70B9;&#x4E0E;PID namespace&#x975E;&#x5E38;&#x76F8;&#x4F3C;&#x3002;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;#define _GNU_SOURCE</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;sys/types.h&gt;</span><br><span class="line">#include &lt;sys/wait.h&gt;</span><br><span class="line">#include &lt;sys/mount.h&gt;</span><br><span class="line">#include &lt;sys/capability.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;sched.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line"></span><br><span class="line">#define STACK_SIZE (1024 * 1024)</span><br><span class="line"></span><br><span class="line">static char container_stack[STACK_SIZE];</span><br><span class="line">char* const container_args[] = {</span><br><span class="line">    &quot;/bin/bash&quot;,</span><br><span class="line">    NULL</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line">int pipefd[2];</span><br><span class="line"></span><br><span class="line">void set_map(char* file, int inside_id, int outside_id, int len) {</span><br><span class="line">    FILE* mapfd = fopen(file, &quot;w&quot;);</span><br><span class="line">    if (NULL == mapfd) {</span><br><span class="line">        perror(&quot;open file error&quot;);</span><br><span class="line">        return;</span><br><span class="line">    }</span><br><span class="line">    fprintf(mapfd, &quot;%d %d %d&quot;, inside_id, outside_id, len);</span><br><span class="line">    fclose(mapfd);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">void set_uid_map(pid_t pid, int inside_id, int outside_id, int len) {</span><br><span class="line">    char file[256];</span><br><span class="line">    sprintf(file, &quot;/proc/%d/uid_map&quot;, pid);</span><br><span class="line">    set_map(file, inside_id, outside_id, len);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">void set_gid_map(pid_t pid, int inside_id, int outside_id, int len) {</span><br><span class="line">    char file[256];</span><br><span class="line">    sprintf(file, &quot;/proc/%d/gid_map&quot;, pid);</span><br><span class="line">    set_map(file, inside_id, outside_id, len);</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">int container_main(void* arg)</span><br><span class="line">{</span><br><span class="line"></span><br><span class="line">    printf(&quot;Container [%5d] - inside the container!\n&quot;, getpid());</span><br><span class="line"></span><br><span class="line">    printf(&quot;Container: eUID = %ld;  eGID = %ld, UID=%ld, GID=%ld\n&quot;,</span><br><span class="line">            (long) geteuid(), (long) getegid(), (long) getuid(), (long) getgid());</span><br><span class="line"></span><br><span class="line">    /* &#x7B49;&#x5F85;&#x7236;&#x8FDB;&#x7A0B;&#x901A;&#x77E5;&#x540E;&#x518D;&#x5F80;&#x4E0B;&#x6267;&#x884C;&#xFF08;&#x8FDB;&#x7A0B;&#x95F4;&#x7684;&#x540C;&#x6B65;&#xFF09; */</span><br><span class="line">    char ch;</span><br><span class="line">    close(pipefd[1]);</span><br><span class="line">    read(pipefd[0], &amp;ch, 1);</span><br><span class="line"></span><br><span class="line">    printf(&quot;Container [%5d] - setup hostname!\n&quot;, getpid());</span><br><span class="line">    //set hostname</span><br><span class="line">    sethostname(&quot;container&quot;,10);</span><br><span class="line"></span><br><span class="line">    //remount &quot;/proc&quot; to make sure the &quot;top&quot; and &quot;ps&quot; show container&apos;s information</span><br><span class="line">    mount(&quot;proc&quot;, &quot;/proc&quot;, &quot;proc&quot;, 0, NULL);</span><br><span class="line"></span><br><span class="line">    execv(container_args[0], container_args);</span><br><span class="line">    printf(&quot;Something&apos;s wrong!\n&quot;);</span><br><span class="line">    return 1;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">{</span><br><span class="line">    const int gid=getgid(), uid=getuid();</span><br><span class="line"></span><br><span class="line">    printf(&quot;Parent: eUID = %ld;  eGID = %ld, UID=%ld, GID=%ld\n&quot;,</span><br><span class="line">            (long) geteuid(), (long) getegid(), (long) getuid(), (long) getgid());</span><br><span class="line"></span><br><span class="line">    pipe(pipefd);</span><br><span class="line"></span><br><span class="line">    printf(&quot;Parent [%5d] - start a container!\n&quot;, getpid());</span><br><span class="line"></span><br><span class="line">    int container_pid = clone(container_main, container_stack+STACK_SIZE, </span><br><span class="line">            CLONE_NEWUTS  | CLONE_NEWNS | CLONE_NEWUSER | SIGCHLD, NULL);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    printf(&quot;Parent [%5d] - Container [%5d]!\n&quot;, getpid(), container_pid);</span><br><span class="line"></span><br><span class="line">    //To map the uid/gid, </span><br><span class="line">    //   we need edit the /proc/PID/uid_map (or /proc/PID/gid_map) in parent</span><br><span class="line">    //The file format is</span><br><span class="line">    //   ID-inside-ns   ID-outside-ns   length</span><br><span class="line">    //if no mapping, </span><br><span class="line">    //   the uid will be taken from /proc/sys/kernel/overflowuid</span><br><span class="line">    //   the gid will be taken from /proc/sys/kernel/overflowgid</span><br><span class="line">    set_uid_map(container_pid, 0, uid, 1);</span><br><span class="line">    set_gid_map(container_pid, 0, gid, 1);</span><br><span class="line"></span><br><span class="line">    printf(&quot;Parent [%5d] - user/group mapping done!\n&quot;, getpid());</span><br><span class="line"></span><br><span class="line">    /* &#x901A;&#x77E5;&#x5B50;&#x8FDB;&#x7A0B; */</span><br><span class="line">    close(pipefd[1]);</span><br><span class="line"></span><br><span class="line">    waitpid(container_pid, NULL, 0);</span><br><span class="line">    printf(&quot;Parent - container stopped!\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x4E0A;&#x9762;&#x7684;&#x7A0B;&#x5E8F;&#xFF0C;&#x6211;&#x4EEC;&#x7528;&#x4E86;&#x4E00;&#x4E2A;pipe&#x6765;&#x5BF9;&#x7236;&#x5B50;&#x8FDB;&#x7A0B;&#x8FDB;&#x884C;&#x540C;&#x6B65;&#xFF0C;&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x8FD9;&#x6837;&#x505A;&#xFF1F;&#x56E0;&#x4E3A;&#x5B50;&#x8FDB;&#x7A0B;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;execv&#x7684;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#xFF0C;&#x8FD9;&#x4E2A;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x4F1A;&#x628A;&#x5F53;&#x524D;&#x5B50;&#x8FDB;&#x7A0B;&#x7684;&#x8FDB;&#x7A0B;&#x7A7A;&#x95F4;&#x7ED9;&#x5168;&#x90E8;&#x8986;&#x76D6;&#x6389;&#xFF0C;&#x6211;&#x4EEC;&#x5E0C;&#x671B;&#x5728;execv&#x4E4B;&#x524D;&#x5C31;&#x505A;&#x597D;user namespace&#x7684;uid/gid&#x7684;&#x6620;&#x5C04;&#xFF0C;&#x8FD9;&#x6837;&#xFF0C;execv&#x8FD0;&#x884C;&#x7684;/bin/bash&#x5C31;&#x4F1A;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x8BBE;&#x7F6E;&#x4E86;uid&#x4E3A;0&#x7684;inside-uid&#x800C;&#x53D8;&#x6210;#&#x53F7;&#x7684;&#x63D0;&#x793A;&#x7B26;&#x3002;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Network-Namespace"><a href="#Network-Namespace" class="headerlink" title="Network Namespace"></a>Network Namespace</h3><p>&#x5728;Linux&#x4E0B;&#xFF0C;&#x6211;&#x4EEC;&#x4E00;&#x822C;&#x7528;ip&#x547D;&#x4EE4;&#x521B;&#x5EFA;Network Namespace  </p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/e194f606c4632d62b20cc244f33994c4e8b89289b812b766259dfacc058d725a" alt="image"></p>
+<p>image</p>
+<p>&#x4E00;&#x822C;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x7269;&#x7406;&#x7F51;&#x7EDC;&#x8BBE;&#x5907;&#x90FD;&#x5206;&#x914D;&#x5728;&#x6700;&#x521D;&#x7684;root namespace&#xFF08;&#x8868;&#x793A;&#x7CFB;&#x7EDF;&#x9ED8;&#x8BA4;&#x7684;namespace&#xFF0C;&#x5728;PID namespace&#x4E2D;&#x5DF2;&#x7ECF;&#x63D0;&#x53CA;&#xFF09;&#x4E2D;&#x3002;&#x4F46;&#x662F;&#x5982;&#x679C;&#x4F60;&#x6709;&#x591A;&#x5757;&#x7269;&#x7406;&#x7F51;&#x5361;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x628A;&#x5176;&#x4E2D;&#x4E00;&#x5757;&#x6216;&#x591A;&#x5757;&#x5206;&#x914D;&#x7ED9;&#x65B0;&#x521B;&#x5EFA;&#x7684;network namespace&#x3002;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x5F53;&#x65B0;&#x521B;&#x5EFA;&#x7684;network namespace&#x88AB;&#x91CA;&#x653E;&#x65F6;&#xFF08;&#x6240;&#x6709;&#x5185;&#x90E8;&#x7684;&#x8FDB;&#x7A0B;&#x90FD;&#x7EC8;&#x6B62;&#x5E76;&#x4E14;namespace&#x6587;&#x4EF6;&#x6CA1;&#x6709;&#x88AB;&#x6302;&#x8F7D;&#x6216;&#x6253;&#x5F00;&#xFF09;&#xFF0C;&#x5728;&#x8FD9;&#x4E2A;namespace&#x4E2D;&#x7684;&#x7269;&#x7406;&#x7F51;&#x5361;&#x4F1A;&#x8FD4;&#x56DE;&#x5230;root namespace&#x800C;&#x975E;&#x521B;&#x5EFA;&#x8BE5;&#x8FDB;&#x7A0B;&#x7684;&#x7236;&#x8FDB;&#x7A0B;&#x6240;&#x5728;&#x7684;network namespace&#x3002;</p>
+<p>&#x5728;&#x5EFA;&#x7ACB;&#x8D77;veth pair&#x4E4B;&#x524D;&#xFF0C;&#x65B0;&#x65E7;namespace&#x8BE5;&#x5982;&#x4F55;&#x901A;&#x4FE1;&#x5462;&#xFF1F;&#x7B54;&#x6848;&#x662F;pipe&#xFF08;&#x7BA1;&#x9053;&#xFF09;&#x3002;&#x6211;&#x4EEC;&#x4EE5;Docker Daemon&#x5728;&#x542F;&#x52A8;&#x5BB9;&#x5668;dockerinit&#x7684;&#x8FC7;&#x7A0B;&#x4E3A;&#x4F8B;&#x3002;Docker Daemon&#x5728;&#x5BBF;&#x4E3B;&#x673A;&#x4E0A;&#x8D1F;&#x8D23;&#x521B;&#x5EFA;&#x8FD9;&#x4E2A;veth pair&#xFF0C;&#x901A;&#x8FC7;netlink&#x8C03;&#x7528;&#xFF0C;&#x628A;&#x4E00;&#x7AEF;&#x7ED1;&#x5B9A;&#x5230;docker0&#x7F51;&#x6865;&#x4E0A;&#xFF0C;&#x4E00;&#x7AEF;&#x8FDE;&#x8FDB;&#x65B0;&#x5EFA;&#x7684;network namespace&#x8FDB;&#x7A0B;&#x4E2D;&#x3002;&#x5EFA;&#x7ACB;&#x7684;&#x8FC7;&#x7A0B;&#x4E2D;&#xFF0C;Docker Daemon&#x548C;dockerinit&#x5C31;&#x901A;&#x8FC7;pipe&#x8FDB;&#x884C;&#x901A;&#x4FE1;&#xFF0C;&#x5F53;Docker Daemon&#x5B8C;&#x6210;veth-pair&#x7684;&#x521B;&#x5EFA;&#x4E4B;&#x524D;&#xFF0C;dockerinit&#x5728;&#x7BA1;&#x9053;&#x7684;&#x53E6;&#x4E00;&#x7AEF;&#x5FAA;&#x73AF;&#x7B49;&#x5F85;&#xFF0C;&#x76F4;&#x5230;&#x7BA1;&#x9053;&#x53E6;&#x4E00;&#x7AEF;&#x4F20;&#x6765;Docker Daemon&#x5173;&#x4E8E;veth&#x8BBE;&#x5907;&#x7684;&#x4FE1;&#x606F;&#xFF0C;&#x5E76;&#x5173;&#x95ED;&#x7BA1;&#x9053;&#x3002;dockerinit&#x624D;&#x7ED3;&#x675F;&#x7B49;&#x5F85;&#x7684;&#x8FC7;&#x7A0B;&#xFF0C;&#x5E76;&#x628A;&#x5B83;&#x7684;&#x201C;eth0&#x201D;&#x542F;&#x52A8;&#x8D77;&#x6765;&#x3002;&#x6574;&#x4E2A;&#x6548;&#x679C;&#x7C7B;&#x4F3C;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// docker &#x7F51;&#x7EDC;&#x672C;&#x8D28;&#x505A;&#x7684;&#x4E8B;&#x5C31;&#x662F; 1. &#x521B;&#x5EFA;&#x7F51;&#x6865;  2. &#x521B;&#x5EFA;veth &#x865A;&#x62DF;&#x7F51;&#x5361;,&#x4E00;&#x5934;&#x5728;docker ns1,&#x4E00;&#x5934;&#x63D2;&#x5728;&#x7F51;&#x6865;&#x4E0A; 3. &#x8BBE;&#x7F6E;ip,&#x8DEF;&#x7531;&#x89C4;&#x5219;,nat&#xFF0C;&#x8BA9;docker &#x7F51;&#x7EDC;&#x80FD;&#x7ECF;&#x8FC7;bridge &#x51FA;&#x53BB;  &#x5916;&#x90E8;&#x8BBF;&#x95EE;&#x5BB9;&#x5668;&#x7F51;&#x7EDC; &#x4E5F;&#x662F;&#x5728;&#x672C;&#x5730;&#x7684; iptable &#x7684; nat &#x8868;&#x4E2D;&#x6DFB;&#x52A0;&#x76F8;&#x5E94;&#x7684;&#x89C4;&#x5219; https://yeasy.gitbooks.io/docker_practice/content/advanced_network/port_mapping.html</span><br><span class="line">calico &#x4E5F;&#x662F;&#x7C7B;&#x4F3C;&#x5B9E;&#x73B0;&#xFF0C;&#x6CA1;&#x6709;&#x7528;bridge&#x6A21;&#x5F0F;</span><br><span class="line"></span><br><span class="line">## &#x9996;&#x5148;&#xFF0C;&#x6211;&#x4EEC;&#x5148;&#x589E;&#x52A0;&#x4E00;&#x4E2A;&#x7F51;&#x6865;lxcbr0&#xFF0C;&#x6A21;&#x4EFF;docker0</span><br><span class="line">brctl addbr lxcbr0</span><br><span class="line">brctl stp lxcbr0 off</span><br><span class="line">ifconfig lxcbr0 192.168.10.1/24 up #&#x4E3A;&#x7F51;&#x6865;&#x8BBE;&#x7F6E;IP&#x5730;&#x5740;</span><br><span class="line"></span><br><span class="line">## &#x63A5;&#x4E0B;&#x6765;&#xFF0C;&#x6211;&#x4EEC;&#x8981;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;network namespace - ns1</span><br><span class="line"></span><br><span class="line"># &#x589E;&#x52A0;&#x4E00;&#x4E2A;namesapce &#x547D;&#x4EE4;&#x4E3A; ns1 &#xFF08;&#x4F7F;&#x7528;ip netns add&#x547D;&#x4EE4;&#xFF09;</span><br><span class="line">ip netns add ns1 </span><br><span class="line"></span><br><span class="line"># &#x6FC0;&#x6D3B;namespace&#x4E2D;&#x7684;loopback&#xFF0C;&#x5373;127.0.0.1&#xFF08;&#x4F7F;&#x7528;ip netns exec ns1&#x6765;&#x64CD;&#x4F5C;ns1&#x4E2D;&#x7684;&#x547D;&#x4EE4;&#xFF09;</span><br><span class="line">ip netns exec ns1   ip link set dev lo up </span><br><span class="line"></span><br><span class="line">## &#x7136;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x589E;&#x52A0;&#x4E00;&#x5BF9;&#x865A;&#x62DF;&#x7F51;&#x5361;</span><br><span class="line"></span><br><span class="line"># &#x589E;&#x52A0;&#x4E00;&#x4E2A;pair&#x865A;&#x62DF;&#x7F51;&#x5361;&#xFF0C;&#x6CE8;&#x610F;&#x5176;&#x4E2D;&#x7684;veth&#x7C7B;&#x578B;&#xFF0C;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;&#x7F51;&#x5361;&#x8981;&#x6309;&#x8FDB;&#x5BB9;&#x5668;&#x4E2D;</span><br><span class="line"># VETH &#x8BBE;&#x5907;&#x603B;&#x662F;&#x6210;&#x5BF9;&#x51FA;&#x73B0;&#xFF0C;&#x9001;&#x5230;&#x4E00;&#x7AEF;&#x8BF7;&#x6C42;&#x53D1;&#x9001;&#x7684;&#x6570;&#x636E;&#x603B;&#x662F;&#x4ECE;&#x53E6;&#x4E00;&#x7AEF;&#x4EE5;&#x8BF7;&#x6C42;&#x63A5;&#x53D7;&#x7684;&#x5F62;&#x5F0F;&#x51FA;&#x73B0;&#x3002;&#x8BE5;&#x8BBE;&#x5907;&#x4E0D;&#x80FD;&#x88AB;&#x7528;&#x6237;&#x7A0B;&#x5E8F;&#x76F4;&#x63A5;&#x64CD;&#x4F5C;&#xFF0C;&#x4F46;&#x4F7F;&#x7528;&#x8D77;&#x6765;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#x3002;&#x521B;&#x5EFA;&#x5E76;&#x914D;&#x7F6E;&#x6B63;&#x786E;&#x540E;&#xFF0C;&#x5411;&#x5176;&#x4E00;&#x7AEF;&#x8F93;&#x5165;&#x6570;&#x636E;&#xFF0C;VETH &#x4F1A;&#x6539;&#x53D8;&#x6570;&#x636E;&#x7684;&#x65B9;&#x5411;&#x5E76;&#x5C06;&#x5176;&#x9001;&#x5165;&#x5185;&#x6838;&#x7F51;&#x7EDC;&#x6838;&#x5FC3;&#xFF0C;&#x5B8C;&#x6210;&#x6570;&#x636E;&#x7684;&#x6CE8;&#x5165;&#x3002;&#x5728;&#x53E6;&#x4E00;&#x7AEF;&#x80FD;&#x8BFB;&#x5230;&#x6B64;&#x6570;&#x636E;&#x3002;</span><br><span class="line"></span><br><span class="line">ip link add veth-ns1 type veth peer name lxcbr0.1</span><br><span class="line"></span><br><span class="line"># &#x628A; veth-ns1 &#x6309;&#x5230;namespace ns1&#x4E2D;&#xFF0C;&#x8FD9;&#x6837;&#x5BB9;&#x5668;&#x4E2D;&#x5C31;&#x4F1A;&#x6709;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x7F51;&#x5361;&#x4E86;</span><br><span class="line">ip link set veth-ns1 netns ns1</span><br><span class="line"></span><br><span class="line"># &#x628A;&#x5BB9;&#x5668;&#x91CC;&#x7684; veth-ns1&#x6539;&#x540D;&#x4E3A; eth0 &#xFF08;&#x5BB9;&#x5668;&#x5916;&#x4F1A;&#x51B2;&#x7A81;&#xFF0C;&#x5BB9;&#x5668;&#x5185;&#x5C31;&#x4E0D;&#x4F1A;&#x4E86;&#xFF09;</span><br><span class="line">ip netns exec ns1  ip link set dev veth-ns1 name eth0 </span><br><span class="line"></span><br><span class="line"># &#x4E3A;&#x5BB9;&#x5668;&#x4E2D;&#x7684;&#x7F51;&#x5361;&#x5206;&#x914D;&#x4E00;&#x4E2A;IP&#x5730;&#x5740;&#xFF0C;&#x5E76;&#x6FC0;&#x6D3B;&#x5B83;</span><br><span class="line">ip netns exec ns1 ifconfig eth0 192.168.10.11/24 up</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># &#x4E0A;&#x9762;&#x6211;&#x4EEC;&#x628A;veth-ns1&#x8FD9;&#x4E2A;&#x7F51;&#x5361;&#x6309;&#x5230;&#x4E86;&#x5BB9;&#x5668;&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x6211;&#x4EEC;&#x8981;&#x628A;lxcbr0.1&#x6DFB;&#x52A0;&#x4E0A;&#x7F51;&#x6865;&#x4E0A;</span><br><span class="line">brctl addif lxcbr0 lxcbr0.1</span><br><span class="line"></span><br><span class="line"># &#x4E3A;&#x5BB9;&#x5668;&#x589E;&#x52A0;&#x4E00;&#x4E2A;&#x8DEF;&#x7531;&#x89C4;&#x5219;&#xFF0C;&#x8BA9;&#x5BB9;&#x5668;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x5916;&#x9762;&#x7684;&#x7F51;&#x7EDC;</span><br><span class="line">ip netns exec ns1     ip route add default via 192.168.10.1</span><br><span class="line"></span><br><span class="line"># &#x5728;/etc/netns&#x4E0B;&#x521B;&#x5EFA;network namespce&#x540D;&#x79F0;&#x4E3A;ns1&#x7684;&#x76EE;&#x5F55;&#xFF0C;</span><br><span class="line"># &#x7136;&#x540E;&#x4E3A;&#x8FD9;&#x4E2A;namespace&#x8BBE;&#x7F6E;resolv.conf&#xFF0C;&#x8FD9;&#x6837;&#xFF0C;&#x5BB9;&#x5668;&#x5185;&#x5C31;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x57DF;&#x540D;&#x4E86;</span><br><span class="line">mkdir -p /etc/netns/ns1</span><br><span class="line">echo &quot;nameserver 8.8.8.8&quot; &gt; /etc/netns/ns1/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<h1 id="CGroup"><a href="#CGroup" class="headerlink" title="CGroup"></a>CGroup</h1><p>cgroups&#x53EF;&#x4EE5;&#x9650;&#x5236;&#x3001;&#x8BB0;&#x5F55;&#x3001;&#x9694;&#x79BB;&#x8FDB;&#x7A0B;&#x7EC4;&#x6240;&#x4F7F;&#x7528;&#x7684;&#x7269;&#x7406;&#x8D44;&#x6E90;&#xFF08;&#x5305;&#x62EC;&#xFF1A;CPU&#x3001;memory&#x3001;IO&#x7B49;&#xFF09;&#xFF0C;&#x4E3A;&#x5BB9;&#x5668;&#x5B9E;&#x73B0;&#x865A;&#x62DF;&#x5316;&#x63D0;&#x4F9B;&#x4E86;&#x57FA;&#x672C;&#x4FDD;&#x8BC1;&#xFF0C;&#x662F;&#x6784;&#x5EFA;Docker&#x7B49;&#x4E00;&#x7CFB;&#x5217;&#x865A;&#x62DF;&#x5316;&#x7BA1;&#x7406;&#x5DE5;&#x5177;&#x7684;&#x57FA;&#x77F3;&#x3002;</p>
+<p>&#x4E3B;&#x8981;&#x63D0;&#x4F9B;&#x4E86;&#x5982;&#x4E0B;&#x529F;&#x80FD;&#xFF1A;</p>
+<ul>
+<li>Resource limitation: &#x9650;&#x5236;&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#xFF0C;&#x6BD4;&#x5982;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x4E0A;&#x9650;&#x4EE5;&#x53CA;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x7F13;&#x5B58;&#x9650;&#x5236;&#x3002;</li>
+<li>Prioritization: &#x4F18;&#x5148;&#x7EA7;&#x63A7;&#x5236;&#xFF0C;&#x6BD4;&#x5982;&#xFF1A;CPU&#x5229;&#x7528;&#x548C;&#x78C1;&#x76D8;IO&#x541E;&#x5410;&#x3002;</li>
+<li>Accounting: &#x4E00;&#x4E9B;&#x5BA1;&#x8BA1;&#x6216;&#x4E00;&#x4E9B;&#x7EDF;&#x8BA1;&#xFF0C;&#x4E3B;&#x8981;&#x76EE;&#x7684;&#x662F;&#x4E3A;&#x4E86;&#x8BA1;&#x8D39;&#x3002;</li>
+<li>Control: &#x6302;&#x8D77;&#x8FDB;&#x7A0B;&#xFF0C;&#x6062;&#x590D;&#x6267;&#x884C;&#x8FDB;&#x7A0B;&#x3002;</li>
+</ul>
+<p>&#x5BF9;&#x5F00;&#x53D1;&#x8005;&#x6765;&#x8BF4;&#xFF0C;cgroups&#x6709;&#x5982;&#x4E0B;&#x56DB;&#x4E2A;&#x6709;&#x8DA3;&#x7684;&#x7279;&#x70B9;&#xFF1A;</p>
+<ul>
+<li>cgroups&#x7684;API&#x4EE5;&#x4E00;&#x4E2A;&#x4F2A;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x65B9;&#x5F0F;&#x5B9E;&#x73B0;&#xFF0C;&#x5373;&#x7528;&#x6237;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x6587;&#x4EF6;&#x64CD;&#x4F5C;&#x5B9E;&#x73B0;cgroups&#x7684;&#x7EC4;&#x7EC7;&#x7BA1;&#x7406;&#x3002;</li>
+<li>cgroups&#x7684;&#x7EC4;&#x7EC7;&#x7BA1;&#x7406;&#x64CD;&#x4F5C;&#x5355;&#x5143;&#x53EF;&#x4EE5;&#x7EC6;&#x7C92;&#x5EA6;&#x5230;&#x7EBF;&#x7A0B;&#x7EA7;&#x522B;&#xFF0C;&#x7528;&#x6237;&#x6001;&#x4EE3;&#x7801;&#x4E5F;&#x53EF;&#x4EE5;&#x9488;&#x5BF9;&#x7CFB;&#x7EDF;&#x5206;&#x914D;&#x7684;&#x8D44;&#x6E90;&#x521B;&#x5EFA;&#x548C;&#x9500;&#x6BC1;cgroups&#xFF0C;&#x4ECE;&#x800C;&#x5B9E;&#x73B0;&#x8D44;&#x6E90;&#x518D;&#x5206;&#x914D;&#x548C;&#x7BA1;&#x7406;&#x3002;</li>
+<li>&#x6240;&#x6709;&#x8D44;&#x6E90;&#x7BA1;&#x7406;&#x7684;&#x529F;&#x80FD;&#x90FD;&#x4EE5;&#x201C;subsystem&#xFF08;&#x5B50;&#x7CFB;&#x7EDF;&#xFF09;&#x201D;&#x7684;&#x65B9;&#x5F0F;&#x5B9E;&#x73B0;&#xFF0C;&#x63A5;&#x53E3;&#x7EDF;&#x4E00;&#x3002;</li>
+<li>&#x5B50;&#x8FDB;&#x7A0B;&#x521B;&#x5EFA;&#x4E4B;&#x521D;&#x4E0E;&#x5176;&#x7236;&#x8FDB;&#x7A0B;&#x5904;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;cgroups&#x7684;&#x63A7;&#x5236;&#x7EC4;&#x3002;</li>
+</ul>
+<p>&#x672C;&#x8D28;&#x4E0A;&#x6765;&#x8BF4;&#xFF0C;cgroups&#x662F;&#x5185;&#x6838;&#x9644;&#x52A0;&#x5728;&#x7A0B;&#x5E8F;&#x4E0A;&#x7684;&#x4E00;&#x7CFB;&#x5217;&#x94A9;&#x5B50;&#xFF08;hooks&#xFF09;&#xFF0C;&#x901A;&#x8FC7;&#x7A0B;&#x5E8F;&#x8FD0;&#x884C;&#x65F6;&#x5BF9;&#x8D44;&#x6E90;&#x7684;&#x8C03;&#x5EA6;&#x89E6;&#x53D1;&#x76F8;&#x5E94;&#x7684;&#x94A9;&#x5B50;&#x4EE5;&#x8FBE;&#x5230;&#x8D44;&#x6E90;&#x8FFD;&#x8E2A;&#x548C;&#x9650;&#x5236;&#x7684;&#x76EE;&#x7684;&#x3002;</p>
+<p>&#x672F;&#x8BED;</p>
+<ul>
+<li>task&#xFF08;&#x4EFB;&#x52A1;&#xFF09;&#xFF1A;cgroups&#x7684;&#x672F;&#x8BED;&#x4E2D;&#xFF0C;task&#x5C31;&#x8868;&#x793A;&#x7CFB;&#x7EDF;&#x7684;&#x4E00;&#x4E2A;&#x8FDB;&#x7A0B;&#x3002;</li>
+<li>cgroup&#xFF08;&#x63A7;&#x5236;&#x7EC4;&#xFF09;&#xFF1A;cgroups &#x4E2D;&#x7684;&#x8D44;&#x6E90;&#x63A7;&#x5236;&#x90FD;&#x4EE5;cgroup&#x4E3A;&#x5355;&#x4F4D;&#x5B9E;&#x73B0;&#x3002;cgroup&#x8868;&#x793A;&#x6309;&#x67D0;&#x79CD;&#x8D44;&#x6E90;&#x63A7;&#x5236;&#x6807;&#x51C6;&#x5212;&#x5206;&#x800C;&#x6210;&#x7684;&#x4EFB;&#x52A1;&#x7EC4;&#xFF0C;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF;&#x3002;&#x4E00;&#x4E2A;&#x4EFB;&#x52A1;&#x53EF;&#x4EE5;&#x52A0;&#x5165;&#x67D0;&#x4E2A;cgroup&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x4ECE;&#x67D0;&#x4E2A;cgroup&#x8FC1;&#x79FB;&#x5230;&#x53E6;&#x5916;&#x4E00;&#x4E2A;cgroup&#x3002;</li>
+<li>subsystem&#xFF08;&#x5B50;&#x7CFB;&#x7EDF;&#xFF09;&#xFF1A;cgroups&#x4E2D;&#x7684;subsystem&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x8D44;&#x6E90;&#x8C03;&#x5EA6;&#x63A7;&#x5236;&#x5668;&#xFF08;Resource Controller&#xFF09;&#x3002;&#x6BD4;&#x5982;CPU&#x5B50;&#x7CFB;&#x7EDF;&#x53EF;&#x4EE5;&#x63A7;&#x5236;CPU&#x65F6;&#x95F4;&#x5206;&#x914D;&#xFF0C;&#x5185;&#x5B58;&#x5B50;&#x7CFB;&#x7EDF;&#x53EF;&#x4EE5;&#x9650;&#x5236;cgroup&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x91CF;&#x3002;</li>
+<li>hierarchy&#xFF08;&#x5C42;&#x7EA7;&#x6811;&#xFF09;&#xFF1A;hierarchy&#x7531;&#x4E00;&#x7CFB;&#x5217;cgroup&#x4EE5;&#x4E00;&#x4E2A;&#x6811;&#x72B6;&#x7ED3;&#x6784;&#x6392;&#x5217;&#x800C;&#x6210;&#xFF0C;&#x6BCF;&#x4E2A;hierarchy&#x901A;&#x8FC7;&#x7ED1;&#x5B9A;&#x5BF9;&#x5E94;&#x7684;subsystem&#x8FDB;&#x884C;&#x8D44;&#x6E90;&#x8C03;&#x5EA6;&#x3002;hierarchy&#x4E2D;&#x7684;cgroup&#x8282;&#x70B9;&#x53EF;&#x4EE5;&#x5305;&#x542B;&#x96F6;&#x6216;&#x591A;&#x4E2A;&#x5B50;&#x8282;&#x70B9;&#xFF0C;&#x5B50;&#x8282;&#x70B9;&#x7EE7;&#x627F;&#x7236;&#x8282;&#x70B9;&#x7684;&#x5C5E;&#x6027;&#x3002;&#x6574;&#x4E2A;&#x7CFB;&#x7EDF;&#x53EF;&#x4EE5;&#x6709;&#x591A;&#x4E2A;hierarchy</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;hchen@ubuntu:~$ mount -t cgroup #&#x6216;&#x8005;&#x4F7F;&#x7528;lssubsys -m&#x547D;&#x4EE4;&#xFF1A; # lscgroup &#x67E5;&#x8BE2;</span><br><span class="line">cgroup on /sys/fs/cgroup/cpuset type cgroup (rw,relatime,cpuset)</span><br><span class="line">cgroup on /sys/fs/cgroup/cpu type cgroup (rw,relatime,cpu)</span><br><span class="line">cgroup on /sys/fs/cgroup/cpuacct type cgroup (rw,relatime,cpuacct)</span><br><span class="line">cgroup on /sys/fs/cgroup/memory type cgroup (rw,relatime,memory)</span><br><span class="line">cgroup on /sys/fs/cgroup/devices type cgroup (rw,relatime,devices)</span><br><span class="line">cgroup on /sys/fs/cgroup/freezer type cgroup (rw,relatime,freezer)</span><br><span class="line">cgroup on /sys/fs/cgroup/blkio type cgroup (rw,relatime,blkio)</span><br><span class="line">cgroup on /sys/fs/cgroup/net_prio type cgroup (rw,net_prio)</span><br><span class="line">cgroup on /sys/fs/cgroup/net_cls type cgroup (rw,net_cls)</span><br><span class="line">cgroup on /sys/fs/cgroup/perf_event type cgroup (rw,relatime,perf_event)</span><br><span class="line">cgroup on /sys/fs/cgroup/hugetlb type cgroup (rw,relatime,hugetlb)</span><br></pre></td></tr></table></figure>
+
+<h2 id="cgroups&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x6CD5;&#x7B80;&#x4ECB;"><a href="#cgroups&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x6CD5;&#x7B80;&#x4ECB;" class="headerlink" title="cgroups&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x6CD5;&#x7B80;&#x4ECB;"></a>cgroups&#x7684;&#x4F7F;&#x7528;&#x65B9;&#x6CD5;&#x7B80;&#x4ECB;</h2><h3 id="&#x67E5;&#x8BE2;cgroup&#x53CA;&#x5B50;&#x7CFB;&#x7EDF;&#x6302;&#x8F7D;&#x72B6;&#x6001;"><a href="#&#x67E5;&#x8BE2;cgroup&#x53CA;&#x5B50;&#x7CFB;&#x7EDF;&#x6302;&#x8F7D;&#x72B6;&#x6001;" class="headerlink" title="&#x67E5;&#x8BE2;cgroup&#x53CA;&#x5B50;&#x7CFB;&#x7EDF;&#x6302;&#x8F7D;&#x72B6;&#x6001;"></a>&#x67E5;&#x8BE2;cgroup&#x53CA;&#x5B50;&#x7CFB;&#x7EDF;&#x6302;&#x8F7D;&#x72B6;&#x6001;</h3><ul>
+<li>&#x67E5;&#x770B;&#x6240;&#x6709;&#x7684;cgroup&#xFF1A;lscgroup</li>
+<li>&#x67E5;&#x770B;&#x6240;&#x6709;&#x652F;&#x6301;&#x7684;&#x5B50;&#x7CFB;&#x7EDF;&#xFF1A;lssubsys -a</li>
+<li>&#x67E5;&#x770B;&#x6240;&#x6709;&#x5B50;&#x7CFB;&#x7EDF;&#x6302;&#x8F7D;&#x7684;&#x4F4D;&#x7F6E;&#xFF1A; lssubsys &#x2013;m</li>
+<li>&#x67E5;&#x770B;&#x5355;&#x4E2A;&#x5B50;&#x7CFB;&#x7EDF;&#xFF08;&#x5982;memory&#xFF09;&#x6302;&#x8F7D;&#x4F4D;&#x7F6E;&#xFF1A;lssubsys &#x2013;m memory</li>
+</ul>
+<h3 id="&#x521B;&#x5EFA;hierarchy&#x5C42;&#x7EA7;&#x5E76;&#x6302;&#x8F7D;&#x5B50;&#x7CFB;&#x7EDF;"><a href="#&#x521B;&#x5EFA;hierarchy&#x5C42;&#x7EA7;&#x5E76;&#x6302;&#x8F7D;&#x5B50;&#x7CFB;&#x7EDF;" class="headerlink" title="&#x521B;&#x5EFA;hierarchy&#x5C42;&#x7EA7;&#x5E76;&#x6302;&#x8F7D;&#x5B50;&#x7CFB;&#x7EDF;"></a>&#x521B;&#x5EFA;hierarchy&#x5C42;&#x7EA7;&#x5E76;&#x6302;&#x8F7D;&#x5B50;&#x7CFB;&#x7EDF;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x865A;&#x62DF;&#x673A;&#x64CD;&#x4F5C;&#xFF0C;&#x4F1A;&#x5F71;&#x54CD;&#x7CFB;&#x7EDF;</span><br><span class="line">mount -t tmpfs cgroups /sys/fs/cgroup</span><br><span class="line">mkdir /sys/fs/cgroup/cg1</span><br><span class="line">// mount -t cgroup -o subsystems name /cgroup/name</span><br><span class="line">mount &#x2013;t cgroup &#x2013;o cpu,memory cpu_and_mem /sys/fs/cgroup/cg1</span><br></pre></td></tr></table></figure>
+
+<h2 id="CPU-&#x9650;&#x5236;"><a href="#CPU-&#x9650;&#x5236;" class="headerlink" title="CPU &#x9650;&#x5236;"></a>CPU &#x9650;&#x5236;</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;root@container:~# mkdir -p  /sys/fs/cgroup/cpu/wanglei</span><br><span class="line">root@container:~# cat /sys/fs/cgroup/cpu/wanglei/cpu.cfs_quota_us</span><br><span class="line">-1</span><br><span class="line"></span><br><span class="line">&#x6D4B;&#x8BD5;&#x7A0B;&#x5E8F;</span><br><span class="line">int main(void)</span><br><span class="line">{</span><br><span class="line">    int i = 0;</span><br><span class="line">    for(;;) i++;</span><br><span class="line">    return 0;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">top-&gt;</span><br><span class="line">  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND</span><br><span class="line"> 6121 root      20   0    4224    684    612 R 100.0  0.0   0:05.89 a.out</span><br><span class="line"></span><br><span class="line">&#x5F00;&#x59CB;&#x9650;&#x5236;,6121&#x67E5;&#x5230;&#x662F;&#x6D4B;&#x8BD5;&#x7A0B;&#x5E8F;&#x7684;pid</span><br><span class="line">root@container:~/testcgroup# echo 20000 &gt; /sys/fs/cgroup/cpu/wanglei/cpu.cfs_quota_us</span><br><span class="line">root@container:~/testcgroup# echo 6121 &gt;&gt; /sys/fs/cgroup/cpu/wanglei/tasks</span><br><span class="line"></span><br><span class="line">top-&gt;</span><br><span class="line">  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND</span><br><span class="line"> 6121 root      20   0    4224    684    612 R  20.3  0.0   2:31.16 a.out</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0B;&#x9762;&#x7684;&#x4EE3;&#x7801;&#x662F;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x7684;&#x793A;&#x4F8B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;#define _GNU_SOURCE         /* See feature_test_macros(7) */</span><br><span class="line"></span><br><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;sys/stat.h&gt;</span><br><span class="line">#include &lt;sys/types.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;sys/syscall.h&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">const int NUM_THREADS = 5;</span><br><span class="line"></span><br><span class="line">void *thread_main(void *threadid)</span><br><span class="line">{</span><br><span class="line">    /* &#x628A;&#x81EA;&#x5DF1;&#x52A0;&#x5165;cgroup&#x4E2D;&#xFF08;syscall(SYS_gettid)&#x4E3A;&#x5F97;&#x5230;&#x7EBF;&#x7A0B;&#x7684;&#x7CFB;&#x7EDF;tid&#xFF09; */</span><br><span class="line">    char cmd[128];</span><br><span class="line">    sprintf(cmd, &quot;echo %ld &gt;&gt; /sys/fs/cgroup/cpu/haoel/tasks&quot;, syscall(SYS_gettid));</span><br><span class="line">    system(cmd); </span><br><span class="line">    sprintf(cmd, &quot;echo %ld &gt;&gt; /sys/fs/cgroup/cpuset/haoel/tasks&quot;, syscall(SYS_gettid));</span><br><span class="line">    system(cmd);</span><br><span class="line"></span><br><span class="line">    long tid;</span><br><span class="line">    tid = (long)threadid;</span><br><span class="line">    printf(&quot;Hello World! It&apos;s me, thread #%ld, pid #%ld!\n&quot;, tid, syscall(SYS_gettid));</span><br><span class="line"></span><br><span class="line">    int a=0; </span><br><span class="line">    while(1) {</span><br><span class="line">        a++;</span><br><span class="line">    }</span><br><span class="line">    pthread_exit(NULL);</span><br><span class="line">}</span><br><span class="line">int main (int argc, char *argv[])</span><br><span class="line">{</span><br><span class="line">    int num_threads;</span><br><span class="line">    if (argc &gt; 1){</span><br><span class="line">        num_threads = atoi(argv[1]);</span><br><span class="line">    }</span><br><span class="line">    if (num_threads&lt;=0 || num_threads&gt;=100){</span><br><span class="line">        num_threads = NUM_THREADS;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /* &#x8BBE;&#x7F6E;CPU&#x5229;&#x7528;&#x7387;&#x4E3A;50% */</span><br><span class="line">    mkdir(&quot;/sys/fs/cgroup/cpu/haoel&quot;, 755);</span><br><span class="line">    system(&quot;echo 50000 &gt; /sys/fs/cgroup/cpu/haoel/cpu.cfs_quota_us&quot;);</span><br><span class="line"></span><br><span class="line">    mkdir(&quot;/sys/fs/cgroup/cpuset/haoel&quot;, 755);</span><br><span class="line">    /* &#x9650;&#x5236;CPU&#x53EA;&#x80FD;&#x4F7F;&#x7528;#2&#x6838;&#x548C;#3&#x6838; */</span><br><span class="line">    system(&quot;echo \&quot;2,3\&quot; &gt; /sys/fs/cgroup/cpuset/haoel/cpuset.cpus&quot;);</span><br><span class="line"></span><br><span class="line">    pthread_t* threads = (pthread_t*) malloc (sizeof(pthread_t)*num_threads);</span><br><span class="line">    int rc;</span><br><span class="line">    long t;</span><br><span class="line">    for(t=0; t&lt;num_threads; t++){</span><br><span class="line">        printf(&quot;In main: creating thread %ld\n&quot;, t);</span><br><span class="line">        rc = pthread_create(&amp;threads[t], NULL, thread_main, (void *)t);</span><br><span class="line">        if (rc){</span><br><span class="line">            printf(&quot;ERROR; return code from pthread_create() is %d\n&quot;, rc);</span><br><span class="line">            exit(-1);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /* Last thing that main() should do */</span><br><span class="line">    pthread_exit(NULL);</span><br><span class="line">    free(threads);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x9650;&#x5236;"><a href="#&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x9650;&#x5236;" class="headerlink" title="&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x9650;&#x5236;"></a>&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x9650;&#x5236;</h2><p>&#x6D4B;&#x8BD5;&#x4E00;&#x4E2A;&#x8017;&#x5C3D;&#x5185;&#x5B58;&#x7684;&#x7A0B;&#x5E8F;&#xFF0C;&#x9650;&#x5236;&#x5185;&#x5B58;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x7A0B;&#x5E8F;&#x4F1A;&#x88AB;kill</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">#include &lt;sys/types.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line"></span><br><span class="line">int main(void)</span><br><span class="line">{</span><br><span class="line">    int size = 0;</span><br><span class="line">    int chunk_size = 512;</span><br><span class="line">    void *p = NULL;</span><br><span class="line"></span><br><span class="line">    while(1) {</span><br><span class="line"></span><br><span class="line">        if ((p = malloc(chunk_size)) == NULL) {</span><br><span class="line">            printf(&quot;out of memory!!\n&quot;);</span><br><span class="line">            break;</span><br><span class="line">        }</span><br><span class="line">        memset(p, 1, chunk_size);</span><br><span class="line">        size += chunk_size;</span><br><span class="line">        printf(&quot;[%d] - memory is allocated [%8d] bytes \n&quot;, getpid(), size);</span><br><span class="line">        sleep(1);</span><br><span class="line">    }</span><br><span class="line">    return 0;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;root@container:~/testcgroup# mkdir /sys/fs/cgroup/memory/wanglei</span><br><span class="line">root@container:~/testcgroup# echo 64k &gt; /sys/fs/cgroup/memory/wanglei/memory.limit_in_bytes</span><br><span class="line">root@container:~/testcgroup# echo [pid] &gt; /sys/fs/cgroup/memory/haoel/tasks^C</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x78C1;&#x76D8;I-O&#x9650;&#x5236;"><a href="#&#x78C1;&#x76D8;I-O&#x9650;&#x5236;" class="headerlink" title="&#x78C1;&#x76D8;I/O&#x9650;&#x5236;"></a>&#x78C1;&#x76D8;I/O&#x9650;&#x5236;</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;root@container:~/testcgroup# dd if=/dev/vda of=/dev/null</span><br><span class="line"></span><br><span class="line">iotop-&gt;</span><br><span class="line">  TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN     IO&gt;    COMMAND</span><br><span class="line">15660 be/4 root       73.81 M/s    0.00 B/s  0.00 % 82.47 % dd if=/dev/vda of=/dev/null</span><br><span class="line"></span><br><span class="line">root@container:~/testcgroup# mkdir /sys/fs/cgroup/blkio/wanglei</span><br><span class="line">root@container:~/testcgroup# ls -l /dev/vda</span><br><span class="line">brw-rw---- 1 root disk 253, 0 Sep 25 12:49 /dev/vda</span><br><span class="line">root@container:~/testcgroup# echo &quot;253:0 1048576&quot; &gt; /sys/fs/cgroup/blkio/wanglei/blkio.throttle.read_bps_device</span><br><span class="line">root@container:~/testcgroup# echo 16221  &gt; /sys/fs/cgroup/blkio/wanglei/tasks</span><br><span class="line"></span><br><span class="line">iotop-&gt; &#x9650;&#x5236;&#x5F97;&#x4E0D;&#x662F;&#x5F88;&#x51C6;</span><br><span class="line">  TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN     IO&gt;    COMMAND</span><br><span class="line">16221 be/4 root      978.21 K/s    0.00 B/s  0.00 % 95.28 % dd if=/dev/vda of=/dev/null</span><br></pre></td></tr></table></figure>
+
+<h2 id="CGroup&#x7684;&#x5B50;&#x7CFB;&#x7EDF;"><a href="#CGroup&#x7684;&#x5B50;&#x7CFB;&#x7EDF;" class="headerlink" title="CGroup&#x7684;&#x5B50;&#x7CFB;&#x7EDF;"></a>CGroup&#x7684;&#x5B50;&#x7CFB;&#x7EDF;</h2><ul>
+<li>blkio&#xFF1A; &#x8FD9;&#x4E2A;subsystem&#x53EF;&#x4EE5;&#x4E3A;&#x5757;&#x8BBE;&#x5907;&#x8BBE;&#x5B9A;&#x8F93;&#x5165;/&#x8F93;&#x51FA;&#x9650;&#x5236;&#xFF0C;&#x6BD4;&#x5982;&#x7269;&#x7406;&#x9A71;&#x52A8;&#x8BBE;&#x5907;&#xFF08;&#x5305;&#x62EC;&#x78C1;&#x76D8;&#x3001;&#x56FA;&#x6001;&#x786C;&#x76D8;&#x3001;USB&#x7B49;&#xFF09;&#x3002;</li>
+<li>cpu&#xFF1A; &#x8FD9;&#x4E2A;subsystem&#x4F7F;&#x7528;&#x8C03;&#x5EA6;&#x7A0B;&#x5E8F;&#x63A7;&#x5236;task&#x5BF9;CPU&#x7684;&#x4F7F;&#x7528;&#x3002;</li>
+<li>cpuacct&#xFF1A; &#x8FD9;&#x4E2A;subsystem&#x81EA;&#x52A8;&#x751F;&#x6210;cgroup&#x4E2D;task&#x5BF9;CPU&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x7684;&#x62A5;&#x544A;&#x3002;</li>
+<li>cpuset&#xFF1A; &#x8FD9;&#x4E2A;subsystem&#x53EF;&#x4EE5;&#x4E3A;cgroup&#x4E2D;&#x7684;task&#x5206;&#x914D;&#x72EC;&#x7ACB;&#x7684;CPU&#xFF08;&#x6B64;&#x5904;&#x9488;&#x5BF9;&#x591A;&#x5904;&#x7406;&#x5668;&#x7CFB;&#x7EDF;&#xFF09;&#x548C;&#x5185;&#x5B58;&#x3002;</li>
+<li>devices &#x8FD9;&#x4E2A;subsystem&#x53EF;&#x4EE5;&#x5F00;&#x542F;&#x6216;&#x5173;&#x95ED;cgroup&#x4E2D;task&#x5BF9;&#x8BBE;&#x5907;&#x7684;&#x8BBF;&#x95EE;&#x3002;</li>
+<li>freezer &#x8FD9;&#x4E2A;subsystem&#x53EF;&#x4EE5;&#x6302;&#x8D77;&#x6216;&#x6062;&#x590D;cgroup&#x4E2D;&#x7684;task&#x3002;</li>
+<li>memory &#x8FD9;&#x4E2A;subsystem&#x53EF;&#x4EE5;&#x8BBE;&#x5B9A;cgroup&#x4E2D;task&#x5BF9;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x91CF;&#x7684;&#x9650;&#x5B9A;&#xFF0C;&#x5E76;&#x4E14;&#x81EA;&#x52A8;&#x751F;&#x6210;&#x8FD9;&#x4E9B;task&#x5BF9;&#x5185;&#x5B58;&#x8D44;&#x6E90;&#x4F7F;&#x7528;&#x60C5;&#x51B5;&#x7684;&#x62A5;&#x544A;&#x3002;</li>
+<li>perfevent &#x8FD9;&#x4E2A;subsystem&#x4F7F;&#x7528;&#x540E;&#x4F7F;&#x5F97;cgroup&#x4E2D;&#x7684;task&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x7EDF;&#x4E00;&#x7684;&#x6027;&#x80FD;&#x6D4B;&#x8BD5;&#x3002;{![perf: Linux CPU&#x6027;&#x80FD;&#x63A2;&#x6D4B;&#x5668;&#xFF0C;&#x8BE6;&#x89C1;<a href="/external_links/dc07f9b78d7d47604a887fb751616d52.html" target="blank" rel="noopener">perf.wiki.kernel.org/index.php/M&#x2026;</a></li>
+<li>*net_cls &#x8FD9;&#x4E2A;subsystem Docker&#x6CA1;&#x6709;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#xFF0C;&#x5B83;&#x901A;&#x8FC7;&#x4F7F;&#x7528;&#x7B49;&#x7EA7;&#x8BC6;&#x522B;&#x7B26;(classid)&#x6807;&#x8BB0;&#x7F51;&#x7EDC;&#x6570;&#x636E;&#x5305;&#xFF0C;&#x4ECE;&#x800C;&#x5141;&#x8BB8; Linux &#x6D41;&#x91CF;&#x63A7;&#x5236;&#x7A0B;&#x5E8F;&#xFF08;TC&#xFF1A;Traffic Controller&#xFF09;&#x8BC6;&#x522B;&#x4ECE;&#x5177;&#x4F53;cgroup&#x4E2D;&#x751F;&#x6210;&#x7684;&#x6570;&#x636E;&#x5305;&#x3002;</li>
+</ul>
+<h2 id="&#x7EC4;&#x7EC7;&#x7ED3;&#x6784;&#x4E0E;&#x57FA;&#x672C;&#x89C4;&#x5219;"><a href="#&#x7EC4;&#x7EC7;&#x7ED3;&#x6784;&#x4E0E;&#x57FA;&#x672C;&#x89C4;&#x5219;" class="headerlink" title="&#x7EC4;&#x7EC7;&#x7ED3;&#x6784;&#x4E0E;&#x57FA;&#x672C;&#x89C4;&#x5219;"></a>&#x7EC4;&#x7EC7;&#x7ED3;&#x6784;&#x4E0E;&#x57FA;&#x672C;&#x89C4;&#x5219;</h2><p>&#x5927;&#x5BB6;&#x5728;namespace&#x6280;&#x672F;&#x7684;&#x8BB2;&#x89E3;&#x4E2D;&#x5DF2;&#x7ECF;&#x4E86;&#x89E3;&#x5230;&#xFF0C;&#x4F20;&#x7EDF;&#x7684;Unix&#x8FDB;&#x7A0B;&#x7BA1;&#x7406;&#xFF0C;&#x5B9E;&#x9645;&#x4E0A;&#x662F;&#x5148;&#x542F;&#x52A8;init&#x8FDB;&#x7A0B;&#x4F5C;&#x4E3A;&#x6839;&#x8282;&#x70B9;&#xFF0C;&#x518D;&#x7531;init&#x8282;&#x70B9;&#x521B;&#x5EFA;&#x5B50;&#x8FDB;&#x7A0B;&#x4F5C;&#x4E3A;&#x5B50;&#x8282;&#x70B9;&#xFF0C;&#x800C;&#x6BCF;&#x4E2A;&#x5B50;&#x8282;&#x70B9;&#x7531;&#x53EF;&#x4EE5;&#x521B;&#x5EFA;&#x65B0;&#x7684;&#x5B50;&#x8282;&#x70B9;&#xFF0C;&#x5982;&#x6B64;&#x5F80;&#x590D;&#xFF0C;&#x5F62;&#x6210;&#x4E00;&#x4E2A;&#x6811;&#x72B6;&#x7ED3;&#x6784;&#x3002;&#x800C;cgroups&#x4E5F;&#x662F;&#x7C7B;&#x4F3C;&#x7684;&#x6811;&#x72B6;&#x7ED3;&#x6784;&#xFF0C;&#x5B50;&#x8282;&#x70B9;&#x90FD;&#x4ECE;&#x7236;&#x8282;&#x70B9;&#x7EE7;&#x627F;&#x5C5E;&#x6027;&#x3002;</p>
+<p>&#x5B83;&#x4EEC;&#x6700;&#x5927;&#x7684;&#x4E0D;&#x540C;&#x5728;&#x4E8E;&#xFF0C;&#x7CFB;&#x7EDF;&#x4E2D;cgroup&#x6784;&#x6210;&#x7684;hierarchy&#x53EF;&#x4EE5;&#x5141;&#x8BB8;&#x5B58;&#x5728;&#x591A;&#x4E2A;&#x3002;&#x5982;&#x679C;&#x8FDB;&#x7A0B;&#x6A21;&#x578B;&#x662F;&#x7531;init&#x4F5C;&#x4E3A;&#x6839;&#x8282;&#x70B9;&#x6784;&#x6210;&#x7684;&#x4E00;&#x68F5;&#x6811;&#x7684;&#x8BDD;&#xFF0C;&#x90A3;&#x4E48;cgroups&#x7684;&#x6A21;&#x578B;&#x5219;&#x662F;&#x7531;&#x591A;&#x4E2A;hierarchy&#x6784;&#x6210;&#x7684;&#x68EE;&#x6797;&#x3002;&#x8FD9;&#x6837;&#x505A;&#x7684;&#x76EE;&#x7684;&#x4E5F;&#x5F88;&#x597D;&#x7406;&#x89E3;&#xFF0C;&#x5982;&#x679C;&#x53EA;&#x6709;&#x4E00;&#x4E2A;hierarchy&#xFF0C;&#x90A3;&#x4E48;&#x6240;&#x6709;&#x7684;task&#x90FD;&#x8981;&#x53D7;&#x5230;&#x7ED1;&#x5B9A;&#x5176;&#x4E0A;&#x7684;subsystem&#x7684;&#x9650;&#x5236;&#xFF0C;&#x4F1A;&#x7ED9;&#x90A3;&#x4E9B;&#x4E0D;&#x9700;&#x8981;&#x8FD9;&#x4E9B;&#x9650;&#x5236;&#x7684;task&#x9020;&#x6210;&#x9EBB;&#x70E6;&#x3002;</p>
+<p>&#x4E86;&#x89E3;&#x4E86;cgroups&#x7684;&#x7EC4;&#x7EC7;&#x7ED3;&#x6784;&#xFF0C;&#x6211;&#x4EEC;&#x518D;&#x6765;&#x4E86;&#x89E3;cgroup&#x3001;task&#x3001;subsystem&#x4EE5;&#x53CA;hierarchy&#x56DB;&#x8005;&#x95F4;&#x7684;&#x76F8;&#x4E92;&#x5173;&#x7CFB;&#x53CA;&#x5176;&#x57FA;&#x672C;&#x89C4;&#x5219;{![&#x53C2;&#x7167;&#x81EA;&#xFF1A;<a href="/external_links/83a8001b8164522aea03e0c74ea640bb.html" target="blank" rel="noopener">access.redhat.com/documentati&#x2026;</a></p>
+<p>&#x89C4;&#x5219;1&#xFF1A; &#x540C;&#x4E00;&#x4E2A;hierarchy&#x53EF;&#x4EE5;&#x9644;&#x52A0;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;subsystem&#x3002;&#x5982;&#x4E0B;&#x56FE;1&#xFF0C;cpu&#x548C;memory&#x7684;subsystem&#x9644;&#x52A0;&#x5230;&#x4E86;&#x4E00;&#x4E2A;hierarchy&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/7cec89dfc91eb3df234c07d5772f6ae6f0b047007d4a8d4531a26e51be653f90" alt="image"></p>
+<p>image</p>
+<p>&#x56FE;1 &#x540C;&#x4E00;&#x4E2A;hierarchy&#x53EF;&#x4EE5;&#x9644;&#x52A0;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;subsystem</p>
+<p>&#x89C4;&#x5219;2&#xFF1A; &#x4E00;&#x4E2A;subsystem&#x53EF;&#x4EE5;&#x9644;&#x52A0;&#x5230;&#x591A;&#x4E2A;hierarchy&#xFF0C;&#x5F53;&#x4E14;&#x4EC5;&#x5F53;&#x8FD9;&#x4E9B;hierarchy&#x53EA;&#x6709;&#x8FD9;&#x552F;&#x4E00;&#x4E00;&#x4E2A;subsystem&#x3002;&#x5982;&#x4E0B;&#x56FE;2&#xFF0C;&#x5C0F;&#x5708;&#x4E2D;&#x7684;&#x6570;&#x5B57;&#x8868;&#x793A;subsystem&#x9644;&#x52A0;&#x7684;&#x65F6;&#x95F4;&#x987A;&#x5E8F;&#xFF0C;CPU subsystem&#x9644;&#x52A0;&#x5230;hierarchy A&#x7684;&#x540C;&#x65F6;&#x4E0D;&#x80FD;&#x518D;&#x9644;&#x52A0;&#x5230;hierarchy B&#xFF0C;&#x56E0;&#x4E3A;hierarchy B&#x5DF2;&#x7ECF;&#x9644;&#x52A0;&#x4E86;memory subsystem&#x3002;&#x5982;&#x679C;hierarchy B&#x4E0E;hierarchy A&#x72B6;&#x6001;&#x76F8;&#x540C;&#xFF0C;&#x6CA1;&#x6709;&#x9644;&#x52A0;&#x8FC7;memory subsystem&#xFF0C;&#x90A3;&#x4E48;CPU subsystem&#x540C;&#x65F6;&#x9644;&#x52A0;&#x5230;&#x4E24;&#x4E2A;hierarchy&#x662F;&#x53EF;&#x4EE5;&#x7684;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/1deb6215b34d7b38a4a9966b876fb8d0c8b8b7a1b4bec16a659971bf169c4355" alt="image"></p>
+<p>image</p>
+<p>&#x56FE;2 &#x4E00;&#x4E2A;&#x5DF2;&#x7ECF;&#x9644;&#x52A0;&#x5728;&#x67D0;&#x4E2A;hierarchy&#x4E0A;&#x7684;subsystem&#x4E0D;&#x80FD;&#x9644;&#x52A0;&#x5230;&#x5176;&#x4ED6;&#x542B;&#x6709;&#x522B;&#x7684;subsystem&#x7684;hierarchy&#x4E0A;<br>&#x89C4;&#x5219;3&#xFF1A; &#x7CFB;&#x7EDF;&#x6BCF;&#x6B21;&#x65B0;&#x5EFA;&#x4E00;&#x4E2A;hierarchy&#x65F6;&#xFF0C;&#x8BE5;&#x7CFB;&#x7EDF;&#x4E0A;&#x7684;&#x6240;&#x6709;task&#x9ED8;&#x8BA4;&#x6784;&#x6210;&#x4E86;&#x8FD9;&#x4E2A;&#x65B0;&#x5EFA;&#x7684;hierarchy&#x7684;&#x521D;&#x59CB;&#x5316;cgroup&#xFF0C;&#x8FD9;&#x4E2A;cgroup&#x4E5F;&#x79F0;&#x4E3A;root cgroup&#x3002;&#x5BF9;&#x4E8E;&#x4F60;&#x521B;&#x5EFA;&#x7684;&#x6BCF;&#x4E2A;hierarchy&#xFF0C;task&#x53EA;&#x80FD;&#x5B58;&#x5728;&#x4E8E;&#x5176;&#x4E2D;&#x4E00;&#x4E2A;cgroup&#x4E2D;&#xFF0C;&#x5373;&#x4E00;&#x4E2A;task&#x4E0D;&#x80FD;&#x5B58;&#x5728;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;hierarchy&#x7684;&#x4E0D;&#x540C;cgroup&#x4E2D;&#xFF0C;&#x4F46;&#x662F;&#x4E00;&#x4E2A;task&#x53EF;&#x4EE5;&#x5B58;&#x5728;&#x5728;&#x4E0D;&#x540C;hierarchy&#x4E2D;&#x7684;&#x591A;&#x4E2A;cgroup&#x4E2D;&#x3002;&#x5982;&#x679C;&#x64CD;&#x4F5C;&#x65F6;&#x628A;&#x4E00;&#x4E2A;task&#x6DFB;&#x52A0;&#x5230;&#x540C;&#x4E00;&#x4E2A;hierarchy&#x4E2D;&#x7684;&#x53E6;&#x4E00;&#x4E2A;cgroup&#x4E2D;&#xFF0C;&#x5219;&#x4F1A;&#x4ECE;&#x7B2C;&#x4E00;&#x4E2A;cgroup&#x4E2D;&#x79FB;&#x9664;&#x3002;&#x5728;&#x4E0B;&#x56FE;3&#x4E2D;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;httpd&#x8FDB;&#x7A0B;&#x5DF2;&#x7ECF;&#x52A0;&#x5165;&#x5230;hierarchy A&#x4E2D;&#x7684;/cg1&#x800C;&#x4E0D;&#x80FD;&#x52A0;&#x5165;&#x540C;&#x4E00;&#x4E2A;hierarchy&#x4E2D;&#x7684;/cg2&#xFF0C;&#x4F46;&#x662F;&#x53EF;&#x4EE5;&#x52A0;&#x5165;hierarchy B&#x4E2D;&#x7684;/cg3&#x3002;&#x5B9E;&#x9645;&#x4E0A;&#x4E0D;&#x5141;&#x8BB8;&#x52A0;&#x5165;&#x540C;&#x4E00;&#x4E2A;hierarchy&#x4E2D;&#x7684;&#x5176;&#x4ED6;cgroup&#x91CE;&#x751F;&#x4E3A;&#x4E86;&#x9632;&#x6B62;&#x51FA;&#x73B0;&#x77DB;&#x76FE;&#xFF0C;&#x5982;CPU subsystem&#x4E3A;/cg1&#x5206;&#x914D;&#x4E86;30%&#xFF0C;&#x800C;&#x4E3A;/cg2&#x5206;&#x914D;&#x4E86;50%&#xFF0C;&#x6B64;&#x65F6;&#x5982;&#x679C;httpd&#x5728;&#x8FD9;&#x4E24;&#x4E2A;cgroup&#x4E2D;&#xFF0C;&#x5C31;&#x4F1A;&#x51FA;&#x73B0;&#x77DB;&#x76FE;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/b2ecb4620cea557a645d7a6fa5776be50dbc7bf6e3a215560673ef3f552fad30" alt="image"></p>
+<p>image</p>
+<p>&#x56FE;3 &#x4E00;&#x4E2A;task&#x4E0D;&#x80FD;&#x5C5E;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;hierarchy&#x7684;&#x4E0D;&#x540C;cgroup<br>&#x89C4;&#x5219;4&#xFF1A; &#x8FDB;&#x7A0B;&#xFF08;task&#xFF09;&#x5728;fork&#x81EA;&#x8EAB;&#x65F6;&#x521B;&#x5EFA;&#x7684;&#x5B50;&#x4EFB;&#x52A1;&#xFF08;child task&#xFF09;&#x9ED8;&#x8BA4;&#x4E0E;&#x539F;task&#x5728;&#x540C;&#x4E00;&#x4E2A;cgroup&#x4E2D;&#xFF0C;&#x4F46;&#x662F;child task&#x5141;&#x8BB8;&#x88AB;&#x79FB;&#x52A8;&#x5230;&#x4E0D;&#x540C;&#x7684;cgroup&#x4E2D;&#x3002;&#x5373;fork&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x7236;&#x5B50;&#x8FDB;&#x7A0B;&#x95F4;&#x662F;&#x5B8C;&#x5168;&#x72EC;&#x7ACB;&#x7684;&#x3002;&#x5982;&#x4E0B;&#x56FE;4&#x4E2D;&#xFF0C;&#x5C0F;&#x5708;&#x4E2D;&#x7684;&#x6570;&#x5B57;&#x8868;&#x793A;task &#x51FA;&#x73B0;&#x7684;&#x65F6;&#x95F4;&#x987A;&#x5E8F;&#xFF0C;&#x5F53;httpd&#x521A;fork&#x51FA;&#x53E6;&#x4E00;&#x4E2A;httpd&#x65F6;&#xFF0C;&#x5728;&#x540C;&#x4E00;&#x4E2A;hierarchy&#x4E2D;&#x7684;&#x540C;&#x4E00;&#x4E2A;cgroup&#x4E2D;&#x3002;&#x4F46;&#x662F;&#x968F;&#x540E;&#x5982;&#x679C;PID&#x4E3A;4840&#x7684;httpd&#x9700;&#x8981;&#x79FB;&#x52A8;&#x5230;&#x5176;&#x4ED6;cgroup&#x4E5F;&#x662F;&#x53EF;&#x4EE5;&#x7684;&#xFF0C;&#x56E0;&#x4E3A;&#x7236;&#x5B50;&#x4EFB;&#x52A1;&#x95F4;&#x5DF2;&#x7ECF;&#x72EC;&#x7ACB;&#x3002;&#x603B;&#x7ED3;&#x8D77;&#x6765;&#x5C31;&#x662F;&#xFF1A;&#x521D;&#x59CB;&#x5316;&#x65F6;&#x5B50;&#x4EFB;&#x52A1;&#x4E0E;&#x7236;&#x4EFB;&#x52A1;&#x5728;&#x540C;&#x4E00;&#x4E2A;cgroup&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x79CD;&#x5173;&#x7CFB;&#x968F;&#x540E;&#x53EF;&#x4EE5;&#x6539;&#x53D8;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p5/raw/master/img/229cec92b4fa1401e3e4e8b2607e9135a9f11cf24c452d2b44ec07fa41f46935" alt="image"></p>
+<p>image</p>
+<p>&#x56FE;4 &#x521A;fork&#x51FA;&#x7684;&#x5B50;&#x8FDB;&#x7A0B;&#x5728;&#x521D;&#x59CB;&#x72B6;&#x6001;&#x4E0E;&#x5176;&#x7236;&#x8FDB;&#x7A0B;&#x5904;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;cgroup<br>&#x8865;&#x5145;<br>==</p>
+<h2 id="systemd"><a href="#systemd" class="headerlink" title="systemd"></a>systemd</h2><p>kuberlet&#x6709;&#x4E2A;systemd&#x6587;&#x6863;&#x8FD9;&#x4E48;&#x8BF4;&#xFF1A;<br>This document describes how the node should be configured, and a set of enhancements that should be made to the kubelet to better integrate with these distributions independent of container runtime.</p>
+<p>The Kernel direction for cgroup management is to promote a single-writer model rather than allowing multiple processes to independently write to parts of the file-system.In distributions that run systemd as their init system, the cgroup tree is managed by systemd by default since it implicitly interacts with the cgroup tree when starting units. Manual changes made by other cgroup managers to the cgroup tree are not guaranteed to be preserved unless systemd is made aware. systemd can be told to ignore sections of the cgroup tree by configuring the unit to have the Delegate= option.</p>
+<p>&#x662F;&#x8BF4;&#x518D;linux&#x4E0A;&#x5C31;&#x63A8;&#x8350;&#x7528;systemd&#x6765;&#x7BA1;&#x7406;cgroup?&#x800C;&#x4E14;&#x8FD9;&#x6837;&#x8FD8;&#x80FD;&#x4E0D;&#x4F9D;&#x8D56;docker?</p>
+<h2 id="sysctl"><a href="#sysctl" class="headerlink" title="sysctl"></a>sysctl</h2><p>&#x9664;&#x4E86;cgroup&#x505A;&#x8D44;&#x6E90;&#x9650;&#x5236;&#xFF0C;&#x5BF9;&#x4E8E;&#x7CFB;&#x7EDF;&#x7EA7;&#x522B;&#x7684;&#x8D44;&#x6E90;&#x9650;&#x5236;&#x76F8;&#x5173;&#x7684;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;sysctl&#x547D;&#x4EE4;<br>sysctl&#x547D;&#x4EE4;&#x88AB;&#x7528;&#x4E8E;&#x5728;&#x5185;&#x6838;&#x8FD0;&#x884C;&#x65F6;&#x52A8;&#x6001;&#x5730;&#x4FEE;&#x6539;&#x5185;&#x6838;&#x7684;&#x8FD0;&#x884C;&#x53C2;&#x6570;&#xFF0C;&#x53EF;&#x7528;&#x7684;&#x5185;&#x6838;&#x53C2;&#x6570;&#x5728;&#x76EE;&#x5F55;/proc/sys&#x4E2D;&#x3002;&#x5B83;&#x5305;&#x542B;&#x4E00;&#x4E9B;TCP/ip&#x5806;&#x6808;&#x548C;&#x865A;&#x62DF;&#x5185;&#x5B58;&#x7CFB;&#x7EDF;&#x7684;&#x9AD8;&#x7EA7;&#x9009;&#x9879;&#xFF0C; &#x8FD9;&#x53EF;&#x4EE5;&#x8BA9;&#x6709;&#x7ECF;&#x9A8C;&#x7684;&#x7BA1;&#x7406;&#x5458;&#x63D0;&#x9AD8;&#x5F15;&#x4EBA;&#x6CE8;&#x76EE;&#x7684;&#x7CFB;&#x7EDF;&#x6027;&#x80FD;&#x3002;&#x7528;sysctl&#x53EF;&#x4EE5;&#x8BFB;&#x53D6;&#x8BBE;&#x7F6E;&#x8D85;&#x8FC7;&#x4E94;&#x767E;&#x4E2A;&#x7CFB;&#x7EDF;&#x53D8;&#x91CF;&#x3002;<br> Parameters are available via /proc/sys/ virtual process file system. The parameters cover various subsystems such as:</p>
+<ul>
+<li>kernel (common prefix: kernel.)</li>
+<li>networking (common prefix: net.)</li>
+<li>virtual memory (common prefix: vm.)</li>
+<li>MDADM (common prefix: dev.)</li>
+</ul>
+<p>docker privileged&#x53EF;&#x4EE5;&#x8BBE;&#x7F6E;&#xFF0C;&#x4F46;&#x662F;&#x6709;&#x4E9B;&#x53C2;&#x6570;&#x662F;&#x7CFB;&#x7EDF;&#x7EA7;&#x522B;&#x7684;&#xFF0C;&#x6CA1;&#x6709;&#x9694;&#x79BB;&#xFF0C;&#x6539;&#x4E86;&#x4F1A;&#x5F71;&#x54CD;&#x522B;&#x7684;&#x5BB9;&#x5668;&#x3002;&#x540E;&#x6765;&#x7248;&#x672C;docker&#x505A;&#x4E86;&#x9650;&#x5236;&#xFF0C;&#x53EA;&#x80FD;&#x6539;&#x4E00;&#x4E9B;whitelisted sysctls&#x3002;<br>Only namespaced kernel parameters can be modified<br>k8s&#x91CC;&#x9762;&#x7684;&#x8BBE;&#x7F6E;<a href="/external_links/0058fbbf97a30fd40c4a71fb1bf10aca.html" target="blank" rel="noopener">github.com/kubernetes/&#x2026;</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/59ebab96df95b0ec2f43adecf6cb5743.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Linux-Docker-后端-Node-js/" rel="tag"># Linux,Docker,后端,Node.js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903512485150734.html" rel="next" title="Go 中任务队列的简单实现">
+                <i class="fa fa-chevron-left"></i> Go 中任务队列的简单实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903512040538125.html" rel="prev" title="痛入爽出 HTTP/2：代码实战1">
+                痛入爽出 HTTP/2：代码实战1 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#namespace"><span class="nav-number">1.</span> <span class="nav-text">namespace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分类"><span class="nav-number">1.1.1.</span> <span class="nav-text">分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三个系统调用"><span class="nav-number">1.1.2.</span> <span class="nav-text">三个系统调用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#详解"><span class="nav-number">1.2.</span> <span class="nav-text">详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UTS-Namespace"><span class="nav-number">1.2.1.</span> <span class="nav-text">UTS Namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IPC-Namespace"><span class="nav-number">1.2.2.</span> <span class="nav-text">IPC Namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PID-Namespace"><span class="nav-number">1.2.3.</span> <span class="nav-text">PID Namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mount-Namespace"><span class="nav-number">1.2.4.</span> <span class="nav-text">Mount Namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#User-Namespace"><span class="nav-number">1.2.5.</span> <span class="nav-text">User Namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Network-Namespace"><span class="nav-number">1.2.6.</span> <span class="nav-text">Network Namespace</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CGroup"><span class="nav-number">2.</span> <span class="nav-text">CGroup</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cgroups的使用方法简介"><span class="nav-number">2.1.</span> <span class="nav-text">cgroups的使用方法简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查询cgroup及子系统挂载状态"><span class="nav-number">2.1.1.</span> <span class="nav-text">查询cgroup及子系统挂载状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建hierarchy层级并挂载子系统"><span class="nav-number">2.1.2.</span> <span class="nav-text">创建hierarchy层级并挂载子系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CPU-限制"><span class="nav-number">2.2.</span> <span class="nav-text">CPU 限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存使用限制"><span class="nav-number">2.3.</span> <span class="nav-text">内存使用限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#磁盘I-O限制"><span class="nav-number">2.4.</span> <span class="nav-text">磁盘I/O限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CGroup的子系统"><span class="nav-number">2.5.</span> <span class="nav-text">CGroup的子系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组织结构与基本规则"><span class="nav-number">2.6.</span> <span class="nav-text">组织结构与基本规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#systemd"><span class="nav-number">2.7.</span> <span class="nav-text">systemd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sysctl"><span class="nav-number">2.8.</span> <span class="nav-text">sysctl</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

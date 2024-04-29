@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x9700;&amp;#x8981;&amp;#x5177;&amp;#x5907;&amp;#x7684;&amp;#x77E5;&amp;#x8BC6;&amp;#x70B9;&amp;#x95ED;&amp;#x5305;&amp;#x95ED;&amp;#x5305;&amp;#x548C;&amp;#x533F;&amp;#x540D;&amp;#x51FD;&amp;#x6570;&amp;#x5728;PHP5.3.0&amp;#x4E2D;&amp;#x5F15;&amp;#x5165;&amp;#x7684;&amp;#x3002; &amp;#x95ED">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP容器--Pimple运行流程浅析">
+<meta property="og:url" content="https://dev.newban.cn/6844903517258252301.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x9700;&amp;#x8981;&amp;#x5177;&amp;#x5907;&amp;#x7684;&amp;#x77E5;&amp;#x8BC6;&amp;#x70B9;&amp;#x95ED;&amp;#x5305;&amp;#x95ED;&amp;#x5305;&amp;#x548C;&amp;#x533F;&amp;#x540D;&amp;#x51FD;&amp;#x6570;&amp;#x5728;PHP5.3.0&amp;#x4E2D;&amp;#x5F15;&amp;#x5165;&amp;#x7684;&amp;#x3002; &amp;#x95ED">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-28T06:04:14.449Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP容器--Pimple运行流程浅析">
+<meta name="twitter:description" content="&amp;#x9700;&amp;#x8981;&amp;#x5177;&amp;#x5907;&amp;#x7684;&amp;#x77E5;&amp;#x8BC6;&amp;#x70B9;&amp;#x95ED;&amp;#x5305;&amp;#x95ED;&amp;#x5305;&amp;#x548C;&amp;#x533F;&amp;#x540D;&amp;#x51FD;&amp;#x6570;&amp;#x5728;PHP5.3.0&amp;#x4E2D;&amp;#x5F15;&amp;#x5165;&amp;#x7684;&amp;#x3002; &amp;#x95ED">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6844903517258252301.html">
+
+
+
+
+
+  <title>PHP容器--Pimple运行流程浅析 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PHP容器--Pimple运行流程浅析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-28T15:16:55+08:00">
+                2017-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="&#x9700;&#x8981;&#x5177;&#x5907;&#x7684;&#x77E5;&#x8BC6;&#x70B9;"><a href="#&#x9700;&#x8981;&#x5177;&#x5907;&#x7684;&#x77E5;&#x8BC6;&#x70B9;" class="headerlink" title="&#x9700;&#x8981;&#x5177;&#x5907;&#x7684;&#x77E5;&#x8BC6;&#x70B9;"></a>&#x9700;&#x8981;&#x5177;&#x5907;&#x7684;&#x77E5;&#x8BC6;&#x70B9;</h2><h3 id="&#x95ED;&#x5305;"><a href="#&#x95ED;&#x5305;" class="headerlink" title="&#x95ED;&#x5305;"></a>&#x95ED;&#x5305;</h3><p>&#x95ED;&#x5305;&#x548C;&#x533F;&#x540D;&#x51FD;&#x6570;&#x5728;PHP5.3.0&#x4E2D;&#x5F15;&#x5165;&#x7684;&#x3002;</p>
+<p>&#x95ED;&#x5305;&#x662F;&#x6307;&#xFF1A;&#x521B;&#x5EFA;&#x65F6;&#x5C01;&#x88C5;&#x5468;&#x56F4;&#x72B6;&#x6001;&#x7684;&#x51FD;&#x6570;&#x3002;&#x5373;&#x4F7F;&#x95ED;&#x5305;&#x6240;&#x5904;&#x7684;&#x73AF;&#x5883;&#x4E0D;&#x5B58;&#x5728;&#x4E86;&#xFF0C;&#x95ED;&#x5305;&#x4E2D;&#x5C01;&#x88C5;&#x7684;&#x72B6;&#x6001;&#x4F9D;&#x7136;&#x5B58;&#x5728;&#x3002;</p>
+<blockquote>
+<p>&#x7406;&#x8BBA;&#x4E0A;&#xFF0C;&#x95ED;&#x5305;&#x548C;&#x533F;&#x540D;&#x51FD;&#x6570;&#x662F;&#x4E0D;&#x540C;&#x7684;&#x6982;&#x5FF5;&#x3002;&#x4F46;&#x662F;PHP&#x5C06;&#x5176;&#x89C6;&#x4F5C;&#x76F8;&#x540C;&#x6982;&#x5FF5;&#x3002;&#x5B9E;&#x9645;&#x4E0A;&#xFF0C;&#x95ED;&#x5305;&#x548C;&#x533F;&#x540D;&#x51FD;&#x6570;&#x662F;&#x4F2A;&#x88C5;&#x6210;&#x51FD;&#x6570;&#x7684;&#x5BF9;&#x8C61;&#x3002;&#x4ED6;&#x4EEC;&#x662F;Closure&#x7C7B;&#x7684;&#x5B9E;&#x4F8B;&#x3002;</p>
+</blockquote>
+<p>&#x95ED;&#x5305;&#x548C;&#x5B57;&#x7B26;&#x4E32;&#x3001;&#x6574;&#x6570;&#x4E00;&#x6837;&#xFF0C;&#x662F;&#x4E00;&#x7B49;&#x503C;&#x7C7B;&#x578B;&#x3002;</p>
+<p>&#x521B;&#x5EFA;&#x95ED;&#x5305;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;?php</span><br><span class="line">$closure = function ($name) {</span><br><span class="line">    return &apos;Hello &apos; . $name;</span><br><span class="line">};</span><br><span class="line">echo $closure(&apos;nesfo&apos;);//Hello nesfo</span><br><span class="line">var_dump(method_exists($closure, &apos;__invoke&apos;));//true</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>&#x6211;&#x4EEC;&#x4E4B;&#x6240;&#x4EE5;&#x80FD;&#x8C03;&#x7528;<code>$closure</code>&#x53D8;&#x91CF;&#xFF0C;&#x662F;&#x56E0;&#x4E3A;&#x8FD9;&#x4E2A;&#x53D8;&#x91CF;&#x7684;&#x503C;&#x662F;&#x4E00;&#x4E2A;&#x95ED;&#x5305;&#xFF0C;&#x800C;&#x4E14;&#x95ED;&#x5305;&#x5BF9;&#x8C61;&#x5B9E;&#x73B0;&#x4E86;<code>__invoke()</code>&#x9B54;&#x672F;&#x65B9;&#x6CD5;&#x3002;&#x53EA;&#x8981;&#x53D8;&#x91CF;&#x540D;&#x540E;&#x6709;<code>()</code>,PHP&#x5C31;&#x4F1A;&#x67E5;&#x627E;&#x5E76;&#x8C03;&#x7528;<code>__invoke()</code>&#x65B9;&#x6CD5;&#x3002;</p>
+</blockquote>
+<p>&#x901A;&#x5E38;&#x4F1A;&#x628A;PHP&#x95ED;&#x5305;&#x5F53;&#x4F5C;&#x51FD;&#x6570;&#x7684;&#x56DE;&#x8C03;&#x4F7F;&#x7528;&#x3002;</p>
+<p><code>array_map()</code>, <code>preg_replace_callback()</code>&#x65B9;&#x6CD5;&#x90FD;&#x4F1A;&#x7528;&#x5230;&#x56DE;&#x8C03;&#x51FD;&#x6570;&#xFF0C;&#x8FD9;&#x662F;&#x4F7F;&#x7528;&#x95ED;&#x5305;&#x7684;&#x6700;&#x4F73;&#x65F6;&#x673A;&#xFF01;</p>
+<p>&#x4E3E;&#x4E2A;&#x4F8B;&#x5B50;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;?php</span><br><span class="line">$numbersPlusOne = array_map(function ($number) {</span><br><span class="line">    return $number + 1;</span><br><span class="line">}, [1, 2, 3]);</span><br><span class="line">print_r($numbersPlusOne);</span><br></pre></td></tr></table></figure>
+
+<p>&#x5F97;&#x5230;&#x7ED3;&#x679C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;[2, 3, 4]</span><br></pre></td></tr></table></figure>
+
+<p>&#x5728;&#x95ED;&#x5305;&#x51FA;&#x73B0;&#x4E4B;&#x524D;&#xFF0C;&#x53EA;&#x80FD;&#x5355;&#x72EC;&#x521B;&#x5EFA;&#x5177;&#x540D;&#x51FD;&#x6570;&#xFF0C;&#x7136;&#x540E;&#x4F7F;&#x7528;&#x540D;&#x79F0;&#x5F15;&#x7528;&#x90A3;&#x4E2A;&#x51FD;&#x6570;&#x3002;&#x8FD9;&#x4E48;&#x505A;&#xFF0C;&#x4EE3;&#x7801;&#x6267;&#x884C;&#x4F1A;&#x7A0D;&#x5FAE;&#x6162;&#x70B9;&#xFF0C;&#x800C;&#x4E14;&#x628A;&#x56DE;&#x8C03;&#x7684;&#x5B9E;&#x73B0;&#x548C;&#x4F7F;&#x7528;&#x573A;&#x666F;&#x9694;&#x79BB;&#x4E86;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&lt;?php</span><br><span class="line">function incrementNum ($number) {</span><br><span class="line">    return $number + 1;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">$numbersPlusOne = array_map(&apos;incrementNum&apos;, [1, 2, 3]);</span><br><span class="line">print_r($numbersPlusOne);</span><br></pre></td></tr></table></figure>
+
+<h3 id="SPL"><a href="#SPL" class="headerlink" title="SPL"></a>SPL</h3><h4 id="ArrayAccess"><a href="#ArrayAccess" class="headerlink" title="ArrayAccess"></a>ArrayAccess</h4><p>&#x5B9E;&#x73B0;ArrayAccess&#x63A5;&#x53E3;&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x5F97;object&#x50CF;array&#x90A3;&#x6837;&#x64CD;&#x4F5C;&#x3002;ArrayAccess&#x63A5;&#x53E3;&#x5305;&#x542B;&#x56DB;&#x4E2A;&#x5FC5;&#x987B;&#x5B9E;&#x73B0;&#x7684;&#x65B9;&#x6CD5;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;interface ArrayAccess {</span><br><span class="line">    //&#x68C0;&#x67E5;&#x4E00;&#x4E2A;&#x504F;&#x79FB;&#x4F4D;&#x7F6E;&#x662F;&#x5426;&#x5B58;&#x5728; </span><br><span class="line">    public mixed offsetExists ( mixed $offset  );</span><br><span class="line">    </span><br><span class="line">    //&#x83B7;&#x53D6;&#x4E00;&#x4E2A;&#x504F;&#x79FB;&#x4F4D;&#x7F6E;&#x7684;&#x503C; </span><br><span class="line">    public mixed offsetGet( mixed $offset  );</span><br><span class="line">    </span><br><span class="line">    //&#x8BBE;&#x7F6E;&#x4E00;&#x4E2A;&#x504F;&#x79FB;&#x4F4D;&#x7F6E;&#x7684;&#x503C; </span><br><span class="line">    public mixed offsetSet ( mixed $offset  );</span><br><span class="line">    </span><br><span class="line">    //&#x590D;&#x4F4D;&#x4E00;&#x4E2A;&#x504F;&#x79FB;&#x4F4D;&#x7F6E;&#x7684;&#x503C; </span><br><span class="line">    public mixed offsetUnset  ( mixed $offset  );</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h4 id="SplObjectStorage"><a href="#SplObjectStorage" class="headerlink" title="SplObjectStorage"></a>SplObjectStorage</h4><p>SplObjectStorage&#x7C7B;&#x5B9E;&#x73B0;&#x4E86;&#x4EE5;&#x5BF9;&#x8C61;&#x4E3A;&#x952E;&#x7684;&#x6620;&#x5C04;&#xFF08;map&#xFF09;&#x6216;&#x5BF9;&#x8C61;&#x7684;&#x96C6;&#x5408;&#xFF08;&#x5982;&#x679C;&#x5FFD;&#x7565;&#x4F5C;&#x4E3A;&#x952E;&#x7684;&#x5BF9;&#x8C61;&#x6240;&#x5BF9;&#x5E94;&#x7684;&#x6570;&#x636E;&#xFF09;&#x8FD9;&#x79CD;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x3002;&#x8FD9;&#x4E2A;&#x7C7B;&#x7684;&#x5B9E;&#x4F8B;&#x5F88;&#x50CF;&#x4E00;&#x4E2A;&#x6570;&#x7EC4;&#xFF0C;&#x4F46;&#x662F;&#x5B83;&#x6240;&#x5B58;&#x653E;&#x7684;&#x5BF9;&#x8C61;&#x90FD;&#x662F;&#x552F;&#x4E00;&#x3002;&#x8BE5;&#x7C7B;&#x7684;&#x53E6;&#x4E00;&#x4E2A;&#x7279;&#x70B9;&#x662F;&#xFF0C;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4ECE;&#x4E2D;&#x5220;&#x9664;&#x6307;&#x5B9A;&#x7684;&#x5BF9;&#x8C61;&#xFF0C;&#x800C;&#x4E0D;&#x9700;&#x8981;&#x904D;&#x5386;&#x6216;&#x641C;&#x7D22;&#x6574;&#x4E2A;&#x96C6;&#x5408;&#x3002;</p>
+<h3 id="class&#x8BED;&#x6CD5;"><a href="#class&#x8BED;&#x6CD5;" class="headerlink" title="::class&#x8BED;&#x6CD5;"></a><code>::class</code>&#x8BED;&#x6CD5;</h3><p>&#x56E0;&#x4E3A; <code>::class</code> &#x8868;&#x793A;&#x662F;&#x5B57;&#x7B26;&#x4E32;&#x3002;&#x7528; <code>::class</code> &#x7684;&#x597D;&#x5904;&#x5728;&#x4E8E; IDE &#x91CC;&#x9762;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x6539;&#x540D;&#x4E00;&#x4E2A; class&#xFF0C;&#x7136;&#x540E; IDE &#x81EA;&#x52A8;&#x5904;&#x7406;&#x76F8;&#x5173;&#x5F15;&#x7528;&#x3002;<br>&#x540C;&#x65F6;&#xFF0C;PHP &#x6267;&#x884C;&#x76F8;&#x5173;&#x4EE3;&#x7801;&#x65F6;&#xFF0C;&#x662F;&#x4E0D;&#x4F1A;&#x5148;&#x52A0;&#x8F7D;&#x76F8;&#x5173; class &#x7684;&#x3002;</p>
+<p>&#x540C;&#x7406;&#xFF0C;&#x4EE3;&#x7801;&#x81EA;&#x52A8;&#x5316;&#x68C0;&#x67E5; inspect &#x4E5F;&#x53EF;&#x4EE5;&#x6B63;&#x786E;&#x8BC6;&#x522B; class&#x3002;</p>
+<h2 id="Pimple&#x5BB9;&#x5668;&#x6D41;&#x7A0B;&#x6D45;&#x6790;"><a href="#Pimple&#x5BB9;&#x5668;&#x6D41;&#x7A0B;&#x6D45;&#x6790;" class="headerlink" title="Pimple&#x5BB9;&#x5668;&#x6D41;&#x7A0B;&#x6D45;&#x6790;"></a>Pimple&#x5BB9;&#x5668;&#x6D41;&#x7A0B;&#x6D45;&#x6790;</h2><p>Pimpl&#x662F;php&#x793E;&#x533A;&#x4E2D;&#x6BD4;&#x8F83;&#x6D41;&#x884C;&#x7684;&#x5BB9;&#x5668;&#x3002;&#x4EE3;&#x7801;&#x4E0D;&#x662F;&#x5F88;&#x591A;&#xFF0C;&#x8BE6;&#x89C1;<a href="/external_links/2260a34615d6163578f1dba7a7c1ac32.html" target="blank" rel="noopener">github.com/silexphp/P.&#x2026;</a> &#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x7684;&#x5E94;&#x7528;&#x53EF;&#x4EE5;&#x57FA;&#x4E8E;Pimple&#x5F00;&#x53D1;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;namespace EasyWeChat\Foundation;</span><br><span class="line"></span><br><span class="line">use Pimple\Container;</span><br><span class="line"></span><br><span class="line">class Application extends Container</span><br><span class="line">{</span><br><span class="line">    /**</span><br><span class="line">     * Service Providers.</span><br><span class="line">     *</span><br><span class="line">     * @var array</span><br><span class="line">     */</span><br><span class="line">    protected $providers = [</span><br><span class="line">        ServiceProviders\ServerServiceProvider::class,</span><br><span class="line">        ServiceProviders\UserServiceProvider::class</span><br><span class="line">    ];</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Application constructor.</span><br><span class="line">     *</span><br><span class="line">     * @param array $config</span><br><span class="line">     */</span><br><span class="line">    public function __construct($config)</span><br><span class="line">    {</span><br><span class="line">        parent::__construct();</span><br><span class="line"></span><br><span class="line">        $this[&apos;config&apos;] = function () use ($config) {</span><br><span class="line">            return new Config($config);</span><br><span class="line">        };</span><br><span class="line"></span><br><span class="line">        if ($this[&apos;config&apos;][&apos;debug&apos;]) {</span><br><span class="line">            error_reporting(E_ALL);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        $this-&gt;registerProviders();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Add a provider.</span><br><span class="line">     *</span><br><span class="line">     * @param string $provider</span><br><span class="line">     *</span><br><span class="line">     * @return Application</span><br><span class="line">     */</span><br><span class="line">    public function addProvider($provider)</span><br><span class="line">    {</span><br><span class="line">        array_push($this-&gt;providers, $provider);</span><br><span class="line"></span><br><span class="line">        return $this;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Set providers.</span><br><span class="line">     *</span><br><span class="line">     * @param array $providers</span><br><span class="line">     */</span><br><span class="line">    public function setProviders(array $providers)</span><br><span class="line">    {</span><br><span class="line">        $this-&gt;providers = [];</span><br><span class="line"></span><br><span class="line">        foreach ($providers as $provider) {</span><br><span class="line">            $this-&gt;addProvider($provider);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Return all providers.</span><br><span class="line">     *</span><br><span class="line">     * @return array</span><br><span class="line">     */</span><br><span class="line">    public function getProviders()</span><br><span class="line">    {</span><br><span class="line">        return $this-&gt;providers;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Magic get access.</span><br><span class="line">     *</span><br><span class="line">     * @param string $id</span><br><span class="line">     *</span><br><span class="line">     * @return mixed</span><br><span class="line">     */</span><br><span class="line">    public function __get($id)</span><br><span class="line">    {</span><br><span class="line">        return $this-&gt;offsetGet($id);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Magic set access.</span><br><span class="line">     *</span><br><span class="line">     * @param string $id</span><br><span class="line">     * @param mixed  $value</span><br><span class="line">     */</span><br><span class="line">    public function __set($id, $value)</span><br><span class="line">    {</span><br><span class="line">        $this-&gt;offsetSet($id, $value);</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5982;&#x4F55;&#x4F7F;&#x7528;&#x6211;&#x4EEC;&#x7684;&#x5E94;&#x7528;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$app = new Application([]);</span><br><span class="line">$user = $app-&gt;user;</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E4B;&#x540E;&#x6211;&#x4EEC;&#x5C31;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>$user</code>&#x5BF9;&#x8C61;&#x7684;&#x65B9;&#x6CD5;&#x4E86;&#x3002;&#x6211;&#x4EEC;&#x53D1;&#x73B0;&#x5176;&#x5B9E;&#x5E76;&#x6CA1;&#x6709;<code>$this-&gt;user</code>&#x8FD9;&#x4E2A;&#x5C5E;&#x6027;&#xFF0C;&#x4F46;&#x662F;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x3002;&#x4E3B;&#x8981;&#x662F;&#x8FD9;&#x4E24;&#x4E2A;&#x65B9;&#x6CD5;&#x8D77;&#x7684;&#x4F5C;&#x7528;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public function offsetSet($id, $value){}</span><br><span class="line">public function offsetGet($id){}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x5C06;&#x89E3;&#x91CA;&#x5728;&#x6267;&#x884C;&#x8FD9;&#x4E24;&#x53E5;&#x4EE3;&#x7801;&#xFF0C;Pimple&#x505A;&#x4E86;&#x4EC0;&#x4E48;&#x3002;&#x4F46;&#x5728;&#x89E3;&#x91CA;&#x8FD9;&#x4E2A;&#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x4EEC;&#x5148;&#x770B;&#x770B;&#x5BB9;&#x5668;&#x7684;&#x4E00;&#x4E9B;&#x6838;&#x5FC3;&#x6982;&#x5FF5;&#x3002;</p>
+<h3 id="&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;"><a href="#&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;" class="headerlink" title="&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;"></a>&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;</h3><p>&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x662F;&#x8FDE;&#x63A5;&#x5BB9;&#x5668;&#x4E0E;&#x5177;&#x4F53;&#x529F;&#x80FD;&#x5B9E;&#x73B0;&#x7C7B;&#x7684;&#x6865;&#x6881;&#x3002;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x9700;&#x8981;&#x5B9E;&#x73B0;&#x63A5;&#x53E3;<code>ServiceProviderInterface</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;namespace Pimple;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Pimple service provider interface.</span><br><span class="line"> *</span><br><span class="line"> * @author  Fabien Potencier</span><br><span class="line"> * @author  Dominik Zogg</span><br><span class="line"> */</span><br><span class="line">interface ServiceProviderInterface</span><br><span class="line">{</span><br><span class="line">    /**</span><br><span class="line">     * Registers services on the given container.</span><br><span class="line">     *</span><br><span class="line">     * This method should only be used to configure services and parameters.</span><br><span class="line">     * It should not get services.</span><br><span class="line">     *</span><br><span class="line">     * @param Container $pimple A container instance</span><br><span class="line">     */</span><br><span class="line">    public function register(Container $pimple);</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6240;&#x6709;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x5FC5;&#x987B;&#x5B9E;&#x73B0;&#x63A5;&#x53E3;<code>register</code>&#x65B9;&#x6CD5;&#x3002;</p>
+<p>&#x6211;&#x4EEC;&#x7684;&#x5E94;&#x7528;&#x91CC;&#x9ED8;&#x8BA4;&#x6709;2&#x4E2A;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;protected $providers = [</span><br><span class="line">    ServiceProviders\ServerServiceProvider::class,</span><br><span class="line">    ServiceProviders\UserServiceProvider::class</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;UserServiceProvider&#x4E3A;&#x4F8B;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x5176;&#x4EE3;&#x7801;&#x5B9E;&#x73B0;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;namespace EasyWeChat\Foundation\ServiceProviders;</span><br><span class="line"></span><br><span class="line">use EasyWeChat\User\User;</span><br><span class="line">use Pimple\Container;</span><br><span class="line">use Pimple\ServiceProviderInterface;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Class UserServiceProvider.</span><br><span class="line"> */</span><br><span class="line">class UserServiceProvider implements ServiceProviderInterface</span><br><span class="line">{</span><br><span class="line">    /**</span><br><span class="line">     * Registers services on the given container.</span><br><span class="line">     *</span><br><span class="line">     * This method should only be used to configure services and parameters.</span><br><span class="line">     * It should not get services.</span><br><span class="line">     *</span><br><span class="line">     * @param Container $pimple A container instance</span><br><span class="line">     */</span><br><span class="line">    public function register(Container $pimple)</span><br><span class="line">    {</span><br><span class="line">        $pimple[&apos;user&apos;] = function ($pimple) {</span><br><span class="line">            return new User($pimple[&apos;access_token&apos;]);</span><br><span class="line">        };</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6211;&#x4EEC;&#x770B;&#x5230;&#xFF0C;&#x8BE5;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x7684;&#x6CE8;&#x518C;&#x65B9;&#x6CD5;&#x4F1A;&#x7ED9;&#x5BB9;&#x5668;&#x589E;&#x52A0;&#x5C5E;&#x6027;<code>user</code>&#xFF0C;&#x4F46;&#x662F;&#x8FD4;&#x56DE;&#x7684;&#x4E0D;&#x662F;&#x5BF9;&#x8C61;&#xFF0C;&#x800C;&#x662F;&#x4E00;&#x4E2A;&#x95ED;&#x5305;&#x3002;&#x8FD9;&#x4E2A;&#x540E;&#x9762;&#x6211;&#x518D;&#x505A;&#x8BB2;&#x89E3;&#x3002;</p>
+<h3 id="&#x670D;&#x52A1;&#x6CE8;&#x518C;"><a href="#&#x670D;&#x52A1;&#x6CE8;&#x518C;" class="headerlink" title="&#x670D;&#x52A1;&#x6CE8;&#x518C;"></a>&#x670D;&#x52A1;&#x6CE8;&#x518C;</h3><p>&#x6211;&#x4EEC;&#x5728;Application&#x91CC;&#x6784;&#x9020;&#x51FD;&#x6570;&#x91CC;&#x4F7F;&#x7528;<code>$this-&gt;registerProviders();</code>&#x5BF9;&#x6240;&#x6709;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x8FDB;&#x884C;&#x4E86;&#x6CE8;&#x518C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;private function registerProviders()</span><br><span class="line">{</span><br><span class="line">    foreach ($this-&gt;providers as $provider) {</span><br><span class="line">        $this-&gt;register(new $provider());</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4ED4;&#x7EC6;&#x770B;&#xFF0C;&#x6211;&#x4EEC;&#x53D1;&#x73B0;&#x8FD9;&#x91CC;&#x5B9E;&#x4F8B;&#x5316;&#x4E86;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#xFF0C;&#x5E76;&#x8C03;&#x7528;&#x4E86;&#x5BB9;&#x5668;Pimple&#x7684;<code>register</code>&#x65B9;&#x6CD5;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;public function register(ServiceProviderInterface $provider, array $values = array())</span><br><span class="line">{</span><br><span class="line">    $provider-&gt;register($this);</span><br><span class="line"></span><br><span class="line">    foreach ($values as $key =&gt; $value) {</span><br><span class="line">        $this[$key] = $value;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    return $this;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x800C;&#x8FD9;&#x91CC;&#x8C03;&#x7528;&#x4E86;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x7684;<code>register</code>&#x65B9;&#x6CD5;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x6211;&#x4EEC;&#x5728;&#x4E0A;&#x4E00;&#x8282;&#x4E2D;&#x63D0;&#x5230;&#x7684;&#xFF1A;&#x6CE8;&#x518C;&#x65B9;&#x6CD5;&#x7ED9;&#x5BB9;&#x5668;&#x589E;&#x52A0;&#x4E86;&#x5C5E;&#x6027;<code>user</code>&#xFF0C;&#x4F46;&#x8FD4;&#x56DE;&#x7684;&#x4E0D;&#x662F;&#x5BF9;&#x8C61;&#xFF0C;&#x800C;&#x662F;&#x4E00;&#x4E2A;&#x95ED;&#x5305;&#x3002;</p>
+<p>&#x5F53;&#x6211;&#x4EEC;&#x7ED9;&#x5BB9;&#x5668;Pimple&#x6DFB;&#x52A0;&#x5C5E;&#x6027;<code>user</code>&#x7684;&#x540C;&#x65F6;&#xFF0C;&#x4F1A;&#x8C03;&#x7528;<code>offsetSet($id, $value)</code>&#x65B9;&#x6CD5;&#xFF1A;&#x7ED9;&#x5BB9;&#x5668;Pimple&#x7684;&#x5C5E;&#x6027;<code>values</code>&#x3001;<code>keys</code>&#x5206;&#x522B;&#x8D4B;&#x503C;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$this-&gt;values[$id] = $value;</span><br><span class="line">$this-&gt;keys[$id] = true;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5230;&#x8FD9;&#x91CC;&#xFF0C;&#x6211;&#x4EEC;&#x8FD8;&#x6CA1;&#x6709;&#x5B9E;&#x4F8B;&#x5316;&#x771F;&#x6B63;&#x63D0;&#x4F9B;&#x5B9E;&#x9645;&#x529F;&#x80FD;&#x7684;&#x7C7B;<code>EasyWeChat\User\Usr</code>&#x3002;&#x4F46;&#x5DF2;&#x7ECF;&#x5B8C;&#x6210;&#x4E86;&#x670D;&#x52A1;&#x63D0;&#x4F9B;&#x8005;&#x7684;&#x6CE8;&#x518C;&#x5DE5;&#x4F5C;&#x3002;</p>
+<p>&#x5F53;&#x6211;&#x4EEC;&#x8FD0;&#x884C;&#x5230;&#x8FD9;&#x91CC;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$user = $app-&gt;user;</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F1A;&#x8C03;&#x7528;<code>offsetGet($id)</code>&#x5E76;&#x8FDB;&#x884C;&#x5B9E;&#x4F8B;&#x5316;&#x771F;&#x6B63;&#x7684;&#x7C7B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$raw = $this-&gt;values[$id];</span><br><span class="line">$val = $this-&gt;values[$id] = $raw($this);</span><br><span class="line">$this-&gt;raw[$id] = $raw;</span><br><span class="line"></span><br><span class="line">$this-&gt;frozen[$id] = true;</span><br><span class="line"></span><br><span class="line">return $val;</span><br></pre></td></tr></table></figure>
+
+<p><code>$raw</code>&#x83B7;&#x53D6;&#x7684;&#x662F;&#x95ED;&#x5305;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;$pimple[&apos;user&apos;] = function ($pimple) {</span><br><span class="line">    return new User($pimple[&apos;access_token&apos;]);</span><br><span class="line">};</span><br></pre></td></tr></table></figure>
+
+<p><code>$raw($this)</code>&#x8FD4;&#x56DE;&#x7684;&#x662F;&#x5B9E;&#x4F8B;&#x5316;&#x7684;&#x5BF9;&#x8C61;User&#x3002;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x53EA;&#x6709;&#x5B9E;&#x9645;&#x8C03;&#x7528;&#x624D;&#x4F1A;&#x53BB;&#x5B9E;&#x4F8B;&#x5316;&#x5177;&#x4F53;&#x7684;&#x7C7B;&#x3002;&#x540E;&#x9762;&#x6211;&#x4EEC;&#x5C31;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;<code>$this[&apos;user&apos;]</code>&#x6216;&#x8005;<code>$this-&gt;user</code>&#x8C03;&#x7528;User&#x7C7B;&#x91CC;&#x7684;&#x65B9;&#x6CD5;&#x4E86;&#x3002;</p>
+<p>&#x5F53;&#x7136;&#xFF0C;Pimple&#x91CC;&#x8FD8;&#x6709;&#x5F88;&#x591A;&#x7279;&#x6027;&#x503C;&#x5F97;&#x6211;&#x4EEC;&#x53BB;&#x6DF1;&#x5165;&#x7814;&#x7A76;&#xFF0C;&#x8FD9;&#x91CC;&#x4E0D;&#x505A;&#x8FC7;&#x591A;&#x8BB2;&#x89E3;&#x3002;</p>
+<h2 id="&#x53C2;&#x8003;"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</h2><p>1&#x3001;PHP: &#x6570;&#x7EC4;&#x5F0F;&#x8BBF;&#x95EE; - Manual<br><a href="/external_links/72e021d8d5f3e94b6179bec9406892a1.html" target="blank" rel="noopener">php.net/manual/zh/c&#x2026;</a><br>2&#x3001;&#x5229;&#x7528; SPL &#x5FEB;&#x901F;&#x5B9E;&#x73B0; Observer &#x8BBE;&#x8BA1;&#x6A21;&#x5F0F;<br><a href="/external_links/5c70dfe82955fae13f36ddc7ed25dd41.html" target="blank" rel="noopener">www.ibm.com/developer..&#x2026;</a><br>3&#x3001;Pimple</p>
+<ul>
+<li>A simple PHP Dependency Injection Container<br><a href="/external_links/a473c752a2f8f8a5b72cce644acbe816.html" target="blank" rel="noopener">pimple.sensiolabs.org/</a><br>4&#x3001;Laravel&#x6E90;&#x7801;&#x91CC;&#x9762;&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x7528;::class&#x8BED;&#x6CD5;&#xFF1F; - &#x77E5;&#x4E4E;<br><a href="/external_links/0649b59a048007468f97a3c12a3b313f.html" target="blank" rel="noopener">www.zhihu.com/questio&#x2026;</a><br>5&#x3001;Laravel<br>&#x5B66;&#x4E60;&#x7B14;&#x8BB0; &#x2014;&#x2014; &#x795E;&#x5947;&#x7684;&#x670D;&#x52A1;&#x5BB9;&#x5668; | Laravel China &#x793E;&#x533A; - &#x9AD8;&#x54C1;&#x8D28;&#x7684; Laravel &#x548C; PHP &#x5F00;&#x53D1;&#x8005;&#x793E;&#x533A; - Powered by PHPHub<br><a href="/external_links/15636625d2415eb2c5a9d01c7cd0026c.html" target="blank" rel="noopener">laravel-china.org/top&#x2026;</a><br>6&#x3001;Pimple/README_zh.rst<br>at master &#xB7; 52fhy/Pimple<br><a href="/external_links/2d6199b16ad9958ede796a9c08a7e051.html" target="blank" rel="noopener">github.com/52fhy/Pimp.&#x2026;</a> </li>
+</ul>
+<blockquote>
+<p>&#x539F;&#x6587;&#x53D1;&#x5E03;&#x4E8E;&#x535A;&#x5BA2;&#x56ED;&#xFF1A;<a href="/external_links/df92faf1dcc64b354e845d3daf13fb27.html" target="blank" rel="noopener">www.cnblogs.com/52fhy/&#x2026;</a></p>
+</blockquote>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/2de8d741625ccab681e059d062a41325.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/PHP/" rel="tag"># PHP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6844903517212114952.html" rel="next" title="如何使用Python编写vim插件">
+                <i class="fa fa-chevron-left"></i> 如何使用Python编写vim插件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6844903517258268685.html" rel="prev" title="Asyncdb（四）：MySQL网络协议分析 引言 背景 M">
+                Asyncdb（四）：MySQL网络协议分析 引言 背景 M <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">2975</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1162</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#需要具备的知识点"><span class="nav-number">1.</span> <span class="nav-text">需要具备的知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#闭包"><span class="nav-number">1.1.</span> <span class="nav-text">闭包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPL"><span class="nav-number">1.2.</span> <span class="nav-text">SPL</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ArrayAccess"><span class="nav-number">1.2.1.</span> <span class="nav-text">ArrayAccess</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SplObjectStorage"><span class="nav-number">1.2.2.</span> <span class="nav-text">SplObjectStorage</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#class语法"><span class="nav-number">1.3.</span> <span class="nav-text">::class语法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pimple容器流程浅析"><span class="nav-number">2.</span> <span class="nav-text">Pimple容器流程浅析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务提供者"><span class="nav-number">2.1.</span> <span class="nav-text">服务提供者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务注册"><span class="nav-number">2.2.</span> <span class="nav-text">服务注册</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
