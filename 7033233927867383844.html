@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Kubernetes,Docker,云原生,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x5927;&amp;#x5BB6;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x5F20;&amp;#x664B;&amp;#x6D9B;&amp;#x3002; &amp;#x76EE;&amp;#x524D;&amp;#x5DF2;&amp;#x7ECF;&amp;#x786E;&amp;#x5B9A;&amp;#xFF0C; dockershim &amp;#x7684;&amp;#x4EE3;&amp;#x7801;&amp;#x5C06;&amp;#x5728; Kubernetes">
+<meta name="keywords" content="Kubernetes,Docker,云原生">
+<meta property="og:type" content="article">
+<meta property="og:title" content="定了！dockershim 的代码将在 K8s v124">
+<meta property="og:url" content="https://dev.newban.cn/7033233927867383844.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x5927;&amp;#x5BB6;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x5F20;&amp;#x664B;&amp;#x6D9B;&amp;#x3002; &amp;#x76EE;&amp;#x524D;&amp;#x5DF2;&amp;#x7ECF;&amp;#x786E;&amp;#x5B9A;&amp;#xFF0C; dockershim &amp;#x7684;&amp;#x4EE3;&amp;#x7801;&amp;#x5C06;&amp;#x5728; Kubernetes">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/aca17ce6471530d0154538f1ac8420f4c1dbaea953a2cdbe63e8a8139485d547">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/318d3b794c4579e27df868ae55e957d0b5d9e7bf649f529226d6c869b229b86a">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/b01bf827e9782ad52e5e5d19c2a9dff000178003df0f85c3036419fbc8d1e675">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e8ab26b4c323f06ccd89dfeea0891cc7d720f55ba9682a016b156a94077c9192">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e9d15baf9982cba8240e03179902940fc22d47ab4acc8d5069167385cf2b69ff">
+<meta property="og:updated_time" content="2024-04-30T04:04:18.616Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="定了！dockershim 的代码将在 K8s v124">
+<meta name="twitter:description" content="&amp;#x5927;&amp;#x5BB6;&amp;#x597D;&amp;#xFF0C;&amp;#x6211;&amp;#x662F;&amp;#x5F20;&amp;#x664B;&amp;#x6D9B;&amp;#x3002; &amp;#x76EE;&amp;#x524D;&amp;#x5DF2;&amp;#x7ECF;&amp;#x786E;&amp;#x5B9A;&amp;#xFF0C; dockershim &amp;#x7684;&amp;#x4EE3;&amp;#x7801;&amp;#x5C06;&amp;#x5728; Kubernetes">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/aca17ce6471530d0154538f1ac8420f4c1dbaea953a2cdbe63e8a8139485d547">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7033233927867383844.html">
+
+
+
+
+
+  <title>定了！dockershim 的代码将在 K8s v124 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">定了！dockershim 的代码将在 K8s v124</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-22T11:40:31+08:00">
+                2021-11-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x5927;&#x5BB6;&#x597D;&#xFF0C;&#x6211;&#x662F;&#x5F20;&#x664B;&#x6D9B;&#x3002;</p>
+<p>&#x76EE;&#x524D;&#x5DF2;&#x7ECF;&#x786E;&#x5B9A;&#xFF0C; dockershim &#x7684;&#x4EE3;&#x7801;&#x5C06;&#x5728; <strong>Kubernetes v1.24 &#x7248;&#x672C;&#x4E2D;&#x88AB;&#x6B63;&#x5F0F;&#x4ECE; Kubernetes &#x7684;&#x4EE3;&#x7801;&#x4ED3;&#x5E93;&#x79FB;&#x9664;&#xFF0C;&#x9884;&#x8BA1;&#x65B0;&#x7248;&#x672C;&#x660E;&#x5E74; 4 &#x6708;&#x5DE6;&#x53F3;&#x53D1;&#x5E03;</strong>&#x3002;&#x5BF9;&#x4E8E;&#x559C;&#x6B22;&#x5C1D;&#x732E;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#xFF0C;dockershim &#x7684;&#x4EE3;&#x7801;&#x4E0B;&#x4E2A;&#x6708;&#x5C31;&#x5C06;&#x4ECE; Kubernetes &#x7684;&#x6E90;&#x4EE3;&#x7801;&#x4ED3;&#x5E93;&#x4E2D;&#x6B63;&#x5F0F;&#x79FB;&#x9664;&#x4E86;&#xFF0C;&#x5C4A;&#x65F6;&#x53EF;&#x4EE5;&#x5C1D;&#x8BD5;&#x4F7F;&#x7528; alpha &#x7248;&#x672C;&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#x4F7F;&#x7528;&#xFF0C;&#x6216;&#x8005;&#x81EA;&#x6027;&#x7F16;&#x8BD1;&#x3002;</p>
+<p>&#x8001;&#x7C89;&#x4EEC;&#x53EF;&#x80FD;&#x5728;&#x53BB;&#x5E74;&#x770B;&#x8FC7;&#x6211;&#x53D1;&#x5E03;&#x7684; <a href="/external_links/03b08922c055d8dcf1d7805dd92e139f.html" target="blank" rel="noopener">&#x300A;K8S &#x5F03;&#x7528; Docker &#x4E86;&#xFF1F;Docker &#x4E0D;&#x80FD;&#x7528;&#x4E86;&#xFF1F;&#x522B;&#x9017;&#x4E86;&#xFF01;&#x300B;</a>&#xFF0C;&#x5728;&#x5176;&#x4E2D;&#x6211;&#x8BE6;&#x7EC6;&#x7684;&#x8BF4;&#x660E;&#x4E86;&#x6240;&#x8C13;&#x7684; &#x201C;Kubernetes &#x5728;&#x5F03; Docker &#x4E00;&#x4E8B;&#x4E0A;&#x7684;&#x8D77;&#x6E90;&#xFF0C;&#x7ED3;&#x679C;&#x201D; &#x7B49;&#x3002;</p>
+<p>&#x73B0;&#x5728;&#x8FD9;&#x4E2A;&#x4E8B;&#x60C5;&#x4ECE;&#x6B63;&#x5F0F;&#x5BA3;&#x5E03;&#x5230;&#x73B0;&#x5728;&#x5DF2;&#x7ECF;&#x53D1;&#x5C55;&#x4E86;&#x5FEB;&#x4E00;&#x5E74;&#x4E86;&#xFF0C;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#x5B83;&#x6709;&#x54EA;&#x4E9B;&#x53D8;&#x5316;&#x548C;&#x66F4;&#x65B0;&#x5427;&#x3002;</p>
+<p>&#x4E3A;&#x4E86;&#x7167;&#x987E;&#x65B0;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#xFF0C;&#x6211;&#x4EEC;&#x518D;&#x660E;&#x786E;&#x4E0B;&#xFF0C;&#x672C;&#x6B21; Kubernetes &#x79FB;&#x9664; dockershim &#x7684;&#x6811;&#x5185;&#x4EE3;&#x7801;&#xFF0C;&#x5BF9;&#x4E8E;&#x4E0D;&#x540C;&#x89D2;&#x8272;&#xFF08;&#x67B6;&#x6784;&#x3001;&#x5F00;&#x53D1;&#x3001;&#x96C6;&#x7FA4;&#x7BA1;&#x7406;&#x5458;&#x7B49;&#x7B49;&#xFF09;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#x90FD;&#x6709;&#x54EA;&#x4E9B;&#x5F71;&#x54CD;&#x4EE5;&#x53CA;&#x9700;&#x8981;&#x505A;&#x4E9B;&#x4EC0;&#x4E48;&#x3002;</p>
+<p>&#x9996;&#x5148;&#xFF0C;&#x8FD8;&#x662F;&#x9700;&#x8981;&#x7ED9;&#x5927;&#x5BB6;&#x4E00;&#x5242;&#x5F3A;&#x5FC3;&#x9488;&#xFF0C;<strong>&#x672C;&#x6B21; Kubernetes &#x79FB;&#x9664;&#x6811;&#x5185; dockershim &#x4EE3;&#x7801; &#x5E76;&#x4E0D;&#x8BF4;&#x660E; Docker &#x4E0D;&#x53EF;&#x7528;</strong>&#xFF01;**&#x800C; dockershim &#x672C;&#x8EAB;&#x4F5C;&#x7528;&#x5C31;&#x662F;&#x901A;&#x8FC7; CRI &#x7684;&#x65B9;&#x5F0F;&#x8FDE;&#x63A5; Kubelet &#x548C; Docker &#x7684;&#x3002;**Kubernetes &#x63A8;&#x51FA;&#x4E86; CRI&#xFF0C;&#x4EE5;&#x6EE1;&#x8DB3;&#x5BF9;&#x4E0D;&#x540C;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#x7684;&#x652F;&#x6301;&#xFF01;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x4ECE;&#x6839;&#x672C;&#x4E0A;&#xFF0C;&#x4E86;&#x89E3; Docker &#x7684;&#x5B9A;&#x4F4D;&#x4EE5;&#x53CA; dockershim &#x5BF9; Kubernetes &#x6765;&#x8BB2;&#x610F;&#x5473;&#x7740;&#x4EC0;&#x4E48;&#x3002;</p>
+<h1 id="&#x8FFD;&#x6839;&#x6EAF;&#x6E90;-Docker-&#x7684;&#x5B9A;&#x4F4D;&#x4EE5;&#x53CA;-Kubernetes-CRI"><a href="#&#x8FFD;&#x6839;&#x6EAF;&#x6E90;-Docker-&#x7684;&#x5B9A;&#x4F4D;&#x4EE5;&#x53CA;-Kubernetes-CRI" class="headerlink" title="&#x8FFD;&#x6839;&#x6EAF;&#x6E90; - Docker &#x7684;&#x5B9A;&#x4F4D;&#x4EE5;&#x53CA; Kubernetes CRI"></a>&#x8FFD;&#x6839;&#x6EAF;&#x6E90; - Docker &#x7684;&#x5B9A;&#x4F4D;&#x4EE5;&#x53CA; Kubernetes CRI</h1><p>&#x77E5;&#x9053;&#x7684;&#x8D8A;&#x591A;&#xFF0C;&#x6050;&#x60E7;&#x7684;&#x8D8A;&#x5C11;&#x3002;</p>
+<h2 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h2><p>Docker &#x7684;&#x5B9A;&#x4F4D;&#x662F; Development Platform &#xFF0C;&#x5373;&#xFF0C;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x5F00;&#x53D1;&#x8005;&#x5DE5;&#x5177;&#xFF0C;&#x800C;&#x975E;&#x5E95;&#x5C42;&#x7684;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#x3002;</p>
+<p>&#x6240;&#x4EE5;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;Docker &#x4E8E; 2017&#x5E74; &#x7ED9; CNCF &#x8D21;&#x732E;&#x4E86; containerd &#xFF0C;&#x540C;&#x5E74;&#x7684; 11&#x6708; &#xFF0C;Kubernetes &#x4E5F;&#x589E;&#x52A0;&#x4E86;&#x5BF9; containerd &#x7684;&#x652F;&#x6301;&#xFF08;2018 &#x5E74;&#xFF0C; Kubernetes &#x7684; containerd &#x96C6;&#x6210;&#xFF0C;&#x6B63;&#x5F0F; GA&#xFF09;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/aca17ce6471530d0154538f1ac8420f4c1dbaea953a2cdbe63e8a8139485d547" alt="img"></p>
+<p><strong>&#x56FE; 1 &#xFF0C;Kubernetes CRI &#x4E0E;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6; containerd &#x7684;&#x96C6;&#x6210;</strong></p>
+<p>&#x56FE;1 &#x5C55;&#x793A;&#x4E86;&#xFF0C;&#x5982;&#x679C;&#x5C06;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#x66FF;&#x6362;&#x4E3A; containerd &#x7684;&#x8BDD;&#xFF0C;&#x6574;&#x4E2A;&#x7684;&#x5904;&#x7406;&#x94FE;&#x8DEF;&#x662F;&#x4EC0;&#x4E48;&#x3002;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x5904;&#x7406;&#x94FE;&#x8DEF;&#x7F29;&#x77ED;&#x4E86;&#x3002;</p>
+<h2 id="Kubernetes-CRI"><a href="#Kubernetes-CRI" class="headerlink" title="Kubernetes CRI"></a>Kubernetes CRI</h2><p>2016 &#x5E74; 12 &#x6708;&#xFF0C; <strong>Kubernetes &#x53D1;&#x5E03; CRI &#xFF08;Container Runtime Interface&#xFF09;&#x3002;</strong></p>
+<p>&#x5728;&#x4E4B;&#x524D;&#x7684;&#x6587;&#x7AE0;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x8BF4;&#x8FC7;&#xFF0C;2014&#x5E74; Kubernetes &#x7684;&#x8BDE;&#x751F;&#x5C31;&#x662F;&#x4E3A;&#x4E86;&#x89E3;&#x51B3;&#x5927;&#x89C4;&#x6A21;&#x573A;&#x666F;&#x4E0B; Docker &#x5BB9;&#x5668;&#x7F16;&#x6392;&#x7684;&#x95EE;&#x9898;&#x3002;&#x5728;&#x5F53;&#x65F6;&#xFF0C;Docker &#x662F;&#x6700;&#x6D41;&#x884C;&#x4E5F;&#x662F;&#x552F;&#x4E00;&#x7684;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x5BF9; Docker &#x7684;&#x652F;&#x6301;&#xFF0C;&#x4F7F;&#x5F97; Kubernetes &#x5728;&#x65E9;&#x671F;&#x5C31;&#x8FCE;&#x6765;&#x4E86;&#x5927;&#x91CF;&#x7684;&#x7528;&#x6237;&#x3002;</p>
+<p>&#x4E3A;&#x4E86;&#x80FD;&#x9632;&#x6B62;&#x88AB;&#x9501;&#x5B9A;&#x5728; Docker &#x8FD9;&#x4E00;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x4E5F;&#x4E3A;&#x4E86;&#x51CF;&#x8F7B;&#x5728;&#x96C6;&#x6210;&#x5176;&#x4ED6;&#x8FD0;&#x884C;&#x65F6;&#x7684;&#x65F6;&#x5019;&#x7684;&#x5F00;&#x53D1;&#x5DE5;&#x4F5C;&#x91CF;&#xFF0C;Kubernetes &#x63A8;&#x51FA;&#x4E86;&#x4E00;&#x4E2A;&#x7EDF;&#x4E00;&#x7684; CRI &#x63A5;&#x53E3;&#xFF0C;&#x51E1;&#x662F;&#x652F;&#x6301; CRI &#x7684;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x7686;&#x53EF;&#x76F4;&#x63A5;&#x4F5C;&#x4E3A; Kubernetes &#x7684;&#x5E95;&#x5C42;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x4EE5;&#x6B64;&#x6765;&#x5E94;&#x5BF9;&#x66F4;&#x591A;&#x66F4;&#x590D;&#x6742;&#x7684;&#x9700;&#x6C42;&#x53CA;&#x573A;&#x666F;&#x3002;</p>
+<p>&#x4ECE;&#x53D1;&#x5C55;&#x7684;&#x5386;&#x53F2;&#x8F68;&#x8FF9;&#x6765;&#x770B;&#xFF0C;&#x5728; 2014&#x5E74;&#x65F6;&#xFF0C;Kubernetes &#x6CA1;&#x6709;&#x66F4;&#x591A;&#x9009;&#x62E9;&#xFF0C;&#x5185;&#x7F6E; dockershim &#x4E5F;&#x662F;&#x4E3A;&#x4E86;&#x8FCE;&#x5408;&#x5927;&#x91CF;&#x7684; Docker &#x7528;&#x6237;&#x3002;&#x800C; Kubernetes &#x786E;&#x4E5F;&#x4ECE;&#x4E2D;&#x83B7;&#x53D6;&#x5230;&#x76F8;&#x5E94;&#x7684;&#x597D;&#x5904;&#x3002;&#x800C; CRI &#x7684;&#x51FA;&#x73B0;&#xFF0C;&#x5219;&#x662F;&#x53D1;&#x5C55;&#x7684;&#x5FC5;&#x7136;&#x4E86;&#xFF08;&#x6BD5;&#x7ADF; 2016&#x5E74; Kubernetes &#x5728;&#x90A3;&#x573A;&#x5BB9;&#x5668;&#x7F16;&#x6392;&#x4E4B;&#x6218;&#x91CC;&#x80DC;&#x51FA;&#x4E86;&#xFF09;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/318d3b794c4579e27df868ae55e957d0b5d9e7bf649f529226d6c869b229b86a" alt="img"></p>
+<p><strong>&#x56FE; 2 &#xFF0C;Kubernetes &#x589E;&#x52A0;&#x4E86;&#x5BF9; containerd &#x7684;&#x652F;&#x6301;</strong></p>
+<p>&#x90A3;&#x4E48;&#x4EC0;&#x4E48;&#x662F; CRI &#xFF1F;</p>
+<p>CRI &#x662F;&#x5728; Kubernetes v1.5 &#x7248;&#x672C;&#x4E2D;&#x5F15;&#x5165;&#x7684;&#xFF08;&#x4F5C;&#x4E3A; Alpha &#x53D1;&#x5E03;&#xFF09;&#xFF0C;&#x4E00;&#x4E2A;&#x63D2;&#x4EF6;&#x63A5;&#x53E3;&#xFF0C;&#x5B83;&#x4F7F; kubelet &#x80FD;&#x591F;&#x4F7F;&#x7528;&#x5404;&#x79CD;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x800C;&#x65E0;&#x9700;&#x91CD;&#x65B0;&#x7F16;&#x8BD1;&#x3002;CRI &#x7684;&#x51FA;&#x73B0;&#x662F;&#x4E00;&#x6B21;&#x89E3;&#x8026;&#xFF0C;&#x5B83;&#x4F7F;&#x5F97; Kubernetes &#x793E;&#x533A;&#x7684;&#x7EF4;&#x62A4;&#x6210;&#x672C;&#x51CF;&#x5C11;&#x4E86;&#x4E9B;&#xFF0C;&#x5E76;&#x4E14;&#x8282;&#x7EA6;&#x4E86;&#x5F00;&#x53D1;&#x8005;&#x9700;&#x8981;&#x5BF9; kubelet &#x5185;&#x90E8;&#x7ED3;&#x6784;&#x4EE5;&#x53CA;&#x4EE3;&#x7801;&#x6DF1;&#x5165;&#x4E86;&#x89E3;&#x7684;&#x95E8;&#x69DB;&#xFF0C;&#x540C;&#x65F6;&#x4E5F;&#x6253;&#x7834;&#x4E86;&#x65B0;&#x751F;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#x60F3;&#x63A5;&#x5165; Kubernetes &#x7684;&#x9AD8;&#x58C1;&#x5792;&#x3002;</p>
+<p>Kubelet &#x4F7F;&#x7528; gRPC &#x6846;&#x67B6;&#x901A;&#x8FC7; Unix &#x5957;&#x63A5;&#x5B57;&#x4E0E;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#xFF08;&#x6216;&#x8FD0;&#x884C;&#x65F6;&#x7684; CRI shim&#xFF09;&#x901A;&#x4FE1;&#xFF0C;&#x5176;&#x4E2D; kubelet &#x4F5C;&#x4E3A;&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;CRI shim &#x4F5C;&#x4E3A;&#x670D;&#x52A1;&#x5668;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/b01bf827e9782ad52e5e5d19c2a9dff000178003df0f85c3036419fbc8d1e675" alt="img"></p>
+<p><strong>&#x56FE; 3 &#xFF0C;CRI &#x5B9E;&#x73B0;&#x539F;&#x7406;</strong></p>
+<p>API&#x5305;&#x62EC;&#x4E24;&#x4E2A; gRPC Service:</p>
+<ul>
+<li>ImageService - &#x63D0;&#x4F9B; RPC &#x4EE5;&#x4ECE;&#x5B58;&#x50A8;&#x5E93;&#x4E2D;&#x63D0;&#x53D6;&#x56FE;&#x50CF;&#x3001;&#x68C0;&#x67E5;&#x548C;&#x5220;&#x9664;&#x56FE;&#x50CF;&#x3002;</li>
+<li>RuntimeService - &#x5305;&#x542B; RPC &#x6765;&#x7BA1;&#x7406; Pod &#x548C;&#x5BB9;&#x5668;&#x7684;&#x751F;&#x547D;&#x5468;&#x671F;&#xFF0C;&#x4EE5;&#x53CA;&#x4E0E;&#x5BB9;&#x5668;&#x4EA4;&#x4E92;&#x7684;&#x8C03;&#x7528;&#xFF08;exec/attach/port-forward&#xFF09;&#x3002;</li>
+</ul>
+<h2 id="&#x6709;&#x4E9B;&#x5C34;&#x5C2C;&#x53C8;&#x4E0D;&#x77E5;&#x6240;&#x63AA;&#x7684;-dockershim&#xFF1F;"><a href="#&#x6709;&#x4E9B;&#x5C34;&#x5C2C;&#x53C8;&#x4E0D;&#x77E5;&#x6240;&#x63AA;&#x7684;-dockershim&#xFF1F;" class="headerlink" title="&#x6709;&#x4E9B;&#x5C34;&#x5C2C;&#x53C8;&#x4E0D;&#x77E5;&#x6240;&#x63AA;&#x7684; dockershim&#xFF1F;"></a>&#x6709;&#x4E9B;&#x5C34;&#x5C2C;&#x53C8;&#x4E0D;&#x77E5;&#x6240;&#x63AA;&#x7684; dockershim&#xFF1F;</h2><p><strong>dockershim</strong> &#x4E00;&#x76F4;&#x90FD;&#x662F; Kubernetes &#x793E;&#x533A;&#x4E3A;&#x4E86;&#x80FD;&#x8BA9; Docker &#x6210;&#x4E3A;&#x5176;&#x652F;&#x6301;&#x7684;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x6240;&#x7EF4;&#x62A4;&#x7684;&#x4E00;&#x4E2A;&#x517C;&#x5BB9;&#x7A0B;&#x5E8F;&#x3002;</p>
+<p>&#x800C;&#x6211;&#x4EEC;&#x4E5F;&#x4E0D;&#x5FC5;&#x4E3A;&#x4E86; dockershim &#x592A;&#x8FC7;&#x62C5;&#x5FC3;&#xFF0C;Mirantis &#x5DF2;&#x7ECF;&#x627F;&#x8BFA;&#x4F1A;&#x63A5;&#x7BA1;&#x5E76;&#x4E14;&#x6301;&#x7EED;&#x652F;&#x6301; dockershim&#x3002;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#xFF0C;&#x867D;&#x7136; Kubernetes &#x4EE3;&#x7801;&#x4ED3;&#x5E93;&#x4E2D;&#x79FB;&#x9664;&#x4E86; dockershim &#x7684;&#x4EE3;&#x7801;&#xFF0C;&#x4F46;&#x662F;&#xFF0C;Mirantis &#x4F1A;&#x7EF4;&#x62A4;&#x4E00;&#x4EFD;&#x6811;&#x5916;&#x7684; dockershim &#x3002;&#x5982;&#x679C;&#x4F60;&#x60F3;&#x7EE7;&#x7EED;&#x4F7F;&#x7528; Docker &#x4F5C;&#x4E3A; Kubernetes &#x7684;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#xFF0C;&#x90A3;&#x4E48;&#x5C31;&#x9700;&#x8981;&#x8FD0;&#x884C;&#x6811;&#x5916;&#x7684; dockershim &#x4E86;&#x3002;</p>
+<p>&#x4E5F;&#x8BF7;&#x5C0F;&#x4F19;&#x4F34;&#x4EEC;&#x8010;&#x5FC3;&#x67E5;&#x770B;&#x4E0B;&#x65B9;&#x89C6;&#x9891;&#xFF0C; <a href="/external_links/d0d8e418dafdf4432b80856c446f6aaf.html" target="blank" rel="noopener">www.youtube.com/watch?v=epo&#x2026;</a></p>
+<p>Mirantis &#x518D;&#x6B21;&#x516C;&#x5F00;&#x58F0;&#x660E;&#xFF0C;&#x6211;&#x4EEC;&#x5927;&#x53EF;&#x4E0D;&#x5FC5;&#x4E3A; dockershim &#x7684;&#x672A;&#x6765;&#x5FE7;&#x5FC3;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e8ab26b4c323f06ccd89dfeea0891cc7d720f55ba9682a016b156a94077c9192" alt="img"></p>
+<h1 id="&#x5F71;&#x54CD;"><a href="#&#x5F71;&#x54CD;" class="headerlink" title="&#x5F71;&#x54CD;"></a>&#x5F71;&#x54CD;</h1><p>&#x76F8;&#x4FE1;&#x5F88;&#x591A;&#x5C0F;&#x4F19;&#x4F34;&#x6700;&#x5173;&#x5FC3;&#x7684;&#x5C31;&#x662F;&#xFF0C;&#x8FD9;&#x79CD;&#x53D8;&#x5316;&#xFF0C;&#x4F1A;&#x5BF9;&#x6211;&#x4EEC;&#x65E5;&#x5E38;&#x7684;&#x751F;&#x4EA7;&#x3001;&#x5F00;&#x53D1;&#x73AF;&#x5883;&#x5E26;&#x6765;&#x54EA;&#x4E9B;&#x53D8;&#x5316;&#x3002;&#x6211;&#x4EEC;&#x8981;&#x600E;&#x6837;&#x5FEB;&#x901F;&#x7684;&#x8FDB;&#x884C;&#x5E94;&#x5BF9;&#xFF01;</p>
+<p>&#x629B;&#x5F00;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x8BF7;&#x5C0F;&#x4F19;&#x4F34;&#x4EEC;&#x8BC4;&#x4F30;&#x4E0B;&#x5404;&#x81EA;&#x7684;&#x5B9E;&#x9645;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x3002;</p>
+<ul>
+<li>&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#x7684; Kubernetes &#x5347;&#x7EA7;&#x5468;&#x671F;</li>
+<li>&#x5F53;&#x524D;&#x751F;&#x4EA7;&#x96C6;&#x7FA4;&#x4E2D;&#x4F7F;&#x7528;&#x7684;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#x662F;&#x4EC0;&#x4E48;</li>
+</ul>
+<p>&#x5F53;&#x7136;&#xFF0C;&#x4F5C;&#x4E3A;&#x5E94;&#x7528;&#x8F6F;&#x4EF6;&#x7684;&#x5F00;&#x53D1;&#x8005;&#x800C;&#x8A00;&#xFF0C;&#x6B64;&#x6B21;&#x7684;&#x53D8;&#x5316;&#xFF0C;&#x5E76;&#x4E0D;&#x5E26;&#x6765;&#x4EFB;&#x4F55;&#x5F00;&#x53D1;&#x89D2;&#x5EA6;&#x7684;&#x5F71;&#x54CD;&#xFF08;&#x9664;&#x975E;&#xFF0C;&#x4F60;&#x662F;&#x4E2A;&#x5BB9;&#x5668;&#x53CA;&#x5BB9;&#x5668;&#x7F16;&#x6392;&#x5F00;&#x53D1;&#x30FE;(&#x25CD;&#xB0;&#x2207;&#xB0;&#x25CD;)&#xFF89;&#xFF9E;&#xFF09;&#x3002;</p>
+<p>&#x5982;&#x679C;&#xFF0C;&#x4F5C;&#x4E3A;&#x5BB9;&#x5668;&#x3001;&#x5BB9;&#x5668;&#x7F16;&#x6392;&#x5F00;&#x53D1;&#x3001;&#x96C6;&#x7FA4;&#x7EF4;&#x62A4;&#x7BA1;&#x7406;&#x4EBA;&#x5458;&#x3001;&#x67B6;&#x6784;&#x3001;&#x4EE5;&#x53CA;&#x5BF9;&#x5BB9;&#x5668;&#x6280;&#x672F;&#x5173;&#x6CE8;&#x7684;&#x5C0F;&#x4F19;&#x4F34;&#xFF0C;&#x5EFA;&#x8BAE;&#x4E00;&#x5B9A;&#x8981;&#x5173;&#x6CE8;&#x5E76;&#x79EF;&#x6781;&#x5730;&#x6D4B;&#x8BD5;&#x3001;&#x53CD;&#x9988;&#x5728; 12&#x6708;&#x5373;&#x5C06;&#x53D1;&#x5E03;&#x7684; Kubernetes v1.24 &#x7684; alpha &#x548C; beta &#x7248;&#x672C;&#x3002;&#x540C;&#x65F6;&#xFF0C;&#x8FD8;&#x9700;&#x8981;&#x6DF1;&#x5165; CRI &#x4EE5;&#x53CA;&#x76EE;&#x524D;&#x8F83;&#x6D41;&#x884C;&#x7684;&#x5BB9;&#x5668;&#x8FD0;&#x884C;&#x65F6;&#xFF08;containerd&#x3001;cri-o&#xFF09;&#x3002;</p>
+<p>&#x5EFA;&#x8BAE;&#x5927;&#x5BB6;&#x90FD;&#x6DF1;&#x5165;&#x5730;&#x4E86;&#x89E3;&#x4E0B; containerd &#x3002;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x6211;&#x53BB;&#x5E74;&#x505A;&#x7684;&#x4E00;&#x6B21;&#x5206;&#x4EAB;&#xFF1A; containerd &#x4E0A;&#x624B;&#x5B9E;&#x8DF5;&#x3002;&#x5728;&#x6B64;&#x5904;&#x53EF;&#x83B7;&#x53D6; PPT <a href="/external_links/85c1d1b49c6e092999eacea3728924d1.html" target="blank" rel="noopener">github.com/tao12345666&#x2026;</a></p>
+<p>&#x867D;&#x7136;&#xFF0C;Mirantis &#x516C;&#x53F8;&#x5BA3;&#x79F0;&#x4F1A;&#x548C; Docker &#x4E00;&#x8D77;&#x7EF4;&#x62A4;&#x597D; dockershim&#xFF0C;&#x4F46;&#x662F;&#xFF0C;&#x5C31; &#x76EE;&#x524D;&#x6765;&#x770B; Mirantis &#x7EF4;&#x62A4;&#x7684; dockershim &#x5E76;&#x6CA1;&#x4EC0;&#x4E48;&#x5B9E;&#x8D28;&#x6027;&#x7684;&#x8FDB;&#x5C55;&#x3002;&#x800C; containerd &#x5728;&#x4F17;&#x591A;&#x7684;&#x4E91;&#x5382;&#x5546;&#x53CA;&#x516C;&#x53F8;&#x7684;&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x4E2D;&#x5DF2;&#x88AB;&#x4F5C;&#x4E3A;&#x5176; Kubernetes &#x7684;&#x8FD0;&#x884C;&#x65F6;&#x4F7F;&#x7528;&#x4E86;&#x3002;</p>
+<p>&#x6700;&#x540E;&#x7684;&#x6700;&#x540E;&#xFF0C;&#x5C0F;&#x4F19;&#x4F34;&#x4EEC;&#xFF0C;&#x62E5;&#x62B1;&#x53D8;&#x5316;&#x5427;&#xFF01;</p>
+<hr>
+<p>&#x6B22;&#x8FCE;&#x8BA2;&#x9605;&#x6211;&#x7684;&#x6587;&#x7AE0;&#x516C;&#x4F17;&#x53F7;&#x3010;MoeLove&#x3011;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e9d15baf9982cba8240e03179902940fc22d47ab4acc8d5069167385cf2b69ff" alt="TheMoeLove"></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/089d89f7adb3b6ad8b43da87e84b7bb9.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Kubernetes-Docker-云原生/" rel="tag"># Kubernetes,Docker,云原生</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7033223596289982500.html" rel="next" title="MySQL入门系列 --- 1 环境搭建 （CentOS8">
+                <i class="fa fa-chevron-left"></i> MySQL入门系列 --- 1 环境搭建 （CentOS8
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7033254369407533092.html" rel="prev" title="Java 处理表格，真的很爽！">
+                Java 处理表格，真的很爽！ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#追根溯源-Docker-的定位以及-Kubernetes-CRI"><span class="nav-number">1.</span> <span class="nav-text">追根溯源 - Docker 的定位以及 Kubernetes CRI</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker"><span class="nav-number">1.1.</span> <span class="nav-text">Docker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kubernetes-CRI"><span class="nav-number">1.2.</span> <span class="nav-text">Kubernetes CRI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有些尴尬又不知所措的-dockershim？"><span class="nav-number">1.3.</span> <span class="nav-text">有些尴尬又不知所措的 dockershim？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#影响"><span class="nav-number">2.</span> <span class="nav-text">影响</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

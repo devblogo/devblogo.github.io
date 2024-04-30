@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x601D;&amp;#x8003;&amp;#x6211;&amp;#x4EEC;&amp;#x53EF;&amp;#x4EE5;&amp;#x901A;&amp;#x8FC7; &amp;#x65E0;buffer &amp;#x7684; channel&amp;#x6765;&amp;#x8FDB;&amp;#x884C;&amp;#x901A;&amp;#x77E5;&amp;#xFF0C;&amp;#x90A3;&amp;#x6709;&amp;#x6CA1;&amp;#x6709;&amp;#x66F4;&amp;#x7B80;&amp;#x4FBF;">
+<meta name="keywords" content="Go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="了解 WaitGroup 和 errorgroup 思考 W">
+<meta property="og:url" content="https://dev.newban.cn/7035181619644203038.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x601D;&amp;#x8003;&amp;#x6211;&amp;#x4EEC;&amp;#x53EF;&amp;#x4EE5;&amp;#x901A;&amp;#x8FC7; &amp;#x65E0;buffer &amp;#x7684; channel&amp;#x6765;&amp;#x8FDB;&amp;#x884C;&amp;#x901A;&amp;#x77E5;&amp;#xFF0C;&amp;#x90A3;&amp;#x6709;&amp;#x6CA1;&amp;#x6709;&amp;#x66F4;&amp;#x7B80;&amp;#x4FBF;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-30T05:30:47.272Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="了解 WaitGroup 和 errorgroup 思考 W">
+<meta name="twitter:description" content="&amp;#x601D;&amp;#x8003;&amp;#x6211;&amp;#x4EEC;&amp;#x53EF;&amp;#x4EE5;&amp;#x901A;&amp;#x8FC7; &amp;#x65E0;buffer &amp;#x7684; channel&amp;#x6765;&amp;#x8FDB;&amp;#x884C;&amp;#x901A;&amp;#x77E5;&amp;#xFF0C;&amp;#x90A3;&amp;#x6709;&amp;#x6CA1;&amp;#x6709;&amp;#x66F4;&amp;#x7B80;&amp;#x4FBF;">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035181619644203038.html">
+
+
+
+
+
+  <title>了解 WaitGroup 和 errorgroup 思考 W | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">了解 WaitGroup 和 errorgroup 思考 W</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-27T17:39:43+08:00">
+                2021-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="&#x601D;&#x8003;"><a href="#&#x601D;&#x8003;" class="headerlink" title="&#x601D;&#x8003;"></a>&#x601D;&#x8003;</h1><p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x901A;&#x8FC7; &#x65E0;buffer &#x7684; channel&#x6765;&#x8FDB;&#x884C;&#x901A;&#x77E5;&#xFF0C;&#x90A3;&#x6709;&#x6CA1;&#x6709;&#x66F4;&#x7B80;&#x4FBF;&#x7684;&#x65B9;&#x6CD5;?</p>
+<h1 id="WaitGroup"><a href="#WaitGroup" class="headerlink" title="WaitGroup"></a>WaitGroup</h1><h2 id="WaitGroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;"><a href="#WaitGroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;" class="headerlink" title="WaitGroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;"></a>WaitGroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;</h2><p><code>WaitGroup</code>&#x7B49;&#x5F85;&#x4E00;&#x7EC4;Goroutine&#x7684;&#x5B8C;&#x6210;&#xFF0C;main goroutine &#x8C03;&#x7528; Add &#x6765;&#x8BBE;&#x7F6E;&#x8981;&#x7B49;&#x5F85;&#x7684; goroutine &#x7684;&#x6570;&#x91CF;&#x3002;&#x7136;&#x540E;&#x6BCF;&#x4E2A; goroutine &#x8FD0;&#x884C;&#x5E76;&#x5728;&#x5B8C;&#x6210;&#x65F6;&#x8C03;&#x7528; Done&#x3002;&#x540C;&#x65F6;&#xFF0C;Wait &#x53EF;&#x4EE5;&#x7528;&#x6765;&#x963B;&#x585E;&#xFF0C;&#x76F4;&#x5230;&#x6240;&#x6709;&#x7684; goroutine &#x90FD;&#x5B8C;&#x6210;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;type WaitGroup struct {</span><br><span class="line">	noCopy noCopy</span><br><span class="line"></span><br><span class="line">	// 64-bit value: high 32 bits are counter, low 32 bits are waiter count.</span><br><span class="line">	// 64-bit atomic operations require 64-bit alignment, but 32-bit</span><br><span class="line">	// compilers do not ensure it. So we allocate 12 bytes and then use</span><br><span class="line">	// the aligned 8 bytes in them as state, and the other 4 as storage</span><br><span class="line">	// for the sema.</span><br><span class="line">	state1 [3]uint32</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// Add adds delta, which may be negative, to the WaitGroup counter.</span><br><span class="line">func (wg *WaitGroup) Add(delta int) {}</span><br><span class="line"></span><br><span class="line">// Done decrements the WaitGroup counter by one.</span><br><span class="line">func (wg *WaitGroup) Done() {}</span><br><span class="line"></span><br><span class="line">// Wait blocks until the WaitGroup counter is zero.</span><br><span class="line">func (wg *WaitGroup) Wait() {}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x793A;&#x4F8B;"><a href="#&#x793A;&#x4F8B;" class="headerlink" title="&#x793A;&#x4F8B;"></a>&#x793A;&#x4F8B;</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func main() {</span><br><span class="line">   urls := []string{</span><br><span class="line">      &quot;https://pic.netbian.com/uploads/allimg/210925/233922-163258436234e8.jpg&quot;,</span><br><span class="line">      &quot;https://pic.netbian.com/uploads/allimg/210920/180354-16321322345f20.jpg&quot;,</span><br><span class="line">      &quot;https://pic.netbian.com/uploads/allimg/210916/232432-16318058722f4d.jpg&quot;,</span><br><span class="line">   }</span><br><span class="line">   var wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">   for _,url := range urls{</span><br><span class="line">      wg.Add(1)</span><br><span class="line">      go func() {</span><br><span class="line">         defer wg.Done()</span><br><span class="line">         downloadFile(url)</span><br><span class="line">      }()</span><br><span class="line">   }</span><br><span class="line">   wg.Wait()</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func downloadFile(URL string) error {</span><br><span class="line">   //Get the response bytes from the url</span><br><span class="line">   response, err := http.Get(URL)</span><br><span class="line">   if err != nil {</span><br><span class="line">      return err</span><br><span class="line">   }</span><br><span class="line">   defer response.Body.Close()</span><br><span class="line"></span><br><span class="line">   if response.StatusCode != 200 {</span><br><span class="line">      return errors.New(&quot;Received non 200 response code&quot;)</span><br><span class="line">   }</span><br><span class="line">   //Create a empty file</span><br><span class="line">   file, err := os.Create(path.Base(URL))</span><br><span class="line">   if err != nil {</span><br><span class="line">      return err</span><br><span class="line">   }</span><br><span class="line">   defer file.Close()</span><br><span class="line"></span><br><span class="line">   //Write the bytes to the fiel</span><br><span class="line">   _, err = io.Copy(file, response.Body)</span><br><span class="line">   if err != nil {</span><br><span class="line">      return err</span><br><span class="line">   }</span><br><span class="line"></span><br><span class="line">   return nil</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x95EE;&#x9898;"><a href="#&#x95EE;&#x9898;" class="headerlink" title="&#x95EE;&#x9898;"></a>&#x95EE;&#x9898;</h3><ol>
+<li>&#x5E76;&#x53D1;&#x7684;&#x65F6;&#x5019;<code>url</code>&#x7684;&#x503C;&#x53EF;&#x80FD;&#x4F1A;&#x53D1;&#x751F;&#x6DF7;&#x6DC6;&#xFF0C;&#x56E0;&#x4E3A;&#x5728;&#x5FAA;&#x73AF;&#x7684;&#x65F6;&#x5019;&#x4F7F;&#x7528;&#x7684;&#x662F;&#x76F8;&#x540C;&#x7684;&#x5B9E;&#x4F8B;url&#xFF0C;&#x5F53;&#x6267;&#x884C;<code>downloadFile(url)</code>&#x7684;&#x65F6;&#x5019;&#xFF0C;url&#x7684;&#x503C;&#x53EF;&#x80FD;&#x5DF2;&#x7ECF;&#x88AB;&#x66F4;&#x6539;</li>
+</ol>
+<h4 id="&#x5982;&#x4F55;&#x68C0;&#x6D4B;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x5462;&#xFF1F;"><a href="#&#x5982;&#x4F55;&#x68C0;&#x6D4B;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x5462;&#xFF1F;" class="headerlink" title="&#x5982;&#x4F55;&#x68C0;&#x6D4B;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x5462;&#xFF1F;"></a>&#x5982;&#x4F55;&#x68C0;&#x6D4B;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x5462;&#xFF1F;</h4><p><code>go vet</code></p>
+<h4 id="&#x5982;&#x4F55;&#x89E3;&#x51B3;&#xFF1F;"><a href="#&#x5982;&#x4F55;&#x89E3;&#x51B3;&#xFF1F;" class="headerlink" title="&#x5982;&#x4F55;&#x89E3;&#x51B3;&#xFF1F;"></a>&#x5982;&#x4F55;&#x89E3;&#x51B3;&#xFF1F;</h4><pre><code>* &#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#x5C06;&#x5F53;&#x524D;&#x503C;&#x7ED1;&#x5B9A;&#x7ED9;&#x95ED;&#x5305;
+* &#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x53D8;&#x91CF;</code></pre><ol start="2">
+<li>&#x5982;&#x4F55;&#x77E5;&#x9053;&#x542F;&#x52A8;&#x7684;goroutine&#x7EC4;&#x91CC;&#x8FB9;&#x4ED6;&#x4EEC;&#x7684;&#x8FD0;&#x884C;&#x60C5;&#x51B5;&#xFF1F;&#x662F;&#x5426;&#x53D1;&#x751F;&#x9519;&#x8BEF;&#x4E86;&#xFF1F;&#x5982;&#x4F55;&#x8FD4;&#x56DE;&#x9519;&#x8BEF;&#xFF1F;&#x5047;&#x5982;&#x67D0;&#x4E00;&#x4E2A;goroutine&#x53D1;&#x751F;&#x9519;&#x8BEF;&#x4E86;&#xFF0C;&#x5982;&#x4F55;&#x53D6;&#x6D88;&#x5176;&#x4ED6;goroutine&#xFF0C;&#x907F;&#x514D;&#x8D44;&#x6E90;&#x7684;&#x6D6A;&#x8D39;</li>
+<li>&#x5982;&#x4F55;&#x63A7;&#x5236;&#x8D85;&#x65F6;&#x6216;&#x8005;&#x53D6;&#x6D88;</li>
+</ol>
+<h1 id="errgroup"><a href="#errgroup" class="headerlink" title="errgroup"></a>errgroup</h1><h2 id="errgroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;"><a href="#errgroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;" class="headerlink" title="errgroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;"></a>errgroup&#x662F;&#x4EC0;&#x4E48;&#xFF1F;</h2><p>&#x63D0;&#x4F9B;&#x540C;&#x6B65;&#xFF0C;&#x9519;&#x8BEF;&#x4F20;&#x64AD;&#xFF0C;&#x4E00;&#x7EC4;gorouines&#x7684;context&#x7684;&#x53D6;&#x6D88;&#xFF0C;&#x81F4;&#x529B;&#x4E8E;&#x89E3;&#x51B3;&#x901A;&#x7528;&#x4EFB;&#x52A1;&#x7684;&#x5B50;&#x4EFB;&#x52A1;&#x4EEC;</p>
+<h2 id="&#x51FD;&#x6570;&#x7B7E;&#x540D;"><a href="#&#x51FD;&#x6570;&#x7B7E;&#x540D;" class="headerlink" title="&#x51FD;&#x6570;&#x7B7E;&#x540D;"></a>&#x51FD;&#x6570;&#x7B7E;&#x540D;</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;// A Group is a collection of goroutines working on subtasks that are part of</span><br><span class="line">// the same overall task.</span><br><span class="line">//</span><br><span class="line">// A zero Group is valid and does not cancel on error.</span><br><span class="line">type Group struct {</span><br><span class="line">   cancel func()</span><br><span class="line"></span><br><span class="line">   wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">   errOnce sync.Once</span><br><span class="line">   err     error</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// WithContext returns a new Group and an associated Context derived from ctx.</span><br><span class="line">func WithContext(ctx context.Context) (*Group, context.Context) {}</span><br><span class="line"></span><br><span class="line">// Wait blocks until all function calls from the Go method have returned, then</span><br><span class="line">// returns the first non-nil error (if any) from them.</span><br><span class="line">func (g *Group) Wait() error {}</span><br><span class="line"></span><br><span class="line">// Go calls the given function in a new goroutine.</span><br><span class="line">//</span><br><span class="line">// The first call to return a non-nil error cancels the group; its error will be</span><br><span class="line">// returned by Wait.</span><br><span class="line">func (g *Group) Go(f func() error) {}</span><br></pre></td></tr></table></figure>
+
+<h4 id="func-WithContext"><a href="#func-WithContext" class="headerlink" title="func WithContext"></a>func WithContext</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func WithContext(ctx context.Context ) (*Group , context.Context )</span><br></pre></td></tr></table></figure>
+
+<p>WithContext &#x8FD4;&#x56DE;&#x4E00;&#x4E2A;&#x65B0;&#x7684; Group &#x548C;&#x4E00;&#x4E2A;&#x4ECE; ctx &#x6D3E;&#x751F;&#x7684;&#x5173;&#x8054;&#x4E0A;&#x4E0B;&#x6587;&#x3002;&#x4F1A;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x5E26;&#x53D6;&#x6D88;&#x7684;Group</p>
+<p>&#x6D3E;&#x751F;&#x7684; Context &#x5728;&#x7B2C;&#x4E00;&#x6B21;&#x4F20;&#x9012;&#x7ED9; Go &#x7684;&#x51FD;&#x6570;&#x8FD4;&#x56DE;&#x975E; nil &#x9519;&#x8BEF;&#x65F6;&#x6216;&#x7B2C;&#x4E00;&#x6B21; Wait &#x8FD4;&#x56DE;&#x65F6;&#x88AB;&#x53D6;&#x6D88;&#xFF0C;&#x4EE5;&#x5148;&#x53D1;&#x751F;&#x8005;&#x4E3A;&#x51C6;&#x3002;</p>
+<h4 id="func-Group-Go"><a href="#func-Group-Go" class="headerlink" title="func (*Group) Go"></a>func (*Group) Go</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func (g * Group ) Go(f func() error)</span><br></pre></td></tr></table></figure>
+
+<p>Go &#x5728;&#x4E00;&#x4E2A;&#x65B0;&#x7684; goroutine &#x4E2D;&#x8C03;&#x7528;&#x8F93;&#x5165;&#x7684;&#x51FD;&#x6570;&#x3002;</p>
+<p>&#x7B2C;&#x4E00;&#x6B21;&#x8C03;&#x7528;&#x8FD4;&#x56DE;&#x975E;nil &#x9519;&#x8BEF;&#x5E76;&#x4E14;&#x4F1A;&#x6267;&#x884C;&#x53D6;&#x6D88;&#x903B;&#x8F91;&#xFF1B;&#x5B83;&#x7684;&#x9519;&#x8BEF;&#x5C06;&#x7531; Wait &#x8FD4;&#x56DE;&#x3002;</p>
+<h4 id="func-Group-Wait"><a href="#func-Group-Wait" class="headerlink" title="func (*Group) Wait"></a>func (*Group) Wait</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func (g * Group ) Wait() error</span><br></pre></td></tr></table></figure>
+
+<p>Wait &#x963B;&#x585E;&#xFF0C;&#x76F4;&#x5230;&#x6240;&#x6709;&#x6765;&#x81EA; Go &#x65B9;&#x6CD5;&#x7684;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x90FD;&#x8FD4;&#x56DE;&#xFF0C;&#x7136;&#x540E;&#x4ECE;&#x5B83;&#x4EEC;&#x8FD4;&#x56DE;&#x7B2C;&#x4E00;&#x4E2A;&#x975E; nil &#x9519;&#x8BEF;&#xFF08;&#x5982;&#x679C;&#x6709;&#xFF09;&#x3002;</p>
+<h2 id="&#x793A;&#x4F8B;-1"><a href="#&#x793A;&#x4F8B;-1" class="headerlink" title="&#x793A;&#x4F8B;"></a>&#x793A;&#x4F8B;</h2><h3 id="&#x4F20;&#x64AD;&#x9519;&#x8BEF;"><a href="#&#x4F20;&#x64AD;&#x9519;&#x8BEF;" class="headerlink" title="&#x4F20;&#x64AD;&#x9519;&#x8BEF;"></a>&#x4F20;&#x64AD;&#x9519;&#x8BEF;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func main() {</span><br><span class="line">   urls := []string{</span><br><span class="line">      &quot;https://pic.netbian.com/uploads/allimg/210925/233922-163258436234e8.jpg&quot;,</span><br><span class="line">      &quot;https://pic.netbian.com/uploads/allimg/210920/180354-16321322345f20.jpg&quot;,</span><br><span class="line">      &quot;https://pic.netbian.com/uploads/allimg/210916/232432-16318058722f4d.jpg&quot;,</span><br><span class="line">      &quot;https://pic.netbian.com/uploads/allimg/210916/232432-16318058722f4d11.jpg&quot;,</span><br><span class="line">   }</span><br><span class="line">   eg := &amp;errgroup.Group{}</span><br><span class="line"></span><br><span class="line">   for _,url := range urls{</span><br><span class="line">      url := url</span><br><span class="line">      eg.Go(func() error {</span><br><span class="line">         return downloadFile(url)</span><br><span class="line">      })</span><br><span class="line"></span><br><span class="line">   }</span><br><span class="line">   fmt.Println(eg.Wait())</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x53D6;&#x6D88;&#x5176;&#x4ED6;&#x5B50;&#x4EFB;&#x52A1;"><a href="#&#x53D6;&#x6D88;&#x5176;&#x4ED6;&#x5B50;&#x4EFB;&#x52A1;" class="headerlink" title="&#x53D6;&#x6D88;&#x5176;&#x4ED6;&#x5B50;&#x4EFB;&#x52A1;"></a>&#x53D6;&#x6D88;&#x5176;&#x4ED6;&#x5B50;&#x4EFB;&#x52A1;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func main() {</span><br><span class="line"></span><br><span class="line">   eg, ctx := errgroup.WithContext(context.Background())</span><br><span class="line"></span><br><span class="line">   for i := 0; i &lt; 10; i++ {</span><br><span class="line">      i := i</span><br><span class="line">      eg.Go(func() error {</span><br><span class="line">        </span><br><span class="line">         if i &gt;= 8{</span><br><span class="line">            time.Sleep(1 * time.Second)</span><br><span class="line">         }else{</span><br><span class="line">            time.Sleep(2 * time.Second)</span><br><span class="line">         }</span><br><span class="line"></span><br><span class="line">         select {</span><br><span class="line">         case &lt;-ctx.Done():</span><br><span class="line">            fmt.Println(&quot;canceled &quot;,i)</span><br><span class="line">            return ctx.Err()</span><br><span class="line">         default:</span><br><span class="line">            if i &gt;= 8 {</span><br><span class="line">               fmt.Println(&quot;Error:&quot;, i)</span><br><span class="line">               return fmt.Errorf(&quot;Error occurred: %d&quot;, i)</span><br><span class="line">            }</span><br><span class="line">            fmt.Println(i)</span><br><span class="line">            return nil</span><br><span class="line">         }</span><br><span class="line">      })</span><br><span class="line">   }</span><br><span class="line"></span><br><span class="line">   fmt.Println(&quot;wait &quot;, eg.Wait())</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h3><ul>
+<li>&#x5982;&#x679C;&#x591A;&#x4E2A;<code>Goroutine</code>&#x51FA;&#x73B0;&#x9519;&#x8BEF;&#xFF0C;&#x53EA;&#x4F1A;&#x83B7;&#x53D6;&#x5230;&#x7B2C;&#x4E00;&#x4E2A;&#x51FA;&#x9519;&#x7684;<code>Goroutine</code>&#x7684;&#x9519;&#x8BEF;&#x4FE1;&#x606F;&#xFF0C;&#x5176;&#x4ED6;&#x51FA;&#x9519;&#x7684;<code>Goroutine</code>&#x7684;&#x9519;&#x8BEF;&#x4FE1;&#x606F;&#x5C06;&#x4E0D;&#x4F1A;&#x88AB;&#x611F;&#x77E5;&#x5230;&#x3002;</li>
+<li><code>errgroup.Group</code>&#x5728;&#x51FA;&#x73B0;&#x9519;&#x8BEF;&#x6216;&#x8005;&#x7B49;&#x5F85;&#x7ED3;&#x675F;&#x540E;&#x90FD;&#x4F1A;&#x8C03;&#x7528; <code>Context</code>&#x5BF9;&#x8C61; &#x7684; <code>cancel</code> &#x65B9;&#x6CD5;&#x540C;&#x6B65;&#x53D6;&#x6D88;&#x4FE1;&#x53F7;</li>
+</ul>
+<h1 id="&#x53C2;&#x8003;&#x94FE;&#x63A5;"><a href="#&#x53C2;&#x8003;&#x94FE;&#x63A5;" class="headerlink" title="&#x53C2;&#x8003;&#x94FE;&#x63A5;"></a>&#x53C2;&#x8003;&#x94FE;&#x63A5;</h1><ul>
+<li><a href="/external_links/c58c1761dd74ac21f62cd71903cc79af.html" target="blank" rel="noopener">waitgroup</a></li>
+<li><a href="/external_links/38fbcc8e99e2b5ccf37a8261babf3caf.html" target="blank" rel="noopener">errgroup</a></li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/fa217052eb7a19786870488209b3f1d0.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Go/" rel="tag"># Go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035181752536547336.html" rel="next" title="递归-虽然我不懂，但大受震撼？">
+                <i class="fa fa-chevron-left"></i> 递归-虽然我不懂，但大受震撼？
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035181700506189855.html" rel="prev" title="Python爬虫120例之第20例，1637、一路商机网全站">
+                Python爬虫120例之第20例，1637、一路商机网全站 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#思考"><span class="nav-number">1.</span> <span class="nav-text">思考</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WaitGroup"><span class="nav-number">2.</span> <span class="nav-text">WaitGroup</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WaitGroup是什么？"><span class="nav-number">2.1.</span> <span class="nav-text">WaitGroup是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例"><span class="nav-number">2.2.</span> <span class="nav-text">示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">2.2.1.</span> <span class="nav-text">问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何检测这种情况呢？"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">如何检测这种情况呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如何解决？"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">如何解决？</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#errgroup"><span class="nav-number">3.</span> <span class="nav-text">errgroup</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#errgroup是什么？"><span class="nav-number">3.1.</span> <span class="nav-text">errgroup是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数签名"><span class="nav-number">3.2.</span> <span class="nav-text">函数签名</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#func-WithContext"><span class="nav-number">3.2.0.1.</span> <span class="nav-text">func WithContext</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#func-Group-Go"><span class="nav-number">3.2.0.2.</span> <span class="nav-text">func (*Group) Go</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#func-Group-Wait"><span class="nav-number">3.2.0.3.</span> <span class="nav-text">func (*Group) Wait</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例-1"><span class="nav-number">3.3.</span> <span class="nav-text">示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传播错误"><span class="nav-number">3.3.1.</span> <span class="nav-text">传播错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#取消其他子任务"><span class="nav-number">3.3.2.</span> <span class="nav-text">取消其他子任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.3.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#参考链接"><span class="nav-number">4.</span> <span class="nav-text">参考链接</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

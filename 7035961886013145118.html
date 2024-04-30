@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数据库,Oracle,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x6839;&amp;#x636E;&amp;#x4FDD;&amp;#x62A4;&amp;#x7684;&amp;#x6570;&amp;#x636E;&amp;#x4E0D;&amp;#x540C;&amp;#xFF0C;ORACLE&amp;#x7684;&amp;#x6570;&amp;#x636E;&amp;#x5E93;&amp;#x9501;&amp;#x5206;&amp;#x4E3A;&amp;#x4EE5;&amp;#x4E0B;&amp;#x51E0;&amp;#x5927;&amp;#x7C7B;&amp;#xFF1A; 1.DML&amp;#x9">
+<meta name="keywords" content="数据库,Oracle">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Oracle TX 锁快速查杀处理办法">
+<meta property="og:url" content="https://dev.newban.cn/7035961886013145118.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x6839;&amp;#x636E;&amp;#x4FDD;&amp;#x62A4;&amp;#x7684;&amp;#x6570;&amp;#x636E;&amp;#x4E0D;&amp;#x540C;&amp;#xFF0C;ORACLE&amp;#x7684;&amp;#x6570;&amp;#x636E;&amp;#x5E93;&amp;#x9501;&amp;#x5206;&amp;#x4E3A;&amp;#x4EE5;&amp;#x4E0B;&amp;#x51E0;&amp;#x5927;&amp;#x7C7B;&amp;#xFF1A; 1.DML&amp;#x9">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-30T04:20:50.668Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Oracle TX 锁快速查杀处理办法">
+<meta name="twitter:description" content="&amp;#x6839;&amp;#x636E;&amp;#x4FDD;&amp;#x62A4;&amp;#x7684;&amp;#x6570;&amp;#x636E;&amp;#x4E0D;&amp;#x540C;&amp;#xFF0C;ORACLE&amp;#x7684;&amp;#x6570;&amp;#x636E;&amp;#x5E93;&amp;#x9501;&amp;#x5206;&amp;#x4E3A;&amp;#x4EE5;&amp;#x4E0B;&amp;#x51E0;&amp;#x5927;&amp;#x7C7B;&amp;#xFF1A; 1.DML&amp;#x9">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035961886013145118.html">
+
+
+
+
+
+  <title>Oracle TX 锁快速查杀处理办法 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Oracle TX 锁快速查杀处理办法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-29T20:08:36+08:00">
+                2021-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x6839;&#x636E;&#x4FDD;&#x62A4;&#x7684;&#x6570;&#x636E;&#x4E0D;&#x540C;&#xFF0C;ORACLE&#x7684;&#x6570;&#x636E;&#x5E93;&#x9501;&#x5206;&#x4E3A;&#x4EE5;&#x4E0B;&#x51E0;&#x5927;&#x7C7B;&#xFF1A;</p>
+<p>1.DML&#x9501;&#xFF08;data locks&#x6570;&#x636E;&#x9501;&#xFF09;&#xFF0C;&#x7528;&#x4E8E;&#x4FDD;&#x62A4;&#x6570;&#x636E;&#x7684;&#x5B8C;&#x6574;&#x6027;&#xFF1B;</p>
+<p>2.DDL&#x9501;&#xFF08;dictionary locks&#x5B57;&#x5178;&#x9501;&#xFF09;&#xFF0C;&#x7528;&#x4E8E;&#x4FDD;&#x62A4;&#x6570;&#x636E;&#x5E93;&#x5BF9;&#x8C61;&#x7684;&#x7ED3;&#x6784;&#xFF0C;&#x4F8B;&#x5982;&#x8868;&#x3001;&#x7D22;&#x5F15;&#x7684;&#x7ED3;&#x6784;&#x5B9A;&#x4E49;&#xFF1B;</p>
+<p>3.&#x5185;&#x90E8;&#x9501;&#x6216;&#x95E9;&#xFF08;internal locks or latches&#xFF09;&#xFF0C;&#x7528;&#x4E8E;&#x4FDD;&#x62A4;&#x5185;&#x90E8;&#x7ED3;&#x6784;</p>
+<p>&#x5728; Oracle &#x6570;&#x636E;&#x5E93;&#x4E2D;&#xFF0C;DML&#x9501;&#x4E3B;&#x8981;&#x5305;&#x62EC; TM &#x9501;&#x548C; TX &#x9501;&#xFF0C;&#x5176;&#x4E2D; TM &#x9501;&#x79F0;&#x4E3A;&#x8868;&#x7EA7;&#x9501;&#xFF0C;TX &#x9501;&#x79F0;&#x4E3A;&#x4E8B;&#x52A1;&#x9501;&#x6216;&#x884C;&#x7EA7;&#x9501;&#x3002;</p>
+<p>&#x5F53; Oracle &#x6267;&#x884C; DML &#x8BED;&#x53E5;&#x65F6;&#xFF0C;&#x7CFB;&#x7EDF;&#x81EA;&#x52A8;&#x5728;&#x6240;&#x8981;&#x64CD;&#x4F5C;&#x7684;&#x8868;&#x4E0A;&#x7533;&#x8BF7; TM &#x7C7B;&#x578B;&#x7684;&#x9501;&#x3002;&#x5F53; TM &#x9501;&#x83B7;&#x5F97;&#x540E;&#xFF0C;&#x7CFB;&#x7EDF;&#x518D;&#x81EA;&#x52A8;&#x7533;&#x8BF7; TX &#x7C7B;&#x578B;&#x7684;&#x9501;&#xFF0C;&#x5E76;&#x5C06;&#x5B9E;&#x9645;&#x9501;&#x5B9A;&#x7684;&#x6570;&#x636E;&#x884C;&#x7684;&#x9501;&#x6807;&#x5FD7;&#x4F4D;&#x8FDB;&#x884C;&#x7F6E;&#x4F4D;&#x3002;&#x8FD9;&#x6837;&#x5728;&#x4E8B;&#x52A1;&#x52A0;&#x9501;&#x524D;&#x68C0;&#x67E5; TX &#x9501;&#x76F8;&#x5BB9;&#x6027;&#x65F6;&#x5C31;&#x4E0D;&#x7528;&#x518D;&#x9010;&#x884C;&#x68C0;&#x67E5;&#x9501;&#x6807;&#x5FD7;&#xFF0C;&#x800C;&#x53EA;&#x9700;&#x68C0;&#x67E5; TM &#x9501;&#x6A21;&#x5F0F;&#x7684;&#x76F8;&#x5BB9;&#x6027;&#x5373;&#x53EF;&#xFF0C;&#x5927;&#x5927;&#x63D0;&#x9AD8;&#x4E86;&#x7CFB;&#x7EDF;&#x7684;&#x6548;&#x7387;&#x3002;<strong>TM &#x9501;&#x5305;&#x62EC;&#x4E86; SS&#x3001;SX&#x3001;S&#x3001;X &#x7B49;&#x591A;&#x79CD;&#x6A21;&#x5F0F;&#xFF0C;&#x5728;&#x6570;&#x636E;&#x5E93;&#x4E2D;&#x7528; 0&#xFF0D;6 &#x6765;&#x8868;&#x793A;</strong>&#x3002;&#x4E0D;&#x540C;&#x7684; SQL &#x64CD;&#x4F5C;&#x4EA7;&#x751F;&#x4E0D;&#x540C;&#x7C7B;&#x578B;&#x7684; TM &#x9501;&#x3002;</p>
+<p>&#x5728;&#x6570;&#x636E;&#x884C;&#x4E0A;&#x53EA;&#x6709; X &#x9501;&#xFF08;&#x6392;&#x4ED6;&#x9501;&#xFF09;&#x3002;&#x5728; Oracle &#x6570;&#x636E;&#x5E93;&#x4E2D;&#xFF0C;&#x5F53;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x9996;&#x6B21;&#x53D1;&#x8D77;&#x4E00;&#x4E2A; DML &#x8BED;&#x53E5;&#x65F6;&#x5C31;&#x83B7;&#x5F97;&#x4E00;&#x4E2A; TX &#x9501;&#xFF0C;&#x8BE5;&#x9501;&#x4FDD;&#x6301;&#x5230;&#x4E8B;&#x52A1;&#x88AB;&#x63D0;&#x4EA4;&#x6216;&#x56DE;&#x6EDA;&#x3002;&#x5F53;&#x4E24;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x4F1A;&#x8BDD;&#x5728;&#x8868;&#x7684;&#x540C;&#x4E00;&#x6761;&#x8BB0;&#x5F55;&#x4E0A;&#x6267;&#x884C; DML &#x8BED;&#x53E5;&#x65F6;&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x4F1A;&#x8BDD;&#x5728;&#x8BE5;&#x6761;&#x8BB0;&#x5F55;&#x4E0A;&#x52A0;&#x9501;&#xFF0C;&#x5176;&#x4ED6;&#x7684;&#x4F1A;&#x8BDD;&#x5904;&#x4E8E;&#x7B49;&#x5F85;&#x72B6;&#x6001;&#x3002;&#x5F53;&#x7B2C;&#x4E00;&#x4E2A;&#x4F1A;&#x8BDD;&#x63D0;&#x4EA4;&#x540E;&#xFF0C;TX &#x9501;&#x88AB;&#x91CA;&#x653E;&#xFF0C;&#x5176;&#x4ED6;&#x4F1A;&#x8BDD;&#x624D;&#x53EF;&#x4EE5;&#x52A0;&#x9501;&#x3002;</p>
+<p>&#x5F53; Oracle &#x6570;&#x636E;&#x5E93;&#x53D1;&#x751F; TX &#x9501;&#x7B49;&#x5F85;&#x65F6;&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x53CA;&#x65F6;&#x5904;&#x7406;&#x5E38;&#x5E38;&#x4F1A;&#x5F15;&#x8D77; Oracle &#x6570;&#x636E;&#x5E93;&#x6302;&#x8D77;&#xFF0C;&#x6216;&#x5BFC;&#x81F4;&#x6B7B;&#x9501;&#x7684;&#x53D1;&#x751F;&#xFF0C;&#x4EA7;&#x751F; ORA-60 &#x7684;&#x9519;&#x8BEF;&#x3002;&#x8FD9;&#x4E9B;&#x73B0;&#x8C61;&#x90FD;&#x4F1A;&#x5BF9;&#x5B9E;&#x9645;&#x5E94;&#x7528;&#x4EA7;&#x751F;&#x6781;&#x5927;&#x7684;&#x5371;&#x5BB3;&#xFF0C;&#x5982;&#x957F;&#x65F6;&#x95F4;&#x672A;&#x54CD;&#x5E94;&#xFF0C;&#x5927;&#x91CF;&#x4E8B;&#x52A1;&#x5931;&#x8D25;&#x7B49;&#x3002;</p>
+<p>ORACLE&#x91CC;&#x9501;&#x6709;&#x4EE5;&#x4E0B;&#x51E0;&#x79CD;&#x6A21;&#x5F0F;: </p>
+<p>**0&#xFF1A;none   </p>
+<p>1&#xFF1A;null &#x7A7A;   </p>
+<p>2&#xFF1A;Row-S &#x884C;&#x5171;&#x4EAB;(RS)&#xFF1A;&#x5171;&#x4EAB;&#x8868;&#x9501;&#xFF0C;sub share    </p>
+<p>3&#xFF1A;Row-X &#x884C;&#x72EC;&#x5360;(RX)&#xFF1A;&#x7528;&#x4E8E;&#x884C;&#x7684;&#x4FEE;&#x6539;&#xFF0C;sub exclusive    </p>
+<p>4&#xFF1A;Share &#x5171;&#x4EAB;&#x9501;(S)&#xFF1A;&#x963B;&#x6B62;&#x5176;&#x4ED6;DML&#x64CD;&#x4F5C;&#xFF0C;share   </p>
+<p>5&#xFF1A;S/Row-X &#x5171;&#x4EAB;&#x884C;&#x72EC;&#x5360;(SRX)&#xFF1A;&#x963B;&#x6B62;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x64CD;&#x4F5C;&#xFF0C;share/sub exclusive    </p>
+<p>6&#xFF1A;exclusive &#x72EC;&#x5360;(X)&#xFF1A;&#x72EC;&#x7ACB;&#x8BBF;&#x95EE;&#x4F7F;&#x7528;&#xFF0C;exclusive**</p>
+<p>&#x4E0A;&#x9762;&#x63D0;&#x5230; TX &#x9501;&#x4E5F;&#x79F0;&#x4E8B;&#x52A1;&#x9501;&#x6216;&#x8005;&#x884C;&#x7EA7;&#x9501;&#xFF0C;&#x662F;&#x63A7;&#x5236;&#x6570;&#x636E;&#x5E93;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x7684;&#x4E00;&#x9879;&#x91CD;&#x8981;&#x6280;&#x672F;&#xFF0C;&#x4E5F;&#x662F;&#x6570;&#x636E;&#x5B8C;&#x6574;&#x6027;&#x548C;&#x4E00;&#x81F4;&#x6027;&#x7684;&#x91CD;&#x8981;&#x4FDD;&#x8BC1;&#x3002;&#x4E0B;&#x9762;&#x5C31;&#x4E00;&#x8D77;&#x770B;&#x770B;&#x5982;&#x4F55;&#x5FEB;&#x901F;&#x67E5;&#x6740;&#x9501;&#x3002;</p>
+<h3 id="&#x65B9;&#x6848;-1"><a href="#&#x65B9;&#x6848;-1" class="headerlink" title="&#x65B9;&#x6848; 1"></a>&#x65B9;&#x6848; 1</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">csharp&#x590D;&#x5236;&#x4EE3;&#x7801;--&#x884C;&#x9501;&#x67E5;&#x770B;</span><br><span class="line"></span><br><span class="line">col LOCK_ID1 for a10</span><br><span class="line">col &quot;Locked Mode&quot; for a15</span><br><span class="line">col MACHINE for a20 </span><br><span class="line">set line 345 pages 345</span><br><span class="line">col &quot;Kill&quot; for a40 </span><br><span class="line">select s.SID,s.SERIAL#,s.MACHINE,s.TYPE,l.TYPE,l.CTIME,l.BLOCK,l.REQUEST,l.LMODE,</span><br><span class="line">       decode(l.lmode,</span><br><span class="line">              0,</span><br><span class="line">              &apos;None&apos;,</span><br><span class="line">              1,</span><br><span class="line">              &apos;Null&apos;,</span><br><span class="line">              2,</span><br><span class="line">              &apos;Row-S (SS)&apos;,</span><br><span class="line">              3,</span><br><span class="line">              &apos;Row-X (SX)&apos;,</span><br><span class="line">              4,</span><br><span class="line">              &apos;Share&apos;,</span><br><span class="line">              5,</span><br><span class="line">              &apos;S/Row-X (SSX)&apos;,</span><br><span class="line">              6,</span><br><span class="line">              &apos;Exclusive&apos;,</span><br><span class="line">              substr(to_char(l.lmode), 1, 13)) as &quot;Locked Mode&quot;,</span><br><span class="line">       DECODE(L.TYPE,</span><br><span class="line">              &apos;MR&apos;,</span><br><span class="line">              &apos;File_ID:&apos; || L.ID1,</span><br><span class="line">              &apos;TM&apos;,</span><br><span class="line">              t.NAME,</span><br><span class="line">              &apos;TX&apos;,</span><br><span class="line">              &apos;USN:&apos; || to_char(TRUNC(L.ID1 / 65536)) || &apos;RWO:&apos; ||</span><br><span class="line">              nvl(r.NAME, &apos;None&apos;),</span><br><span class="line">              L.ID1) as LOCK_ID1,</span><br><span class="line">       &apos;alter system kill session &apos;&apos;&apos; || s.SID || &apos;,&apos; || s.SERIAL# || &apos;&apos;&apos;immediate;&apos; as &quot;Kill&quot;</span><br><span class="line">  from gv$process p</span><br><span class="line"> inner join gv$session s</span><br><span class="line">    on s.PADDR = p.ADDR</span><br><span class="line"> inner join v$lock l</span><br><span class="line">    on l.SID = s.SID</span><br><span class="line">  left join sys.obj$ t</span><br><span class="line">    on l.ID1 = t.obj#</span><br><span class="line">  left join sys.obj$ r</span><br><span class="line">    on s.ROW_WAIT_OBJ# = r.obj#</span><br><span class="line"> where 1 = 1</span><br><span class="line">   and l.TYPE != &apos;MR&apos; </span><br><span class="line"> and l.TYPE  = &apos;TM&apos;</span><br><span class="line">   and l.lmode = 3</span><br><span class="line"> order by s.SID;</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x4E0A;&#x65B9; SQL &#x53EF;&#x5B9A;&#x4F4D;&#x9501;&#x4EE5;&#x53CA;&#x67E5;&#x6740;&#x8BED;&#x53E5;&#xFF0C;&#x4F46;&#x65E0;&#x6CD5;&#x786E;&#x5B9A;&#x9501;&#x6E90;&#x5934;&#xFF0C;&#x53EF;&#x901A;&#x8FC7;&#x5982;&#x4E0B; SQL &#x67E5;&#x5230; SID &#x5B9A;&#x4F4D;&#x9501;&#x6E90;&#x5934;&#x4FE1;&#x606F;&#xFF0C;&#x5982;&#x67E5;&#x51FA;&#x7684;&#x9501;&#x6E90;&#x5934;&#xFF08;SID &#x4F4D;&#x4E8E;&#x6700;&#x5DE6;&#x8FB9;&#xFF09;&#x5728;&#x4E0A;&#x8FB9;&#x7ED3;&#x679C;&#x96C6;&#x4E2D;&#x51FA;&#x73B0;&#xFF0C;&#x5219;&#x53EF;&#x4F7F;&#x7528;&#x4E0A;&#x9762; SQL &#x76F4;&#x63A5;&#x67E5;&#x6740;&#x9501;&#xFF0C;&#x65B9;&#x4FBF;&#x5FEB;&#x901F;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;set linesize 132</span><br><span class="line">col sid format a12</span><br><span class="line">col event format a30</span><br><span class="line">col sql_text format a40</span><br><span class="line">col object_name format a25</span><br><span class="line">WITH sessions AS</span><br><span class="line">(SELECT  /*+materialize*/</span><br><span class="line">         sid</span><br><span class="line">        ,sql_id</span><br><span class="line">        ,event</span><br><span class="line">        ,blocking_session</span><br><span class="line">        ,row_wait_obj#</span><br><span class="line">FROM gv$session)</span><br><span class="line">SELECT LPAD(&apos; &apos;, LEVEL ) || sid sid</span><br><span class="line">      ,sql_id</span><br><span class="line">      ,event</span><br><span class="line">      ,owner||decode(owner,null,null,&apos;.&apos;)||object_name object_name</span><br><span class="line">      ,substr(sql_text,1,40) sql_text</span><br><span class="line">FROM sessions s</span><br><span class="line">LEFT OUTER JOIN dba_objects ON (object_id = row_wait_obj#)</span><br><span class="line">LEFT OUTER JOIN v$sql USING (sql_id)</span><br><span class="line">WHERE sid IN (SELECT blocking_session FROM sessions)</span><br><span class="line">OR blocking_session IS NOT NULL</span><br><span class="line">CONNECT BY PRIOR sid = blocking_session</span><br><span class="line">   START WITH blocking_session IS NULL;</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x65B9;&#x6848;-2"><a href="#&#x65B9;&#x6848;-2" class="headerlink" title="&#x65B9;&#x6848; 2"></a>&#x65B9;&#x6848; 2</h3><p><strong>&#x4F7F;&#x7528; v$session &#x4E2D;&#x7684; final_blocking_instance &#x548C; final_blocking_session &#x5B9A;&#x4F4D;&#x9501;&#x6E90;&#x5934;&#xFF0C;&#x5177;&#x4F53; SQL &#x5982;&#x4E0B;&#xFF1A;</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;SQL&gt; select &apos;alter system kill session &apos;&apos;&apos; || ss.sid || &apos;&apos; || &apos;,&apos; || ss.serial# || &apos;,@&apos; ||</span><br><span class="line">       ss.inst_id || &apos;&apos;&apos; immediate;&apos; db_kill_session</span><br><span class="line">  from gv$session s, </span><br><span class="line">  gv$session ss</span><br><span class="line"> where s.final_blocking_session is not null</span><br><span class="line">   and s.final_blocking_instance = ss.inst_id</span><br><span class="line">   and s.final_blocking_session = ss.sid</span><br><span class="line">   and s.sid &lt;&gt; ss.sid;</span><br><span class="line">DB_KILL_SESSION</span><br><span class="line">--------------------------------------------------</span><br><span class="line">alter system kill session &apos;161,5579,@1&apos; immediate;</span><br><span class="line">alter system kill session &apos;161,5579,@1&apos; immediate;</span><br><span class="line"></span><br><span class="line">--&#x5982;&#x4E0B;&#xFF0C;&#x53EF;&#x901A;&#x8FC7;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5C42;&#x9762;&#x76F4;&#x63A5; kill &#x67E5;&#x6740;&#x9501;&#x3002;</span><br><span class="line">SQL&gt; select p.inst_id, &apos;kill -9 &apos; || p.spid os_kill_session</span><br><span class="line">  from gv$session s, </span><br><span class="line">  gv$session ss, </span><br><span class="line">  gv$process p</span><br><span class="line"> where s.final_blocking_session is not null</span><br><span class="line">   and s.final_blocking_instance = ss.inst_id</span><br><span class="line">   and s.final_blocking_session = ss.sid</span><br><span class="line">   and ss.paddr = p.addr</span><br><span class="line">   and ss.inst_id = p.inst_id</span><br><span class="line">   and s.sid &lt;&gt; ss.sid;</span><br><span class="line">   INST_ID OS_KILL_SESSION</span><br><span class="line">---------- --------------------------------</span><br><span class="line">         1 kill -9 12349</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x6700;&#x540E;&#x5728;&#x5206;&#x4EAB;&#x4E00;&#x4E9B;&#x901A;&#x7528;&#x7684;&#x6740;&#x4F1A;&#x8BDD;&#x7684;-SQL-&#x811A;&#x672C;&#xFF1A;"><a href="#&#x6700;&#x540E;&#x5728;&#x5206;&#x4EAB;&#x4E00;&#x4E9B;&#x901A;&#x7528;&#x7684;&#x6740;&#x4F1A;&#x8BDD;&#x7684;-SQL-&#x811A;&#x672C;&#xFF1A;" class="headerlink" title="&#x6700;&#x540E;&#x5728;&#x5206;&#x4EAB;&#x4E00;&#x4E9B;&#x901A;&#x7528;&#x7684;&#x6740;&#x4F1A;&#x8BDD;&#x7684; SQL &#x811A;&#x672C;&#xFF1A;"></a>&#x6700;&#x540E;&#x5728;&#x5206;&#x4EAB;&#x4E00;&#x4E9B;&#x901A;&#x7528;&#x7684;&#x6740;&#x4F1A;&#x8BDD;&#x7684; SQL &#x811A;&#x672C;&#xFF1A;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line">python&#x590D;&#x5236;&#x4EE3;&#x7801;1&#x3001;kill&#x67D0;&#x4E2A;&#x7B49;&#x5F85;&#x4E8B;&#x4EF6;&#x5BF9;&#x5E94;&#x7684;spid&#xFF1A;</span><br><span class="line">set linesize 260 pagesize 10000</span><br><span class="line">select &apos;kill -9 &apos; || a.spid</span><br><span class="line">  from v$process a, v$session b</span><br><span class="line"> where a.addr = b.paddr</span><br><span class="line">   and a.background is null</span><br><span class="line">   and b.type = &apos;USER&apos;</span><br><span class="line">   and b.event like &apos;%&apos; || &apos;&amp;eventname&apos; || &apos;%&apos;</span><br><span class="line">   and b.status = &apos;ACTIVE&apos;;</span><br><span class="line"></span><br><span class="line">-- &#x5BF9;&#x5E94;&#x7684;alter system kill session&#x7684;&#x8BED;&#x6CD5;&#xFF1A;</span><br><span class="line"></span><br><span class="line">set linesize 260 pagesize 1000</span><br><span class="line">col machine for a50</span><br><span class="line">col kill_session for a60;</span><br><span class="line">select machine,</span><br><span class="line">       &apos;alter system kill session &apos; || &apos;&apos;&apos;&apos;||sid|| &apos;,&apos; || serial# ||&apos;&apos;&apos;&apos;|| &apos;immediate;&apos; kill_session,</span><br><span class="line">       status</span><br><span class="line">  from v$session</span><br><span class="line"> where type=&apos;USER&apos; and event like &apos;%event_name%&apos; and status = &apos;ACTIVE&apos;;</span><br><span class="line"></span><br><span class="line">2&#x3001;kill&#x67D0;&#x4E2A;sql_id&#x5BF9;&#x5E94;&#x7684;spid&#xFF1A;</span><br><span class="line">set linesize 260 pagesize 10000</span><br><span class="line">select &apos;kill -9 &apos; || a.spid</span><br><span class="line">  from v$process a, v$session b</span><br><span class="line"> where a.addr = b.paddr</span><br><span class="line">   and a.background is null</span><br><span class="line">   and b.type = &apos;USER&apos;</span><br><span class="line">   and b.sql_id = &apos;&amp;sql_id&apos;</span><br><span class="line">   and b.status = &apos;ACTIVE&apos;;</span><br><span class="line"></span><br><span class="line">-- &#x5BF9;&#x5E94;&#x7684;alter system kill session&#x7684;&#x8BED;&#x6CD5;&#xFF1A;</span><br><span class="line"></span><br><span class="line">set linesize 260 pagesize 10000</span><br><span class="line">col machine for a60</span><br><span class="line">select machine,</span><br><span class="line">       &apos;alter system kill session &apos; || &apos;&apos;&apos;&apos;||sid|| &apos;,&apos; || serial# ||&apos;&apos;&apos;&apos;|| &apos;immediate;&apos;,</span><br><span class="line">       status</span><br><span class="line">  from v$session</span><br><span class="line"> where sql_id = &apos;&amp;sql_id&apos; and type=&apos;USER&apos; and status=&apos;ACTIVE&apos;;</span><br><span class="line"></span><br><span class="line">3&#x3001;&#x88AB;kill&#x4F1A;&#x8BDD;&#x7684;&#x7C7B;&#x578B;&#xFF1A;</span><br><span class="line">set linesize 260 pagesize 10000</span><br><span class="line">select b.osuser,b.machine,b.program,b.sql_id,b.PREV_SQL_ID,a.spid,to_char(LAST_CALL_ET) as seconds,b.BLOCKING_SESSION,b.BLOCKING_INSTANCE</span><br><span class="line">  from v$process a, v$session b</span><br><span class="line"> where a.addr = b.paddr</span><br><span class="line">   and a.inst_id=b.inst_id</span><br><span class="line">   and a.background is null</span><br><span class="line">   and b.type = &apos;USER&apos;</span><br><span class="line">   and b.event=&apos;&amp;event_name&apos;</span><br><span class="line">   and b.status = &apos;ACTIVE&apos;;</span><br><span class="line"></span><br><span class="line">4&#x3001;blocking&#x4F1A;&#x8BDD;&#x7C7B;&#x578B;&#x548C;kill blocking&#x4F1A;&#x8BDD;&#xFF1A;</span><br><span class="line">set linesize 260 pagesize 10000</span><br><span class="line">col machine for a50</span><br><span class="line">col kill_session for a60</span><br><span class="line">SELECT</span><br><span class="line">    blocking_instance,</span><br><span class="line">    blocking_session,</span><br><span class="line">    BLOCKING_SESSION_STATUS,</span><br><span class="line">    FINAL_BLOCKING_INSTANCE,</span><br><span class="line">    FINAL_BLOCKING_SESSION,</span><br><span class="line">    COUNT(*)</span><br><span class="line">FROM</span><br><span class="line">    v$session</span><br><span class="line">WHERE</span><br><span class="line">    upper(event) LIKE &apos;%&amp;cursor%&apos;</span><br><span class="line">GROUP BY</span><br><span class="line">    blocking_instance,</span><br><span class="line">    blocking_session,</span><br><span class="line">    BLOCKING_SESSION_STATUS,</span><br><span class="line">    FINAL_BLOCKING_INSTANCE,</span><br><span class="line">    FINAL_BLOCKING_SESSION</span><br><span class="line">    order by blocking_instance,count(*);</span><br><span class="line"></span><br><span class="line">-- kill blocking&#x4F1A;&#x8BDD;</span><br><span class="line"></span><br><span class="line">select </span><br><span class="line">       inst_id,</span><br><span class="line">       machine,</span><br><span class="line">       &apos;alter system kill session &apos; || &apos;&apos;&apos;&apos;||sid|| &apos;,&apos; || serial# ||&apos;&apos;&apos;&apos;|| &apos;immediate;&apos; kill_session,</span><br><span class="line">       status</span><br><span class="line">  from gv$session a</span><br><span class="line">where a.type=&apos;USER&apos; and (a.inst_id,a.sid) in </span><br><span class="line">(</span><br><span class="line">select </span><br><span class="line">BLOCKING_INSTANCE,</span><br><span class="line">BLOCKING_SESSION </span><br><span class="line">from v$session</span><br><span class="line">where upper(event) like &apos;%&amp;cursor%&apos;</span><br><span class="line">)</span><br><span class="line">order by inst_id;</span><br><span class="line"></span><br><span class="line">5&#x3001;&#x6240;&#x6709;&#x542B;&#x6709;&#x5173;&#x952E;&#x5B57;&#x201C;LOCAL=NO&#x201D;&#x7684;&#x8FDB;&#x7A0B;&#x662F;Oracle&#x6570;&#x636E;&#x5E93;&#x4E2D;&#x8FDC;&#x7A0B;&#x8FDE;&#x63A5;&#x8FDB;&#x7A0B;&#x7684;&#x5171;&#x540C;&#x7279;&#x70B9;&#xFF0C;&#x56E0;&#x6B64;&#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x547D;&#x4EE4;&#x53EF;&#x4EE5;kill&#x6389;&#x6240;&#x6709;&#x7684;&#x8FDB;&#x7A0B;</span><br><span class="line">ps -ef|grep -v grep|grep LOCAL=NO|awk &apos;{print $2}&apos;|xargs kill -9</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/dec4664337085a7c0a4e9eec05c3ad9e.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/数据库-Oracle/" rel="tag"># 数据库,Oracle</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035960327376207885.html" rel="next" title="可能是最好的Spring RMI开发教程【建议收藏】">
+                <i class="fa fa-chevron-left"></i> 可能是最好的Spring RMI开发教程【建议收藏】
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035966050235580452.html" rel="prev" title="linux中centos7防火墙开启/关闭异常错误解决方案">
+                linux中centos7防火墙开启/关闭异常错误解决方案 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#方案-1"><span class="nav-number">1.</span> <span class="nav-text">方案 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方案-2"><span class="nav-number">2.</span> <span class="nav-text">方案 2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最后在分享一些通用的杀会话的-SQL-脚本："><span class="nav-number">3.</span> <span class="nav-text">最后在分享一些通用的杀会话的 SQL 脚本：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

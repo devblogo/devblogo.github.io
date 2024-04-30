@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="1.&amp;#x4E3A;&amp;#x4EC0;&amp;#x4E48;&amp;#x9700;&amp;#x8981;Lock &amp;#x4E3A;&amp;#x4EC0;&amp;#x4E48;synchronized&amp;#x4E0D;&amp;#x591F;&amp;#x7528;,&amp;#x8FD8;&amp;#x9700;&amp;#x8981;Lock  Lock&amp;#x548C;synchronized&amp;#x8FD9;&amp;#x4E24;&amp;#x4E2A;&amp;#x6700;&amp;#x5E3">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lock锁 精讲">
+<meta property="og:url" content="https://dev.newban.cn/6917052196223713288.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="1.&amp;#x4E3A;&amp;#x4EC0;&amp;#x4E48;&amp;#x9700;&amp;#x8981;Lock &amp;#x4E3A;&amp;#x4EC0;&amp;#x4E48;synchronized&amp;#x4E0D;&amp;#x591F;&amp;#x7528;,&amp;#x8FD8;&amp;#x9700;&amp;#x8981;Lock  Lock&amp;#x548C;synchronized&amp;#x8FD9;&amp;#x4E24;&amp;#x4E2A;&amp;#x6700;&amp;#x5E3">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/a372ef91eb479eeade925a4d27a48c5db05694bd275718b5b2a1e52c1d75bd5d">
+<meta property="og:updated_time" content="2024-04-29T13:14:16.045Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lock锁 精讲">
+<meta name="twitter:description" content="1.&amp;#x4E3A;&amp;#x4EC0;&amp;#x4E48;&amp;#x9700;&amp;#x8981;Lock &amp;#x4E3A;&amp;#x4EC0;&amp;#x4E48;synchronized&amp;#x4E0D;&amp;#x591F;&amp;#x7528;,&amp;#x8FD8;&amp;#x9700;&amp;#x8981;Lock  Lock&amp;#x548C;synchronized&amp;#x8FD9;&amp;#x4E24;&amp;#x4E2A;&amp;#x6700;&amp;#x5E3">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/a372ef91eb479eeade925a4d27a48c5db05694bd275718b5b2a1e52c1d75bd5d">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6917052196223713288.html">
+
+
+
+
+
+  <title>Lock锁 精讲 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Lock锁 精讲</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-13T09:37:29+08:00">
+                2021-01-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981;Lock"><a href="#1-&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981;Lock" class="headerlink" title="1.&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981;Lock"></a>1.&#x4E3A;&#x4EC0;&#x4E48;&#x9700;&#x8981;Lock</h2><ol>
+<li><strong>&#x4E3A;&#x4EC0;&#x4E48;synchronized&#x4E0D;&#x591F;&#x7528;,&#x8FD8;&#x9700;&#x8981;Lock</strong></li>
+</ol>
+<pre><code>Lock&#x548C;synchronized&#x8FD9;&#x4E24;&#x4E2A;&#x6700;&#x5E38;&#x89C1;&#x7684;&#x9501;&#x90FD;&#x53EF;&#x4EE5;&#x8FBE;&#x5230;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;&#x76EE;&#x7684;,&#x4F46;&#x662F;&#x529F;&#x80FD;&#x4E0A;&#x6709;&#x5F88;&#x5927;&#x4E0D;&#x540C;&#x3002;
+
+
+Lock&#x5E76;&#x4E0D;&#x662F;&#x7528;&#x6765;&#x4EE3;&#x66FF;synchronized&#x7684;&#x800C;&#x662F;&#x5F53;&#x4F7F;&#x7528;synchronized&#x4E0D;&#x6EE1;&#x8DB3;&#x60C5;&#x51B5;&#x6216;&#x8005;&#x4E0D;&#x5408;&#x9002;&#x7684;&#x65F6;&#x5019;&#x6765;&#x63D0;&#x4F9B;&#x9AD8;&#x7EA7;&#x529F;&#x80FD;&#x7684;</code></pre><ol start="2">
+<li><strong>&#x4E3A;&#x4EC0;&#x4E48;synchronized&#x4E0D;&#x591F;&#x7528;</strong></li>
+</ol>
+<ul>
+<li><strong>&#x6548;&#x7387;&#x4F4E;</strong>&#xFF1A;&#x9501;&#x7684;&#x91CA;&#x653E;&#x60C5;&#x51B5;&#x8F83;&#x5C11;&#xFF0C;&#x8BD5;&#x56FE;&#x83B7;&#x5F97;&#x9501;&#x4E0D;&#x80FD;&#x8BBE;&#x5B9A;&#x8D85;&#x65F6;&#xFF0C;&#x4E0D;&#x80FD;&#x4E2D;&#x65AD;&#x4E00;&#x4E2A;&#x6B63;&#x5728;&#x8BD5;&#x56FE;&#x83B7;&#x5F97;&#x9501;&#x7684;&#x7EBF;&#x7A0B;</li>
+<li><strong>&#x4E0D;&#x591F;&#x7075;&#x6D3B;</strong>&#xFF1A;&#x52A0;&#x9501;&#x548C;&#x91CA;&#x653E;&#x7684;&#x65F6;&#x5019;&#x5355;&#x4E00;&#xFF0C;&#x6BCF;&#x4E2A;&#x9501;&#x4EC5;&#x6709;&#x5355;&#x4E00;&#x7684;&#x6761;&#x4EF6;&#x53EF;&#x80FD;&#x662F;&#x4E0D;&#x591F;&#x7684;</li>
+<li><strong>&#x65E0;&#x6CD5;&#x77E5;&#x9053;&#x662F;&#x5426;&#x6210;&#x529F;&#x7684;&#x83B7;&#x53D6;&#x9501;</strong></li>
+</ul>
+<h2 id="2-Lock&#x9501;&#x7684;&#x610F;&#x4E49;"><a href="#2-Lock&#x9501;&#x7684;&#x610F;&#x4E49;" class="headerlink" title="2.Lock&#x9501;&#x7684;&#x610F;&#x4E49;"></a>2.Lock&#x9501;&#x7684;&#x610F;&#x4E49;</h2><ol>
+<li>&#x4E0E;&#x4F7F;&#x7528;synchronized&#x65B9;&#x6CD5;&#x548C;&#x8BED;&#x53E5;&#x76F8;&#x6BD4;&#xFF0C; Lock&#x5B9E;&#x73B0;&#x63D0;&#x4F9B;&#x4E86;&#x66F4;&#x5E7F;&#x6CDB;&#x7684;&#x9501;&#x64CD;&#x4F5C;&#x3002; &#x5B83;&#x4EEC;&#x5141;&#x8BB8;&#x66F4;&#x7075;&#x6D3B;&#x7684;&#x7ED3;&#x6784;&#xFF0C;&#x53EF;&#x4EE5;&#x5177;&#x6709;&#x5B8C;&#x5168;&#x4E0D;&#x540C;&#x7684;&#x5C5E;&#x6027;&#xFF0C;&#x5E76;&#x4E14;&#x53EF;&#x4EE5;&#x652F;&#x6301;&#x591A;&#x4E2A;&#x5173;&#x8054;&#x7684;Condition&#x5BF9;&#x8C61;&#x3002;</li>
+<li>&#x9501;&#x662F;&#x4E00;&#x79CD;&#x7528;&#x4E8E;&#x63A7;&#x5236;&#x591A;&#x4E2A;&#x7EBF;&#x7A0B;&#x5BF9;&#x5171;&#x4EAB;&#x8D44;&#x6E90;&#x7684;&#x8BBF;&#x95EE;&#x7684;&#x5DE5;&#x5177;&#x3002; &#x901A;&#x5E38;&#xFF0C;&#x9501;&#x63D0;&#x4F9B;&#x5BF9;&#x5171;&#x4EAB;&#x8D44;&#x6E90;&#x7684;&#x72EC;&#x5360;&#x8BBF;&#x95EE;&#xFF0C;<strong>&#x4E00;&#x6B21;&#x53EA;&#x80FD;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x8BE5;&#x9501;&#xFF0C;&#x5E76;&#x4E14;&#x5BF9;&#x5171;&#x4EAB;&#x8D44;&#x6E90;&#x7684;&#x6240;&#x6709;&#x8BBF;&#x95EE;&#x90FD;&#x9700;&#x8981;&#x9996;&#x5148;&#x83B7;&#x53D6;&#x8BE5;&#x9501;</strong>&#x3002; &#x4F46;&#x662F;&#xFF0C;<strong>&#x67D0;&#x4E9B;&#x9501;&#x53EF;&#x80FD;&#x5141;&#x8BB8;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x5171;&#x4EAB;&#x8D44;&#x6E90;</strong>&#xFF0C;&#x4F8B;&#x5982;ReadWriteLock&#x7684;&#x8BFB;&#x53D6;&#x9501;&#x3002;</li>
+<li>&#x4F7F;&#x7528;synchronized&#x65B9;&#x6CD5;&#x6216;&#x8BED;&#x53E5;&#x53EF;&#x8BBF;&#x95EE;&#x4E0E;&#x6BCF;&#x4E2A;&#x5BF9;&#x8C61;&#x5173;&#x8054;&#x7684;&#x9690;&#x5F0F;&#x76D1;&#x89C6;&#x5668;&#x9501;&#xFF0C;&#x4F46;&#x4F1A;&#x5F3A;&#x5236;&#x6240;&#x6709;&#x9501;&#x7684;&#x83B7;&#x53D6;&#x548C;&#x91CA;&#x653E;&#x4EE5;&#x5757;&#x7ED3;&#x6784;&#x65B9;&#x5F0F;&#x8FDB;&#x884C;&#x3002;&#x5F53;&#x83B7;&#x53D6;&#x591A;&#x4E2A;&#x9501;&#x65F6;&#xFF0C;&#x5B83;&#x4EEC;&#x5FC5;&#x987B;&#x4EE5;&#x76F8;&#x53CD;&#x7684;&#x987A;&#x5E8F;&#x91CA;&#x653E;&#x9501;&#x3002;</li>
+<li>&#x867D;&#x7136;&#x7528;&#x4E8E;synchronized&#x65B9;&#x6CD5;&#x548C;&#x8BED;&#x53E5;&#x7684;&#x4F5C;&#x7528;&#x57DF;&#x673A;&#x5236;&#x4F7F;&#x4F7F;&#x7528;&#x76D1;&#x89C6;&#x5668;&#x9501;&#x7684;&#x7F16;&#x7A0B;&#x53D8;&#x5F97;&#x66F4;&#x52A0;&#x5BB9;&#x6613;&#xFF0C;&#x5E76;&#x4E14;&#x6709;&#x52A9;&#x4E8E;&#x907F;&#x514D;&#x8BB8;&#x591A;&#x5E38;&#x89C1;&#x7684;&#x6D89;&#x53CA;&#x9501;&#x7684;&#x7F16;&#x7A0B;&#x9519;&#x8BEF;&#xFF0C;&#x4F46;&#x5728;&#x67D0;&#x4E9B;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x60A8;&#x9700;&#x8981;&#x4EE5;&#x66F4;&#x7075;&#x6D3B;&#x7684;&#x65B9;&#x5F0F;&#x4F7F;&#x7528;&#x9501;&#x3002; &#x4F8B;&#x5982;&#xFF0C;&#x67D0;&#x4E9B;&#x7528;&#x4E8E;&#x904D;&#x5386;&#x5E76;&#x53D1;&#x8BBF;&#x95EE;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x7684;&#x7B97;&#x6CD5;&#x9700;&#x8981;&#x4F7F;&#x7528;&#x201C;&#x79FB;&#x4EA4;&#x201D;&#x6216;&#x201C;&#x94FE;&#x9501;&#x201D;&#xFF1A;&#x60A8;&#x83B7;&#x53D6;&#x8282;&#x70B9;A&#x7684;&#x9501;&#xFF0C;&#x7136;&#x540E;&#x83B7;&#x53D6;&#x8282;&#x70B9;B&#x7684;&#x9501;&#xFF0C;&#x7136;&#x540E;&#x91CA;&#x653E;A&#x5E76;&#x83B7;&#x53D6;C&#xFF0C;&#x7136;&#x540E;&#x91CA;&#x653E;B&#x5E76;&#x83B7;&#x5F97;D&#x7B49;&#x3002; Lock&#x63A5;&#x53E3;&#x7684;&#x5B9E;&#x73B0;&#x901A;&#x8FC7;&#x5141;&#x8BB8;&#x5728;&#x4E0D;&#x540C;&#x8303;&#x56F4;&#x5185;&#x83B7;&#x53D6;&#x548C;&#x91CA;&#x653E;&#x9501;&#xFF0C;&#x5E76;&#x5141;&#x8BB8;&#x4EE5;&#x4EFB;&#x610F;&#x987A;&#x5E8F;&#x83B7;&#x53D6;&#x548C;&#x91CA;&#x653E;&#x591A;&#x4E2A;&#x9501;&#xFF0C;&#x4ECE;&#x800C;&#x542F;&#x7528;&#x4E86;&#x6B64;&#x7C7B;&#x6280;&#x672F;&#x3002;</li>
+</ol>
+<h2 id="3-&#x9501;&#x7684;&#x7528;&#x6CD5;"><a href="#3-&#x9501;&#x7684;&#x7528;&#x6CD5;" class="headerlink" title="3.&#x9501;&#x7684;&#x7528;&#x6CD5;"></a>3.&#x9501;&#x7684;&#x7528;&#x6CD5;</h2><pre><code>&#x7075;&#x6D3B;&#x6027;&#x7684;&#x63D0;&#x9AD8;&#x5E26;&#x6765;&#x4E86;&#x989D;&#x5916;&#x7684;&#x8D23;&#x4EFB;&#x3002; &#x7F3A;&#x5C11;&#x5757;&#x7ED3;&#x6784;&#x9501;&#x5B9A;&#x9700;&#x8981;&#x624B;&#x52A8;&#x7684;&#x53BB;&#x91CA;&#x653E;&#x9501;&#x3002; &#x5728;&#x5927;&#x591A;&#x6570;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5E94;&#x4F7F;&#x7528;&#x4EE5;&#x4E0B;&#x60EF;&#x7528;&#x6CD5;&#xFF1A;</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;Lock lock = new ReentrantLock();</span><br><span class="line">lock.lock();</span><br><span class="line">try{</span><br><span class="line">  </span><br><span class="line">}finally {</span><br><span class="line">  lock.unlock();</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<pre><code>**&#x5F53;&#x9501;&#x5B9A;&#x548C;&#x89E3;&#x9501;&#x53D1;&#x751F;&#x5728;&#x4E0D;&#x540C;&#x7684;&#x8303;&#x56F4;&#x5185;&#x65F6;&#xFF0C;&#x5FC5;&#x987B;&#x5C0F;&#x5FC3;&#x4EE5;&#x786E;&#x4FDD;&#x901A;&#x8FC7;try-finally&#x6216;try-catch&#x4FDD;&#x62A4;&#x6301;&#x6709;&#x9501;&#x5B9A;&#x65F6;&#x6267;&#x884C;&#x7684;&#x6240;&#x6709;&#x4EE3;&#x7801;&#xFF0C;&#x4EE5;&#x786E;&#x4FDD;&#x5728;&#x5FC5;&#x8981;&#x65F6;&#x91CA;&#x653E;&#x9501;&#x5B9A;&#x3002;**
+
+
+Lock&#x5B9E;&#x73B0;&#x901A;&#x8FC7;&#x4F7F;&#x7528;**&#x975E;&#x963B;&#x585E;&#x5C1D;&#x8BD5;&#x83B7;&#x53D6;&#x9501;**&#xFF08; tryLock() &#xFF09;&#xFF0C;**&#x5C1D;&#x8BD5;&#x83B7;&#x53D6;&#x53EF;&#x88AB;&#x4E2D;&#x65AD;&#x7684;&#x9501;**&#xFF08; lockInterruptibly&#x4EE5;&#x53CA;&#x5C1D;&#x8BD5;&#x83B7;&#x53D6;&#x9501;&#xFF09;&#xFF0C;&#x63D0;&#x4F9B;&#x4E86;&#x6BD4;&#x4F7F;&#x7528;synchronized&#x65B9;&#x6CD5;&#x548C;&#x8BED;&#x53E5;&#x66F4;&#x591A;&#x7684;&#x529F;&#x80FD;&#x3002;&#x53EF;&#x80FD;&#x4F1A;&#x8D85;&#x65F6;&#xFF08; tryLock(long, TimeUnit) &#xFF09;&#x3002;
+
+
+Lock&#x7C7B;&#x8FD8;&#x53EF;&#x4EE5;&#x63D0;&#x4F9B;&#x4E0E;&#x9690;&#x5F0F;&#x76D1;&#x89C6;&#x5668;&#x9501;&#x5B9A;&#x5B8C;&#x5168;&#x4E0D;&#x540C;&#x7684;&#x884C;&#x4E3A;&#x548C;&#x8BED;&#x4E49;&#xFF0C;&#x4F8B;&#x5982;&#x4FDD;&#x8BC1;&#x987A;&#x5E8F;&#xFF0C;&#x4E0D;&#x53EF;&#x91CD;&#x7528;&#x6216;&#x6B7B;&#x9501;&#x68C0;&#x6D4B;&#x3002; &#x5982;&#x679C;&#x5B9E;&#x73B0;&#x63D0;&#x4F9B;&#x4E86;&#x8FD9;&#x79CD;&#x7279;&#x6B8A;&#x7684;&#x8BED;&#x4E49;&#xFF0C;&#x5219;&#x5B9E;&#x73B0;&#x5FC5;&#x987B;&#x8BB0;&#x5F55;&#x8FD9;&#x4E9B;&#x8BED;&#x4E49;&#x3002;
+
+
+&#x8BF7;&#x6CE8;&#x610F;&#xFF0C;Lock&#x5B9E;&#x4F8B;&#x53EA;&#x662F;&#x666E;&#x901A;&#x5BF9;&#x8C61;&#xFF0C;&#x5B83;&#x4EEC;&#x672C;&#x8EAB;&#x53EF;&#x4EE5;&#x7528;&#x4F5C;synchronized&#x8BED;&#x53E5;&#x4E2D;&#x7684;&#x76EE;&#x6807;&#x3002; &#x83B7;&#x53D6;Lock&#x5B9E;&#x4F8B;&#x7684;&#x76D1;&#x89C6;&#x5668;&#x9501;&#x4E0E;&#x8C03;&#x7528;&#x8BE5;&#x5B9E;&#x4F8B;&#x7684;&#x4EFB;&#x4F55;lock&#x65B9;&#x6CD5;&#x6CA1;&#x6709;&#x6307;&#x5B9A;&#x7684;&#x5173;&#x7CFB;&#x3002; &#x5EFA;&#x8BAE;&#x907F;&#x514D;&#x6DF7;&#x6DC6;&#xFF0C;&#x9664;&#x975E;&#x5728;&#x81EA;&#x5DF1;&#x7684;&#x5B9E;&#x73B0;&#x4E2D;&#x4F7F;&#x7528;&#xFF0C;&#x5426;&#x5219;&#x4E0D;&#x8981;&#x4EE5;&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x4F7F;&#x7528;Lock&#x5B9E;&#x4F8B;&#x3002;</code></pre><h2 id="4-&#x5185;&#x5B58;&#x540C;&#x6B65;"><a href="#4-&#x5185;&#x5B58;&#x540C;&#x6B65;" class="headerlink" title="4.&#x5185;&#x5B58;&#x540C;&#x6B65;"></a><strong>4.&#x5185;&#x5B58;&#x540C;&#x6B65;</strong></h2><pre><code>&#x6240;&#x6709;Lock&#x5B9E;&#x73B0;&#x5FC5;&#x987B;&#x5F3A;&#x5236;&#x6267;&#x884C;&#x4E0E;&#x5185;&#x7F6E;&#x76D1;&#x89C6;&#x5668;&#x9501;&#x6240;&#x63D0;&#x4F9B;&#x7684;&#x76F8;&#x540C;&#x7684;&#x5185;&#x5B58;&#x540C;&#x6B65;&#x8BED;&#x4E49;&#xFF0C;&#x5982;Java&#x8BED;&#x8A00;&#x89C4;&#x8303;&#x4E2D;&#x6240;&#x8FF0; &#xFF1A;</code></pre><ul>
+<li>&#x4E00;&#x4E2A;&#x6210;&#x529F;&#x7684;lock&#x64CD;&#x4F5C;&#x5177;&#x6709;&#x540C;&#x6837;&#x7684;&#x5185;&#x5B58;&#x540C;&#x6B65;&#x6548;&#x5E94;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x6210;&#x529F;&#x7684;&#x9501;&#x5B9A;&#x52A8;&#x4F5C;&#x3002;</li>
+<li>&#x4E00;&#x4E2A;&#x6210;&#x529F;&#x7684;unlock&#x64CD;&#x4F5C;&#x5177;&#x6709;&#x76F8;&#x540C;&#x7684;&#x5B58;&#x50A8;&#x5668;&#x540C;&#x6B65;&#x6548;&#x5E94;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x6210;&#x529F;&#x7684;&#x89E3;&#x9501;&#x52A8;&#x4F5C;&#x3002;</li>
+</ul>
+<pre><code>&#x4E0D;&#x6210;&#x529F;&#x7684;&#x9501;&#x5B9A;&#x548C;&#x89E3;&#x9501;&#x64CD;&#x4F5C;&#x4EE5;&#x53CA;&#x53EF;&#x91CD;&#x5165;&#x7684;&#x9501;&#x5B9A;/&#x89E3;&#x9501;&#x64CD;&#x4F5C;&#x4E0D;&#x9700;&#x8981;&#x4EFB;&#x4F55;&#x5185;&#x5B58;&#x540C;&#x6B65;&#x6548;&#x679C;&#x3002;</code></pre><p><strong>&#x5B9E;&#x65BD;&#x6CE8;&#x610F;&#x4E8B;&#x9879;</strong></p>
+<pre><code>&#x9501;&#x83B7;&#x53D6;&#x7684;&#x4E09;&#x79CD;&#x5F62;&#x5F0F;&#xFF08;&#x53EF;&#x4E2D;&#x65AD;&#xFF0C;&#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x548C;&#x5B9A;&#x65F6;&#xFF09;&#x5728;&#x5176;&#x6027;&#x80FD;&#x7279;&#x5F81;&#x53EF;&#x80FD;&#x6709;&#x6240;&#x4E0D;&#x540C;&#x3002; &#x6B64;&#x5916;&#xFF0C;&#x5728;&#x7ED9;&#x5B9A;&#x7684;Lock&#x7C7B;&#x4E2D;&#xFF0C;&#x53EF;&#x80FD;&#x65E0;&#x6CD5;&#x63D0;&#x4F9B;&#x4E2D;&#x65AD;&#x6B63;&#x5728;&#x8FDB;&#x884C;&#x7684;&#x9501;&#x5B9A;&#x7684;&#x529F;&#x80FD;&#x3002; &#x56E0;&#x6B64;&#xFF0C;&#x4E0D;&#x9700;&#x8981;&#x4E3A;&#x6240;&#x6709;&#x4E09;&#x79CD;&#x5F62;&#x5F0F;&#x7684;&#x9501;&#x83B7;&#x53D6;&#x5B9A;&#x4E49;&#x5B8C;&#x5168;&#x76F8;&#x540C;&#x7684;&#x4FDD;&#x8BC1;&#x6216;&#x8BED;&#x4E49;&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x4E5F;&#x4E0D;&#x9700;&#x8981;&#x652F;&#x6301;&#x6B63;&#x5728;&#x8FDB;&#x884C;&#x7684;&#x9501;&#x83B7;&#x53D6;&#x7684;&#x4E2D;&#x65AD;&#x3002; &#x9700;&#x8981;&#x4E00;&#x4E2A;&#x5B9E;&#x73B0;&#x6765;&#x6E05;&#x695A;&#x5730;&#x8BB0;&#x5F55;&#x6BCF;&#x4E2A;&#x9501;&#x5B9A;&#x65B9;&#x6CD5;&#x63D0;&#x4F9B;&#x7684;&#x8BED;&#x4E49;&#x548C;&#x4FDD;&#x8BC1;&#x3002; &#x5728;&#x652F;&#x6301;&#x9501;&#x83B7;&#x53D6;&#x4E2D;&#x65AD;&#x7684;&#x8303;&#x56F4;&#x5185;&#xFF0C;&#x5B83;&#x8FD8;&#x5FC5;&#x987B;&#x670D;&#x4ECE;&#x6B64;&#x63A5;&#x53E3;&#x4E2D;&#x5B9A;&#x4E49;&#x7684;&#x4E2D;&#x65AD;&#x8BED;&#x4E49;&#xFF1A;**&#x5168;&#x90E8;&#x6216;&#x4EC5;&#x5728;&#x65B9;&#x6CD5;&#x8F93;&#x5165;&#x65F6;&#x624D;&#x8FD9;&#x6837;&#x505A;**&#x3002;</code></pre><h2 id="5-Lock&#x63D0;&#x4F9B;&#x7684;&#x63A5;&#x53E3;"><a href="#5-Lock&#x63D0;&#x4F9B;&#x7684;&#x63A5;&#x53E3;" class="headerlink" title="5.Lock&#x63D0;&#x4F9B;&#x7684;&#x63A5;&#x53E3;"></a>5.Lock&#x63D0;&#x4F9B;&#x7684;&#x63A5;&#x53E3;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/a372ef91eb479eeade925a4d27a48c5db05694bd275718b5b2a1e52c1d75bd5d" alt="&#x56FE;&#x7247;"></p>
+<h3 id="5-1-&#x83B7;&#x53D6;&#x9501;"><a href="#5-1-&#x83B7;&#x53D6;&#x9501;" class="headerlink" title="5.1 &#x83B7;&#x53D6;&#x9501;"></a>5.1 &#x83B7;&#x53D6;&#x9501;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;void lock(); // &#x83B7;&#x53D6;&#x9501;&#x3002;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>&#x6700;&#x666E;&#x901A;&#x7684;&#x7684;&#x83B7;&#x53D6;&#x9501;&#xFF0C;&#x5982;&#x679C;&#x9501;&#x88AB;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x83B7;&#x53D6;&#x5219;&#x8FDB;&#x884C;&#x7B49;&#x5F85;</li>
+<li>lock&#x4E0D;&#x4F1A;&#x50CF;synchronized&#x4E00;&#x6837;&#x5728;&#x5F02;&#x5E38;&#x7684;&#x65F6;&#x5019;&#x81EA;&#x52A8;&#x91CA;&#x653E;&#x9501;</li>
+<li>&#x56E0;&#x6B64;&#x5FC5;&#x987B;&#x5728;finally&#x4E2D;&#x91CA;&#x653E;&#x9501;&#xFF0C;&#x4EE5;&#x4FDD;&#x8BC1;&#x53D1;&#x751F;&#x5F02;&#x5E38;&#x7684;&#x65F6;&#x5019;&#x9501;&#x4E00;&#x5B9A;&#x88AB;&#x91CA;&#x653E;</li>
+</ol>
+<p><strong>&#x6CE8;&#x610F;</strong>&#xFF1A;lock()&#x65B9;&#x6CD5;&#x4E0D;&#x80FD;&#x88AB;&#x4E2D;&#x65AD;&#xFF0C;&#x8FD9;&#x4F1A;&#x5E26;&#x6765;&#x5F88;&#x5927;&#x7684;&#x9690;&#x60A3;&#xFF1A;&#x4E00;&#x65E6;&#x9677;&#x5165;&#x6B7B;&#x9501;&#x3001;lock()&#x5C31;&#x4F1A;&#x9677;&#x5165;&#x6C38;&#x4E45;&#x7B49;&#x5F85;&#x72B6;&#x6001;</p>
+<h3 id="5-2-&#x83B7;&#x53D6;&#x4E2D;&#x65AD;&#x9501;"><a href="#5-2-&#x83B7;&#x53D6;&#x4E2D;&#x65AD;&#x9501;" class="headerlink" title="5.2 &#x83B7;&#x53D6;&#x4E2D;&#x65AD;&#x9501;"></a>5.2 &#x83B7;&#x53D6;&#x4E2D;&#x65AD;&#x9501;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;void lockInterruptibly() throws InterruptedException;</span><br></pre></td></tr></table></figure>
+
+<pre><code>&#x9664;&#x975E;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x88AB;&#x4E2D;&#x65AD;&#xFF0C;&#x5426;&#x5219;&#x83B7;&#x53D6;&#x9501;&#x3002;
+
+
+&#x83B7;&#x53D6;&#x9501;&#xFF08;&#x5982;&#x679C;&#x6709;&#xFF09;&#x5E76;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;&#x3002;
+
+
+&#x5982;&#x679C;&#x8BE5;&#x9501;&#x4E0D;&#x53EF;&#x7528;&#xFF0C;&#x5219;&#x51FA;&#x4E8E;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x76EE;&#x7684;&#xFF0C;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x5C06;&#x88AB;&#x6302;&#x8D77;&#xFF0C;&#x5E76;&#x5728;&#x53D1;&#x751F;&#x4EE5;&#x4E0B;&#x4E24;&#x79CD;&#x60C5;&#x51B5;&#x4E4B;&#x4E00;&#x4E4B;&#x524D;&#x5904;&#x4E8E;&#x4F11;&#x7720;&#x72B6;&#x6001;&#xFF1A;</code></pre><ul>
+<li>&#x8BE5;&#x9501;&#x662F;&#x7531;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x83B7;&#x53D6;&#x7684;&#xFF1B;</li>
+<li>&#x5176;&#x4ED6;&#x4E00;&#x4E9B;&#x7EBF;&#x7A0B;&#x4E2D;&#x65AD;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF0C;&#x5E76;&#x652F;&#x6301;&#x9501;&#x5B9A;&#x83B7;&#x53D6;&#x7684;&#x4E2D;&#x65AD;&#x3002;</li>
+</ul>
+<pre><code>&#x5982;&#x679C;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF1A;&#x5728;&#x8FDB;&#x5165;&#x6B64;&#x65B9;&#x6CD5;&#x65F6;&#x5DF2;&#x8BBE;&#x7F6E;&#x5176;&#x4E2D;&#x65AD;&#x72B6;&#x6001;&#xFF1B;**&#x8981;&#x4E48;&#x83B7;&#x53D6;&#x9501;&#x65F6;&#x88AB;&#x4E2D;&#x65AD;&#xFF0C;&#x5E76;&#x4E14;&#x652F;&#x6301;&#x9501;&#x83B7;&#x53D6;&#x7684;&#x4E2D;&#x65AD;**&#xFF0C;&#x7136;&#x540E;&#x629B;&#x51FA;InterruptedException&#x5E76;&#x6E05;&#x9664;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x7684;&#x4E2D;&#x65AD;&#x72B6;&#x6001;&#x3002;</code></pre><p><strong>&#x6CE8;&#x610F;&#x4E8B;&#x9879;</strong></p>
+<pre><code>&#x5728;&#x67D0;&#x4E9B;&#x5B9E;&#x73B0;&#x4E2D;&#xFF0C;&#x4E2D;&#x65AD;&#x9501;&#x83B7;&#x53D6;&#x7684;&#x80FD;&#x529B;&#x53EF;&#x80FD;&#x662F;&#x4E0D;&#x53EF;&#x80FD;&#x7684;&#xFF0C;&#x5E76;&#x4E14;&#x5982;&#x679C;&#x53EF;&#x80FD;&#x7684;&#x8BDD;&#x53EF;&#x80FD;&#x662F;&#x6602;&#x8D35;&#x7684;&#x64CD;&#x4F5C;&#x3002; &#x7A0B;&#x5E8F;&#x5458;&#x5E94;&#x610F;&#x8BC6;&#x5230;&#x53EF;&#x80FD;&#x662F;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x3002; &#x5728;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5B9E;&#x73B0;&#x5E94;&#x8BB0;&#x5F55;&#x5728;&#x6848;&#x3002;&#x4E0E;&#x6B63;&#x5E38;&#x65B9;&#x6CD5;&#x8FD4;&#x56DE;&#x76F8;&#x6BD4;&#xFF0C;&#x5B9E;&#x73B0;&#x53EF;&#x80FD;&#x66F4;&#x559C;&#x6B22;&#x5BF9;&#x4E2D;&#x65AD;&#x505A;&#x51FA;&#x54CD;&#x5E94;&#x3002;Lock&#x5B9E;&#x73B0;&#x53EF;&#x80FD;&#x80FD;&#x591F;&#x68C0;&#x6D4B;&#x5230;&#x9501;&#x7684;&#x9519;&#x8BEF;&#x4F7F;&#x7528;&#xFF0C;&#x4F8B;&#x5982;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x6B7B;&#x9501;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#x53EF;&#x80FD;&#x5F15;&#x53D1;&#xFF08;&#x672A;&#x7ECF;&#x68C0;&#x67E5;&#x7684;&#xFF09;&#x5F02;&#x5E38;&#x3002;</code></pre><p><strong>&#x6CE8;&#x610F; synchronized &#x5728;&#x83B7;&#x53D6;&#x9501;&#x65F6;&#x662F;&#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x7684;</strong></p>
+<h3 id="5-3-&#x5C1D;&#x8BD5;&#x83B7;&#x53D6;&#x9501;"><a href="#5-3-&#x5C1D;&#x8BD5;&#x83B7;&#x53D6;&#x9501;" class="headerlink" title="5.3 &#x5C1D;&#x8BD5;&#x83B7;&#x53D6;&#x9501;"></a>5.3 &#x5C1D;&#x8BD5;&#x83B7;&#x53D6;&#x9501;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;boolean tryLock();</span><br></pre></td></tr></table></figure>
+
+<pre><code>&#x975E;&#x963B;&#x585E;&#x83B7;&#x53D6;&#x9501;&#xFF08;&#x5982;&#x679C;&#x6709;&#xFF09;&#x5E76;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;true&#x503C;&#x3002; &#x5982;&#x679C;&#x9501;&#x4E0D;&#x53EF;&#x7528;&#xFF0C;&#x5219;&#x6B64;&#x65B9;&#x6CD5;&#x5C06;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;false&#x503C;&#x3002;&#x76F8;&#x6BD4;&#x4E8E;Lock&#x8FD9;&#x6837;&#x7684;&#x65B9;&#x6CD5;&#x663E;&#x7136;&#x529F;&#x80FD;&#x66F4;&#x52A0;&#x5F3A;&#x5927;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6839;&#x636E;&#x662F;&#x5426;&#x80FD;&#x83B7;&#x53D6;&#x5230;&#x9501;&#x6765;&#x51B3;&#x5B9A;&#x540E;&#x7EED;&#x7A0B;&#x5E8F;&#x7684;&#x884C;&#x4E3A;</code></pre><p><strong>&#x6CE8;&#x610F;&#xFF1A;&#x8BE5;&#x65B9;&#x6CD5;&#x4F1A;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;&#xFF0C;&#x5373;&#x4FBF;&#x5728;&#x62FF;&#x4E0D;&#x5230;&#x9501;&#x7684;&#x65F6;&#x5019;&#x4E5F;&#x4E0D;&#x4F1A;&#x5728;&#x4E00;&#x53EA;&#x5728;&#x90A3;&#x91CC;&#x7B49;&#x5F85;</strong></p>
+<p>&#x8BE5;&#x65B9;&#x6CD5;&#x7684;&#x5178;&#x578B;&#x7528;&#x6CD5;&#x662F;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;Lock lock = new ReentrantLock();</span><br><span class="line">if(lock.tryLock()){</span><br><span class="line">  try{</span><br><span class="line">    // TODO</span><br><span class="line">  }finally {</span><br><span class="line">    lock.unlock();</span><br><span class="line">  }</span><br><span class="line">}else{</span><br><span class="line">  // TODO</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-4-&#x5728;&#x4E00;&#x5B9A;&#x65F6;&#x95F4;&#x5185;&#x83B7;&#x53D6;&#x9501;"><a href="#5-4-&#x5728;&#x4E00;&#x5B9A;&#x65F6;&#x95F4;&#x5185;&#x83B7;&#x53D6;&#x9501;" class="headerlink" title="5.4 &#x5728;&#x4E00;&#x5B9A;&#x65F6;&#x95F4;&#x5185;&#x83B7;&#x53D6;&#x9501;"></a>5.4 &#x5728;&#x4E00;&#x5B9A;&#x65F6;&#x95F4;&#x5185;&#x83B7;&#x53D6;&#x9501;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;boolean tryLock(long time, TimeUnit unit) throws InterruptedException;</span><br></pre></td></tr></table></figure>
+
+<pre><code>**&#x5982;&#x679C;&#x7EBF;&#x7A0B;&#x5728;&#x7ED9;&#x5B9A;&#x7684;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#x5185;&#x83B7;&#x53D6;&#x5230;&#x9501;&#xFF0C;&#x5E76;&#x4E14;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x5C1A;&#x672A;&#x4E2D;&#x65AD;&#xFF0C;&#x5219;&#x83B7;&#x53D6;&#x8BE5;&#x9501;&#x3002;**
+&#x5982;&#x679C;&#x9501;&#x53EF;&#x7528;&#xFF0C;&#x5219;&#x6B64;&#x65B9;&#x6CD5;&#x7ACB;&#x5373;&#x8FD4;&#x56DE;true&#x503C;&#x3002; &#x5982;&#x679C;&#x8BE5;&#x9501;&#x4E0D;&#x53EF;&#x7528;&#xFF0C;&#x5219;&#x51FA;&#x4E8E;&#x7EBF;&#x7A0B;&#x8C03;&#x5EA6;&#x76EE;&#x7684;&#xFF0C;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x5C06;&#x88AB;&#x6302;&#x8D77;&#xFF0C;&#x5E76;&#x5904;&#x4E8E;&#x4F11;&#x7720;&#x72B6;&#x6001;&#xFF0C;&#x76F4;&#x5230;&#x53D1;&#x751F;&#x4EE5;&#x4E0B;&#x4E09;&#x79CD;&#x60C5;&#x51B5;&#x4E4B;&#x4E00;&#xFF1A;</code></pre><ol>
+<li>&#x8BE5;&#x9501;&#x662F;&#x7531;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x83B7;&#x53D6;&#x7684;&#x3002;</li>
+<li>&#x5176;&#x4ED6;&#x4E00;&#x4E9B;&#x7EBF;&#x7A0B;&#x4F1A;&#x4E2D;&#x65AD;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF0C;&#x5E76;&#x652F;&#x6301;&#x9501;&#x5B9A;&#x83B7;&#x53D6;&#x7684;&#x4E2D;&#x65AD;&#x3002;</li>
+<li>&#x7ECF;&#x8FC7;&#x6307;&#x5B9A;&#x7684;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#x5982;&#x679C;&#x83B7;&#x5F97;&#x4E86;&#x9501;&#xFF0C;&#x5219;&#x8FD4;&#x56DE;&#x503C;true &#x3002;</li>
+</ol>
+<pre><code>**&#x5982;&#x679C;&#x7ECF;&#x8FC7;&#x4E86;&#x6307;&#x5B9A;&#x7684;&#x7B49;&#x5F85;&#x65F6;&#x95F4;&#xFF0C;&#x5219;&#x8FD4;&#x56DE;&#x503C;false &#x3002; &#x5982;&#x679C;&#x65F6;&#x95F4;&#x5C0F;&#x4E8E;&#x6216;&#x7B49;&#x4E8E;&#x96F6;&#xFF0C;&#x5219;&#x8BE5;&#x65B9;&#x6CD5;&#x5C06;&#x6839;&#x672C;&#x4E0D;&#x7B49;&#x5F85;**&#x3002;</code></pre><p><strong>&#x6CE8;&#x610F;&#x4E8B;&#x9879;</strong></p>
+<pre><code>&#x5728;&#x67D0;&#x4E9B;&#x5B9E;&#x73B0;&#x4E2D;&#xFF0C;&#x4E2D;&#x65AD;&#x9501;&#x83B7;&#x53D6;&#x7684;&#x80FD;&#x529B;&#x53EF;&#x80FD;&#x662F;&#x4E0D;&#x53EF;&#x80FD;&#x7684;&#xFF0C;&#x5E76;&#x4E14;&#x5982;&#x679C;&#x53EF;&#x80FD;&#x7684;&#x8BDD;&#x53EF;&#x80FD;&#x662F;&#x6602;&#x8D35;&#x7684;&#x64CD;&#x4F5C;&#x3002; &#x7A0B;&#x5E8F;&#x5458;&#x5E94;&#x610F;&#x8BC6;&#x5230;&#x53EF;&#x80FD;&#x662F;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x3002; &#x5728;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x5B9E;&#x73B0;&#x5E94;&#x8BB0;&#x5F55;&#x5728;&#x6848;&#x3002;&#x4E0E;&#x6B63;&#x5E38;&#x65B9;&#x6CD5;&#x8FD4;&#x56DE;&#x6216;&#x62A5;&#x544A;&#x8D85;&#x65F6;&#x76F8;&#x6BD4;&#xFF0C;&#x5B9E;&#x73B0;&#x53EF;&#x80FD;&#x66F4;&#x559C;&#x6B22;&#x5BF9;&#x4E2D;&#x65AD;&#x505A;&#x51FA;&#x54CD;&#x5E94;&#x3002;Lock&#x5B9E;&#x73B0;&#x53EF;&#x80FD;&#x80FD;&#x591F;&#x68C0;&#x6D4B;&#x5230;&#x9501;&#x7684;&#x9519;&#x8BEF;&#x4F7F;&#x7528;&#xFF0C;&#x4F8B;&#x5982;&#x53EF;&#x80FD;&#x5BFC;&#x81F4;&#x6B7B;&#x9501;&#x7684;&#x8C03;&#x7528;&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x8FD9;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#x53EF;&#x80FD;&#x5F15;&#x53D1;&#xFF08;&#x672A;&#x7ECF;&#x68C0;&#x67E5;&#x7684;&#xFF09;&#x5F02;&#x5E38;&#x3002;</code></pre><h3 id="5-5-&#x89E3;&#x9501;"><a href="#5-5-&#x89E3;&#x9501;" class="headerlink" title="5.5 &#x89E3;&#x9501;"></a>5.5 &#x89E3;&#x9501;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;void unlock(); //&#x91CA;&#x653E;&#x9501;&#x3002;</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x6CE8;&#x610F;&#x4E8B;&#x9879;</strong></p>
+<pre><code>Lock&#x5B9E;&#x73B0;&#x901A;&#x5E38;&#x4F1A;&#x9650;&#x5236;&#x54EA;&#x4E9B;&#x7EBF;&#x7A0B;&#x53EF;&#x4EE5;&#x91CA;&#x653E;&#x9501;&#xFF08;&#x901A;&#x5E38;&#x53EA;&#x6709;&#x9501;&#x7684;&#x6301;&#x6709;&#x8005;&#x624D;&#x80FD;&#x91CA;&#x653E;&#x9501;&#xFF09;&#xFF0C;&#x5E76;&#x4E14;&#x5982;&#x679C;&#x8FDD;&#x53CD;&#x8BE5;&#x9650;&#x5236;&#xFF0C;&#x5219;&#x53EF;&#x80FD;&#x5F15;&#x53D1;&#xFF08;&#x672A;&#x7ECF;&#x68C0;&#x67E5;&#x7684;&#xFF09;&#x5F02;&#x5E38;&#x3002;</code></pre><h3 id="5-6-&#x83B7;&#x53D6;&#x7B49;&#x5F85;&#x901A;&#x77E5;&#x7EC4;&#x4EF6;"><a href="#5-6-&#x83B7;&#x53D6;&#x7B49;&#x5F85;&#x901A;&#x77E5;&#x7EC4;&#x4EF6;" class="headerlink" title="5.6 &#x83B7;&#x53D6;&#x7B49;&#x5F85;&#x901A;&#x77E5;&#x7EC4;&#x4EF6;"></a>5.6 &#x83B7;&#x53D6;&#x7B49;&#x5F85;&#x901A;&#x77E5;&#x7EC4;&#x4EF6;</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;Condition newCondition(); //&#x8FD4;&#x56DE;&#x7ED1;&#x5B9A;&#x5230;&#x6B64;Lock&#x5B9E;&#x4F8B;&#x7684;&#x65B0;Condition&#x5B9E;&#x4F8B;&#x3002;</span><br></pre></td></tr></table></figure>
+
+<pre><code>**&#x8BE5;&#x7EC4;&#x4EF6;&#x4E0E;&#x5F53;&#x524D;&#x9501;&#x7ED1;&#x5B9A;**&#xFF0C;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x53EA;&#x6709;&#x83B7;&#x5F97;&#x4E86;&#x9501;&#x3002; &#x624D;&#x80FD;&#x8C03;&#x7528;&#x8BE5;&#x7EC4;&#x4EF6;&#x7684;wait()&#x65B9;&#x6CD5;&#xFF0C;&#x800C;&#x8C03;&#x7528;&#x540E;&#xFF0C;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x5C06;&#x91CA;&#x653E;&#x9501;&#x3002;</code></pre><p><strong>&#x6CE8;&#x610F;&#x4E8B;&#x9879;</strong></p>
+<p>Condition&#x5B9E;&#x4F8B;&#x7684;&#x786E;&#x5207;&#x64CD;&#x4F5C;&#x53D6;&#x51B3;&#x4E8E;Lock&#x5B9E;&#x73B0;&#x3002;</p>
+<h3 id="5-7&#x603B;&#x7ED3;"><a href="#5-7&#x603B;&#x7ED3;" class="headerlink" title="5.7&#x603B;&#x7ED3;"></a>5.7&#x603B;&#x7ED3;</h3><pre><code>Lock&#x5BF9;&#x8C61;&#x9501;&#x8FD8;&#x63D0;&#x4F9B;&#x4E86;synchronized&#x6240;&#x4E0D;&#x5177;&#x5907;&#x7684;&#x5176;&#x4ED6;&#x540C;&#x6B65;&#x7279;&#x6027;&#xFF0C;&#x5982;**&#x53EF;&#x4E2D;&#x65AD;&#x9501;&#x7684;&#x83B7;&#x53D6;**(synchronized&#x5728;&#x7B49;&#x5F85;&#x83B7;&#x53D6;&#x9501;&#x65F6;&#x662F;&#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x7684;)&#xFF0C;**&#x8D85;&#x65F6;&#x4E2D;&#x65AD;&#x9501;&#x7684;&#x83B7;&#x53D6;**&#xFF0C;**&#x7B49;&#x5F85;&#x5524;&#x9192;&#x673A;&#x5236;&#x7684;&#x591A;&#x6761;&#x4EF6;&#x53D8;&#x91CF;Condition**&#x7B49;&#xFF0C;&#x8FD9;&#x4E5F;&#x4F7F;&#x5F97;Lock&#x9501;&#x5177;&#x6709;&#x66F4;&#x5927;&#x7684;&#x7075;&#x6D3B;&#x6027;&#x3002;**Lock&#x7684;&#x52A0;&#x9501;&#x548C;&#x91CA;&#x653E;&#x9501;&#x548C;synchronized&#x6709;&#x540C;&#x6837;&#x7684;&#x5185;&#x5B58;&#x8BED;&#x4E49;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x8BF4;&#x4E0B;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x52A0;&#x9501;&#x540E;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x524D;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x89E3;&#x9501;&#x524D;&#x53D1;&#x751F;&#x7684;&#x6240;&#x6709;&#x64CD;&#x4F5C;&#x3002;**</code></pre><h2 id="6-&#x9501;&#x7684;&#x5206;&#x7C7B;"><a href="#6-&#x9501;&#x7684;&#x5206;&#x7C7B;" class="headerlink" title="6.&#x9501;&#x7684;&#x5206;&#x7C7B;"></a>6.&#x9501;&#x7684;&#x5206;&#x7C7B;</h2><p>&#x6839;&#x636E;&#x4E00;&#x4E0B;6&#x79CD;&#x60C5;&#x51B5;&#x53EF;&#x4EE5;&#x533A;&#x5206;&#x591A;&#x79CD;&#x4E0D;&#x540C;&#x7684;&#x9501;&#xFF0C;&#x4E0B;&#x9762;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;</p>
+<h3 id="6-1&#x8981;&#x4E0D;&#x8981;&#x9501;&#x4F4F;&#x540C;&#x6B65;&#x8D44;&#x6E90;"><a href="#6-1&#x8981;&#x4E0D;&#x8981;&#x9501;&#x4F4F;&#x540C;&#x6B65;&#x8D44;&#x6E90;" class="headerlink" title="6.1&#x8981;&#x4E0D;&#x8981;&#x9501;&#x4F4F;&#x540C;&#x6B65;&#x8D44;&#x6E90;"></a>6.1&#x8981;&#x4E0D;&#x8981;&#x9501;&#x4F4F;&#x540C;&#x6B65;&#x8D44;&#x6E90;</h3><table>
+<thead>
+<tr>
+<th>&#x662F;&#x5426;&#x9501;&#x4F4F;</th>
+<th>&#x9501;&#x540D;&#x79F0;</th>
+<th>&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;</th>
+<th>&#x4F8B;&#x5B50;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x9501;&#x67F1;</td>
+<td>&#x60B2;&#x89C2;&#x9501;</td>
+<td>synchronized&#x3001;lock</td>
+<td>synchronized&#x3001;lock</td>
+</tr>
+<tr>
+<td>&#x4E0D;&#x9501;&#x4F4F;</td>
+<td>&#x4E50;&#x89C2;&#x9501;</td>
+<td>CAS&#x7B97;&#x6CD5;</td>
+<td>&#x539F;&#x5B50;&#x7C7B;&#x3001;&#x5E76;&#x53D1;&#x5BB9;&#x5668;</td>
+</tr>
+</tbody></table>
+<p>&#x60B2;&#x89C2;&#x9501;&#x53C8;&#x79F0;&#x4E92;&#x65A5;&#x540C;&#x6B65;&#x9501;&#xFF0C;&#x4E92;&#x65A5;&#x540C;&#x6B65;&#x9501;&#x7684;&#x52A3;&#x52BF;&#xFF1A;</p>
+<ol>
+<li>&#x963B;&#x585E;&#x548C;&#x5524;&#x9192;&#x5E26;&#x6765;&#x7684;&#x6027;&#x80FD;&#x52A3;&#x52BF;</li>
+<li>&#x6C38;&#x4E45;&#x963B;&#x585E;&#xFF1A;&#x5982;&#x679C;&#x6301;&#x6709;&#x9501;&#x7684;&#x7EBF;&#x7A0B;&#x88AB;&#x6C38;&#x4E45;&#x963B;&#x585E;&#xFF0C;&#x6BD4;&#x5982;&#x9047;&#x5230;&#x4E86;&#x65E0;&#x9650;&#x5FAA;&#x73AF;&#xFF0C;&#x6B7B;&#x9501;&#x7B49;&#x6D3B;&#x8DC3;&#x6027;&#x95EE;&#x9898;</li>
+<li>&#x4F18;&#x5148;&#x7EA7;&#x53CD;&#x8F6C;</li>
+</ol>
+<p><strong>&#x60B2;&#x89C2;&#x9501;:</strong></p>
+<pre><code>&#x5F53;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x62FF;&#x5230;&#x9501;&#x4E86;&#x4E4B;&#x540E;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x90FD;&#x4E0D;&#x80FD;&#x5F97;&#x5230;&#x8FD9;&#x628A;&#x9501;&#xFF0C;&#x53EA;&#x6709;&#x6301;&#x6709;&#x9501;&#x7684;&#x7EBF;&#x7A0B;&#x91CA;&#x653E;&#x9501;&#x4E4B;&#x540E;&#x624D;&#x80FD;&#x83B7;&#x53D6;&#x9501;&#x3002;</code></pre><p><strong>&#x4E50;&#x89C2;&#x9501;:</strong></p>
+<pre><code>&#x81EA;&#x5DF1;&#x624D;&#x8FDB;&#x884C;&#x64CD;&#x4F5C;&#x7684;&#x65F6;&#x5019;&#x5E76;&#x4E0D;&#x4F1A;&#x6709;&#x5176;&#x4ED6;&#x7684;&#x7EBF;&#x7A0B;&#x8FDB;&#x884C;&#x5E72;&#x6270;&#xFF0C;&#x6240;&#x4EE5;&#x5E76;&#x4E0D;&#x4F1A;&#x9501;&#x4F4F;&#x5BF9;&#x8C61;&#x3002;&#x5728;&#x66F4;&#x65B0;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x53BB;&#x5BF9;&#x6BD4;&#x6211;&#x5728;&#x4FEE;&#x6539;&#x671F;&#x95F4;&#x7684;&#x6570;&#x636E;&#x6709;&#x6CA1;&#x6709;&#x4EBA;&#x5BF9;&#x4ED6;&#x8FDB;&#x884C;&#x6539;&#x8FC7;&#xFF0C;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x6539;&#x53D8;&#x5219;&#x8FDB;&#x884C;&#x4FEE;&#x6539;&#xFF0C;&#x5982;&#x679C;&#x6539;&#x53D8;&#x4E86;&#x90A3;&#x5C31;&#x662F;&#x522B;&#x4EBA;&#x6539;&#x7684;&#x90A3;&#x6211;&#x5C31;&#x4E0D;&#x6539;&#x4E86;&#x653E;&#x5F03;&#x4E86;&#xFF0C;&#x6216;&#x8005;&#x91CD;&#x65B0;&#x6765;&#x3002;</code></pre><p><strong>&#x5F00;&#x9500;&#x5BF9;&#x6BD4;&#xFF1A;</strong></p>
+<ol>
+<li>&#x60B2;&#x89C2;&#x9501;&#x7684;&#x539F;&#x59CB;&#x5F00;&#x9500;&#x8981;&#x9AD8;&#x4E8E;&#x4E50;&#x89C2;&#x9501;&#xFF0C;&#x4F46;&#x662F;&#x7279;&#x70B9;&#x662F;&#x4E00;&#x52B3;&#x6C38;&#x9038;&#xFF0C;&#x4E34;&#x754C;&#x533A;&#x6301;&#x9501;&#x7684;&#x65F6;&#x95F4;&#x54EA;&#x6015;&#x8D8A;&#x6765;&#x8D8A;&#x957F;&#xFF0C;&#x4E5F;&#x4E0D;&#x4F1A;&#x5BF9;&#x4E92;&#x65A5;&#x9501;&#x7684;&#x5F00;&#x9500;&#x9020;&#x6210;&#x5F71;&#x54CD;</li>
+<li>&#x60B2;&#x89C2;&#x9501;&#x4E00;&#x5F00;&#x59CB;&#x7684;&#x5F00;&#x9500;&#x6BD4;&#x4E50;&#x89C2;&#x9501;&#x5C0F;&#xFF0C;&#x4F46;&#x662F;&#x5982;&#x679C;&#x81EA;&#x65CB;&#x65F6;&#x95F4;&#x957F;&#xFF0C;&#x6216;&#x8005;&#x4E0D;&#x505C;&#x7684;&#x91CD;&#x8BD5;&#xFF0C;&#x90A3;&#x4E48;&#x6D88;&#x8017;&#x7684;&#x8D44;&#x6E90;&#x4E5F;&#x4F1A;&#x8D8A;&#x6765;&#x8D8A;&#x591A;</li>
+</ol>
+<p><strong>&#x4F7F;&#x7528;&#x573A;&#x666F;&#xFF1A;</strong></p>
+<ol>
+<li>&#x60B2;&#x89C2;&#x9501;&#xFF1A;&#x9002;&#x5408;&#x5E76;&#x53D1;&#x5199;&#x591A;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x9002;&#x7528;&#x4E8E;&#x4E34;&#x754C;&#x533A;&#x6301;&#x9501;&#x65F6;&#x95F4;&#x6BD4;&#x8F83;&#x957F;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x60B2;&#x89C2;&#x9501;&#x53EF;&#x4EE5;&#x907F;&#x514D;&#xFF0C;&#x5927;&#x91CF;&#x7684;&#x65E0;&#x7528;&#x81EA;&#x65CB;&#x7B49;&#x6D88;&#x8017;</li>
+<li>&#x4E50;&#x89C2;&#x9501;&#xFF1A;&#x9002;&#x5408;&#x5E76;&#x53D1;&#x8BFB;&#x6BD4;&#x8F83;&#x591A;&#x7684;&#x573A;&#x666F;&#xFF0C;&#x4E0D;&#x52A0;&#x9501;&#x80FD;&#x8BA9;&#x8BFB;&#x53D6;&#x6027;&#x80FD;&#x5927;&#x5E45;&#x5EA6;&#x63D0;&#x9AD8;</li>
+</ol>
+<h3 id="6-2&#x80FD;&#x5426;&#x5171;&#x4EAB;&#x4E00;&#x628A;&#x9501;"><a href="#6-2&#x80FD;&#x5426;&#x5171;&#x4EAB;&#x4E00;&#x628A;&#x9501;" class="headerlink" title="6.2&#x80FD;&#x5426;&#x5171;&#x4EAB;&#x4E00;&#x628A;&#x9501;"></a>6.2&#x80FD;&#x5426;&#x5171;&#x4EAB;&#x4E00;&#x628A;&#x9501;</h3><table>
+<thead>
+<tr>
+<th>&#x662F;&#x5426;&#x5171;&#x4EAB;</th>
+<th>&#x9501;&#x540D;&#x79F0;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x53EF;&#x4EE5;</td>
+<td>&#x5171;&#x4EAB;&#x9501;(&#x8BFB;&#x9501;)</td>
+</tr>
+<tr>
+<td>&#x4E0D;&#x53EF;&#x4EE5;</td>
+<td>&#x6392;&#x4ED6;&#x9501;(&#x72EC;&#x5360;&#x9501;)</td>
+</tr>
+</tbody></table>
+<p><strong>&#x5171;&#x4EAB;&#x9501;:</strong></p>
+<pre><code>&#x83B7;&#x53D6;&#x5171;&#x4EAB;&#x9501;&#x4E4B;&#x540E;,&#x53EF;&#x4EE5;&#x67E5;&#x770B;&#x4F46;&#x662F;&#x65E0;&#x6CD5;&#x4FEE;&#x6539;&#x548C;&#x5220;&#x9664;&#x6570;&#x636E;,&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x6B64;&#x65F6;&#x4E5F;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x5230;&#x5171;&#x4EAB;&#x9501;&#x4E5F;&#x53EF;&#x4EE5;&#x67E5;&#x770B;&#x4F46;&#x65E0;&#x6CD5;&#x4FEE;&#x6539;&#x548C;&#x5220;&#x9664;&#x6570;&#x636E;</code></pre><p>&#x6848;&#x4F8B;&#xFF1A;ReentrantReadWriteLock&#x7684;&#x8BFB;&#x9501;&#xFF08;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x540E;&#x7EED;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x4F1A;&#x8BB2;&#x89E3;&#xFF09;</p>
+<p><strong>&#x6392;&#x4ED6;&#x9501;:</strong></p>
+<pre><code>&#x83B7;&#x53D6;&#x6392;&#x4ED6;&#x9501;&#x7684;&#x4E4B;&#x540E;&#xFF0C;&#x522B;&#x7684;&#x7EBF;&#x7A0B;&#x662F;&#x65E0;&#x6CD5;&#x83B7;&#x53D6;&#x5F53;&#x524D;&#x9501;&#x7684;&#xFF0C;&#x6BD4;&#x5982;&#x5199;&#x9501;&#x3002;</code></pre><p>&#x6848;&#x4F8B;&#xFF1A;ReentrantReadWriteLock&#x7684;&#x5199;&#x9501;&#xFF08;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x540E;&#x7EED;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x4F1A;&#x8BB2;&#x89E3;&#xFF09;</p>
+<h3 id="6-3&#x662F;&#x5426;&#x6392;&#x961F;"><a href="#6-3&#x662F;&#x5426;&#x6392;&#x961F;" class="headerlink" title="6.3&#x662F;&#x5426;&#x6392;&#x961F;"></a>6.3&#x662F;&#x5426;&#x6392;&#x961F;</h3><table>
+<thead>
+<tr>
+<th>&#x662F;&#x5426;&#x6392;&#x961F;</th>
+<th>&#x9501;&#x540D;&#x79F0;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x6392;&#x961F;</td>
+<td>&#x516C;&#x5E73;&#x9501;</td>
+</tr>
+<tr>
+<td>&#x4E0D;&#x6392;&#x961F;</td>
+<td>&#x975E;&#x516C;&#x5E73;&#x9501;</td>
+</tr>
+</tbody></table>
+<p><strong>&#x975E;&#x516C;&#x5E73;&#x9501;&#xFF1A;</strong></p>
+<pre><code>&#x5148;&#x5C1D;&#x8BD5;&#x63D2;&#x961F;&#xFF0C;&#x63D2;&#x961F;&#x5931;&#x8D25;&#x518D;&#x6392;&#x961F;&#xFF0C;&#x975E;&#x516C;&#x5E73;&#x662F;&#x6307;&#x4E0D;&#x5B8C;&#x5168;&#x7684;&#x6309;&#x7167;&#x8BF7;&#x6C42;&#x7684;&#x987A;&#x5E8F;&#xFF0C;&#x5728;&#x4E00;&#x5B9A;&#x7684;&#x60C5;&#x51B5;&#x4E0B;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x63D2;&#x961F;</code></pre><p><strong>&#x5B58;&#x5728;&#x7684;&#x610F;&#x4E49;&#xFF1A;</strong></p>
+<ul>
+<li>&#x63D0;&#x9AD8;&#x6548;&#x7387;</li>
+<li>&#x907F;&#x514D;&#x5524;&#x9192;&#x5E26;&#x6765;&#x7684;&#x7A7A;&#x6863;&#x671F;</li>
+</ul>
+<p>&#x6848;&#x4F8B;&#xFF1A;</p>
+<ol>
+<li>&#x4EE5;ReentrantLock&#x4E3A;&#x4F8B;&#xFF0C;<strong>&#x521B;&#x5EFA;&#x5BF9;&#x8C61;&#x7684;&#x65F6;&#x5019;&#x53C2;&#x6570;&#x4E3A;false</strong>&#xFF08;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x540E;&#x7EED;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x4F1A;&#x8BB2;&#x89E3;&#xFF09;</li>
+<li>&#x9488;&#x5BF9;tryLock()&#x65B9;&#x6CD5;&#xFF0C;&#x5B83;&#x662F;&#x4E0D;&#x9075;&#x5B88;&#x8BBE;&#x5B9A;&#x7684;&#x516C;&#x5E73;&#x7684;&#x89C4;&#x5219;&#x7684;</li>
+</ol>
+<pre><code>&#x4F8B;&#x5982;&#xFF1A;&#x5F53;&#x6709;&#x7EBF;&#x7A0B;&#x6267;&#x884C;tryLock&#x7684;&#x65F6;&#x5019;&#x4E00;&#x65E6;&#x6709;&#x7EBF;&#x7A0B;&#x91CA;&#x653E;&#x4E86;&#x9501;&#xFF0C;&#x90A3;&#x4E48;&#x8FD9;&#x4E2A;&#x6B63;&#x5728;&#x6267;&#x884C;tryLock&#x7684;&#x7EBF;&#x7A0B;&#x7ACB;&#x9A6C;&#x5C31;&#x80FD;&#x83B7;&#x53D6;&#x5230;&#x9501;&#x5373;&#x4F7F;&#x5728;&#x5B83;&#x4E4B;&#x524D;&#x5DF2;&#x7ECF;&#x6709;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x5728;&#x7B49;&#x5F85;&#x961F;&#x5217;&#x4E2D;</code></pre><p><strong>&#x516C;&#x5E73;&#x9501;&#xFF1A;</strong></p>
+<pre><code>&#x6392;&#x961F;&#xFF0C;&#x516C;&#x5E73;&#x662F;&#x6307;&#x7684;&#x662F;&#x6309;&#x7167;&#x7EBF;&#x7A0B;&#x8BF7;&#x6C42;&#x7684;&#x987A;&#x5E8F;&#x6765;&#x8FDB;&#x884C;&#x5206;&#x914D;&#x9501;</code></pre><p>&#x6848;&#x4F8B;&#xFF1A;&#x4EE5;ReentrantLock&#x4E3A;&#x4F8B;&#xFF0C;<strong>&#x521B;&#x5EFA;&#x5BF9;&#x8C61;&#x7684;&#x65F6;&#x5019;&#x53C2;&#x6570;&#x4E3A;true</strong>&#xFF08;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x540E;&#x7EED;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x4F1A;&#x8BB2;&#x89E3;&#xFF09;</p>
+<p><strong>&#x6CE8;&#x610F;:</strong></p>
+<pre><code>&#x975E;&#x516C;&#x5E73;&#x4E5F;&#x540C;&#x6837;&#x4E0D;&#x63D0;&#x5021;&#x63D2;&#x961F;&#x884C;&#x4E3A;&#xFF0C;&#x8FD9;&#x91CC;&#x6307;&#x7684;&#x975E;&#x516C;&#x5E73;&#x662F;&#x6307;&#x5728;&#x5408;&#x9002;&#x7684;&#x65F6;&#x673A;&#x63D2;&#x961F;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x76F2;&#x76EE;&#x7684;&#x63D2;&#x961F;</code></pre><p><strong>&#x4F18;&#x7F3A;&#x70B9;&#xFF1A;</strong></p>
+<p><strong>&#x975E;&#x516C;&#x5E73;&#x9501;&#xFF1A;</strong></p>
+<ul>
+<li>&#x4F18;&#x52BF;&#xFF1A;&#x66F4;&#x5FEB;&#xFF0C;&#x541E;&#x5410;&#x91CF;&#x5927;</li>
+<li>&#x52A3;&#x52BF;&#xFF1A;&#x6709;&#x53EF;&#x80FD;&#x4EA7;&#x751F;&#x7EBF;&#x7A0B;&#x9965;&#x997F;</li>
+</ul>
+<p><strong>&#x516C;&#x5E73;&#x9501;&#xFF1A;</strong></p>
+<ul>
+<li>&#x4F18;&#x52BF;: &#x7EBF;&#x7A0B;&#x5E73;&#x7B49;&#xFF0C;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x6309;&#x7167;&#x987A;&#x5E8F;&#x90FD;&#x6709;&#x6267;&#x884C;&#x7684;&#x673A;&#x4F1A;</li>
+<li>&#x52A3;&#x52BF;&#xFF1A;&#x66F4;&#x6162;&#xFF0C;&#x541E;&#x5410;&#x91CF;&#x66F4;&#x5C0F;</li>
+</ul>
+<h3 id="6-4-&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x91CD;&#x590D;&#x83B7;&#x53D6;&#x540C;&#x4E00;&#x628A;&#x9501;"><a href="#6-4-&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x91CD;&#x590D;&#x83B7;&#x53D6;&#x540C;&#x4E00;&#x628A;&#x9501;" class="headerlink" title="6.4 &#x662F;&#x5426;&#x53EF;&#x4EE5;&#x91CD;&#x590D;&#x83B7;&#x53D6;&#x540C;&#x4E00;&#x628A;&#x9501;"></a>6.4 &#x662F;&#x5426;&#x53EF;&#x4EE5;&#x91CD;&#x590D;&#x83B7;&#x53D6;&#x540C;&#x4E00;&#x628A;&#x9501;</h3><table>
+<thead>
+<tr>
+<th>&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x91CD;&#x5165;</th>
+<th>&#x9501;&#x540D;&#x79F0;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x53EF;&#x4EE5;</td>
+<td>&#x53EF;&#x91CD;&#x5165;&#x9501;</td>
+</tr>
+<tr>
+<td>&#x4E0D;&#x53EF;&#x4EE5;</td>
+<td>&#x4E0D;&#x53EF;&#x91CD;&#x5165;&#x9501;</td>
+</tr>
+</tbody></table>
+<p>&#x6848;&#x4F8B;&#xFF1A;&#x4EE5;ReentrantLock&#x4E3A;&#x4F8B;&#xFF08;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x540E;&#x7EED;&#x7CFB;&#x5217;&#x6587;&#x7AE0;&#x4F1A;&#x8BB2;&#x89E3;&#xFF09;</p>
+<h3 id="6-5&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x88AB;&#x4E2D;&#x65AD;"><a href="#6-5&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x88AB;&#x4E2D;&#x65AD;" class="headerlink" title="6.5&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x88AB;&#x4E2D;&#x65AD;"></a>6.5&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x88AB;&#x4E2D;&#x65AD;</h3><table>
+<thead>
+<tr>
+<th>&#x662F;&#x5426;&#x53EF;&#x4EE5;&#x4E2D;&#x65AD;</th>
+<th>&#x9501;&#x540D;&#x79F0;</th>
+<th>&#x6848;&#x4F8B;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x53EF;&#x4EE5;</td>
+<td>&#x53EF;&#x4E2D;&#x65AD;&#x9501;</td>
+<td>Lock&#x662F;&#x53EF;&#x4E2D;&#x65AD;&#x9501;&#xFF08;&#x56E0;&#x4E3A;tryLock&#x548C;lockInterruptibly&#x90FD;&#x80FD;&#x54CD;&#x5E94;&#x4E2D;&#x65AD;&#xFF09;</td>
+</tr>
+<tr>
+<td>&#x4E0D;&#x53EF;&#x4EE5;</td>
+<td>&#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x9501;</td>
+<td>Synchronized&#x5C31;&#x662F;&#x4E0D;&#x53EF;&#x4E2D;&#x65AD;&#x9501;</td>
+</tr>
+</tbody></table>
+<h3 id="6-6&#x7B49;&#x9501;&#x7684;&#x8FC7;&#x7A0B;"><a href="#6-6&#x7B49;&#x9501;&#x7684;&#x8FC7;&#x7A0B;" class="headerlink" title="6.6&#x7B49;&#x9501;&#x7684;&#x8FC7;&#x7A0B;"></a>6.6&#x7B49;&#x9501;&#x7684;&#x8FC7;&#x7A0B;</h3><table>
+<thead>
+<tr>
+<th>&#x662F;&#x5426;&#x81EA;&#x65CB;</th>
+<th>&#x9501;&#x540D;&#x79F0;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x662F;</td>
+<td>&#x81EA;&#x65CB;&#x9501;</td>
+</tr>
+<tr>
+<td>&#x5426;</td>
+<td>&#x963B;&#x585E;&#x9501;</td>
+</tr>
+</tbody></table>
+<p><strong>&#x4F7F;&#x7528;&#x573A;&#x666F;&#xFF1A;</strong></p>
+<ol>
+<li>&#x81EA;&#x65CB;&#x9501;&#x4E00;&#x822C;&#x7528;&#x4E8E;&#x591A;&#x6838;&#x7684;&#x670D;&#x52A1;&#x5668;,&#x5728;&#x5E76;&#x53D1;&#x5EA6;&#x4E0D;&#x662F;&#x5F88;&#x9AD8;&#x7684;&#x60C5;&#x51B5;&#x4E0B;,&#x6BD4;&#x963B;&#x585E;&#x9501;&#x6548;&#x7387;&#x9AD8;</li>
+<li>&#x81EA;&#x65CB;&#x9501;&#x9002;&#x5408;&#x4E34;&#x754C;&#x533A;&#x6BD4;&#x8F83;&#x77ED;&#x5C0F;&#x7684;&#x60C5;&#x51B5;,&#x5426;&#x5219;&#x5982;&#x679C;&#x4E34;&#x754C;&#x533A;&#x5F88;&#x5927;,&#x7EBF;&#x7A0B;&#x4E00;&#x65E6;&#x62FF;&#x5230;&#x9501;,&#x5F88;&#x4E45;&#x4EE5;&#x540E;&#x624D;&#x4F1A;&#x91CA;&#x653E;&#x90A3;&#x4E5F;&#x4E0D;&#x5408;&#x9002;&#x7684;&#xFF0C;&#x56E0;&#x4E3A;&#x4F1A;&#x6D6A;&#x8D39;&#x6027;&#x80FD;&#x5728;&#x81EA;&#x65CB;&#x7684;&#x65F6;&#x5019;</li>
+</ol>
+<h2 id="7-&#x9501;&#x4F18;&#x5316;"><a href="#7-&#x9501;&#x4F18;&#x5316;" class="headerlink" title="7.&#x9501;&#x4F18;&#x5316;"></a>7.&#x9501;&#x4F18;&#x5316;</h2><h3 id="7-1-&#x865A;&#x62DF;&#x673A;&#x4E2D;&#x5E26;&#x7684;&#x9501;&#x4F18;&#x5316;"><a href="#7-1-&#x865A;&#x62DF;&#x673A;&#x4E2D;&#x5E26;&#x7684;&#x9501;&#x4F18;&#x5316;" class="headerlink" title="7.1 &#x865A;&#x62DF;&#x673A;&#x4E2D;&#x5E26;&#x7684;&#x9501;&#x4F18;&#x5316;"></a>7.1 &#x865A;&#x62DF;&#x673A;&#x4E2D;&#x5E26;&#x7684;&#x9501;&#x4F18;&#x5316;</h3><ol>
+<li>&#x81EA;&#x65CB;&#x9501;</li>
+<li>&#x9501;&#x6D88;&#x9664;</li>
+<li>&#x9501;&#x7C97;&#x5316;</li>
+</ol>
+<p><strong>&#x8FD9;&#x4E09;&#x79CD;&#x9501;&#x4F18;&#x5316;&#x7684;&#x65B9;&#x5F0F;&#x5728;&#x524D;&#x4E00;&#x7BC7;Synchronized&#x6587;&#x7AE0;&#x79CD;&#x6240;&#x6709;&#x8BB2;&#x89E3;</strong></p>
+<h3 id="7-2&#x5199;&#x4EE3;&#x7801;&#x7684;&#x65F6;&#x5019;&#x9501;&#x4F18;&#x5316;"><a href="#7-2&#x5199;&#x4EE3;&#x7801;&#x7684;&#x65F6;&#x5019;&#x9501;&#x4F18;&#x5316;" class="headerlink" title="7.2&#x5199;&#x4EE3;&#x7801;&#x7684;&#x65F6;&#x5019;&#x9501;&#x4F18;&#x5316;"></a>7.2&#x5199;&#x4EE3;&#x7801;&#x7684;&#x65F6;&#x5019;&#x9501;&#x4F18;&#x5316;</h3><ul>
+<li>&#x7F29;&#x5C0F;&#x540C;&#x6B65;&#x4EE3;&#x7801;&#x5757;</li>
+<li>&#x5C3D;&#x91CF;&#x4E0D;&#x9501;&#x4F4F;&#x65B9;&#x6CD5;</li>
+<li>&#x51CF;&#x5C11;&#x8BF7;&#x6C42;&#x9501;&#x7684;&#x6B21;&#x6570;</li>
+<li>&#x907F;&#x514D;&#x4EBA;&#x4E3A;&#x5236;&#x9020;&#x70ED;&#x70B9;</li>
+<li>&#x9501;&#x4E2D;&#x5C3D;&#x91CF;&#x4E0D;&#x8981;&#x518D;&#x5305;&#x542B;&#x9501;</li>
+<li>&#x9009;&#x62E9;&#x5408;&#x9002;&#x7684;&#x9501;&#x7C7B;&#x578B;&#x6216;&#x8005;&#x5408;&#x9002;&#x7684;&#x5DE5;&#x5177;&#x7C7B;</li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/ba945a2a55e8b672bd5aadc0e398f819.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6916452005128962062.html" rel="next" title="计科小伙们，我将用一篇文章，搞定你的毕业设计难题！！！ 前言">
+                <i class="fa fa-chevron-left"></i> 计科小伙们，我将用一篇文章，搞定你的毕业设计难题！！！ 前言
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6917131822711341070.html" rel="prev" title="数据结构与算法">
+                数据结构与算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-为什么需要Lock"><span class="nav-number">1.</span> <span class="nav-text">1.为什么需要Lock</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Lock锁的意义"><span class="nav-number">2.</span> <span class="nav-text">2.Lock锁的意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-锁的用法"><span class="nav-number">3.</span> <span class="nav-text">3.锁的用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-内存同步"><span class="nav-number">4.</span> <span class="nav-text">4.内存同步</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Lock提供的接口"><span class="nav-number">5.</span> <span class="nav-text">5.Lock提供的接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-获取锁"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 获取锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-获取中断锁"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 获取中断锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-尝试获取锁"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 尝试获取锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-在一定时间内获取锁"><span class="nav-number">5.4.</span> <span class="nav-text">5.4 在一定时间内获取锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-解锁"><span class="nav-number">5.5.</span> <span class="nav-text">5.5 解锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-6-获取等待通知组件"><span class="nav-number">5.6.</span> <span class="nav-text">5.6 获取等待通知组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-7总结"><span class="nav-number">5.7.</span> <span class="nav-text">5.7总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-锁的分类"><span class="nav-number">6.</span> <span class="nav-text">6.锁的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1要不要锁住同步资源"><span class="nav-number">6.1.</span> <span class="nav-text">6.1要不要锁住同步资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2能否共享一把锁"><span class="nav-number">6.2.</span> <span class="nav-text">6.2能否共享一把锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3是否排队"><span class="nav-number">6.3.</span> <span class="nav-text">6.3是否排队</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-是否可以重复获取同一把锁"><span class="nav-number">6.4.</span> <span class="nav-text">6.4 是否可以重复获取同一把锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-5是否可以被中断"><span class="nav-number">6.5.</span> <span class="nav-text">6.5是否可以被中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-6等锁的过程"><span class="nav-number">6.6.</span> <span class="nav-text">6.6等锁的过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-锁优化"><span class="nav-number">7.</span> <span class="nav-text">7.锁优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-虚拟机中带的锁优化"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 虚拟机中带的锁优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2写代码的时候锁优化"><span class="nav-number">7.2.</span> <span class="nav-text">7.2写代码的时候锁优化</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="MySQL&amp;#x652F;&amp;#x6301;&amp;#x7684;&amp;#x9501;&amp;#x4ECE;&amp;#x9501;&amp;#x7C92;&amp;#x5EA6;&amp;#x4E0A;&amp;#x5212;&amp;#x5206;  123scss&amp;#x590D;&amp;#x5236;&amp;#x4EE3;&amp;#x7801;&amp;#x8868;&amp;#x7EA7;&amp;#x9501;&amp;#x884C;&amp;#x7EA7;&amp;#x9501;(InnoDB&amp;#x5B58;&amp;#x">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL锁机制">
+<meta property="og:url" content="https://dev.newban.cn/7035634252397936671.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="MySQL&amp;#x652F;&amp;#x6301;&amp;#x7684;&amp;#x9501;&amp;#x4ECE;&amp;#x9501;&amp;#x7C92;&amp;#x5EA6;&amp;#x4E0A;&amp;#x5212;&amp;#x5206;  123scss&amp;#x590D;&amp;#x5236;&amp;#x4EE3;&amp;#x7801;&amp;#x8868;&amp;#x7EA7;&amp;#x9501;&amp;#x884C;&amp;#x7EA7;&amp;#x9501;(InnoDB&amp;#x5B58;&amp;#x">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9bd3503f9a01109f76bb2289df3a8a2ffeba1e1819e29f04942dc6a542a3a1e9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/6268573db4836b991a7cc97968e76ea7b911d3943f16c0cfcb2ef78f0e8919a7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/abc16f20ee18aea7407a0edfaeb9829d4837392e20902332be7a220a1640cad2">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/b17fc8db4492f8f87661a46d53fb59bd1ff9e79b19e0bad608e4ad66312f042b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d46ce0782985564626c8865357ac846dbe4899ec8bb30384d65b41a6c3cc74d3">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e21e95cf88e44f29a5c0d660c01cdda42ae4b5e1e649633d21999209034112e7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d30190760f4f89126f4bceeda4b9ee8ee836446f48ce63ee4e9a246783968c23">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/5a1524efde169f9a32c7927251b3ca5916c0c0d15d5fa4d3eaa6aef875e39e87">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9e464285dc4b4a625a9b07e73c513d48a5eb17b29226c54e2a77756c00515f35">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/56b5745bcf17fd4fa124daf62238be237250193775ca2bb511b9928285c686c2">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/60af92a4cf3c50f779a85948cb697b7eca74f667e453ed27d6e8d6b2317e0363">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/693d737c6029bd2aad9e18b57d95944e82ff0e9b5df96c10e8a8396d2585d86c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e1e2a6992f4c15ba43db4a37d29c2f4bd0fd057687710579705857e80e8aa3cb">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fec8c7314e6b24ce1356e25bb7bc92ef5ca742e912676e967c510d4aa58ba611">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/95502b94d727bd590e7d0a25a5996650753787689a2cbfa6fbc2d93502ab57ab">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/7e6b98ae3b1cc31cd17ef9e0317c69ea0bd5159724fb8245de5d2ed1393c1573">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/10b81ad65328dfabf90e7c4413b6ae11a6dfac5a26579e649c2a57746e07994c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/dd90023a039edb94ee3976473546bdec871a22a7ed5caec9b8766b69a2b6c917">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/2155e64912d7c0d2176679ca4cbaea6db0d3c6e50a49b0ca7c07ae312d89c974">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/6c543eb560240eae9c77d8a862dc4c16e28906644058decb58518413bbe91a67">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/671eb3f25085bd2eca26c1bdb1dc15d8c5b839dfc58303a4d1c1d0afb593c4d8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/8b9d135e69f3a68ec98b0da8450e744e58e95472bdf79d2a8bcb5711ebbe23e7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ec4a2e39e899b02b91414aad2b5cc9bcb729453c5e2d8e1f8b2563111589d6e5">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/38bcaff024081f01c5ccd2ed1e956c6960d19da90d7d3c747f03eb7a53b0e296">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/533e368faae97e84d78d91370a08f852006292ba1d60501f965aaf2ef964998f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/8376dc1808fbdad0e1a14de94e702bab03e60357aff33b94f5a7202891ee531b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/29ee40b1d6921948aec34211d4450b597b386e4c30d8fa402a69a302028cc0b6">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/124df3415ecc477712e93c725b2244fc09e20977790e2677a4a3f8d5302d6fd9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/cfef42b6b6120d963b71c1afd40d792a2878e94cf027503c6bacff87b81c70d7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/c9706b92aee243714be61c1dc0aba673cafef42c72a26c3079978e98891399b4">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/cba573138bd409dca3722fb0991f71dc742f3e5f1f23e39737d6d2f77a6273d9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d6a6dc5deab962eea62c17974d5e334e6e5c334d367ab8087060101f0655a992">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/695301d61f5d57d2b87ca1bd659c412f1b6181eec385349ca505d02dea43e9ef">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e08f7509e7b669c27706114363f794a8d918aa0656abe1521e3fec6936a5b6c8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/edf193b4814179255d7bf6a2240fb845cb4393da8175c7171bb30331d41cf28c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/f0bdff3a2a13af430eb467128a306fa83842caa9b4b7cb0443cf812712aa3c8e">
+<meta property="og:updated_time" content="2024-04-29T13:03:37.289Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL锁机制">
+<meta name="twitter:description" content="MySQL&amp;#x652F;&amp;#x6301;&amp;#x7684;&amp;#x9501;&amp;#x4ECE;&amp;#x9501;&amp;#x7C92;&amp;#x5EA6;&amp;#x4E0A;&amp;#x5212;&amp;#x5206;  123scss&amp;#x590D;&amp;#x5236;&amp;#x4EE3;&amp;#x7801;&amp;#x8868;&amp;#x7EA7;&amp;#x9501;&amp;#x884C;&amp;#x7EA7;&amp;#x9501;(InnoDB&amp;#x5B58;&amp;#x">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9bd3503f9a01109f76bb2289df3a8a2ffeba1e1819e29f04942dc6a542a3a1e9">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035634252397936671.html">
+
+
+
+
+
+  <title>MySQL锁机制 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL锁机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-28T22:55:16+08:00">
+                2021-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="MySQL&#x652F;&#x6301;&#x7684;&#x9501;"><a href="#MySQL&#x652F;&#x6301;&#x7684;&#x9501;" class="headerlink" title="MySQL&#x652F;&#x6301;&#x7684;&#x9501;"></a>MySQL&#x652F;&#x6301;&#x7684;&#x9501;</h2><p><code>&#x4ECE;&#x9501;&#x7C92;&#x5EA6;&#x4E0A;&#x5212;&#x5206;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9bd3503f9a01109f76bb2289df3a8a2ffeba1e1819e29f04942dc6a542a3a1e9" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;&#x8868;&#x7EA7;&#x9501;</span><br><span class="line">&#x884C;&#x7EA7;&#x9501;(InnoDB&#x5B58;&#x50A8;&#x5F15;&#x64CE;)</span><br><span class="line">&#x9875;&#x7EA7;&#x9501;(BDB&#x5B58;&#x50A8;&#x5F15;&#x64CE;)</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x4ECE;&#x9501;&#x64CD;&#x4F5C;&#x4E0A;&#x5212;&#x5206;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/6268573db4836b991a7cc97968e76ea7b911d3943f16c0cfcb2ef78f0e8919a7" alt></p>
+<p><code>&#x4ECE;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#x4E0A;&#x5212;&#x5206;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/abc16f20ee18aea7407a0edfaeb9829d4837392e20902332be7a220a1640cad2" alt></p>
+<h2 id="&#x4F7F;&#x7528;&#x573A;&#x666F;"><a href="#&#x4F7F;&#x7528;&#x573A;&#x666F;" class="headerlink" title="&#x4F7F;&#x7528;&#x573A;&#x666F;"></a>&#x4F7F;&#x7528;&#x573A;&#x666F;</h2><p><code>&#x4FEE;&#x6539;&#x8868;&#x7ED3;&#x6784;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/b17fc8db4492f8f87661a46d53fb59bd1ff9e79b19e0bad608e4ad66312f042b" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4FEE;&#x6539;&#x6570;&#x636E;&#x5E93;&#x8868;&#x7ED3;&#x6784;&#x4F1A;&#x81EA;&#x52A8;&#x52A0;&#x8868;&#x7EA7;&#x9501;&#xFF08;&#x5143;&#x6570;&#x636E;&#x9501;&#xFF09;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x884C;&#x7EA7;&#x9501;&#x5347;&#x7EA7;&#x8868;&#x7EA7;&#x9501;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x66F4;&#x65B0;&#x6570;&#x636E;&#x672A;&#x4F7F;&#x7528;&#x7D22;&#x5F15;</span><br><span class="line">&#x884C;&#x7EA7;&#x9501;&#x4F1A;&#x4E0A;&#x5347;&#x4E3A;&#x8868;&#x7EA7;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d46ce0782985564626c8865357ac846dbe4899ec8bb30384d65b41a6c3cc74d3" alt></p>
+<p><code>&#x66F4;&#x65B0;&#x6570;&#x636E;&#x4F7F;&#x7528;&#x7D22;&#x5F15;&#x4F1A;&#x4F7F;&#x7528;&#x884C;&#x7EA7;&#x9501;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e21e95cf88e44f29a5c0d660c01cdda42ae4b5e1e649633d21999209034112e7" alt></p>
+<p><code>select .... from update&#x4F7F;&#x7528;&#x884C;&#x7EA7;&#x9501;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d30190760f4f89126f4bceeda4b9ee8ee836446f48ce63ee4e9a246783968c23" alt></p>
+<h2 id="MySQL&#x9501;&#x5206;&#x7C7B;"><a href="#MySQL&#x9501;&#x5206;&#x7C7B;" class="headerlink" title="MySQL&#x9501;&#x5206;&#x7C7B;"></a>MySQL&#x9501;&#x5206;&#x7C7B;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/5a1524efde169f9a32c7927251b3ca5916c0c0d15d5fa4d3eaa6aef875e39e87" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x5206;&#x4E3A;&#x4E50;&#x89C2;&#x9501;&#x548C;&#x60B2;&#x89C2;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x4E50;&#x89C2;&#x9501;"><a href="#&#x4E50;&#x89C2;&#x9501;" class="headerlink" title="&#x4E50;&#x89C2;&#x9501;"></a>&#x4E50;&#x89C2;&#x9501;</h3><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9e464285dc4b4a625a9b07e73c513d48a5eb17b29226c54e2a77756c00515f35" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E50;&#x89C2;&#x9501;&#x662F;&#x7A0B;&#x5E8F;&#x901A;&#x8FC7;&#x7248;&#x672C;&#x53F7;&#x6216;&#x65F6;&#x95F4;&#x6233;&#x5B9E;&#x73B0;</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x60B2;&#x89C2;&#x9501;"><a href="#&#x60B2;&#x89C2;&#x9501;" class="headerlink" title="&#x60B2;&#x89C2;&#x9501;"></a>&#x60B2;&#x89C2;&#x9501;</h3><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/56b5745bcf17fd4fa124daf62238be237250193775ca2bb511b9928285c686c2" alt></p>
+<h4 id="&#x8868;&#x7EA7;&#x9501;"><a href="#&#x8868;&#x7EA7;&#x9501;" class="headerlink" title="&#x8868;&#x7EA7;&#x9501;"></a>&#x8868;&#x7EA7;&#x9501;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x6BCF;&#x6B21;&#x64CD;&#x4F5C;&#x9501;&#x4F4F;&#x6574;&#x4E2A;&#x8868;</span><br><span class="line">&#x9501;&#x5B9A;&#x529B;&#x5EA6;&#x5927;</span><br><span class="line">&#x53D1;&#x751F;&#x9501;&#x51B2;&#x7A81;&#x7684;&#x6982;&#x7387;&#x6700;&#x9AD8;</span><br><span class="line">&#x5E76;&#x53D1;&#x5EA6;&#x6700;&#x4F4E;</span><br><span class="line">&#x5E94;&#x7528;&#x5728;MyISAM&#x3001;InnoDB&#x3001;BDB&#x7B49;&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#x4E2D;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/60af92a4cf3c50f779a85948cb697b7eca74f667e453ed27d6e8d6b2317e0363" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;&#x8868;&#x7EA7;&#x9501;&#x53C8;&#x5206;&#x4E3A;&#x8868;&#x9501;&#xFF08;MySQL&#xA0;layer&#x5C42;&#x52A0;&#x9501;&#xFF09;</span><br><span class="line">&#x5143;&#x6570;&#x636E;&#x9501;&#xFF08;MySQL&#xA0;layer&#x5C42;&#x52A0;&#x9501;&#xFF09;</span><br><span class="line">&#x610F;&#x5411;&#x9501;(InnodB&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#x5C42;&#x52A0;&#x9501;)&#xA0;&#x5185;&#x90E8;&#x4F7F;&#x7528;&#x7684;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<h5 id="&#x8868;&#x9501;"><a href="#&#x8868;&#x9501;" class="headerlink" title="&#x8868;&#x9501;"></a>&#x8868;&#x9501;</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x9700;&#x8981;&#x624B;&#x52A8;&#x52A0;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/693d737c6029bd2aad9e18b57d95944e82ff0e9b5df96c10e8a8396d2585d86c" alt></p>
+<ul>
+<li>read lock</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x52A0;&#x8BFB;&#x9501;&#x540E;&#x8FD8;&#x53EF;&#x4EE5;&#x52A0;&#x8BFB;&#x9501;</span><br><span class="line">&#x4E0D;&#x80FD;&#x52A0;&#x5199;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>write lock</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x52A0;&#x5199;&#x9501;&#x540E;&#x4E0D;&#x80FD;&#x52A0;&#x8BFB;&#x9501;&#x4E5F;&#x4E0D;&#x80FD;&#x52A0;&#x5199;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<h5 id="&#x5143;&#x6570;&#x636E;&#x9501;"><a href="#&#x5143;&#x6570;&#x636E;&#x9501;" class="headerlink" title="&#x5143;&#x6570;&#x636E;&#x9501;"></a>&#x5143;&#x6570;&#x636E;&#x9501;</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x81EA;&#x52A8;&#x52A0;&#x9501;</span><br><span class="line">&#x5143;&#x6570;&#x636E;&#x5176;&#x5B9E;&#x5C31;&#x662F;&#x8868;&#x7ED3;&#x6784;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e1e2a6992f4c15ba43db4a37d29c2f4bd0fd057687710579705857e80e8aa3cb" alt></p>
+<h5 id="&#x610F;&#x5411;&#x9501;"><a href="#&#x610F;&#x5411;&#x9501;" class="headerlink" title="&#x610F;&#x5411;&#x9501;"></a>&#x610F;&#x5411;&#x9501;</h5><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fec8c7314e6b24ce1356e25bb7bc92ef5ca742e912676e967c510d4aa58ba611" alt></p>
+<h4 id="&#x884C;&#x7EA7;&#x9501;"><a href="#&#x884C;&#x7EA7;&#x9501;" class="headerlink" title="&#x884C;&#x7EA7;&#x9501;"></a>&#x884C;&#x7EA7;&#x9501;</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x6BCF;&#x6B21;&#x64CD;&#x4F5C;&#x9501;&#x4F4F;&#x4E00;&#x884C;&#x6570;&#x636E;</span><br><span class="line">&#x9501;&#x5B9A;&#x7C92;&#x5EA6;&#x6700;&#x5C0F;</span><br><span class="line">&#x53D1;&#x751F;&#x9501;&#x51B2;&#x7A81;&#x7684;&#x6982;&#x7387;&#x6700;&#x4F4E;</span><br><span class="line">&#x5E76;&#x53D1;&#x8BFB;&#x6700;&#x9AD8;</span><br><span class="line">&#x662F;&#x7531;InnoDB&#x5B58;&#x50A8;&#x5F15;&#x64CE;&#x5B9E;&#x73B0;&#x7684;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/95502b94d727bd590e7d0a25a5996650753787689a2cbfa6fbc2d93502ab57ab" alt></p>
+<h5 id="&#x5171;&#x4EAB;&#x8BFB;&#x9501;-S"><a href="#&#x5171;&#x4EAB;&#x8BFB;&#x9501;-S" class="headerlink" title="&#x5171;&#x4EAB;&#x8BFB;&#x9501;(S)"></a>&#x5171;&#x4EAB;&#x8BFB;&#x9501;(S)</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">csharp&#x590D;&#x5236;&#x4EE3;&#x7801;&#x624B;&#x52A8;&#x52A0;&#x9501;</span><br><span class="line">select&#xA0;....&#xA0;lock&#xA0;in&#xA0;share&#xA0;mode</span><br><span class="line">&#x5141;&#x8BB8;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x53BB;&#x8BFB;&#x4E00;&#x884C;&#xA0;</span><br><span class="line">&#x963B;&#x6B62;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x83B7;&#x53D6;&#x76F8;&#x540C;&#x6570;&#x636E;&#x96C6;&#x7684;&#x6392;&#x4ED6;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<h5 id="&#x6392;&#x4ED6;&#x5199;&#x9501;-X"><a href="#&#x6392;&#x4ED6;&#x5199;&#x9501;-X" class="headerlink" title="&#x6392;&#x4ED6;&#x5199;&#x9501;(X)"></a>&#x6392;&#x4ED6;&#x5199;&#x9501;(X)</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x81EA;&#x52A8;&#x52A0;&#x9501;</span><br><span class="line">&#x5141;&#x8BB8;&#x83B7;&#x5F97;&#x6392;&#x4ED6;&#x5199;&#x9501;&#x7684;&#x4E8B;&#x52A1;&#x66F4;&#x65B0;&#x6570;&#x636E;</span><br><span class="line">&#x963B;&#x6B62;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x53D6;&#x5F97;&#x76F8;&#x540C;&#x6570;&#x636E;&#x96C6;&#x7684;&#x5171;&#x4EAB;&#x8BFB;&#x9501;&#xFF08;&#x4E0D;&#x662F;&#x666E;&#x901A;&#x8BFB;&#xFF09;</span><br><span class="line">&#x548C;&#x6392;&#x4ED6;&#x5199;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>DML(insert&#x3001;update&#x3001;delete)</li>
+<li>select &#x2026; from udpate</li>
+</ul>
+<p><code>&#x6574;&#x4F53;&#x5206;&#x7C7B;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/7e6b98ae3b1cc31cd17ef9e0317c69ea0bd5159724fb8245de5d2ed1393c1573" alt></p>
+<h2 id="&#x8868;&#x7EA7;&#x9501;&#x4F7F;&#x7528;"><a href="#&#x8868;&#x7EA7;&#x9501;&#x4F7F;&#x7528;" class="headerlink" title="&#x8868;&#x7EA7;&#x9501;&#x4F7F;&#x7528;"></a>&#x8868;&#x7EA7;&#x9501;&#x4F7F;&#x7528;</h2><p><code>&#x8868;&#x8BFB;&#x9501;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/10b81ad65328dfabf90e7c4413b6ae11a6dfac5a26579e649c2a57746e07994c" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E8B;&#x52A1;1&#x7ED9;mylock&#x8868;&#x6DFB;&#x52A0;&#x8BFB;&#x9501;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x67E5;&#x8BE2;mylock&#x8868;&#x53EF;&#x4EE5;&#x8BFB;&#x53D6;&#x5230;&#x6570;&#x636E;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x4E0D;&#x53EF;&#x4EE5;&#x67E5;&#x8BE2;&#x5176;&#x4ED6;&#x8868;&#x6570;&#x636E;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x666E;&#x901A;&#x67E5;&#x8BE2;mylock&#x8868;&#xA0;</span><br><span class="line">&#x6CA1;&#x6709;&#x52A0;&#x9501;&#xA0;</span><br><span class="line">&#x53EF;&#x4EE5;&#x67E5;&#x5230;&#xA0;</span><br><span class="line">&#x901A;&#x8FC7;MVCC&#x673A;&#x5236;&#x67E5;&#x8BE2;&#x6570;&#x636E;&#x7684;&#x5386;&#x53F2;&#x7248;&#x672C;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x66F4;&#x65B0;mylock&#x8868;id&#x4E3A;2&#x7684;&#x6570;&#x636E;&#xA0;</span><br><span class="line">&#x9700;&#x8981;&#x5148;&#x83B7;&#x53D6;&#x8FD9;&#x6761;&#x6570;&#x636E;&#x7684;&#x884C;&#x9501;</span><br><span class="line">&#x624D;&#x53EF;&#x4EE5;&#x8FDB;&#x884C;&#x4FEE;&#x6539;</span><br><span class="line">&#x4F46;&#x6B64;&#x65F6;&#x662F;&#x83B7;&#x53D6;&#x4E0D;&#x5230;&#x7684;</span><br><span class="line">&#x56E0;&#x4E3A;&#x4E8B;&#x52A1;1&#x8FD8;&#x672A;&#x91CA;&#x653E;mylock&#x8868;&#x7684;&#x8BFB;&#x9501;</span><br><span class="line">&#x6240;&#x4EE5;&#x4E8B;&#x52A1;2&#x53EA;&#x80FD;&#x7B49;&#x5F85;&#x4E8B;&#x52A1;1&#x91CA;&#x653E;mylock&#x8868;&#x7684;&#x8BFB;&#x9501;</span><br><span class="line">&#x624D;&#x80FD;&#x591F;&#x83B7;&#x53D6;&#x5230;&#x884C;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;1&#x91CA;&#x653E;&#x4E86;mylock&#x8868;&#x7684;&#x8BFB;&#x9501;</span><br><span class="line">&#x90A3;&#x4E48;&#x5219;&#x53EF;&#x4EE5;&#x67E5;&#x8BE2;&#x5176;&#x4ED6;&#x8868;&#x7684;&#x6570;&#x636E;&#x4E86;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x4E5F;&#x83B7;&#x53D6;&#x5230;id&#x4E3A;2&#x7684;&#x8FD9;&#x6761;&#x6570;&#x636E;&#x7684;&#x884C;&#x9501;</span><br><span class="line">&#x6267;&#x884C;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x8868;&#x5199;&#x9501;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/dd90023a039edb94ee3976473546bdec871a22a7ed5caec9b8766b69a2b6c917" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E8B;&#x52A1;1&#x7ED9;mylock&#x6DFB;&#x52A0;&#x8868;&#x5199;&#x9501;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x53EF;&#x4EE5;&#x67E5;&#x8BE2;mylock&#x6570;&#x636E;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x4E0D;&#x53EF;&#x4EE5;&#x67E5;&#x8BE2;&#x5176;&#x4ED6;&#x8868;&#x6570;&#x636E;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x66F4;&#x65B0;mylock&#x8868;id&#x4E3A;2&#x7684;&#x6570;&#x636E;</span><br><span class="line">&#x53EF;&#x4EE5;&#x6267;&#x884C;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x67E5;&#x8BE2;mylock&#x6570;&#x636E;</span><br><span class="line">&#x67E5;&#x8BE2;&#x963B;&#x585E;&#xA0;</span><br><span class="line">&#x56E0;&#x4E3A;&#x4E8B;&#x52A1;1&#x8FD8;&#x672A;&#x91CA;&#x653E;mylock&#x8868;&#x7684;&#x5199;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;1&#x91CA;&#x653E;mylock&#x8868;&#x7684;&#x5199;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x7684;&#x67E5;&#x8BE2;&#x5F97;&#x4EE5;&#x7EE7;&#x7EED;&#x6267;&#x884C;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x9875;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#x5176;&#x4ED6;&#x8868;&#x6570;&#x636E;&#x4E86;</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x5143;&#x6570;&#x636E;&#x9501;&#x7684;&#x4F7F;&#x7528;"><a href="#&#x5143;&#x6570;&#x636E;&#x9501;&#x7684;&#x4F7F;&#x7528;" class="headerlink" title="&#x5143;&#x6570;&#x636E;&#x9501;&#x7684;&#x4F7F;&#x7528;"></a>&#x5143;&#x6570;&#x636E;&#x9501;&#x7684;&#x4F7F;&#x7528;</h2><p><code>&#x5143;&#x6570;&#x636E;&#x8BFB;&#x9501;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/2155e64912d7c0d2176679ca4cbaea6db0d3c6e50a49b0ca7c07ae312d89c974" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E8B;&#x52A1;1&#x5F00;&#x542F;&#x4E8B;&#x52A1;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x67E5;&#x8BE2;mylock&#x8868;</span><br><span class="line">&#x6B64;&#x65F6;&#x4F1A;&#x52A0;&#x4E00;&#x4E2A;MDL&#x8BFB;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x4FEE;&#x6539;mylock&#x8868;&#x7ED3;&#x6784;</span><br><span class="line">&#x6B64;&#x65F6;&#x4F1A;&#x88AB;&#x963B;&#x585E;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;1&#x63D0;&#x4EA4;&#x4E8B;&#x52A1;&#x6216;&#x56DE;&#x6EDA;&#x4E8B;&#x52A1;</span><br><span class="line">&#x4E8B;&#x52A1;2&#x624D;&#x5F97;&#x4EE5;&#x4FEE;&#x6539;&#x5B8C;&#x6210;</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x884C;&#x7EA7;&#x9501;&#x5206;&#x7C7B;&#x53CA;&#x4F7F;&#x7528;"><a href="#&#x884C;&#x7EA7;&#x9501;&#x5206;&#x7C7B;&#x53CA;&#x4F7F;&#x7528;" class="headerlink" title="&#x884C;&#x7EA7;&#x9501;&#x5206;&#x7C7B;&#x53CA;&#x4F7F;&#x7528;"></a>&#x884C;&#x7EA7;&#x9501;&#x5206;&#x7C7B;&#x53CA;&#x4F7F;&#x7528;</h2><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/6c543eb560240eae9c77d8a862dc4c16e28906644058decb58518413bbe91a67" alt></p>
+<p><code>&#x67E5;&#x8BE2;&#x884C;&#x7EA7;&#x9501;&#x72B6;&#x6001;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;show&#xA0;status&#xA0;like&#xA0;&apos;innodb_row_locks&apos;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x884C;&#x7EA7;&#x9501;&#x7684;&#x4F7F;&#x7528;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/671eb3f25085bd2eca26c1bdb1dc15d8c5b839dfc58303a4d1c1d0afb593c4d8" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E8B;&#x52A1;1&#xA0;&#x5F00;&#x59CB;&#x4E8B;&#x52A1;</span><br><span class="line">&#x4E8B;&#x52A1;1&#xA0;&#x67E5;&#x8BE2;mylock&#x8868;id&#x4E3A;1&#x7684;&#x6570;&#x636E;</span><br><span class="line">id&#x5217;&#x4E3A;&#x7D22;&#x5F15;&#x5217;</span><br><span class="line">&#x52A0;&#x884C;&#x8BFB;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x66F4;&#x65B0;id&#x4E3A;2&#x7684;&#x6570;&#x636E;&#xA0;</span><br><span class="line">&#x56E0;&#x672A;&#x9501;&#x5B9A;&#x8BE5;&#x884C;&#xA0;&#x6240;&#x4EE5;&#x53EF;&#x4EE5;&#x66F4;&#x65B0;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x66F4;&#x65B0;id&#x4E3A;1&#x7684;&#x6570;&#x636E;</span><br><span class="line">&#x8BE5;&#x884C;&#x7684;&#x884C;&#x8BFB;&#x9501;&#x8FD8;&#x672A;&#x91CA;&#x653E;</span><br><span class="line">&#x6B64;&#x65F6;&#x4FEE;&#x6539;&#x88AB;&#x963B;&#x585E;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;1&#x63D0;&#x4EA4;&#x4E8B;&#x52A1;</span><br><span class="line">&#x4E8B;&#x52A1;2&#x5BF9;id&#x4E3A;1&#x8FD9;&#x6761;&#x6570;&#x636E;&#x7684;&#x66F4;&#x65B0;&#x624D;&#x5F97;&#x4EE5;&#x6267;&#x884C;</span><br><span class="line"></span><br><span class="line">&quot;&#x6CE8;&quot;</span><br><span class="line">&#x4F7F;&#x7528;&#x7D22;&#x5F15;&#x52A0;&#x884C;&#x9501;</span><br><span class="line">&#x672A;&#x9501;&#x5B9A;&#x7684;&#x884C;&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x884C;&#x8BFB;&#x9501;&#x5347;&#x7EA7;&#x4E3A;&#x8868;&#x9501;</code></p>
+<p><strong>&#x672A;&#x4F7F;&#x7528;&#x7D22;&#x5F15;&#x7684;&#x884C;&#x7EA7;&#x9501;&#x4F1A;&#x5347;&#x7EA7;&#x4E3A;&#x8868;&#x9501;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/8b9d135e69f3a68ec98b0da8450e744e58e95472bdf79d2a8bcb5711ebbe23e7" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E8B;&#x52A1;1&#x5F00;&#x59CB;&#x4E8B;&#x52A1;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x67E5;&#x8BE2;mylock&#x8868;&#xA0;&#x67E5;&#x8BE2;&#x6761;&#x4EF6;&#x662F;name=&apos;c&apos;</span><br><span class="line">&#x5E76;&#x624B;&#x52A8;&#x7ED9;name=&apos;c&apos;&#x6DFB;&#x52A0;&#x884C;&#x8BFB;&#x9501;</span><br><span class="line">&#x4F46;name&#x5217;&#x5E76;&#x672A;&#x4F7F;&#x7528;&#x7D22;&#x5F15;</span><br><span class="line">&#x6240;&#x4EE5;&#x884C;&#x8BFB;&#x9501;&#x5C31;&#x4F1A;&#x5347;&#x7EA7;&#x4E3A;&#x8868;&#x7EA7;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x66F4;&#x65B0;mylock&#x8868;id&#x4E3A;2&#x7684;&#x6570;&#x636E;</span><br><span class="line">&#x5C31;&#x4F1A;&#x88AB;&#x963B;&#x585E;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;1&#x63D0;&#x4EA4;&#x6216;&#x56DE;&#x6EDA;&#x4E8B;&#x52A1;&#xA0;&#x8868;&#x7EA7;&#x9501;&#x5C31;&#x4F1A;&#x88AB;&#x91CA;&#x653E;</span><br><span class="line">&#x4E8B;&#x52A1;2&#x7684;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;&#x5C31;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x5230;&#x884C;&#x7EA7;&#x9501;&#xA0;</span><br><span class="line">&#x7136;&#x540E;&#x6267;&#x884C;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x884C;&#x5199;&#x9501;</code></p>
+<p><strong>&#x4E3B;&#x952E;&#x7D22;&#x5F15;&#x4EA7;&#x751F;&#x8BB0;&#x5F55;&#x9501;</strong></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ec4a2e39e899b02b91414aad2b5cc9bcb729453c5e2d8e1f8b2563111589d6e5" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E8B;&#x52A1;1&#x5F00;&#x59CB;&#x4E8B;&#x52A1;</span><br><span class="line">&#x4E8B;&#x52A1;1&#x67E5;&#x8BE2;mylock&#x8868;id&#x4E3A;1&#x7684;&#x6570;&#x636E;&#xA0;</span><br><span class="line">&#x5E76;&#x6DFB;&#x52A0;&#x884C;&#x5199;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x67E5;&#x8BE2;mylock&#x8868;id&#x4E3A;2&#x7684;&#x6570;&#x636E;&#xA0;</span><br><span class="line">&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#x67E5;&#x8BE2;mylock&#x8868;id&#x4E3A;1&#x7684;&#x6570;&#x636E;</span><br><span class="line">&#x53EF;&#x4EE5;&#x8BBF;&#x95EE;&#xA0;&#x4E0D;&#x52A0;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;2&#xA0;&#x67E5;&#x8BE2;mylock&#x8868;id&#x4E3A;1&#x7684;&#x6570;&#x636E;&#xA0;&#x6DFB;&#x52A0;&#x8BFB;&#x9501;</span><br><span class="line">&#x6B64;&#x65F6;&#x88AB;&#x963B;&#x585E;</span><br><span class="line"></span><br><span class="line">&#x4E8B;&#x52A1;1&#x63D0;&#x4EA4;&#xA0;&#x91CA;&#x653E;&#x4E86;id&#x4E3A;1&#x7684;&#x884C;&#x5199;&#x9501;</span><br><span class="line">&#x4E8B;&#x52A1;2&#xA0;&#x52A0;&#x8BFB;&#x9501;&#x83B7;&#x53D6;id&#x4E3A;1&#x7684;&#x6570;&#x636E;&#x5F97;&#x4EE5;&#x6267;&#x884C;</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x884C;&#x9501;&#x539F;&#x7406;"><a href="#&#x884C;&#x9501;&#x539F;&#x7406;" class="headerlink" title="&#x884C;&#x9501;&#x539F;&#x7406;"></a>&#x884C;&#x9501;&#x539F;&#x7406;</h2><p><code>&#x4E3B;&#x952E;&#x52A0;&#x9501;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;id&#x4E3A;&#x4E3B;&#x952E;&#x7D22;&#x5F15;</span><br><span class="line">update&#xA0;t&#xA0;set&#xA0;name=&apos;x&apos;&#xA0;where&#xA0;id&#xA0;=10;</span><br><span class="line">&#x52A0;&#x9501;&#x884C;&#x4E3A;&#x4EC5;&#x5728;id=10&#x7684;&#x4E3B;&#x952E;&#x7D22;&#x5F15;&#x8BB0;&#x5F55;&#x4E0A;&#x52A0;X&#x9501;(&#x8BB0;&#x5F55;&#x9501;)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/38bcaff024081f01c5ccd2ed1e956c6960d19da90d7d3c747f03eb7a53b0e296" alt></p>
+<p><code>&#x552F;&#x4E00;&#x952E;&#x52A0;&#x9501;</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/533e368faae97e84d78d91370a08f852006292ba1d60501f965aaf2ef964998f" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/8376dc1808fbdad0e1a14de94e702bab03e60357aff33b94f5a7202891ee531b" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;id&#x4E3A;&#x552F;&#x4E00;&#x952E;&#x7D22;&#x5F15;</span><br><span class="line">name&#x4E3A;&#x4E3B;&#x952E;&#x7D22;&#x5F15;</span><br><span class="line"></span><br><span class="line">&#x5148;&#x5728;&#x552F;&#x4E00;&#x7D22;&#x5F15;id&#x4E0A;&#x52A0;id=10&#x7684;x&#x9501;</span><br><span class="line">&#x518D;&#x5728;id=10&#x7684;&#x4E3B;&#x952E;&#x7D22;&#x5F15;&#x8BB0;&#x5F55;&#x4E0A;&#x52A0;x&#x9501;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x975E;&#x552F;&#x4E00;&#x952E;&#x52A0;&#x9501;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;name&#x662F;&#x4E3B;&#x952E;</span><br><span class="line">id&#x662F;&#x7D22;&#x5F15;&#xFF08;&#x4E8C;&#x7EA7;&#x7D22;&#x5F15;&#xFF09;</span><br><span class="line"></span><br><span class="line">&#x52A0;&#x9501;&#x884C;&#x4E3A;&#xFF1A;&#x5BF9;&#x6EE1;&#x8DB3;id=10&#x6761;&#x4EF6;&#x7684;&#x8BB0;&#x5F55;&#x548C;&#x4E3B;&#x952E;&#x5206;&#x522B;&#x52A0;x&#x9501;</span><br><span class="line">&#x7136;&#x540E;&#x5728;</span><br><span class="line">(6,c)~(10,b)</span><br><span class="line">(10,b)~(10,d)</span><br><span class="line">&#xFF08;10,d)~(11,f)</span><br><span class="line">&#x95F4;&#x9699;&#x5206;&#x522B;&#x52A0;Gap&#x9501;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/29ee40b1d6921948aec34211d4450b597b386e4c30d8fa402a69a302028cc0b6" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/124df3415ecc477712e93c725b2244fc09e20977790e2677a4a3f8d5302d6fd9" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/cfef42b6b6120d963b71c1afd40d792a2878e94cf027503c6bacff87b81c70d7" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x6709;&#x4E86;&#x95F4;&#x9699;&#x9501;&#xA0;</span><br><span class="line">&#x8FD9;&#x4E9B;&#x533A;&#x95F4;&#x5185;&#x4E0D;&#x5141;&#x8BB8;&#x5176;&#x4ED6;&#x4E8B;&#x52A1;&#x505A;&#x63D2;&#x5165;&#x64CD;&#x4F5C;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x65E0;&#x7D22;&#x5F15;&#x52A0;&#x9501;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;name&#x662F;&#x9010;&#x6E10;</span><br><span class="line">id&#x6CA1;&#x6709;&#x7D22;&#x5F15;</span><br><span class="line">select&#xA0;*&#xA0;from&#xA0;t&#xA0;where&#xA0;id&#xA0;=10;&#xA0;</span><br><span class="line">&#x4F1A;&#x5BFC;&#x81F4;&#x5168;&#x8868;&#x626B;&#x63CF;</span><br><span class="line"></span><br><span class="line">&#x52A0;&#x9501;&#x884C;&#x4E3A;&#xFF1A;&#x8868;&#x91CC;&#x6240;&#x6709;&#x884C;&#x548C;&#x95F4;&#x9699;&#x5747;&#x52A0;x&#x9501;</span><br><span class="line">&#x7531;&#x4E8E;InnoDB&#x5F15;&#x64CE;&#x884C;&#x9501;&#x673A;&#x5236;&#x57FA;&#x4E8E;&#x7D22;&#x5F15;&#x5B9E;&#x73B0;&#x8BB0;&#x5F55;&#x9501;&#x5B9A;</span><br><span class="line">&#x56E0;&#x4E3A;&#x6CA1;&#x6709;&#x7D22;&#x5F15;&#x65F6;&#x4F1A;&#x5BFC;&#x81F4;&#x5168;&#x8868;&#x9501;&#x5B9A;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/c9706b92aee243714be61c1dc0aba673cafef42c72a26c3079978e98891399b4" alt></p>
+<h2 id="&#x6B7B;&#x9501;"><a href="#&#x6B7B;&#x9501;" class="headerlink" title="&#x6B7B;&#x9501;"></a>&#x6B7B;&#x9501;</h2><p><code>&#x6B7B;&#x9501;&#x73B0;&#x8C61;</code></p>
+<ul>
+<li>&#x8868;&#x9501;&#x6B7B;&#x9501;</li>
+<li>&#x884C;&#x7EA7;&#x9501;&#x6B7B;&#x9501;</li>
+<li>&#x5171;&#x4EAB;&#x9501;&#x8F6C;&#x6362;&#x4E3A;&#x6392;&#x4ED6;&#x9501;</li>
+</ul>
+<h3 id="&#x8868;&#x7EA7;&#x9501;&#x6B7B;&#x9501;"><a href="#&#x8868;&#x7EA7;&#x9501;&#x6B7B;&#x9501;" class="headerlink" title="&#x8868;&#x7EA7;&#x9501;&#x6B7B;&#x9501;"></a>&#x8868;&#x7EA7;&#x9501;&#x6B7B;&#x9501;</h3><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/cba573138bd409dca3722fb0991f71dc742f3e5f1f23e39737d6d2f77a6273d9" alt></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d6a6dc5deab962eea62c17974d5e334e6e5c334d367ab8087060101f0655a992" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">css&#x590D;&#x5236;&#x4EE3;&#x7801;&#x7528;&#x6237;A&#x5148;&#x8BBF;&#x95EE;&#x8868;A&#xA0;&#x5BF9;&#x8868;A&#x52A0;&#x4E86;&#x9501;</span><br><span class="line">&#x7136;&#x540E;&#x518D;&#x8BBF;&#x95EE;&#x8868;B</span><br><span class="line">&#x7528;&#x6237;B&#x5148;&#x8BBF;&#x95EE;&#x8868;B&#xA0;&#x5BF9;&#x8868;B&#x52A0;&#x4E86;&#x9501;</span><br><span class="line">&#x7136;&#x540E;&#x518D;&#x8BBF;&#x95EE;&#x8868;A</span><br><span class="line">&#x56E0;&#x8868;B&#x88AB;&#x52A0;&#x4E86;&#x9501;</span><br><span class="line">&#x6240;&#x4EE5;&#x7528;&#x6237;A&#x9700;&#x7B49;&#x7740;&#x7528;&#x6237;B&#x91CA;&#x653E;&#x4E86;&#x8868;B&#x7684;&#x9501;&#x624D;&#x53EF;&#x4EE5;&#x5BF9;&#x8868;B&#x52A0;&#x9501;</span><br><span class="line">&#x56E0;&#x8868;A&#x88AB;&#x52A0;&#x4E86;&#x9501;</span><br><span class="line">&#x6240;&#x4EE5;&#x7528;&#x6237;B&#x9700;&#x7B49;&#x7740;&#x7528;&#x6237;A&#x91CA;&#x653E;&#x4E86;&#x8868;A&#x7684;&#x9501;&#x624D;&#x53EF;&#x4EE5;&#x5BF9;&#x8868;A&#x52A0;&#x9501;</span><br><span class="line">&#x6240;&#x4EE5;2&#x8005;&#x4E92;&#x76F8;&#x7B49;&#x5F85;&#xA0;&#x4ECE;&#x800C;&#x6B7B;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x89E3;&#x51B3;&#x65B9;&#x6848;</code></p>
+<ul>
+<li>&#x8C03;&#x6574;&#x7A0B;&#x5E8F;&#x7684;&#x903B;&#x8F91;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">css&#x590D;&#x5236;&#x4EE3;&#x7801;&#x628A;&#x8868;A&#x548C;&#x8868;B&#x5F53;&#x6210;&#x540C;&#x4E00;&#x4E2A;&#x8D44;&#x6E90;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/695301d61f5d57d2b87ca1bd659c412f1b6181eec385349ca505d02dea43e9ef" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">css&#x590D;&#x5236;&#x4EE3;&#x7801;&#x7528;&#x6237;A&#x8BBF;&#x95EE;&#x5B8C;&#x8868;A&#x548C;&#x8868;B&#x4E4B;&#x540E;</span><br><span class="line">&#x7528;&#x6237;B&#x518D;&#x6765;&#x8BBF;&#x95EE;&#x8868;A&#x548C;&#x8868;B</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x5C3D;&#x91CF;&#x907F;&#x514D;&#x540C;&#x65F6;&#x9501;&#x5B9A;2&#x4E2A;&#x8D44;&#x6E90;</li>
+</ul>
+<h3 id="&#x884C;&#x7EA7;&#x9501;&#x6B7B;&#x9501;"><a href="#&#x884C;&#x7EA7;&#x9501;&#x6B7B;&#x9501;" class="headerlink" title="&#x884C;&#x7EA7;&#x9501;&#x6B7B;&#x9501;"></a>&#x884C;&#x7EA7;&#x9501;&#x6B7B;&#x9501;</h3><p><code>&#x4EA7;&#x751F;&#x539F;&#x56E0;1</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rust&#x590D;&#x5236;&#x4EE3;&#x7801;&#x5728;&#x4E8B;&#x52A1;&#x4E2D;&#x6267;&#x884C;&#x4E86;&#x4E00;&#x6761;&#x4E0D;&#x6EE1;&#x8DB3;for&#xA0;update&#x7684;&#x64CD;&#x4F5C;</span><br><span class="line">&#x5219;&#x6267;&#x884C;&#x5168;&#x8868;&#x626B;&#x63CF;</span><br><span class="line">&#x628A;&#x884C;&#x7EA7;&#x9501;&#x4E0A;&#x5347;&#x4E3A;&#x8868;&#x7EA7;&#x9501;</span><br><span class="line">&#x591A;&#x4E2A;&#x8FD9;&#x6837;&#x7684;&#x4E8B;&#x52A1;&#x6267;&#x884C;&#x540E;</span><br><span class="line">&#x5C31;&#x5F88;&#x5BB9;&#x6613;&#x4EA7;&#x751F;&#x6B7B;&#x9501;&#x548C;&#x963B;&#x585E;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e08f7509e7b669c27706114363f794a8d918aa0656abe1521e3fec6936a5b6c8" alt></p>
+<p><code>&#x89E3;&#x51B3;&#x65B9;&#x6848;</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;SQL&#x8BED;&#x53E5;&#x4E2D;&#x4E0D;&#x8981;&#x4F7F;&#x7528;&#x592A;&#x590D;&#x6742;&#x7684;&#x5173;&#x8054;&#x8868;&#x7684;&#x67E5;&#x8BE2;&#xA0;</span><br><span class="line">&#x4F18;&#x5316;&#x7D22;&#x5F15;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x4EA7;&#x751F;&#x539F;&#x56E0;2</code></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/edf193b4814179255d7bf6a2240fb845cb4393da8175c7171bb30331d41cf28c" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#x590D;&#x5236;&#x4EE3;&#x7801;&#x8868;&#x4E2D;&#x7684;2&#x4E2A;&#x6570;&#x636E;id1&#x548C;id2</span><br><span class="line">&#x4E8B;&#x52A1;1&#x5148;&#x8BBF;&#x95EE;id1&#xA0;&#x5BF9;id1&#x52A0;&#x884C;&#x9501;</span><br><span class="line">&#x518D;&#x8BBF;&#x95EE;id2</span><br><span class="line">&#x4E8B;&#x52A1;2&#x5148;&#x8BBF;&#x95EE;id2&#xA0;&#x5BF9;id2&#x52A0;&#x884C;&#x9501;</span><br><span class="line">&#x518D;&#x8BBF;&#x95EE;id1</span><br><span class="line">&#x4E8B;&#x52A1;1&#x8BBF;&#x95EE;id2&#x7B49;&#x5F85;&#x4E8B;&#x52A1;2&#x91CA;&#x653E;id2&#x7684;&#x884C;&#x9501;</span><br><span class="line">&#x4E8B;&#x52A1;2&#x8BBF;&#x95EE;id1&#x7B49;&#x5F85;&#x4E8B;&#x52A1;1&#x91CA;&#x653E;id1&#x7684;&#x884C;&#x9501;</span><br><span class="line">&#x6240;&#x4EE5;&#x4E8B;&#x52A1;1&#x548C;&#x4E8B;&#x52A1;2&#x4E92;&#x76F8;&#x7B49;&#x5F85;&#xA0;&#x963B;&#x585E;</span><br><span class="line">&#x4ECE;&#x800C;&#x4EA7;&#x751F;&#x6B7B;&#x9501;</span><br><span class="line"></span><br><span class="line">&#x7C7B;&#x4F3C;&#x4E8E;2&#x4E2A;&#x8868;&#x6B7B;&#x9501;</span><br><span class="line">&#x8FD9;&#x4E2A;&#x662F;&#x8868;&#x4E2D;&#x7684;2&#x4E2A;&#x8BB0;&#x5F55;&#x884C;&#x7EA7;&#x6B7B;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x89E3;&#x51B3;&#x65B9;&#x6848;</code></p>
+<ul>
+<li>&#x540C;&#x4E00;&#x4E2A;&#x4E8B;&#x52A1;&#x4E2D; &#x5C3D;&#x53EF;&#x80FD;&#x505A;&#x5230;&#x4E00;&#x6B21;&#x6027;&#x9501;&#x5B9A;&#x6240;&#x6709;&#x8D44;&#x6E90;</li>
+<li>&#x6309;&#x7167;id&#x5BF9;&#x8D44;&#x6E90;&#x6392;&#x5E8F; &#x7136;&#x540E;&#x6309;&#x987A;&#x5E8F;&#x8FDB;&#x884C;&#x5904;&#x7406;</li>
+<li>&#x91C7;&#x7528;MVCC&#x673A;&#x5236;&#x5904;&#x7406; &#x666E;&#x901A;&#x8BFB; &#x4E0D;&#x4F1A;&#x4F7F;&#x7528;&#x9501;</li>
+</ul>
+<h3 id="&#x5171;&#x4EAB;&#x9501;&#x8F6C;&#x6392;&#x4ED6;&#x9501;"><a href="#&#x5171;&#x4EAB;&#x9501;&#x8F6C;&#x6392;&#x4ED6;&#x9501;" class="headerlink" title="&#x5171;&#x4EAB;&#x9501;&#x8F6C;&#x6392;&#x4ED6;&#x9501;"></a>&#x5171;&#x4EAB;&#x9501;&#x8F6C;&#x6392;&#x4ED6;&#x9501;</h3><p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/f0bdff3a2a13af430eb467128a306fa83842caa9b4b7cb0443cf812712aa3c8e" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">css&#x590D;&#x5236;&#x4EE3;&#x7801;&#x4E8B;&#x52A1;A&#x67E5;&#x8BE2;&#x4E00;&#x6761;&#x8BB0;&#x5F55;&#xA0;&#x52A0;&#x5171;&#x4EAB;&#x8BFB;&#x9501;</span><br><span class="line">&#x4E8B;&#x52A1;A&#x66F4;&#x65B0;&#x8FD9;&#x6761;&#x8BB0;&#x5F55;</span><br><span class="line">&#x4E8B;&#x52A1;B&#x4E5F;&#x66F4;&#x65B0;&#x8FD9;&#x6761;&#x8BB0;&#x5F55;&#xA0;&#x9700;&#x8981;&#x6392;&#x4ED6;&#x9501;</span><br><span class="line">&#x4E8B;&#x52A1;B&#x9700;&#x7B49;&#x5F85;&#x4E8B;&#x52A1;A&#x91CA;&#x653E;&#x4E86;&#x5171;&#x4EAB;&#x9501;</span><br><span class="line">&#x624D;&#x53EF;&#x4EE5;&#x83B7;&#x5F97;&#x6392;&#x4ED6;&#x9501;&#x8FDB;&#x884C;&#x66F4;&#x65B0;</span><br><span class="line">&#x6240;&#x4EE5;&#x4E8B;&#x52A1;B&#x8FDB;&#x5165;&#x4E86;&#x6392;&#x961F;&#x7B49;&#x5F85;</span><br><span class="line">&#x4E8B;&#x52A1;A&#x4E5F;&#x9700;&#x8981;&#x6392;&#x4ED6;&#x9501;&#x8FDB;&#x884C;&#x66F4;&#x65B0;&#x64CD;&#x4F5C;</span><br><span class="line">&#x4F46;&#x662F;&#x65E0;&#x6CD5;&#x6388;&#x4E88;&#x8BE5;&#xA0;&#x9501;&#x8BF7;&#x6C42;</span><br><span class="line">&#x56E0;&#x4E3A;&#x4E8B;&#x52A1;B&#x5DF2;&#x7ECF;&#x6709;&#x4E86;&#x4E00;&#x4E2A;&#x6392;&#x4ED6;&#x9501;&#x8BF7;&#x6C42;</span><br><span class="line">&#x5E76;&#x4E14;&#x7B49;&#x5F85;&#x4E8B;&#x52A1;A&#x91CA;&#x653E;&#x5176;&#x5171;&#x4EAB;&#x9501;</span><br></pre></td></tr></table></figure>
+
+<p><code>&#x89E3;&#x51B3;&#x65B9;&#x6848;</code></p>
+<ul>
+<li>&#x907F;&#x514D;&#x5F15;&#x53D1;&#x5BF9;&#x540C;&#x4E00;&#x6761;&#x8BB0;&#x5F55;&#x7684;&#x53CD;&#x590D;&#x64CD;&#x4F5C;</li>
+<li>&#x4F7F;&#x7528;&#x4E50;&#x89C2;&#x9501;&#x8FDB;&#x884C;&#x63A7;&#x5236;</li>
+</ul>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/945103d6d987b7a1f90a1741af9a2d5d.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端/" rel="tag"># 后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035633561805783070.html" rel="next" title="Golang 程序启动过程">
+                <i class="fa fa-chevron-left"></i> Golang 程序启动过程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035634692795662367.html" rel="prev" title="数据结构—树、森林和二叉树的转换详解 1 树转换为二叉树 2">
+                数据结构—树、森林和二叉树的转换详解 1 树转换为二叉树 2 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL支持的锁"><span class="nav-number">1.</span> <span class="nav-text">MySQL支持的锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用场景"><span class="nav-number">2.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL锁分类"><span class="nav-number">3.</span> <span class="nav-text">MySQL锁分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#乐观锁"><span class="nav-number">3.1.</span> <span class="nav-text">乐观锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#悲观锁"><span class="nav-number">3.2.</span> <span class="nav-text">悲观锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#表级锁"><span class="nav-number">3.2.1.</span> <span class="nav-text">表级锁</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#表锁"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">表锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#元数据锁"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">元数据锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#意向锁"><span class="nav-number">3.2.1.3.</span> <span class="nav-text">意向锁</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#行级锁"><span class="nav-number">3.2.2.</span> <span class="nav-text">行级锁</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#共享读锁-S"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">共享读锁(S)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#排他写锁-X"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">排他写锁(X)</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#表级锁使用"><span class="nav-number">4.</span> <span class="nav-text">表级锁使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#元数据锁的使用"><span class="nav-number">5.</span> <span class="nav-text">元数据锁的使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#行级锁分类及使用"><span class="nav-number">6.</span> <span class="nav-text">行级锁分类及使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#行锁原理"><span class="nav-number">7.</span> <span class="nav-text">行锁原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#死锁"><span class="nav-number">8.</span> <span class="nav-text">死锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#表级锁死锁"><span class="nav-number">8.1.</span> <span class="nav-text">表级锁死锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#行级锁死锁"><span class="nav-number">8.2.</span> <span class="nav-text">行级锁死锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#共享锁转排他锁"><span class="nav-number">8.3.</span> <span class="nav-text">共享锁转排他锁</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

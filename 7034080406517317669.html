@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;7&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;&amp;">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="吐血推荐-详解分布式锁(下)">
+<meta property="og:url" content="https://dev.newban.cn/7034080406517317669.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;7&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;&amp;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-30T02:57:56.080Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="吐血推荐-详解分布式锁(下)">
+<meta name="twitter:description" content="&amp;#x300C;&amp;#x8FD9;&amp;#x662F;&amp;#x6211;&amp;#x53C2;&amp;#x4E0E;11&amp;#x6708;&amp;#x66F4;&amp;#x6587;&amp;#x6311;&amp;#x6218;&amp;#x7684;&amp;#x7B2C;7&amp;#x5929;&amp;#xFF0C;&amp;#x6D3B;&amp;#x52A8;&amp;#x8BE6;&amp;#x60C5;&amp;#x67E5;&amp;#x770B;&amp;#xFF1A;2021&amp;#x6700;&amp;#x540E;&amp;">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7034080406517317669.html">
+
+
+
+
+
+  <title>吐血推荐-详解分布式锁(下) | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">吐血推荐-详解分布式锁(下)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-24T18:30:14+08:00">
+                2021-11-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x300C;&#x8FD9;&#x662F;&#x6211;&#x53C2;&#x4E0E;11&#x6708;&#x66F4;&#x6587;&#x6311;&#x6218;&#x7684;&#x7B2C;7&#x5929;&#xFF0C;&#x6D3B;&#x52A8;&#x8BE6;&#x60C5;&#x67E5;&#x770B;&#xFF1A;<a href="https://dev.newban.cn/7023643374569816095/">2021&#x6700;&#x540E;&#x4E00;&#x6B21;&#x66F4;&#x6587;&#x6311;&#x6218;</a>&#x300D;</p>
+<h2 id="MySql-&#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;"><a href="#MySql-&#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;" class="headerlink" title="MySql &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;"></a>MySql &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;</h2><p>&#x4F7F;&#x7528; <code>Mysql</code> &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x5728;&#x5B9E;&#x9645;&#x5F00;&#x53D1;&#x4E2D;&#x7684;&#x5E94;&#x7528;&#x573A;&#x666F;&#x6BD4;&#x8F83;&#x5C11;&#xFF0C;&#x4E00;&#x822C;&#x53EA;&#x6709;&#x5728;&#x6027;&#x80FD;&#x8981;&#x6C42;&#x4E0D;&#x662F;&#x5F88;&#x9AD8;&#xFF0C;&#x4E0D;&#x60F3;&#x8981;&#x5F15;&#x5165;&#x522B;&#x7684;&#x7EC4;&#x4EF6;&#x7684;&#x65F6;&#x5019;&#x624D;&#x4F1A;&#x4F7F;&#x7528;&#x3002;&#x5B83;&#x6700;&#x5927;&#x7684;&#x7279;&#x70B9;&#x5C31;&#x662F;&#x7406;&#x89E3;&#x8D77;&#x6765;&#x6BD4;&#x8F83;&#x5BB9;&#x6613;&#x3002;</p>
+<p>&#x5B83;&#x4E3B;&#x8981;&#x6709;&#x4EE5;&#x4E0B;&#x4E09;&#x79CD;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#xFF1A;</p>
+<ol>
+<li>&#x57FA;&#x4E8E;&#x8868;&#x8BB0;&#x5F55;&#x5B9E;&#x73B0;</li>
+<li>&#x501F;&#x52A9; <code>mysql</code> &#x7684;&#x60B2;&#x89C2;&#x9501;&#x5B9E;&#x73B0;</li>
+</ol>
+<h3 id="&#x57FA;&#x4E8E;&#x8868;&#x8BB0;&#x5F55;&#x5B9E;&#x73B0;"><a href="#&#x57FA;&#x4E8E;&#x8868;&#x8BB0;&#x5F55;&#x5B9E;&#x73B0;" class="headerlink" title="&#x57FA;&#x4E8E;&#x8868;&#x8BB0;&#x5F55;&#x5B9E;&#x73B0;"></a>&#x57FA;&#x4E8E;&#x8868;&#x8BB0;&#x5F55;&#x5B9E;&#x73B0;</h3><p>&#x5148;&#x521B;&#x5EFA;&#x4E00;&#x5F20;&#x8868;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;CREATE TABLE `mysql_lock` (</span><br><span class="line">	`id` BIGINT NOT NULL AUTO_INCREMENT,</span><br><span class="line">	`resource` int NOT NULL COMMENT &apos;&#x9501;&#x5B9A;&#x7684;&#x8D44;&#x6E90;&apos;,</span><br><span class="line">	`description` varchar(1024) NOT NULL DEFAULT &quot;&quot; COMMENT &apos;&#x63CF;&#x8FF0;&apos;,</span><br><span class="line">	PRIMARY KEY (`id`),</span><br><span class="line">	UNIQUE KEY `uiq_idx_resource` (`resource`) </span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT=&apos;&#x57FA;&#x4E8E;&#x8868;&#x8BB0;&#x5F55;&#x5B9E;&#x73B0;&apos;;</span><br></pre></td></tr></table></figure>
+
+<p>&#x7533;&#x8BF7;&#x9501;&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x5728;&#x8868;&#x4E2D;&#x63D2;&#x5165;&#x4E00;&#x6761;&#x5BF9;&#x5E94;&#x7684;&#x8BB0;&#x5F55;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;INSERT INTO mysql_lock (resource, description) VALUES (1, &apos;&#x7533;&#x8BF7;&#x8D44;&#x6E90;:1&apos;);</span><br></pre></td></tr></table></figure>
+
+<p>&#x91CA;&#x653E;&#x9501;&#x64CD;&#x4F5C;&#x5C31;&#x662F;&#x5220;&#x9664;&#x63D2;&#x5165;&#x7684;&#x90A3;&#x4E00;&#x6761;&#x8868;&#x8BB0;&#x5F55;&#x5373;&#x53EF;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;DELETE FROM mysql_lock WHERE resource = 1;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5B9E;&#x73B0;&#x539F;&#x7406;&#x8BF4;&#x660E;&#xFF1A;</p>
+<p>&#x6211;&#x4EEC;&#x5728;&#x521B;&#x5EFA;&#x8868;&#x7684;&#x65F6;&#x5019;&#x7ED9; <code>resource</code> &#x52A0;&#x4E86;&#x552F;&#x4E00;&#x7EA6;&#x675F;&#xFF0C;&#x5B83;&#x662F;&#x4E0D;&#x80FD;&#x91CD;&#x590D;&#x63D2;&#x5165;&#x7684;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x5B9E;&#x73B0;&#x4E86;&#x4E92;&#x65A5;&#x6027;&#x3002;&#x524D;&#x9762;&#x6211;&#x4EEC;&#x8BB2;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x65F6;&#x5019;&#x8BE6;&#x7EC6;&#x8BF4;&#x660E;&#x4E86;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x5E94;&#x8BE5;&#x62E5;&#x6709;&#x7684;&#x7279;&#x6027;&#xFF0C;&#x4E0A;&#x9762;&#x7684;&#x4F8B;&#x5B50;&#x6CA1;&#x6709;&#x5B9E;&#x73B0;&#x5176;&#x4ED6;&#x7684;&#x7279;&#x6027;&#xFF0C;&#x4E0B;&#x9762;&#x6211;&#x4EEC;&#x6765;&#x8BF4;&#x4E00;&#x4E0B;&#x5177;&#x4F53;&#x7684;&#x4F18;&#x5316;&#x65B9;&#x6848;&#xFF1A;</p>
+<ol>
+<li>&#x5BF9;&#x4E8E;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#xFF1A;&#x53EF;&#x4EE5;&#x5199;&#x4E00;&#x4E2A;&#x5B9A;&#x65F6;&#x6E05;&#x7406;&#x8FC7;&#x671F;&#x8D44;&#x6E90;&#x7684;&#x7A0B;&#x5E8F;</li>
+<li>&#x5BF9;&#x4E8E;&#x53EF;&#x91CD;&#x5165;&#x6027;&#xFF0C;&#x72EC;&#x5360;&#x6027;&#xFF1A;&#x53EF;&#x4EE5;&#x6DFB;&#x52A0;&#x4E00;&#x4E2A;&#x5B57;&#x6BB5;&#x6765;&#x8BB0;&#x5F55;&#x7EBF;&#x7A0B;&#x7684;&#x7F16;&#x53F7;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x540C;&#x4E00;&#x7EBF;&#x7A0B;&#x5141;&#x8BB8;&#x518D;&#x6B21;&#x83B7;&#x53D6;&#x9501;&#xFF0C;&#x6BCF;&#x6B21;&#x5220;&#x9664;&#x6570;&#x636E;&#x5E93;&#x8BB0;&#x5F55;&#x7684;&#x65F6;&#x5019;&#x6821;&#x9A8C;&#x7EBF;&#x7A0B;&#x7F16;&#x53F7;&#xFF0C;&#x4FDD;&#x8BC1;&#x72EC;&#x5360;&#x6027;&#xFF0C;&#x81EA;&#x5DF1;&#x7684;&#x9501;&#x53EA;&#x80FD;&#x81EA;&#x5DF1;&#x89E3;&#x5F00;&#x3002;</li>
+<li>&#x5BF9;&#x4E8E; <code>mysql</code> &#x7684;&#x53EF;&#x9760;&#x6027;&#xFF1A;&#x53EF;&#x4EE5;&#x8BBE;&#x7F6E;&#x4E3B;&#x5907;&#x6216;&#x8005;&#x96C6;&#x7FA4;&#x6765;&#x9632;&#x6B62;&#x5355;&#x70B9;&#x6545;&#x969C;&#x3002;</li>
+<li>&#x8FD9;&#x8FB9;&#x8FD8;&#x6709;&#x4E00;&#x4E2A;&#x5C0F;&#x95EE;&#x9898;&#xFF0C;&#x5C31;&#x662F;&#x6BCF;&#x6B21;&#x53BB;&#x83B7;&#x53D6;&#x9501;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x7EBF;&#x7A0B;&#x4E0D;&#x662F;&#x963B;&#x585E;&#x7684;&#x53EA;&#x53BB;&#x63D2;&#x5165;&#x5411;&#x5E93;&#x91CC;&#x9762;&#x63D2;&#x5165;&#x4E00;&#x6B21;&#xFF0C;&#x5931;&#x8D25;&#x4E86;&#x4E5F;&#x4E0D;&#x91CD;&#x8BD5;&#xFF0C;&#x8FD9;&#x4E2A;&#x90FD;&#x9700;&#x8981;&#x5728;&#x4EE3;&#x7801;&#x903B;&#x8F91;&#x4E2D;&#x81EA;&#x5DF1;&#x5B9E;&#x73B0;&#x4E86;&#x3002;</li>
+</ol>
+<h3 id="&#x501F;&#x52A9;-mysql-&#x60B2;&#x89C2;&#x9501;&#x5B9E;&#x73B0;"><a href="#&#x501F;&#x52A9;-mysql-&#x60B2;&#x89C2;&#x9501;&#x5B9E;&#x73B0;" class="headerlink" title="&#x501F;&#x52A9; mysql &#x60B2;&#x89C2;&#x9501;&#x5B9E;&#x73B0;"></a>&#x501F;&#x52A9; mysql &#x60B2;&#x89C2;&#x9501;&#x5B9E;&#x73B0;</h3><p>&#x4E3A;&#x4E86;&#x63D0;&#x9AD8;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x6548;&#x7387;&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x67E5;&#x8BE2;&#x8BED;&#x53E5;&#xFF0C;&#x501F;&#x52A9; <code>for update</code> &#x5173;&#x952E;&#x5B57;&#x6765;&#x7ED9;&#x88AB;&#x67E5;&#x8BE2;&#x7684;&#x8BB0;&#x5F55;&#x6DFB;&#x52A0;&#x884C;&#x9501;&#x4E2D;&#x60B2;&#x89C2;&#x9501;&#xFF0C;&#x8FD9;&#x6837;&#x522B;&#x7684;&#x7EBF;&#x7A0B;&#x5C31;&#x6CA1;&#x6709;&#x529E;&#x6CD5;&#x5BF9;&#x8FD9;&#x6761;&#x8BB0;&#x5F55;&#x8FDB;&#x884C;&#x4EFB;&#x4F55;&#x64CD;&#x4F5C;&#xFF0C;&#x4ECE;&#x800C;&#x8FBE;&#x5230;&#x4FDD;&#x62A4;&#x5171;&#x4EAB;&#x8D44;&#x6E90;&#x7684;&#x76EE;&#x7684;&#x3002;</p>
+<h4 id="&#x4F7F;&#x7528;&#x884C;&#x9501;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x70B9;"><a href="#&#x4F7F;&#x7528;&#x884C;&#x9501;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x70B9;" class="headerlink" title="&#x4F7F;&#x7528;&#x884C;&#x9501;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x70B9;"></a>&#x4F7F;&#x7528;&#x884C;&#x9501;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x70B9;</h4><ol>
+<li><code>mysql</code> &#x9ED8;&#x8BA4;&#x662F;&#x4F1A;&#x81EA;&#x52A8;&#x63D0;&#x4EA4;&#x4E8B;&#x52A1;&#x7684;&#xFF0C;&#x5E94;&#x8BE5;&#x624B;&#x52A8;&#x7981;&#x6B62;&#x4E00;&#x4E0B;&#xFF1A;<code>SET AUTOCOMMIT = 0;</code></li>
+<li>&#x884C;&#x9501;&#x662F;&#x5EFA;&#x7ACB;&#x5728;&#x7D22;&#x5F15;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#x7684;&#xFF0C;&#x5982;&#x679C;&#x67E5;&#x8BE2;&#x65F6;&#x5019;&#x4E0D;&#x662F;&#x8D70;&#x7684;&#x7D22;&#x5F15;&#x7684;&#x8BDD;&#xFF0C;&#x884C;&#x9501;&#x4F1A;&#x5347;&#x7EA7;&#x4E3A;&#x8868;&#x9501;&#x8FDB;&#x884C;&#x5168;&#x8868;&#x626B;&#x63CF;&#x3002;</li>
+</ol>
+<p>&#x6211;&#x4EEC;&#x7EE7;&#x7EED;&#x4F7F;&#x7528;&#x4E0A;&#x9762;&#x90A3;&#x5F20;&#x8868;&#x6765;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#xFF1A;</p>
+<ol>
+<li>&#x7533;&#x8BF7;&#x9501;&#x64CD;&#x4F5C;&#xFF1A;<code>SELECT * FROM mysql_lock WHERE id = 1 FOR UPDATE;</code> &#x53EA;&#x8981;&#x53EF;&#x4EE5;&#x67E5;&#x7684;&#x51FA;&#x6765;&#x5C31;&#x662F;&#x7533;&#x8BF7;&#x6210;&#x529F;&#x7684;&#xFF0C;&#x6CA1;&#x6709;&#x83B7;&#x53D6;&#x5230;&#x7684;&#x4F1A;&#x88AB;&#x963B;&#x585E;&#xFF0C;&#x963B;&#x585E;&#x7684;&#x8D85;&#x65F6;&#x65F6;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x8BBE;&#x7F6E; <code>mysql</code> &#x7684; <code>innodb_lock_wait_timeout</code> &#x6765;&#x8FDB;&#x884C;&#x8BBE;&#x7F6E;&#x3002;&#x6CE8;&#x610F; <code>WHERE id = 1</code> &#x8FD9;&#x4E2A;&#x67E5;&#x8BE2;&#x6761;&#x4EF6;&#x662F;&#x8D70;&#x7D22;&#x5F15;&#x7684;&#x3002;</li>
+<li>&#x91CA;&#x653E;&#x9501;&#x64CD;&#x4F5C;&#xFF1A;<code>COMMIT;</code> &#x4E8B;&#x52A1;&#x63D0;&#x4EA4;&#x4E4B;&#x540E;&#x522B;&#x7684;&#x7EBF;&#x7A0B;&#x5C31;&#x53EF;&#x4EE5;&#x67E5;&#x7684;&#x8FD9;&#x6761;&#x8BB0;&#x5F55;&#x4E86;&#x3002;</li>
+</ol>
+<blockquote>
+<p>&#x8BF4;&#x660E;&#xFF1A;&#x8FD9;&#x8FB9;&#x7B80;&#x5355;&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x4E0B; <code>mysql</code> &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x4E24;&#x79CD;&#x601D;&#x8DEF;&#xFF0C;&#x5B9E;&#x9645;&#x5F00;&#x53D1;&#x4E0D;&#x5EFA;&#x8BAE;&#x4F7F;&#x7528;&#xFF0C;&#x8981;&#x4F7F;&#x7528;&#x7684;&#x8BDD;&#x5EFA;&#x8BAE;&#x4F7F;&#x7528;&#x7B2C;&#x4E8C;&#x79CD;&#xFF0C;&#x50CF;&#x4E0A;&#x9762;&#x8BF4;&#x7684;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x5E94;&#x8BE5;&#x5B9E;&#x73B0;&#x7684;&#x7279;&#x6027;&#x4F7F;&#x7528;&#x6570;&#x636E;&#x5E93;&#x7684;&#x8BDD;&#xFF0C;&#x597D;&#x591A;&#x9700;&#x8981;&#x5F00;&#x53D1;&#x8005;&#x624B;&#x52A8;&#x53BB;&#x5B9E;&#x73B0;&#xFF0C;&#x4E0D;&#x592A;&#x53CB;&#x597D;&#x3002;</p>
+</blockquote>
+<h2 id="Zookeeper-&#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;"><a href="#Zookeeper-&#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;" class="headerlink" title="Zookeeper &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;"></a>Zookeeper &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;</h2><p>&#x5728;&#x4F7F;&#x7528; <code>zookeeper</code> &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x4E4B;&#x524D;&#x6211;&#x4EEC;&#x5148;&#x6765;&#x4E86;&#x89E3;&#x4E00;&#x70B9;&#x524D;&#x7F6E;&#x77E5;&#x8BC6;&#xFF1A;</p>
+<h3 id="zk-&#x7684;&#x8282;&#x70B9;&#x7C7B;&#x578B;"><a href="#zk-&#x7684;&#x8282;&#x70B9;&#x7C7B;&#x578B;" class="headerlink" title="zk &#x7684;&#x8282;&#x70B9;&#x7C7B;&#x578B;"></a>zk &#x7684;&#x8282;&#x70B9;&#x7C7B;&#x578B;</h3><ol>
+<li>&#x6301;&#x4E45;&#x5316;&#x8282;&#x70B9;&#xFF1A;&#x5BA2;&#x6237;&#x7AEF;&#x65AD;&#x5F00;&#x8FDE;&#x63A5;&#xFF0C;&#x8282;&#x70B9;&#x8FD8;&#x5728;</li>
+<li>&#x6301;&#x4E45;&#x5316;&#x987A;&#x5E8F;&#x8282;&#x70B9;&#xFF1A;&#x5728;&#x6301;&#x4E45;&#x5316;&#x8282;&#x70B9;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#x4FDD;&#x8BC1;&#x6709;&#x5E8F;&#x6027;</li>
+<li>&#x4E34;&#x65F6;&#x8282;&#x70B9;&#xFF1A;&#x5BA2;&#x6237;&#x7AEF;&#x65AD;&#x5F00;&#x8FDE;&#x63A5;&#xFF0C;&#x8282;&#x70B9;&#x5C31;&#x5220;&#x9664;&#x4E86;</li>
+<li>&#x4E34;&#x65F6;&#x987A;&#x5E8F;&#x8282;&#x70B9;&#xFF1A;&#x5728;&#x4E34;&#x65F6;&#x8282;&#x70B9;&#x7684;&#x57FA;&#x7840;&#x4E0A;&#x4FDD;&#x8BC1;&#x6709;&#x5E8F;&#x6027;</li>
+</ol>
+<h3 id="&#x5B9E;&#x73B0;-zk-&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x601D;&#x8DEF;"><a href="#&#x5B9E;&#x73B0;-zk-&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x601D;&#x8DEF;" class="headerlink" title="&#x5B9E;&#x73B0; zk &#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x601D;&#x8DEF;"></a>&#x5B9E;&#x73B0; zk &#x5206;&#x5E03;&#x5F0F;&#x9501;&#x7684;&#x601D;&#x8DEF;</h3><ol>
+<li>&#x5229;&#x7528; <code>zk</code> &#x540C;&#x7EA7;&#x8282;&#x70B9;&#x7684;&#x552F;&#x4E00;&#x7279;&#x6027;&#x53EF;&#x4EE5;&#x5B9E;&#x73B0;&#x9501;&#x7684;&#x4E92;&#x65A5;&#x6027;</li>
+<li>&#x5229;&#x7528; <code>zk</code> &#x4E34;&#x65F6;&#x8282;&#x70B9;&#x7684;&#x7279;&#x6027;&#x53EF;&#x4EE5;&#x907F;&#x514D;&#x6B63;&#x5728;&#x5360;&#x7528;&#x9501;&#x7684;&#x7EBF;&#x7A0B;&#x6CA1;&#x91CA;&#x653E;&#x9501;&#x5C31;&#x56E0;&#x4E3A;&#x4E00;&#x4E9B;&#x4E0D;&#x53EF;&#x6297;&#x529B;&#x56E0;&#x7D20;&#x5B95;&#x673A;&#x5BFC;&#x81F4;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x65E0;&#x6CD5;&#x83B7;&#x53D6;&#x9501;&#x6700;&#x7EC8;&#x6B7B;&#x9501;&#x7684;&#x95EE;&#x9898;&#x3002;</li>
+<li>&#x5229;&#x7528; <code>zk</code> &#x7684; &#x8282;&#x70B9;&#x7684;<code>watcher</code> &#x4E8B;&#x4EF6;&#x53EF;&#x4EE5;&#x8F7B;&#x677E;&#x5B9E;&#x73B0;&#x901A;&#x77E5;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x4E89;&#x62A2;&#x9501;&#x7684;&#x529F;&#x80FD;&#x3002;</li>
+<li>&#x5229;&#x7528; <code>zk</code> &#x987A;&#x5E8F;&#x8282;&#x70B9;&#x7684;&#x7279;&#x6027;&#xFF0C;&#x53EF;&#x4EE5;&#x5B9E;&#x73B0;&#x516C;&#x5E73;&#x9501;&#xFF0C;&#x6309;&#x7167;&#x7533;&#x8BF7;&#x9501;&#x7684;&#x987A;&#x5E8F;&#x6765;&#x5524;&#x9192;&#x963B;&#x585E;&#x7684;&#x7EBF;&#x7A0B;&#xFF0C;&#x9632;&#x6B62;<strong>&#x7F8A;&#x7FA4;&#x6548;&#x5E94;</strong>&#x3002;</li>
+</ol>
+<blockquote>
+<p>&#x7F8A;&#x7FA4;&#x6548;&#x5E94;&#xFF1A;&#x5F53;&#x5E76;&#x53D1;&#x91CF;&#x5DE8;&#x5927;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x7EBF;&#x7A0B;&#x4F1A;&#x83B7;&#x5F97;&#x9501;&#xFF0C;&#x5F88;&#x591A;&#x7EBF;&#x7A0B;&#x5C31;&#x4F1A;&#x963B;&#x585E;&#xFF0C;&#x5F53;&#x83B7;&#x5F97;&#x9501;&#x7684;&#x90A3;&#x4E2A;&#x7EBF;&#x7A0B;&#x91CA;&#x653E;&#x9501;&#x4E4B;&#x540E;&#xFF0C;&#x5176;&#x4ED6;&#x6240;&#x6709;&#x5728;&#x7B49;&#x5F85;&#x7684;&#x7EBF;&#x7A0B;&#x5C31;&#x4F1A;&#x4E00;&#x8D77;&#x4E89;&#x62A2;&#x9501;&#xFF0C;&#x53EF;&#x80FD;&#x4F1A;&#x56E0;&#x4E3A;&#x77AC;&#x95F4;&#x542F;&#x52A8;&#x7684;&#x7EBF;&#x7A0B;&#x8FC7;&#x591A;&#x800C;&#x5BFC;&#x81F4;&#x670D;&#x52A1;&#x5668;&#x6302;&#x5230;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x8FD9;&#x5C31;&#x662F;&#x6240;&#x8C13;&#x7684;&#x7F8A;&#x7FA4;&#x6548;&#x5E94;&#x3002;</p>
+</blockquote>
+<h3 id="&#x81EA;&#x5B9A;&#x4E49;-zk-&#x5206;&#x5E03;&#x5F0F;&#x9501;"><a href="#&#x81EA;&#x5B9A;&#x4E49;-zk-&#x5206;&#x5E03;&#x5F0F;&#x9501;" class="headerlink" title="&#x81EA;&#x5B9A;&#x4E49; zk &#x5206;&#x5E03;&#x5F0F;&#x9501;"></a>&#x81EA;&#x5B9A;&#x4E49; zk &#x5206;&#x5E03;&#x5F0F;&#x9501;</h3><p>&#x4EE3;&#x7801;&#x793A;&#x4F8B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;package com.aha.lock.zk;</span><br><span class="line"></span><br><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line">import org.I0Itec.zkclient.IZkDataListener;</span><br><span class="line">import org.I0Itec.zkclient.ZkClient;</span><br><span class="line">import org.springframework.util.StringUtils;</span><br><span class="line"></span><br><span class="line">import java.util.Collections;</span><br><span class="line">import java.util.List;</span><br><span class="line">import java.util.concurrent.CountDownLatch;</span><br><span class="line">import java.util.concurrent.TimeUnit;</span><br><span class="line">import java.util.concurrent.locks.Condition;</span><br><span class="line">import java.util.concurrent.locks.Lock;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * &#x4F7F;&#x7528; zk &#x5B9E;&#x73B0;&#x5206;&#x5E03;&#x5F0F;&#x9501;</span><br><span class="line"> * &#x5B9E;&#x73B0; Lock &#x9075;&#x5FAA; JUC &#x63D0;&#x4F9B;&#x7684;&#x89C4;&#x8303;</span><br><span class="line"> *</span><br><span class="line"> * @author: WT</span><br><span class="line"> * @date: 2021/11/23 16:41</span><br><span class="line"> */</span><br><span class="line">@Slf4j</span><br><span class="line">public class ZkDistributedLock implements Lock {</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x7528;&#x4E8E;&#x534F;&#x8C03;&#x7EBF;&#x7A0B;&#x7684;&#x6267;&#x884C;&#x65F6;&#x673A;&#xFF0C;&#x6CE8;&#x610F;&#xFF1A;countdown &#x4E4B;&#x540E;&#xFF0C;&#x518D;&#x6B21; await &#x662F;&#x6CA1;&#x6709;&#x529E;&#x6CD5;&#x963B;&#x585E;&#x7EBF;&#x7A0B;&#x7684;,&#x4E0D;&#x80FD;&#x4F7F;&#x7528;&#x7EBF;&#x7A0B;&#x9694;&#x79BB;&#x7684;&#x53D8;&#x91CF;&#xFF0C;&#x8981;&#x4E0D;&#x600E;&#x4E48;&#x5B9E;&#x73B0;&#x7EBF;&#x7A0B;&#x4E4B;&#x95F4;&#x7684;&#x901A;&#x77E5;&#xFF0C;&#x6240;&#x4EE5; ThreadLocal &#x662F;&#x4E0D;&#x53EF;&#x884C;&#x7684;</span><br><span class="line">     * private ThreadLocal&lt;CountDownLatch&gt; countDownLatch = ThreadLocal.withInitial(() -&gt; new CountDownLatch(1));</span><br><span class="line">     */</span><br><span class="line">    private CountDownLatch countDownLatch = new CountDownLatch(1);</span><br><span class="line"></span><br><span class="line">    private static final String IP_PORT = &quot;10.211.55.3:2181&quot;;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x6839;&#x8282;&#x70B9;&#x8DEF;&#x5F84;</span><br><span class="line">     */</span><br><span class="line">    private static final String ROOT_NODE = &quot;/LOCK&quot;;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x5F53;&#x524D;&#x8282;&#x70B9;&#x7684;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x8DEF;&#x5F84;</span><br><span class="line">     */</span><br><span class="line">    private ThreadLocal&lt;String&gt; beforeNodePath = new ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x5F53;&#x524D;&#x8282;&#x70B9;&#x8DEF;&#x5F84;</span><br><span class="line">     */</span><br><span class="line">    private ThreadLocal&lt;String&gt; nodePath = new ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    private ZkClient zkClient = new ZkClient(IP_PORT);</span><br><span class="line"></span><br><span class="line">    public ZkDistributedLock() {</span><br><span class="line"></span><br><span class="line">        // &#x521B;&#x5EFA;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x5BF9;&#x8C61;&#x65F6;&#xFF0C;&#x521D;&#x59CB;&#x5316; zk &#x7684;&#x8DEF;&#x5F84;</span><br><span class="line">        if (!zkClient.exists(ROOT_NODE)) {</span><br><span class="line">            zkClient.createPersistent(ROOT_NODE);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x52A0;&#x9501;&#x65B9;&#x6CD5;</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void lock() {</span><br><span class="line">        if (tryLock()) {</span><br><span class="line">            log.info(&quot;{} &#x52A0;&#x9501;&#x6210;&#x529F;&quot;, Thread.currentThread().getName());</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        // &#x963B;&#x585E; - &#x7B49;&#x5F85;&#x4E0B;&#x6B21;&#x52A0;&#x9501;&#x7684;&#x65F6;&#x673A;</span><br><span class="line">        waitForLock();</span><br><span class="line">        // &#x518D;&#x6B21;&#x5C1D;&#x8BD5;&#x52A0;&#x9501;</span><br><span class="line">        lock();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x963B;&#x585E; - &#x7B49;&#x5F85;&#x4E0B;&#x6B21;&#x52A0;&#x9501;&#x7684;&#x65F6;&#x673A;</span><br><span class="line">     */</span><br><span class="line">    private void waitForLock() {</span><br><span class="line"></span><br><span class="line">        // &#x76D1;&#x542C;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x7684;&#x5220;&#x9664;&#x4E8B;&#x4EF6; - &#x76D1;&#x542C;&#x5185;&#x90E8;&#x7C7B;</span><br><span class="line">        IZkDataListener zkDataListener = new IZkDataListener() {</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            public void handleDataChange(String dataPath, Object data) throws Exception {</span><br><span class="line"></span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            /**</span><br><span class="line">             * &#x76D1;&#x542C;&#x8282;&#x70B9;&#x7684;&#x5220;&#x9664;&#x65F6;&#x95F4;</span><br><span class="line">             * @param dataPath &#x8282;&#x70B9;&#x8DEF;&#x5F84;</span><br><span class="line">             * @throws Exception &#x5F02;&#x5E38;</span><br><span class="line">             */</span><br><span class="line">            @Override</span><br><span class="line">            public void handleDataDeleted(String dataPath) throws Exception {</span><br><span class="line">                log.info(&quot;{} &#x524D;&#x7F6E;&#x8282;&#x70B9;&#x88AB;&#x5220;&#x9664;&quot;, dataPath);</span><br><span class="line">                // TODO: 2021/11/24   &#x8FD9;&#x4E2A;countDown &#x4F1A;&#x5C06;&#x6240;&#x6709;&#x6B63;&#x5728;&#x7B49;&#x5F85;&#x7684;&#x7EBF;&#x7A0B;&#x90FD;&#x5524;&#x9192;&#xFF0C;&#x6CA1;&#x6709;&#x5B9E;&#x73B0;&#x53EA;&#x5524;&#x9192;&#x81EA;&#x5DF1;&#x7684;&#x540E;&#x7F6E;&#x8282;&#x70B9;</span><br><span class="line">                countDownLatch.countDown();</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">        };</span><br><span class="line"></span><br><span class="line">        // &#x8BA2;&#x9605;&#x76D1;&#x542C;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x7684;&#x5220;&#x9664;&#x65F6;&#x95F4;</span><br><span class="line">        zkClient.subscribeDataChanges(beforeNodePath.get(), zkDataListener);</span><br><span class="line">        // &#x5224;&#x65AD;&#x5728;&#x76D1;&#x542C;&#x4E4B;&#x524D;&#xFF0C;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x662F;&#x5426;&#x5DF2;&#x7ECF;&#x88AB;&#x5220;&#x9664;</span><br><span class="line">        if (zkClient.exists(beforeNodePath.get())) {</span><br><span class="line">            // &#x524D;&#x7F6E;&#x8282;&#x70B9;&#x8FD8;&#x5B58;&#x5728; - &#x963B;&#x585E;&#x7EBF;&#x7A0B; &#x7B49;&#x5F85;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x88AB;&#x5220;&#x9664;&#x4E4B;&#x540E;&#x7EE7;&#x7EED;&#x6267;&#x884C;</span><br><span class="line">            try {</span><br><span class="line">                countDownLatch.await();</span><br><span class="line">                log.info(&quot;&#x963B;&#x585E;&#x7EBF;&#x7A0B;: {}, nodePath: {}&quot;, Thread.currentThread().getName(), nodePath.get());</span><br><span class="line">            } catch (InterruptedException e) {</span><br><span class="line">                log.info(&quot;&#x963B;&#x585E; {} &#x7EBF;&#x7A0B;&#x5931;&#x8D25;, &#x4E2D;&#x65AD;&#x6B64;&#x7EBF;&#x7A0B;&quot;, Thread.currentThread().getName());</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">                Thread.currentThread().interrupt();</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        // &#x91CD;&#x7F6E; countDownLatch , &#x524D;&#x7F6E;&#x8282;&#x70B9;&#x5DF2;&#x7ECF;&#x88AB;&#x5220;&#x9664;&#xFF0C;&#x53D6;&#x6D88;&#x8BA2;&#x9605;&#x4E8B;&#x4EF6;</span><br><span class="line">        countDownLatch = new CountDownLatch(1);</span><br><span class="line">        zkClient.unsubscribeDataChanges(beforeNodePath.get(), zkDataListener);</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void lockInterruptibly() throws InterruptedException {</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x5C1D;&#x8BD5;&#x52A0;&#x9501;</span><br><span class="line">     * @return boolean: &#x662F;&#x5426;&#x52A0;&#x9501;&#x6210;&#x529F;</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public boolean tryLock() {</span><br><span class="line"></span><br><span class="line">        // 1. &#x5224;&#x65AD; nodePath &#x662F;&#x5426;&#x4E3A;&#x7A7A;&#xFF0C;&#x4E3A;&#x7A7A;&#x7684;&#x8BDD;&#x8BF4;&#x660E; ZkDistributedLock &#x7B2C;&#x4E00;&#x6B21;&#x7533;&#x8BF7;&#x9501;&#xFF0C; zk &#x9700;&#x8981;&#x8FDB;&#x884C;&#x4E34;&#x65F6;&#x8282;&#x70B9;&#x7684;&#x521B;&#x5EFA;</span><br><span class="line">        if (!StringUtils.hasText(nodePath.get())) {</span><br><span class="line">            nodePath.set(zkClient.createEphemeralSequential(ROOT_NODE + &quot;/&quot;, &quot;lock&quot;));</span><br><span class="line">            // log.info(&quot;ZkDistributedLock &#x7B2C;&#x4E00;&#x6B21;&#x7533;&#x8BF7;&#x9501;&#xFF0C; zk &#x9700;&#x8981;&#x8FDB;&#x884C;&#x4E34;&#x65F6;&#x8282;&#x70B9;&#x7684;&#x521B;&#x5EFA;&#xFF1A;{}&quot;, nodePath);</span><br><span class="line">            log.info(&quot;nodePath&#x4E3A;&#x7A7A;,&#x521B;&#x5EFA;&#x4E34;&#x65F6;&#x8282;&#x70B9;&#xFF1A;{}&quot;, nodePath.get());</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        // 2. &#x83B7;&#x53D6; &#x6839;&#x8282;&#x70B9;&#x6240;&#x6709;&#x5B50;&#x8282;&#x70B9;</span><br><span class="line">        List&lt;String&gt; childrenNodeList = zkClient.getChildren(ROOT_NODE);</span><br><span class="line"></span><br><span class="line">        // 3. &#x5C06;&#x5B50;&#x8282;&#x70B9;&#x5217;&#x8868;&#x8FDB;&#x884C;&#x6392;&#x5E8F;</span><br><span class="line">        Collections.sort(childrenNodeList);</span><br><span class="line"></span><br><span class="line">        log.info(&quot;nodePath: {}, nodeList:{}&quot;, nodePath.get(), childrenNodeList);</span><br><span class="line"></span><br><span class="line">        // 4. &#x5224;&#x65AD;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x662F;&#x4E3A;&#x6700;&#x5C0F;&#x7684;&#x8282;&#x70B9;&#xFF0C;&#x662F;&#x6700;&#x5C0F;&#x7684;&#x8282;&#x70B9;&#x8BF4;&#x660E;&#x83B7;&#x53D6;&#x9501;&#x6210;&#x529F;&#xFF0C;&#x53CD;&#x4E4B;&#x7B49;&#x5F85;&#x5E76;&#x76D1;&#x542C;&#x81EA;&#x5DF1;&#x524D;&#x9762;&#x7684;&#x8282;&#x70B9;&#xFF0C;&#x5F53;&#x81EA;&#x5DF1;&#x524D;&#x9762;&#x7684;&#x8282;&#x70B9;&#x5220;&#x9664;&#x4E4B;&#x540E;&#xFF0C;&#x5C31;&#x662F;&#x81EA;&#x5DF1;&#x518D;&#x6B21;&#x7533;&#x8BF7;&#x9501;&#x7684;&#x65F6;&#x5019;</span><br><span class="line">        if (nodePath.get().equals(ROOT_NODE + &quot;/&quot; + childrenNodeList.get(0))) {</span><br><span class="line">            log.info(&quot;&#x7EBF;&#x7A0B;&#x540D;&#x79F0;: {}, nodePath: {} &#x662F;&#x6700;&#x5C0F;&#x7684;&#x8282;&#x70B9;&#xFF0C;&#x83B7;&#x53D6;&#x9501;&#x6210;&#x529F;&#x3002;&quot;, Thread.currentThread().getName(), nodePath.get());</span><br><span class="line">            return true;</span><br><span class="line">        } else {</span><br><span class="line">            // &#x83B7;&#x53D6;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x5E94;&#x8BE5;&#x5728; &#x8282;&#x70B9;&#x5217;&#x8868;&#x4E2D;&#x63D2;&#x5165;&#x7684;&#x4F4D;&#x7F6E; &#x8FDB;&#x800C;&#x53D6;&#x5F97;&#x4ED6;&#x7684;&#x4E0A;&#x4E00;&#x4E2A;&#x8282;&#x70B9;</span><br><span class="line">            int i = Collections.binarySearch(childrenNodeList, nodePath.get().substring(ROOT_NODE.length() + 1));</span><br><span class="line">            // &#x83B7;&#x53D6;&#x4E0A;&#x4E00;&#x4E2A;&#x8282;&#x70B9;&#x7684;&#x8DEF;&#x5F84;</span><br><span class="line">            beforeNodePath.set(ROOT_NODE + &quot;/&quot; + childrenNodeList.get(i - 1));</span><br><span class="line">            log.info(&quot;{} &#x524D;&#x9762;&#x7684;&#x8282;&#x70B9;&#x4E3A;&#xFF1A;{}&quot;, nodePath.get(), beforeNodePath.get());</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        return false;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {</span><br><span class="line">        return false;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void unlock() {</span><br><span class="line">        zkClient.delete(nodePath.get());</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Condition newCondition() {</span><br><span class="line">        return null;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE3;&#x7801;&#x89E3;&#x6790;&#xFF1A;</p>
+<ol>
+<li><code>implements Lock</code>: &#x5B9E;&#x73B0; <code>Lock</code> &#x9075;&#x5FAA; <code>JUC</code> &#x63D0;&#x4F9B;&#x7684;&#x89C4;&#x8303;&#x3002;</li>
+<li>&#x4F7F;&#x7528; <code>zkClient.createEphemeralSequential()</code> &#x521B;&#x5EFA;&#x4E34;&#x65F6;&#x987A;&#x5E8F;&#x8282;&#x70B9;&#xFF0C;&#x907F;&#x514D;&#x7F8A;&#x7FA4;&#x6548;&#x5E94;&#x548C;&#x62E5;&#x6709;&#x9501;&#x7EBF;&#x7A0B;&#x610F;&#x5916;&#x6302;&#x6389;&#x9020;&#x6210;&#x6B7B;&#x9501;&#x7684;&#x95EE;&#x9898;&#x3002;</li>
+<li>&#x963B;&#x585E;&#x7EBF;&#x7A0B;&#x8FD9;&#x8FB9;&#x4F7F;&#x7528;&#x7684;&#x662F; <code>CountDownLatch</code>&#x3002;&#x5F53;&#x6709;&#x7EBF;&#x7A0B;&#x4E89;&#x62A2;&#x5230;&#x9501;&#x4E4B;&#x540E;&#xFF0C;&#x5176;&#x4ED6;&#x7684;&#x7EBF;&#x7A0B;&#x4F1A;&#x88AB; <code>CountDownLatch</code> &#x7684; <code>await</code> &#x65B9;&#x6CD5;&#x7ED9;&#x963B;&#x585E;&#xFF0C;&#x5F53;&#x88AB;&#x963B;&#x585E;&#x7EBF;&#x7A0B;&#x7684;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x88AB;&#x5220;&#x9664;&#xFF0C;&#x5C31;&#x8BF4;&#x660E;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x5E94;&#x8BE5;&#x88AB;&#x5524;&#x9192;&#xFF0C;&#x56E0;&#x4E3A;&#x987A;&#x5E8F;&#x8282;&#x70B9;&#x662F;&#x6709;&#x5E8F;&#x7684;&#xFF0C;&#x6240;&#x4EE5;&#x53EA;&#x5524;&#x9192;&#x5F53;&#x524D;&#x8282;&#x70B9;&#x5C31;&#x53EF;&#x4EE5;&#x4E86;&#x3002;&#x8FD9;&#x8FB9;&#x5524;&#x9192;&#x65B9;&#x6CD5;&#x4F7F;&#x7528;&#x7684;&#x662F; <code>zkClient.subscribeDataChanges(beforeNodePath.get(), zkDataListener);</code> &#x5728;&#x68C0;&#x6D4B;&#x5230;&#x524D;&#x7F6E;&#x8282;&#x70B9;&#x88AB;&#x5220;&#x9664;&#x4E4B;&#x540E;&#x4F7F;&#x7528; <code>CountDownLatch</code> &#x7684; <code>countDown</code> &#x65B9;&#x6CD5;&#xFF0C;&#x5F53; <code>countDown()</code> &#x53D8;&#x6210; 0 &#x4E4B;&#x540E;&#x5C31;&#x4F1A;&#x5524;&#x9192;&#x7EBF;&#x7A0B;&#x3002;</li>
+<li><code>nodePath</code> &#x548C; <code>beforeNodePath</code> &#x5E94;&#x8BE5;&#x662F;&#x7EBF;&#x7A0B;&#x79C1;&#x6709;&#x53D8;&#x91CF;&#xFF0C;&#x8FD9;&#x6837;&#x624D;&#x80FD;&#x4FDD;&#x8BC1;&#xFF0C;&#x6BCF;&#x4E2A;&#x7EBF;&#x7A0B;&#x8BB0;&#x5F55;&#x81EA;&#x5DF1;&#x7684; <code>nodePath</code> &#x548C; <code>beforeNodePath</code>&#x3002;</li>
+<li>&#x5177;&#x4F53;&#x7684;&#x5B9E;&#x73B0;&#x7EC6;&#x8282;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x4EE3;&#x7801;&#x4E2D;&#x7684;&#x6CE8;&#x91CA;&#x3002;</li>
+</ol>
+<blockquote>
+<p>&#x6B65;&#x9AA4; 3 &#x95EE;&#x9898;&#x8BF4;&#x660E;&#xFF1A;</p>
+<ol>
+<li>&#x5F53; <code>countDown()</code> &#x53D8;&#x6210; 0 &#x4E4B;&#x540E;&#x5C31;&#x4F1A;&#x5524;&#x9192;&#x6240;&#x6709;&#x7684;&#x7EBF;&#x7A0B;&#xFF0C;&#x8FD9;&#x8FB9;&#x5E94;&#x8BE5;&#x5B9E;&#x73B0;&#x6210;&#x5524;&#x9192;&#x81EA;&#x5DF1;&#x4E0B;&#x4E00;&#x4E2A;&#x8282;&#x70B9;</li>
+<li>&#x5F53; <code>countDwon()</code> &#x53D8;&#x6210; 0 &#x4E4B;&#x540E;&#x9700;&#x8981;&#x91CD;&#x65B0; <code>new</code> &#x8FD9;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x4E0D;&#x7136; <code>await</code> &#x65B9;&#x6CD5;&#x662F;&#x6CA1;&#x6709;&#x529E;&#x6CD5;&#x91CD;&#x65B0;&#x963B;&#x585E;&#x7EBF;&#x7A0B;&#x7684;&#x3002;</li>
+</ol>
+</blockquote>
+<p>&#x6D4B;&#x8BD5;&#x81EA;&#x5B9A;&#x4E49; <code>zk</code> &#x5206;&#x5E03;&#x5F0F;&#x9501;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;package com.aha.lock.zk;</span><br><span class="line"></span><br><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line">import org.springframework.web.bind.annotation.GetMapping;</span><br><span class="line">import org.springframework.web.bind.annotation.RestController;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * @author: WT</span><br><span class="line"> * @date: 2021/11/23 17:56</span><br><span class="line"> */</span><br><span class="line">@RestController</span><br><span class="line">@Slf4j</span><br><span class="line">public class ZkDistributeLockTest {</span><br><span class="line"></span><br><span class="line">    static int inventory = 10;</span><br><span class="line">    private static final int NUM = 10;</span><br><span class="line"></span><br><span class="line">    private final ZkDistributedLock zkDistributedLock = new ZkDistributedLock();</span><br><span class="line"></span><br><span class="line">    @GetMapping(&quot;/zk/lock&quot;)</span><br><span class="line">    public void zkLockTest() {</span><br><span class="line">        try {</span><br><span class="line">            for (int i = 0; i &lt; NUM; i++) {</span><br><span class="line">                new Thread(() -&gt; {</span><br><span class="line">                        try {</span><br><span class="line">                            zkDistributedLock.lock();</span><br><span class="line">                            Thread.sleep(200);</span><br><span class="line">                            if (inventory &gt; 0) {</span><br><span class="line">                                inventory--;</span><br><span class="line">                            }</span><br><span class="line">                            log.warn(&quot;&#x5E93;&#x5B58;&#x6263;&#x51CF;&#x5B8C;&#x4E4B;&#x540E;&#x4E3A;&#xFF1A;{}&quot;, inventory);</span><br><span class="line">                        } catch (InterruptedException e) {</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                            Thread.currentThread().interrupt();</span><br><span class="line">                        } finally {</span><br><span class="line">                            zkDistributedLock.unlock();</span><br><span class="line">                        }</span><br><span class="line">                    }</span><br><span class="line">                ).start();</span><br><span class="line">            }</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x4F7F;&#x7528;-curator-&#x7684;-zk-&#x5206;&#x5E03;&#x5F0F;&#x9501;"><a href="#&#x4F7F;&#x7528;-curator-&#x7684;-zk-&#x5206;&#x5E03;&#x5F0F;&#x9501;" class="headerlink" title="&#x4F7F;&#x7528; curator &#x7684; zk &#x5206;&#x5E03;&#x5F0F;&#x9501;"></a>&#x4F7F;&#x7528; curator &#x7684; zk &#x5206;&#x5E03;&#x5F0F;&#x9501;</h3><h4 id="curator-&#x63D0;&#x4F9B;&#x7684;&#x51E0;&#x79CD;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x65B9;&#x6848;"><a href="#curator-&#x63D0;&#x4F9B;&#x7684;&#x51E0;&#x79CD;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x65B9;&#x6848;" class="headerlink" title="curator &#x63D0;&#x4F9B;&#x7684;&#x51E0;&#x79CD;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x65B9;&#x6848;"></a>curator &#x63D0;&#x4F9B;&#x7684;&#x51E0;&#x79CD;&#x5206;&#x5E03;&#x5F0F;&#x9501;&#x65B9;&#x6848;</h4><ol>
+<li><code>InterProcessMutex</code>&#xFF1A;&#x5206;&#x5E03;&#x5F0F;&#x53EF;&#x91CD;&#x5165;&#x6392;&#x5B83;&#x9501;</li>
+<li><code>InterProcessSemaphoreMutex</code>&#xFF1A;&#x5206;&#x5E03;&#x5F0F;&#x6392;&#x5B83;&#x9501;</li>
+<li><code>InterProcessReadWriteLock</code>&#xFF1A;&#x5206;&#x5E03;&#x5F0F;&#x8BFB;&#x5199;&#x9501;</li>
+</ol>
+<h4 id="InterProcessMutex-&#x4F7F;&#x7528;&#x5B9E;&#x4F8B;"><a href="#InterProcessMutex-&#x4F7F;&#x7528;&#x5B9E;&#x4F8B;" class="headerlink" title="InterProcessMutex &#x4F7F;&#x7528;&#x5B9E;&#x4F8B;"></a>InterProcessMutex &#x4F7F;&#x7528;&#x5B9E;&#x4F8B;</h4><p>&#x914D;&#x7F6E; <code>curatorFramework</code> &#x5BA2;&#x6237;&#x7AEF;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">yaml&#x590D;&#x5236;&#x4EE3;&#x7801;zookeeper:</span><br><span class="line">  address: 10.211.55.3:2181   # zookeeper Server &#x5730;&#x5740;,&#x5982;&#x679C;&#x6709;&#x591A;&#x4E2A;&#x4F7F;&#x7528;&#x9017;&#x53F7;&#x5206;&#x9694;&#x3002;&#x5982; ip1:port1,ip2:port2,ip3:port3</span><br><span class="line">  retryCount: 5               # &#x91CD;&#x8BD5;&#x6B21;&#x6570;</span><br><span class="line">  initElapsedTimeMs: 1000     # &#x521D;&#x59CB;&#x91CD;&#x8BD5;&#x95F4;&#x9694;&#x65F6;&#x95F4;</span><br><span class="line">  maxElapsedTimeMs: 5000      # &#x6700;&#x5927;&#x91CD;&#x8BD5;&#x95F4;&#x9694;&#x65F6;&#x95F4;</span><br><span class="line">  sessionTimeoutMs: 30000     # Session &#x8D85;&#x65F6;&#x65F6;&#x95F4;</span><br><span class="line">  connectionTimeoutMs: 10000  # &#x8FDE;&#x63A5;&#x8D85;&#x65F6;&#x65F6;&#x95F4;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;package com.aha.config;</span><br><span class="line"></span><br><span class="line">import lombok.Data;</span><br><span class="line">import org.springframework.boot.context.properties.ConfigurationProperties;</span><br><span class="line">import org.springframework.context.annotation.Configuration;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * &#x8FDE;&#x63A5; zookeeper &#x914D;&#x7F6E;&#x7C7B;</span><br><span class="line"> *</span><br><span class="line"> * @author: WT</span><br><span class="line"> * @date: 2021/11/22 18:14</span><br><span class="line"> */</span><br><span class="line">@Data</span><br><span class="line">@Configuration</span><br><span class="line">@ConfigurationProperties(prefix = &quot;zookeeper&quot;)</span><br><span class="line">public class ZkClientProperties {</span><br><span class="line"></span><br><span class="line">    /** &#x91CD;&#x8BD5;&#x6B21;&#x6570; */</span><br><span class="line">    private int retryCount;</span><br><span class="line"></span><br><span class="line">    /** &#x521D;&#x59CB;&#x91CD;&#x8BD5;&#x95F4;&#x9694;&#x65F6;&#x95F4; */</span><br><span class="line">    private int initElapsedTimeMs;</span><br><span class="line"></span><br><span class="line">    /** &#x6700;&#x5927;&#x91CD;&#x8BD5;&#x95F4;&#x9694;&#x65F6;&#x95F4; */</span><br><span class="line">    private int maxElapsedTimeMs;</span><br><span class="line"></span><br><span class="line">    /**&#x8FDE;&#x63A5;&#x5730;&#x5740; */</span><br><span class="line">    private String address;</span><br><span class="line"></span><br><span class="line">    /**Session&#x8FC7;&#x671F;&#x65F6;&#x95F4; */</span><br><span class="line">    private int sessionTimeoutMs;</span><br><span class="line"></span><br><span class="line">    /**&#x8FDE;&#x63A5;&#x8D85;&#x65F6;&#x65F6;&#x95F4; */</span><br><span class="line">    private int connectionTimeoutMs;</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;package com.aha.client;</span><br><span class="line"></span><br><span class="line">import com.aha.config.ZkClientProperties;</span><br><span class="line">import org.apache.curator.framework.CuratorFramework;</span><br><span class="line">import org.apache.curator.framework.CuratorFrameworkFactory;</span><br><span class="line">import org.apache.curator.retry.ExponentialBackoffRetry;</span><br><span class="line">import org.springframework.context.annotation.Bean;</span><br><span class="line">import org.springframework.context.annotation.Configuration;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * &#x751F;&#x6210; zk &#x5BA2;&#x6237;&#x7AEF;</span><br><span class="line"> *</span><br><span class="line"> * @author: WT</span><br><span class="line"> * @date: 2021/11/22 18:18</span><br><span class="line"> */</span><br><span class="line">@Configuration</span><br><span class="line">public class ZookeeperClient {</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * initMethod = &quot;start&quot;</span><br><span class="line">     * curatorFramework &#x521B;&#x5EFA;&#x5BF9;&#x8C61;&#x4E4B;&#x540E;&#xFF0C;&#x8C03;&#x7528; curatorFramework &#x5B9E;&#x4F8B;&#x7684; start &#x65B9;&#x6CD5;</span><br><span class="line">     */</span><br><span class="line">//    @Bean(initMethod = &quot;start&quot;)</span><br><span class="line">//    public CuratorFramework curatorFramework(ZkClientProperties zookeeperProperties) {</span><br><span class="line">//        return CuratorFrameworkFactory.newClient(</span><br><span class="line">//                zookeeperProperties.getAddress(),</span><br><span class="line">//                zookeeperProperties.getSessionTimeoutMs(),</span><br><span class="line">//                zookeeperProperties.getConnectionTimeoutMs(),</span><br><span class="line">//                new RetryNTimes(zookeeperProperties.getRetryCount(), zookeeperProperties.getInitElapsedTimeMs())</span><br><span class="line">//        );</span><br><span class="line">//    }</span><br><span class="line"></span><br><span class="line">    @Bean(initMethod = &quot;start&quot;)</span><br><span class="line">    private static CuratorFramework getZkClient(ZkClientProperties zookeeperProperties) {</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, zookeeperProperties.getRetryCount(), 5000);</span><br><span class="line">        return CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zookeeperProperties.getAddress())</span><br><span class="line">                .sessionTimeoutMs(zookeeperProperties.getSessionTimeoutMs())</span><br><span class="line">                .connectionTimeoutMs(zookeeperProperties.getConnectionTimeoutMs())</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6A21;&#x62DF; 50 &#x4E2A;&#x7EBF;&#x7A0B;&#x4E89;&#x62A2;&#x9501;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;package com.aha.lock.service;</span><br><span class="line"></span><br><span class="line">import lombok.extern.slf4j.Slf4j;</span><br><span class="line">import org.apache.curator.framework.CuratorFramework;</span><br><span class="line">import org.apache.curator.framework.recipes.locks.InterProcessMutex;</span><br><span class="line">import org.springframework.stereotype.Service;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> *</span><br><span class="line"> * @author: WT</span><br><span class="line"> * @date: 2021/11/22 17:41</span><br><span class="line"> */</span><br><span class="line">@Slf4j</span><br><span class="line">@Service</span><br><span class="line">public class InterprocessMutexLock {</span><br><span class="line"></span><br><span class="line">    private final CuratorFramework curatorFramework;</span><br><span class="line"></span><br><span class="line">    public InterprocessMutexLock (CuratorFramework curatorFramework) {</span><br><span class="line">        this.curatorFramework = curatorFramework;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public void test(String lockPath)  {</span><br><span class="line"></span><br><span class="line">        InterProcessMutex lock = new InterProcessMutex(curatorFramework, lockPath);</span><br><span class="line">        //&#x6A21;&#x62DF; 50 &#x4E2A;&#x7EBF;&#x7A0B;&#x62A2;&#x9501;</span><br><span class="line">        for (int i = 0; i &lt; 50; i++) {</span><br><span class="line">            new Thread(new TestThread(i, lock)).start();</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    static class TestThread implements Runnable {</span><br><span class="line"></span><br><span class="line">        private final Integer threadFlag;</span><br><span class="line">        private final InterProcessMutex lock;</span><br><span class="line"></span><br><span class="line">        public TestThread(Integer threadFlag, InterProcessMutex lock) {</span><br><span class="line">            this.threadFlag = threadFlag;</span><br><span class="line">            this.lock = lock;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void run() {</span><br><span class="line">            try {</span><br><span class="line">                lock.acquire();</span><br><span class="line">                log.info(&quot;&#x7B2C; {} &#x4E2A;&#x7EBF;&#x7A0B;&#x83B7;&#x53D6;&#x5230;&#x4E86;&#x9501;&quot;, threadFlag);</span><br><span class="line">                //&#x7B49;&#x5230;1&#x79D2;&#x540E;&#x91CA;&#x653E;&#x9501;</span><br><span class="line">                Thread.sleep(1000);</span><br><span class="line">            } catch (Exception e) {</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            }finally {</span><br><span class="line">                try {</span><br><span class="line">                    lock.release();</span><br><span class="line">                } catch (Exception e) {</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;package com.aha.lock.controller;</span><br><span class="line"></span><br><span class="line">import com.aha.lock.service.InterprocessMutexLock;</span><br><span class="line">import org.springframework.web.bind.annotation.GetMapping;</span><br><span class="line">import org.springframework.web.bind.annotation.RestController;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * @author: WT</span><br><span class="line"> * @date: 2021/11/23 14:13</span><br><span class="line"> */</span><br><span class="line">@RestController</span><br><span class="line">public class TestController {</span><br><span class="line"></span><br><span class="line">    private final InterprocessMutexLock interprocessMutexLock;</span><br><span class="line"></span><br><span class="line">    public TestController (InterprocessMutexLock interprocessMutexLock) {</span><br><span class="line">        this.interprocessMutexLock = interprocessMutexLock;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @GetMapping(&quot;/lock/mutex&quot;)</span><br><span class="line">    public void testMutexLock () {</span><br><span class="line">        interprocessMutexLock.test(&quot;/lock/mutex&quot;);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/b8eb06504805aeb872483d3f86d19775.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端/" rel="tag"># 后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7034076220484648990.html" rel="next" title="一些常用的代码规范总结">
+                <i class="fa fa-chevron-left"></i> 一些常用的代码规范总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7034111562243637285.html" rel="prev" title="kafka数据可靠性与一致性 ISR 复制机制 数据一致性保">
+                kafka数据可靠性与一致性 ISR 复制机制 数据一致性保 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySql-实现分布式锁"><span class="nav-number">1.</span> <span class="nav-text">MySql 实现分布式锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基于表记录实现"><span class="nav-number">1.1.</span> <span class="nav-text">基于表记录实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#借助-mysql-悲观锁实现"><span class="nav-number">1.2.</span> <span class="nav-text">借助 mysql 悲观锁实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用行锁需要注意的点"><span class="nav-number">1.2.1.</span> <span class="nav-text">使用行锁需要注意的点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper-实现分布式锁"><span class="nav-number">2.</span> <span class="nav-text">Zookeeper 实现分布式锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#zk-的节点类型"><span class="nav-number">2.1.</span> <span class="nav-text">zk 的节点类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现-zk-分布式锁的思路"><span class="nav-number">2.2.</span> <span class="nav-text">实现 zk 分布式锁的思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义-zk-分布式锁"><span class="nav-number">2.3.</span> <span class="nav-text">自定义 zk 分布式锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-curator-的-zk-分布式锁"><span class="nav-number">2.4.</span> <span class="nav-text">使用 curator 的 zk 分布式锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#curator-提供的几种分布式锁方案"><span class="nav-number">2.4.1.</span> <span class="nav-text">curator 提供的几种分布式锁方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#InterProcessMutex-使用实例"><span class="nav-number">2.4.2.</span> <span class="nav-text">InterProcessMutex 使用实例</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

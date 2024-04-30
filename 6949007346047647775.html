@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="大数据,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Spark SQL&amp;#x662F;Apache Spark&amp;#x4E2D;&amp;#x7684;&amp;#x6700;&amp;#x91CD;&amp;#x8981;&amp;#x7684;&amp;#x529F;&amp;#x80FD;&amp;#x4E4B;&amp;#x4E00;&amp;#x3002;&amp;#x5728; SQL&amp;#x7684;&amp;#x4F7F;&amp;#x7528;&amp;#x4E0A;&amp;#xFF0C;Spark SQL&amp;#x548C;&amp;#x5176;&amp;#x5B">
+<meta name="keywords" content="大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="定制Spark SQL  一种轻量级实现方案">
+<meta property="og:url" content="https://dev.newban.cn/6949007346047647775.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="Spark SQL&amp;#x662F;Apache Spark&amp;#x4E2D;&amp;#x7684;&amp;#x6700;&amp;#x91CD;&amp;#x8981;&amp;#x7684;&amp;#x529F;&amp;#x80FD;&amp;#x4E4B;&amp;#x4E00;&amp;#x3002;&amp;#x5728; SQL&amp;#x7684;&amp;#x4F7F;&amp;#x7528;&amp;#x4E0A;&amp;#xFF0C;Spark SQL&amp;#x548C;&amp;#x5176;&amp;#x5B">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ea3497f62e36cf01f9ee53d40fc4f013846f77252c31fa786385752475fa677b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d29761a10badb993b5fd6087253a64f6073459b7780ecfda4533dfae9a825870">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/0e2b5f05cb770a728e0b808e8571d67ddf016115cba5461f164b7e2a509d53fe">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ac455b716ef225d86f335558052294c58698aa81f5be28ed6cf85e320246b239">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/f4466cde9a77587ecc385f8fc991cf0d3b2a680d44b4a41854ed1631cffd885f">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/3f4fc021676be585171d71420b7dd40211f9e0ff2c6eb63a5f72642542d523d9">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/8c2e4eb7ccbab8c54009093b58af376c3dc1f30a58c9781389c620ea9b06c66c">
+<meta property="og:updated_time" content="2024-04-30T03:31:16.582Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="定制Spark SQL  一种轻量级实现方案">
+<meta name="twitter:description" content="Spark SQL&amp;#x662F;Apache Spark&amp;#x4E2D;&amp;#x7684;&amp;#x6700;&amp;#x91CD;&amp;#x8981;&amp;#x7684;&amp;#x529F;&amp;#x80FD;&amp;#x4E4B;&amp;#x4E00;&amp;#x3002;&amp;#x5728; SQL&amp;#x7684;&amp;#x4F7F;&amp;#x7528;&amp;#x4E0A;&amp;#xFF0C;Spark SQL&amp;#x548C;&amp;#x5176;&amp;#x5B">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ea3497f62e36cf01f9ee53d40fc4f013846f77252c31fa786385752475fa677b">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6949007346047647775.html">
+
+
+
+
+
+  <title>定制Spark SQL  一种轻量级实现方案 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">定制Spark SQL  一种轻量级实现方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-04-09T12:18:55+08:00">
+                2021-04-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ea3497f62e36cf01f9ee53d40fc4f013846f77252c31fa786385752475fa677b" alt="&#x56FE;&#x7247;"></p>
+<p>Spark SQL&#x662F;Apache Spark&#x4E2D;&#x7684;&#x6700;&#x91CD;&#x8981;&#x7684;&#x529F;&#x80FD;&#x4E4B;&#x4E00;&#x3002;&#x5728; SQL&#x7684;&#x4F7F;&#x7528;&#x4E0A;&#xFF0C;Spark SQL&#x548C;&#x5176;&#x5B83;&#x9002;&#x7528;&#x4E8E;&#x5927;&#x89C4;&#x6A21;&#x79BB;&#x7EBF;&#x6570;&#x636E;&#x7684;SQL&#x5F15;&#x64CE; (&#x4F8B;&#x5982;Presto/Apache Hive) &#x662F;&#x76F8;&#x4F3C;&#x7684;&#x3002;&#x9664;&#x4E86;SQL&#x4E4B;&#x5916;&#xFF0C;Apache Spark&#x8FD8;&#x63D0;&#x4F9B;&#x4E86;&#x66F4;&#x4E3A;&#x7075;&#x6D3B;&#x7684;DataFrame API&#x3002;</p>
+<p>Spark SQL&#x548C;Spark DataFrame API&#x6709;&#x7740;&#x4E0D;&#x540C;&#x7684;&#x4F7F;&#x7528;&#x573A;&#x666F;&#x3002;</p>
+<ul>
+<li>Spark DataFrame API&#x7684;&#x8868;&#x8FBE;&#x80FD;&#x529B;&#x6BD4;Spark SQL&#x66F4;&#x5F3A;&#xFF0C;&#x5BF9;&#x4E8E;&#x6709;&#x826F;&#x597D;&#x7F16;&#x7A0B;&#x57FA;&#x7840;&#x548C;&#x4EE3;&#x7801;&#x62BD;&#x8C61;&#x80FD;&#x529B;&#x7684;&#x5DE5;&#x7A0B;&#x5E08;&#x6765;&#x8BF4;&#xFF0C;&#x4F7F;&#x7528;DataFrame&#x6765;&#x89E3;&#x51B3;&#x590D;&#x6742;&#x7684;&#x6570;&#x636E;&#x5904;&#x7406;&#x95EE;&#x9898;&#x66F4;&#x52A0;&#x4FBF;&#x6377;&#xFF1B;</li>
+<li>Spark SQL&#x7684;&#x8BED;&#x6CD5;&#x51E0;&#x4E4E;&#x548C;Apache Hive&#x7684;SQL&#x8BED;&#x6CD5;&#x51E0;&#x4E4E;&#x4E00;&#x81F4;&#x3002;&#x7EDD;&#x5927;&#x90E8;&#x5206;&#x6570;&#x636E;&#x5904;&#x7406;&#x9700;&#x6C42;&#xFF0C;&#x4F7F;&#x7528;Spark SQL&#x5C31;&#x80FD;&#x591F;&#x6EE1;&#x8DB3;&#x3002;&#x4F7F;&#x7528;DataFrame API&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x521B;&#x5EFA;&#x4E00;&#x4E2A;Scala&#x5DE5;&#x7A0B;&#xFF0C;&#x7F16;&#x8BD1;&#x4EE3;&#x7801;&#x5E76;&#x6253;&#x5305;&#xFF0C;&#x6700;&#x7EC8;&#x901A;&#x8FC7;spark-submit&#x63D0;&#x4EA4;&#x5230;&#x96C6;&#x7FA4;&#xFF1B;&#x800C;Spark SQL&#x65E0;&#x9700;&#x6784;&#x5EFA;&#x751F;&#x6210;&#x4E2D;&#x95F4;&#x4EA7;&#x7269;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;JDBC&#x7B49;&#x65B9;&#x5F0F;&#x63D0;&#x4EA4;&#x5230;&#x96C6;&#x7FA4;&#x3002;</li>
+</ul>
+<h2 id="&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5B9A;&#x5236;Spark-SQL"><a href="#&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5B9A;&#x5236;Spark-SQL" class="headerlink" title="&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5B9A;&#x5236;Spark SQL"></a>&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5B9A;&#x5236;Spark SQL</h2><p>&#x4F46;&#x662F;&#x4F7F;&#x7528;Spark SQL&#xFF0C;&#x6211;&#x4EEC;&#x603B;&#x4F1A;&#x9047;&#x5230;&#x5404;&#x79CD;&#x6781;&#x7AEF;&#x60C5;&#x51B5;&#x9700;&#x8981;&#x5904;&#x7406;&#xFF0C;&#x6BD4;&#x5982;&#xFF1A;</p>
+<p>&#x201C;&#x6211;&#x6709;&#x4E00;&#x4E2A;200&#x5217;&#x7684;&#x8868;&#xFF0C;&#x6211;&#x60F3;&#x628A;&#x5176;&#x4E2D;&#x7684;&#x4E24;&#x5217;&#x6392;&#x9664;&#x6389;&#xFF0C;&#x628A;&#x5269;&#x4E0B;&#x7684;198&#x5217;&#x4FDD;&#x5B58;&#x5230;&#x4E00;&#x4E2A;&#x65B0;&#x7684;&#x8868;&#x91CC;&#x9762;&#x3002;&#x201D;</p>
+<p>&#x5982;&#x679C;&#x4F7F;&#x7528;Spark DataFrame API&#xFF0C;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x53EF;&#x4EE5;&#x8FD9;&#x6837;&#x89E3;&#x51B3;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d29761a10badb993b5fd6087253a64f6073459b7780ecfda4533dfae9a825870" alt="&#x56FE;&#x7247;"></p>
+<p>&#x4F46;&#x662F;&#x7528;SQL&#xFF0C;&#x628A;198&#x4E2A;&#x5217;&#x540D;&#x76F4;&#x63A5;&#x653E;&#x5728;SQL&#x8BED;&#x53E5;&#x91CC;&#x9762;&#xFF0C;&#x4E0D;&#x5177;&#x5907;&#x53EF;&#x8BFB;&#x6027;&#xFF0C;&#x4E14;&#x65E0;&#x6CD5;&#x5E94;&#x5BF9;&#x5B57;&#x6BB5;&#x589E;&#x52A0;&#x7684;&#x60C5;&#x51B5;&#xFF1A;</p>
+<p>select col_1, col_2, col_3, col_4, col_5, col_6, col_7, col_8, col_9, &#x2026;</p>
+<p>&#x5BF9;&#x4E8E;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;Spark SQL&#x6709;&#x4E00;&#x79CD;&#x517C;&#x5BB9;HiveQL&#x7684;&#x89E3;&#x51B3;&#x65B9;&#x6848;&#xFF0C;&#x9700;&#x8981;&#x5F00;&#x542F;&#x914D;&#x7F6E;&#x9879;&#xFF0C;&#x624D;&#x80FD;&#x4F7F;&#x7528;&#x5982;&#x4E0B;&#x53EF;&#x8BFB;&#x6027;&#x6781;&#x5DEE;&#x7684;&#x8BED;&#x6CD5;&#xFF1A;</p>
+<p>set spark.sql.parser.quotedRegexColumnNames=true;</p>
+<p>select <code>(col\_to\_exclude\_1)?+.+</code> from tbl</p>
+<p>&#x4E0A;&#x9762;&#x662F;&#x4ECE;&#x6240;&#x6709;&#x5B57;&#x6BB5;&#x4E2D;&#x6392;&#x9664;&#x4E00;&#x4E2A;&#x5B57;&#x6BB5;&#x7684;&#x65B9;&#x6CD5;&#xFF0C;&#x5982;&#x679C;&#x6709;&#x4EBA;&#x95EE;&#x6211;&#xFF0C;&#x5982;&#x4F55;&#x6392;&#x9664;&#x4E24;&#x4E2A;&#x5B57;&#x6BB5;&#xFF0C;&#x6211;&#x6050;&#x6015;&#x65E0;&#x6CD5;&#x56DE;&#x7B54;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x3002;</p>
+<p>&#x5728;Tubi&#xFF0C;&#x6211;&#x4EEC;&#x91C7;&#x7528;&#x5B9A;&#x5236;Spark SQL&#x8BED;&#x6CD5;&#x7684;&#x65B9;&#x5F0F;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF1A;</p>
+<p>// select all columns excluding <code>col\_to\_exclude\_1</code></p>
+<p>select all_columns_except(&#x201C;tbl&#x201D;, &#x201C;col_to_exclude_1&#x201D;)</p>
+<p>// select all columns excluding <code>col\_to\_exclude\_1</code> and <code>col\_to\_exclude\_2</code></p>
+<p>select all_columns_except(&#x201C;tbl&#x201D;, &#x201C;col_to_exclude_1&#x201D;, &#x201C;col_to_exclude_2&#x201D;)</p>
+<p>&#x5BF9;&#x4E8E;&#x4E00;&#x4E9B;Spark SQL&#x4E2D;&#x6613;&#x7528;&#x6027;&#x975E;&#x5E38;&#x5DEE;&#x7684;&#x8BED;&#x6CD5;&#xFF0C;&#x4F7F;&#x7528;&#x5B8F;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x53EF;&#x4EE5;&#x5F88;&#x65B9;&#x4FBF;&#x5730;&#x89C4;&#x907F;&#x3002;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x5B8F;&#x6765;&#x5BF9;Spark SQL&#x7684;&#x65E2;&#x6709;&#x529F;&#x80FD;&#x505A;&#x589E;&#x5F3A;&#xFF0C;&#x6BD4;&#x5982;</p>
+<p>select * from json.<code>s3://bucket/dir/dt=2020-12-12/</code></p>
+<p>&#x5982;&#x4E0A;&#x8BED;&#x6CD5;&#x662F;Spark SQL&#x5185;&#x7F6E;&#x7684;&#x529F;&#x80FD;&#xFF0C;&#x4F46;&#x5F88;&#x591A;&#x65F6;&#x5019;&#xFF0C;&#x6211;&#x4EEC;&#x7684;&#x6570;&#x636E;&#x5E76;&#x6CA1;&#x6709;&#x6309;&#x7167;&#x65E5;&#x671F;&#x5206;&#x76EE;&#x5F55;&#x7EC4;&#x7EC7;&#xFF0C;&#x800C;&#x662F;&#x6240;&#x6709;&#x6587;&#x4EF6;&#x90FD;&#x5728;&#x4E00;&#x4E2A;&#x76EE;&#x5F55;&#x4E0B;:</p>
+<p>s3://bucket/2020-12-12-13-00-00.json.gz</p>
+<p>s3://bucket/2020-12-12-13-01-00.json.gz</p>
+<p>s3://bucket/2020-12-12-13-02-00.json.gz</p>
+<p>&#x2026;</p>
+<p>s3://bucket/2020-12-13-00-00-00.json.gz</p>
+<p>s3://bucket/2020-12-13-00-00-01.json.gz</p>
+<p>&#x8FD9;&#x4E2A;&#x65F6;&#x5019;&#xFF0C;&#x6211;&#x4EEC;&#x5E0C;&#x671B;&#x4F7F;&#x7528;&#x5982;&#x4E0B;&#x8BED;&#x6CD5;&#x8BBF;&#x95EE;2020&#x5E74;12&#x6708;12&#x65E5;&#x5F53;&#x5929;&#x4E0B;&#x5348;&#x4E00;&#x70B9;&#x7684;&#x6240;&#x6709;&#x6570;&#x636E;&#xFF1A;</p>
+<p>select * from json.<code>s3://bucket/dir/2020-12-12-13\*</code></p>
+<p>&#x4F46;Spark SQL&#x5E76;&#x4E0D;&#x652F;&#x6301;&#x8FD9;&#x6837;&#x7684;&#x8BED;&#x6CD5;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x81EA;&#x5B9A;&#x4E49;&#x8BED;&#x6CD5;&#x7684;&#x65B9;&#x5F0F;&#x6765;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x3002;</p>
+<h2 id="&#x4F46;&#x662F;&#x6211;&#x4EEC;&#x4E0D;&#x60F3;&#x4FEE;&#x6539;Spark-SQL&#x6E90;&#x4EE3;&#x7801;&#xFF0C;&#x5728;Tubi&#x7EF4;&#x62A4;&#x4E00;&#x4E2A;&#x5B9A;&#x5236;&#x8FC7;&#x7684;Spark&#x7248;&#x672C;"><a href="#&#x4F46;&#x662F;&#x6211;&#x4EEC;&#x4E0D;&#x60F3;&#x4FEE;&#x6539;Spark-SQL&#x6E90;&#x4EE3;&#x7801;&#xFF0C;&#x5728;Tubi&#x7EF4;&#x62A4;&#x4E00;&#x4E2A;&#x5B9A;&#x5236;&#x8FC7;&#x7684;Spark&#x7248;&#x672C;" class="headerlink" title="&#x4F46;&#x662F;&#x6211;&#x4EEC;&#x4E0D;&#x60F3;&#x4FEE;&#x6539;Spark SQL&#x6E90;&#x4EE3;&#x7801;&#xFF0C;&#x5728;Tubi&#x7EF4;&#x62A4;&#x4E00;&#x4E2A;&#x5B9A;&#x5236;&#x8FC7;&#x7684;Spark&#x7248;&#x672C;"></a>&#x4F46;&#x662F;&#x6211;&#x4EEC;&#x4E0D;&#x60F3;&#x4FEE;&#x6539;Spark SQL&#x6E90;&#x4EE3;&#x7801;&#xFF0C;&#x5728;Tubi&#x7EF4;&#x62A4;&#x4E00;&#x4E2A;&#x5B9A;&#x5236;&#x8FC7;&#x7684;Spark&#x7248;&#x672C;</h2><p>&#x4E3A;&#x4E86;&#x5B9A;&#x5236;Spark SQL&#x7684;&#x8BED;&#x6CD5;&#xFF0C;&#x6211;&#x4EEC;&#x91C7;&#x7528;&#x4E86;&#x4E00;&#x79CD;&#x975E;&#x5E38;&#x8F7B;&#x91CF;&#x7EA7;&#x7684;&#x65B9;&#x5F0F;&#xFF0C;&#x6765;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/0e2b5f05cb770a728e0b808e8571d67ddf016115cba5461f164b7e2a509d53fe" alt="&#x56FE;&#x7247;"></p>
+<p>Tubi Spark SQL&#x662F;&#x5728;Tubi&#x4F7F;&#x7528;&#x7684;&#x80FD;&#x591F;&#x88AB;Spark SQL Parser&#x89E3;&#x6790;&#x7684;SQL&#x3002;</p>
+<p>&#x5728;&#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#xFF0C;&#x6240;&#x6709;&#x7684;&#x5B8F;&#x90FD;&#x4F1A;&#x88AB;&#x5C55;&#x5F00;&#xFF0C;&#x5728;Tubi Spark SQL&#x4E2D;&#xFF0C;&#x5B8F;&#x4EE5;UDF&#x7684;&#x8BED;&#x6CD5;&#x5F62;&#x5F0F;&#x5B58;&#x5728;&#xFF0C;&#x8FD9;&#x6837;&#x4FDD;&#x8BC1;&#x4E86;Tubi Spark SQL&#x7684;&#x8BED;&#x6CD5;&#x662F;&#x80FD;&#x591F;&#x88AB;Spark SQL Parser&#x89E3;&#x6790;&#x7684;&#x3002;&#x503C;&#x5F97;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x5B8F;&#x53EA;&#x662F;&#x501F;&#x7528;&#x4E86;UDF&#x7684;&#x8BED;&#x6CD5;&#x5F62;&#x5F0F;&#xFF0C;&#x5B8F;&#x7684;&#x6267;&#x884C;&#x662F;&#x5728;&#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#x53D1;&#x751F;&#x7684;&#x3002;&#x5B8F;&#x88AB;&#x5C55;&#x5F00;&#x4E4B;&#x540E;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x83B7;&#x5F97;&#x4E00;&#x4E2A;&#x65B0;&#x7684;Spark SQL&#x8BED;&#x53E5;&#x3002;UDF&#x53EF;&#x4EE5;&#x63A5;&#x53D7;column&#x4F5C;&#x4E3A;&#x53C2;&#x6570;&#xFF0C;&#x800C;&#x5B8F;&#x53EA;&#x80FD;&#x63A5;&#x53D7;&#x5E38;&#x91CF;&#xFF0C;&#x901A;&#x5E38;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;UDF&#x4F1A;&#x88AB;&#x6267;&#x884C;&#x4E0A;&#x4EBF;&#x6B21;&#xFF0C;&#x800C;&#x5B8F;&#x53EA;&#x662F;&#x4F1A;&#x5728;&#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#x88AB;&#x6267;&#x884C;&#x4E00;&#x6B21;&#x3002;</p>
+<p>&#x5728;&#x7B2C;&#x4E8C;&#x9636;&#x6BB5;&#xFF0C;&#x901A;&#x8FC7;&#x5BF9;&#x8BED;&#x6CD5;&#x6811;&#x7684;&#x5206;&#x6790;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8BC6;&#x522B;Spark SQL&#x7684;&#x5404;&#x79CD;&#x6A21;&#x5F0F;&#xFF0C;&#x6BD4;&#x5982;&#x5982;&#x679C;&#x662F;drop database&#x6216;&#x8005;drop table&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x5C06;&#x8FD9;&#x7C7B;SQL&#x8DEF;&#x7531;&#x5230;ForbiddenDropCommand&#xFF0C;&#x800C;ForbiddenDropCommand&#x4EC0;&#x4E48;&#x90FD;&#x4E0D;&#x505A;&#xFF0C;&#x53EA;&#x662F;&#x544A;&#x8BC9;&#x7528;&#x6237;&#xFF0C;&#x8FD9;&#x7C7B;SQL&#x5728;&#x8FD9;&#x4E2A;SQL&#x6267;&#x884C;&#x5668;&#x91CC;&#x9762;&#x65E0;&#x6CD5;&#x6267;&#x884C;&#x3002;&#x5BF9;&#x4E8E;&#x5E38;&#x89C4;&#x7684;SparkSQL&#xFF0C;&#x5C31;&#x8DEF;&#x7531;&#x5230;SparkSQLCommand&#x6267;&#x884C;&#xFF0C;&#x5BF9;&#x4E8E;&#x5176;&#x5B83;&#x7C7B;&#x578B;&#x7684;SQL&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x63D0;&#x4F9B;&#x4E86;&#x4E00;&#x4E9B;&#x5FC5;&#x8981;&#x7684;&#x5B9A;&#x5236;&#x3002;&#x6BD4;&#x5982;&#xFF0C;Delta Lake&#x76EE;&#x524D;&#x5DF2;&#x7ECF;&#x63D0;&#x4F9B;&#x4E86;&#x4E30;&#x5BCC;&#x7684;&#x7F16;&#x7A0B;&#x63A5;&#x53E3;&#xFF0C;&#x4F46;&#x662F;&#x5F88;&#x591A;&#x7F16;&#x7A0B;&#x63A5;&#x53E3;&#x5E76;&#x6CA1;&#x6709;&#x5BF9;&#x5E94;&#x7684;SQL&#x8BED;&#x6CD5;&#x53EF;&#x4F9B;&#x4F7F;&#x7528;&#xFF0C;&#x6211;&#x4EEC;&#x901A;&#x8FC7;&#x8BC6;&#x522B;&#x76F8;&#x5173;&#x6A21;&#x5F0F;&#xFF0C;&#x53EF;&#x4EE5;&#x5C06;&#x7B26;&#x5408;&#x8FD9;&#x4E9B;SQL&#x6A21;&#x5F0F;&#x7684;&#x8BED;&#x6CD5;&#xFF0C;&#x901A;&#x8FC7;Delta&#x4E2D;&#x4E30;&#x5BCC;&#x7684;&#x7F16;&#x7A0B;&#x63A5;&#x53E3;&#x5B9E;&#x73B0;&#x3002;</p>
+<h2 id="&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;all-columns-except"><a href="#&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;all-columns-except" class="headerlink" title="&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;all_columns_except"></a>&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;all_columns_except</h2><p>&#x5BF9;&#x4E8E;all_columns_except&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;&#x5B9E;&#x9645;&#x7684;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>// &#x5047;&#x5B9A;tbl&#x8FD9;&#x4E2A;&#x8868;&#x6709;&#x516D;&#x4E2A;&#x5B57;&#x6BB5;&#xFF1A;col1, col2, col3, col4, col5, col6</p>
+<p>select all_columns_except(&#x201C;tbl&#x201D;, &#x201C;col1&#x201D;, &#x201C;col5&#x201D;) from tbl</p>
+<p>// &#x2014;&gt;  &#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#xFF1A;&#x5B8F;&#x5C55;&#x5F00;</p>
+<p>select col2, col3, col4, col6 from tbl</p>
+<p>// &#x2014;&gt;  &#x7B2C;&#x4E8C;&#x9636;&#x6BB5;&#xFF1A;&#x8DEF;&#x7531;&#x5230;SparkSQLCommand&#x6267;&#x884C;</p>
+<h2 id="&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;tubi-json"><a href="#&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;tubi-json" class="headerlink" title="&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;tubi_json"></a>&#x6848;&#x4F8B;&#x5206;&#x6790;&#xFF1A;tubi_json</h2><p>&#x5BF9;&#x4E8E;json&#x652F;&#x6301;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;&#x5B9E;&#x9645;&#x7684;&#x6267;&#x884C;&#x8FC7;&#x7A0B;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>select * from tubi_json.<code>s3://bucket/dir/2020-12-13\*</code></p>
+<p>// &#x2013;&gt; &#x7B2C;&#x4E00;&#x9636;&#x6BB5;&#xFF1A;&#x5B8F;&#x5C55;&#x5F00;&#xFF08;&#x91CC;&#x9762;&#x6CA1;&#x6709;&#x5B8F;&#xFF0C;&#x6240;&#x4EE5;SQL&#x4FDD;&#x6301;&#x4E0D;&#x53D8;&#xFF09;</p>
+<p>select * from tubi_json.<code>s3://bucket/dir/2020-12-13\*</code></p>
+<p>// &#x2013;&gt; &#x7B2C;&#x4E8C;&#x9636;&#x6BB5;&#xFF1A;&#x8DEF;&#x7531;&#x5230;TubiJSONCommand&#xFF0C;&#x5E76;&#x6267;&#x884C;&#x76F8;&#x5173;&#x903B;&#x8F91;</p>
+<ol>
+<li>&#x4ECE; <code>s3://bucket/dir/2020-12-13\*</code> &#x52A0;&#x8F7D;&#x6570;&#x636E;&#x5E76;&#x4E3A;&#x8FD9;&#x4E9B;&#x6570;&#x636E;&#x521B;&#x5EFA;&#x4E34;&#x65F6;&#x8868;<code>temp\_vew</code></li>
+</ol>
+<ol start="2">
+<li>&#x6267;&#x884C; spark.sql(&#x201C;select * from temp_view&#x201D;)</li>
+</ol>
+<p>&#x901A;&#x8FC7;&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#xFF0C;&#x6211;&#x4EEC;&#x5C31;&#x5B9E;&#x73B0;&#x4E86;&#x5BF9;Spark SQL&#x7684;&#x5B9A;&#x5236;&#xFF0C;&#x4E14;&#x5177;&#x5907;&#x4EE5;&#x4E0B;&#x4F18;&#x52BF;&#xFF1A;</p>
+<ol>
+<li>&#x4E0D;&#x9700;&#x8981;&#x4FEE;&#x6539;Spark&#x6E90;&#x4EE3;&#x7801;&#xFF0C;&#x7EF4;&#x62A4;&#x81EA;&#x5DF1;&#x7684;Spark&#x5B9A;&#x5236;&#x7248;&#x672C;&#xFF1B;</li>
+<li>&#x4E0D;&#x9700;&#x8981;&#x81EA;&#x5B9A;&#x4E49;Antlr 4&#x7684;&#x8BED;&#x6CD5;&#x6587;&#x4EF6;&#xFF0C;&#x590D;&#x7528;&#x65E2;&#x6709;&#x7684;Spark SQL Parser&#x548C;&#x8BED;&#x6CD5;&#x5B9A;&#x4E49;&#xFF1B;</li>
+<li>&#x5728;Spark&#x7684;&#x57FA;&#x7840;&#x4E0A;&#xFF0C;&#x65E0;&#x75DB;&#x5B9E;&#x73B0;&#x548C;&#x5347;&#x7EA7;&#x5404;&#x79CD;&#x5B9A;&#x5236;&#x8BED;&#x6CD5;&#x7684;&#x529F;&#x80FD;&#x3002;</li>
+</ol>
+<h2 id="Antlr-4&#x751F;&#x6210;&#x7684;Parser&#x4EE3;&#x7801;&#x975E;&#x5E38;&#x590D;&#x6742;&#xFF0C;&#x57FA;&#x4E8E;&#x8FD9;&#x4E9B;&#x751F;&#x6210;&#x4EE3;&#x7801;&#x505A;&#x7814;&#x53D1;&#xFF0C;&#x4EE3;&#x7801;&#x5F88;&#x96BE;&#x7EF4;&#x62A4;"><a href="#Antlr-4&#x751F;&#x6210;&#x7684;Parser&#x4EE3;&#x7801;&#x975E;&#x5E38;&#x590D;&#x6742;&#xFF0C;&#x57FA;&#x4E8E;&#x8FD9;&#x4E9B;&#x751F;&#x6210;&#x4EE3;&#x7801;&#x505A;&#x7814;&#x53D1;&#xFF0C;&#x4EE3;&#x7801;&#x5F88;&#x96BE;&#x7EF4;&#x62A4;" class="headerlink" title="Antlr 4&#x751F;&#x6210;&#x7684;Parser&#x4EE3;&#x7801;&#x975E;&#x5E38;&#x590D;&#x6742;&#xFF0C;&#x57FA;&#x4E8E;&#x8FD9;&#x4E9B;&#x751F;&#x6210;&#x4EE3;&#x7801;&#x505A;&#x7814;&#x53D1;&#xFF0C;&#x4EE3;&#x7801;&#x5F88;&#x96BE;&#x7EF4;&#x62A4;"></a>Antlr 4&#x751F;&#x6210;&#x7684;Parser&#x4EE3;&#x7801;&#x975E;&#x5E38;&#x590D;&#x6742;&#xFF0C;&#x57FA;&#x4E8E;&#x8FD9;&#x4E9B;&#x751F;&#x6210;&#x4EE3;&#x7801;&#x505A;&#x7814;&#x53D1;&#xFF0C;&#x4EE3;&#x7801;&#x5F88;&#x96BE;&#x7EF4;&#x62A4;</h2><p>&#x5728;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x4E2D;&#xFF0C;&#x6700;&#x9EBB;&#x70E6;&#x7684;&#x4E8B;&#x60C5;&#x83AB;&#x8FC7;&#x4E8E;&#x505A;&#x5B8F;&#x7684;&#x66FF;&#x6362;&#x548C;SQL&#x7684;&#x6A21;&#x5F0F;&#x8BC6;&#x522B;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E;&#x5B8F;&#x7684;&#x66FF;&#x6362;&#x800C;&#x8A00;&#xFF0C;&#x53EA;&#x8981;&#x4E86;&#x89E3;Antlr 4&#x4E2D;&#x548C;Rewriter&#x76F8;&#x5173;&#x7684;API&#xFF0C;&#x95EE;&#x9898;&#x5C31;&#x53EF;&#x4EE5;&#x8FCE;&#x5203;&#x800C;&#x89E3;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E;&#x6A21;&#x5F0F;&#x8BC6;&#x522B;&#x800C;&#x8A00;&#xFF0C;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5206;&#x6790;&#x62BD;&#x8C61;&#x8BED;&#x6CD5;&#x6811;&#xFF0C;&#x5C06;&#x7B26;&#x5408;&#x7279;&#x5B9A;&#x6A21;&#x5F0F;&#x7684;SQL&#x8DEF;&#x7531;&#x5230;&#x7279;&#x5B9A;&#x7684;Command&#x6267;&#x884C;&#x3002;Antlr 4&#x63D0;&#x4F9B;&#x4E86;&#x4E24;&#x79CD;&#x6A21;&#x5F0F;&#x6765;&#x8BBF;&#x95EE;&#x4ECE;SQL&#x6784;&#x5EFA;&#x7684;&#x62BD;&#x8C61;&#x8BED;&#x6CD5;&#x6811;&#xFF1A;Listener&#x548C;Visitor&#x3002;Spark Catalyst&#x6A21;&#x5757;&#x6240;&#x4F7F;&#x7528;&#x7684;&#x662F;Visitor&#x6A21;&#x5F0F;&#x3002;&#x5BF9;&#x4E8E;Apache Spark&#x8FD9;&#x6837;&#x7684;&#x5927;&#x578B;&#x9879;&#x76EE;&#x6765;&#x8BF4;&#xFF0C;Visitor&#x6A21;&#x5F0F;&#x662F;&#x9002;&#x7528;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x5BF9;&#x4E8E;&#x6211;&#x4EEC;&#x6765;&#x8BF4;&#xFF0C;&#x65E0;&#x8BBA;&#x662F;Vistor&#x6A21;&#x5F0F;&#x8FD8;&#x662F;Listener&#x6A21;&#x5F0F;&#xFF0C;&#x90FD;&#x8FC7;&#x4E8E;&#x590D;&#x6742;&#x3002;&#x5982;&#x679C;&#x662F;&#x4E00;&#x6B21;&#x6027;&#x7684;&#x62BD;&#x8C61;&#x6811;&#x5206;&#x6790;&#xFF0C;&#x6211;&#x4EEC;&#x8FD8;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;Antlr&#x652F;&#x6301;&#x7684;XPath&#xFF0C;&#x91C7;&#x7528;XPath&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x7684;&#x548C;&#x91C7;&#x7528;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x505A;&#x6587;&#x672C;&#x5904;&#x7406;&#x7684;&#x7F3A;&#x9677;&#x662F;&#x7C7B;&#x4F3C;&#x7684;&#xFF0C;&#x8BD8;&#x5C48;&#x8071;&#x7259;&#x4E14;&#x96BE;&#x4EE5;&#x7EF4;&#x62A4;&#x3002;</p>
+<p>Scala&#x6807;&#x51C6;&#x5E93;&#x4E2D;&#x7684;&#x96C6;&#x5408;&#xFF0C;&#x63D0;&#x4F9B;&#x4E86;&#x5927;&#x91CF;&#x6613;&#x7528;&#x7684;&#x7B97;&#x5B50;&#xFF0C;&#x6BD4;&#x5982;map/filter/count/find&#x7B49;&#x3002;Apache Spark&#x7684;API&#x8BBE;&#x8BA1;&#x4E5F;&#x53D7;&#x5230;&#x4E86;Scala&#x6807;&#x51C6;&#x5E93;&#x4E2D;&#x8FD9;&#x4E9B;&#x7B97;&#x5B50;&#x7684;&#x5F71;&#x54CD;&#xFF0C;&#x65E0;&#x8BBA;&#x662F;&#x504F;&#x5E95;&#x5C42;&#x7684;RDD&#x8FD8;&#x662F;&#x5E94;&#x7528;&#x5C42;DataFrame&#xFF0C;&#x90FD;&#x4F1A;&#x5B9E;&#x73B0;&#x8FD9;&#x4E9B;&#x7B97;&#x5B50;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E;&#x4ECE;SQL&#x6784;&#x5EFA;&#x7684;&#x62BD;&#x8C61;&#x8BED;&#x6CD5;&#x6811;&#xFF0C;&#x6211;&#x4EEC;&#x4E5F;&#x53EF;&#x4EE5;&#x8BBE;&#x8BA1;&#x7C7B;&#x4F3C;&#x7684;&#x7B97;&#x5B50;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ac455b716ef225d86f335558052294c58698aa81f5be28ed6cf85e320246b239" alt="&#x56FE;&#x7247;"></p>
+<p>&#x6BD4;&#x5982;&#xFF0C;&#x5224;&#x65AD;&#x4E00;&#x4E2A;SQL&#x4E2D;&#x662F;&#x5426;&#x5B58;&#x5728;tubi_json.<code>s3://xxxx/yyyy\*</code>&#x8FD9;&#x79CD;&#x6A21;&#x5F0F;&#xFF0C;&#x57FA;&#x4E8E;&#x4E0A;&#x9762;&#x7684;&#x7B97;&#x5B50;&#xFF0C;&#x76F8;&#x5173;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF0C;&#x7B80;&#x6D01;&#x4E14;&#x6613;&#x4E8E;&#x7EF4;&#x62A4;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/f4466cde9a77587ecc385f8fc991cf0d3b2a680d44b4a41854ed1631cffd885f" alt="&#x56FE;&#x7247;"></p>
+<p>&#x5BF9;&#x4E8E;&#x8FD9;&#x4E2A;&#x8BDD;&#x9898;&#xFF0C;&#x5728;&#x4E0A;&#x4E00;&#x6B21;Scala Meetup&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x5DF2;&#x7ECF;&#x4F7F;&#x7528;&#x56DB;&#x5219;&#x8FD0;&#x7B97;&#x8868;&#x8FBE;&#x5F0F;&#x5316;&#x7B80;&#x8FD9;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;&#x5B8C;&#x6574;&#x7684;&#x8BB2;&#x89E3;&#x4E86;&#x5176;&#x4E2D;&#x7684;&#x8BBE;&#x8BA1;&#x5B9E;&#x73B0;&#x548C;&#x6280;&#x672F;&#x7EC6;&#x8282;&#x3002;&#x672C;&#x6587;&#x4E0D;&#x518D;&#x8D58;&#x8FF0;&#xFF0C;&#x611F;&#x5174;&#x8DA3;&#x7684;&#x8BFB;&#x8005;&#x9605;&#x8BFB;<a href="/external_links/853c79760b9c7cf77530118e39efd902.html" target="blank" rel="noopener">&#x300A;2020-09 Online Scala Meetup&#x4E4B;&#x89C2;&#x4F17;&#x5FC3;&#x5F97;&#x300B;</a>&#x7684;&#x7B2C;&#x4E09;&#x90E8;&#x5206;&#xFF0C;&#x76F8;&#x5173;&#x89C6;&#x9891;&#x56DE;&#x653E;&#x4E5F;&#x53EF;&#x4EE5;&#x5728;&#x201C;&#x6BD4;&#x56FE;&#x79D1;&#x6280;&#x201D;&#x7684;&#x5B98;&#x65B9;Bilibili&#x5E10;&#x53F7;&#x627E;&#x5230;&#x3002;</p>
+<p>&#x53E6;&#x5916;&#xFF0C;&#x6B64;&#x6B21;&#x6211;&#x5728;Datafun&#x7684;&#x5E74;&#x7EC8;&#x5927;&#x4F1A;&#x7684;&#x5927;&#x6570;&#x636E;&#x67B6;&#x6784;&#x8BBA;&#x575B;&#x4F1A;&#x6709;&#x66F4;&#x8BE6;&#x7EC6;&#x7684;&#x4E00;&#x4E9B;&#x5206;&#x4EAB;&#xFF0C;&#x4E5F;&#x6B22;&#x8FCE;&#x5927;&#x5BB6;&#x4E00;&#x8D77;&#x4EA4;&#x6D41;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/3f4fc021676be585171d71420b7dd40211f9e0ff2c6eb63a5f72642542d523d9" alt="&#x56FE;&#x7247;"></p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/8c2e4eb7ccbab8c54009093b58af376c3dc1f30a58c9781389c620ea9b06c66c" alt="&#x56FE;&#x7247;"></p>
+<p>&#x672C;&#x6587;&#x4F5C;&#x8005;&#xFF1A;&#x6C88;&#x8FBE;@Tubi</p>
+<p>&#x5BA1;&#x6821;&#xFF1A;&#x6768;&#x5B87;&#x4F73;@Tubi</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/e0ab79016bb7a97b1f6b149e077d7c03.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/大数据/" rel="tag"># 大数据</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6948797533154082853.html" rel="next" title="并发编程-深入JMM内存模型与Volatile 一、CPU高">
+                <i class="fa fa-chevron-left"></i> 并发编程-深入JMM内存模型与Volatile 一、CPU高
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6949048500038402062.html" rel="prev" title="Android组件化实战之利用Maven优雅地调试SDK">
+                Android组件化实战之利用Maven优雅地调试SDK <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#我们需要定制Spark-SQL"><span class="nav-number">1.</span> <span class="nav-text">我们需要定制Spark SQL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#但是我们不想修改Spark-SQL源代码，在Tubi维护一个定制过的Spark版本"><span class="nav-number">2.</span> <span class="nav-text">但是我们不想修改Spark SQL源代码，在Tubi维护一个定制过的Spark版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#案例分析：all-columns-except"><span class="nav-number">3.</span> <span class="nav-text">案例分析：all_columns_except</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#案例分析：tubi-json"><span class="nav-number">4.</span> <span class="nav-text">案例分析：tubi_json</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Antlr-4生成的Parser代码非常复杂，基于这些生成代码做研发，代码很难维护"><span class="nav-number">5.</span> <span class="nav-text">Antlr 4生成的Parser代码非常复杂，基于这些生成代码做研发，代码很难维护</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

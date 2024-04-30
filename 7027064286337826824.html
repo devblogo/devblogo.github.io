@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数据库,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x539F;&amp;#x6587;&amp;#xFF1A;zhuanlan.zhihu.com/p/409323151 &amp;#x95EE;&amp;#x9898;&amp;#x63CF;&amp;#x8FF0;&amp;#x540C;&amp;#x4E8B;A&amp;#x6765;&amp;#x95EE;&amp;#x6211;&amp;#x8FD9;&amp;#x4E2A;&amp;#x5047;DBA&amp;#x4E00;&amp;#x6761;SQL&amp;#x7684;&amp;#x6027;&amp;#x80FD;&amp;#">
+<meta name="keywords" content="数据库">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从一个有趣的SQL优化案例，自顶向下了解数据库优化机制 问题">
+<meta property="og:url" content="https://dev.newban.cn/7027064286337826824.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x539F;&amp;#x6587;&amp;#xFF1A;zhuanlan.zhihu.com/p/409323151 &amp;#x95EE;&amp;#x9898;&amp;#x63CF;&amp;#x8FF0;&amp;#x540C;&amp;#x4E8B;A&amp;#x6765;&amp;#x95EE;&amp;#x6211;&amp;#x8FD9;&amp;#x4E2A;&amp;#x5047;DBA&amp;#x4E00;&amp;#x6761;SQL&amp;#x7684;&amp;#x6027;&amp;#x80FD;&amp;#">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-29T12:53:58.616Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从一个有趣的SQL优化案例，自顶向下了解数据库优化机制 问题">
+<meta name="twitter:description" content="&amp;#x539F;&amp;#x6587;&amp;#xFF1A;zhuanlan.zhihu.com/p/409323151 &amp;#x95EE;&amp;#x9898;&amp;#x63CF;&amp;#x8FF0;&amp;#x540C;&amp;#x4E8B;A&amp;#x6765;&amp;#x95EE;&amp;#x6211;&amp;#x8FD9;&amp;#x4E2A;&amp;#x5047;DBA&amp;#x4E00;&amp;#x6761;SQL&amp;#x7684;&amp;#x6027;&amp;#x80FD;&amp;#">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7027064286337826824.html">
+
+
+
+
+
+  <title>从一个有趣的SQL优化案例，自顶向下了解数据库优化机制 问题 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从一个有趣的SQL优化案例，自顶向下了解数据库优化机制 问题</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-05T20:44:43+08:00">
+                2021-11-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x539F;&#x6587;&#xFF1A;<a href="/external_links/b23c9edb381b8f49554d3da6e42e9c01.html" target="blank" rel="noopener">zhuanlan.zhihu.com/p/409323151</a></p>
+<h1 id="&#x95EE;&#x9898;&#x63CF;&#x8FF0;"><a href="#&#x95EE;&#x9898;&#x63CF;&#x8FF0;" class="headerlink" title="&#x95EE;&#x9898;&#x63CF;&#x8FF0;"></a>&#x95EE;&#x9898;&#x63CF;&#x8FF0;</h1><p>&#x540C;&#x4E8B;A&#x6765;&#x95EE;&#x6211;&#x8FD9;&#x4E2A;&#x5047;DBA&#x4E00;&#x6761;SQL&#x7684;&#x6027;&#x80FD;&#x95EE;&#x9898;&#xFF1A;</p>
+<ul>
+<li>A&#xFF1A;&#x4E24;&#x6761;SQL&#x8BED;&#x53E5;&#x53EA;&#x6709;limit&#x4E0D;&#x4E00;&#x6837;&#xFF0C;&#x800C;<code>limit 1</code>&#x7684;&#x6267;&#x884C;&#x6BD4;<code>limit 10</code>&#x7684;&#x6162;N&#x500D;</li>
+<li>&#x6211;&#xFF1A;&#x662F;&#x4E0D;&#x662F;&#x7F13;&#x5B58;&#x95EE;&#x9898;&#xFF0C;&#x5148;&#x6267;&#x884C;<code>limit 10</code>&#x518D;&#x6267;&#x884C;<code>limit 1</code>&#x8BD5;&#x8BD5;</li>
+<li>A&#xFF1A;&#x2026;&#x2026;&#xFF0C;&#x6267;&#x884C;&#x4E86;&#xFF0C;<code>limit</code> &#x8FD8;&#x662F;&#x5F88;&#x6162;</li>
+</ul>
+<p><strong>&#x4E24;&#x6761;SQL&#x751F;&#x4EA7;&#x73AF;&#x5883;&#x6267;&#x884C;&#x60C5;&#x51B5;</strong></p>
+<p>limit 10</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 10;</span><br></pre></td></tr></table></figure>
+
+<p>Execution Time: 1.307 ms</p>
+<p>limit 1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 1;</span><br></pre></td></tr></table></figure>
+
+<p>Execution Time: 144.098 ms</p>
+<h1 id="&#x5206;&#x6790;"><a href="#&#x5206;&#x6790;" class="headerlink" title="&#x5206;&#x6790;"></a>&#x5206;&#x6790;</h1><h2 id="&#x6267;&#x884C;&#x8BA1;&#x5212;"><a href="#&#x6267;&#x884C;&#x8BA1;&#x5212;" class="headerlink" title="&#x6267;&#x884C;&#x8BA1;&#x5212;"></a>&#x6267;&#x884C;&#x8BA1;&#x5212;</h2><p>&#x65E2;&#x7136;&#x4E0D;&#x662F;&#x7F13;&#x5B58;&#x95EE;&#x9898;&#xFF0C;&#x90A3;&#x6211;&#x4EEC;&#x5148;&#x770B;&#x770B;&#x6267;&#x884C;&#x8BA1;&#x5212;&#x6709;&#x4EC0;&#x4E48;&#x4E0D;&#x4E00;&#x6837;&#x7684;</p>
+<p>limit 1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# explain analyze verbose select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 1;</span><br><span class="line">                                                                                QUERY PLAN</span><br><span class="line">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line"> Limit  (cost=0.43..416.25 rows=1 width=73) (actual time=135.213..135.214 rows=1 loops=1)</span><br><span class="line">   Output: xxx</span><br><span class="line">   -&gt;  Index Scan Backward using user_gift_pkey on yay.user_gift  (cost=0.43..368000.44 rows=885 width=73) (actual time=135.212..135.212 rows=1 loops=1)</span><br><span class="line">         Output: xxx</span><br><span class="line">         Filter: ((user_gift.user_id = 11695667) AND (user_gift.user_type = &apos;default&apos;::user_type))</span><br><span class="line">         Rows Removed by Filter: 330192</span><br><span class="line"> Planning Time: 0.102 ms</span><br><span class="line"> Execution Time: 135.235 ms</span><br><span class="line">(8 rows)</span><br><span class="line"></span><br><span class="line">Time: 135.691 ms</span><br></pre></td></tr></table></figure>
+
+<p>limit 10</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# explain analyze verbose select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 10;</span><br><span class="line">                                                                        QUERY PLAN</span><br><span class="line">----------------------------------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line"> Limit  (cost=868.20..868.22 rows=10 width=73) (actual time=1.543..1.545 rows=10 loops=1)</span><br><span class="line">   Output: xxx</span><br><span class="line">   -&gt;  Sort  (cost=868.20..870.41 rows=885 width=73) (actual time=1.543..1.543 rows=10 loops=1)</span><br><span class="line">         Output: xxx</span><br><span class="line">         Sort Key: user_gift.id DESC</span><br><span class="line">         Sort Method: top-N heapsort  Memory: 27kB</span><br><span class="line">         -&gt;  Index Scan using idx_user_type on yay.user_gift  (cost=0.56..849.07 rows=885 width=73) (actual time=0.020..1.366 rows=775 loops=1)</span><br><span class="line">               Output: xxx</span><br><span class="line">               Index Cond: (user_gift.user_id = 11695667)</span><br><span class="line">               Filter: (user_gift.user_type = &apos;default&apos;::user_type)</span><br><span class="line"> Planning Time: 0.079 ms</span><br><span class="line"> Execution Time: 1.564 ms</span><br><span class="line">(12 rows)</span><br><span class="line"></span><br><span class="line">Time: 1.871 ms</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#xFF0C;&#x4E24;&#x4E2A;SQL&#x6267;&#x884C;&#x8BA1;&#x5212;&#x4E0D;&#x4E00;&#x6837;&#xFF1A;</p>
+<ul>
+<li><code>limit 1</code>&#x8BED;&#x53E5; &#xFF1A;&#x4F7F;&#x7528;&#x4E3B;&#x952E;&#x8FDB;&#x884C;&#x5012;&#x5E8F;&#x626B;&#x63CF;&#xFF0C; <code>Index Scan Backward using user_gift_pkey on yay.user_gift</code></li>
+<li><code>limit 10</code>&#x8BED;&#x53E5; &#xFF1A;&#x4F7F;&#x7528;(user_id, user_type)&#x590D;&#x5408;&#x7D22;&#x5F15;&#x76F4;&#x63A5;&#x67E5;&#x627E;&#x7528;&#x6237;&#x6570;&#x636E;&#xFF0C;<code>Index Scan using idx_user_type on yay.user_gift</code></li>
+</ul>
+<p>&#x4E3A;&#x4EC0;&#x4E48;&#x6267;&#x884C;&#x8BA1;&#x5212;&#x4E0D;&#x4E00;&#x6837;&#xFF1F;</p>
+<p><strong>total cost</strong></p>
+<p>&#x5176;&#x5B9E;postgreSQL&#x7684;&#x6267;&#x884C;&#x8BA1;&#x5212;&#x5E76;&#x6CA1;&#x6709;&#x201C;&#x95EE;&#x9898;&#x201D;&#xFF0C;&#x56E0;&#x4E3A;<code>limit 1</code>&#x7684;total cost<br><code>Limit (cost=0.43..416.25 rows=1 width=73)</code> &#x662F;416&#xFF0C;run cost&#x662F;416-0.43=415.57&#x3002;&#x800C;<code>limit 10</code>&#x7684;total cost<br><code>Limit (cost=868.20..868.22 rows=10 width=73)</code>&#x662F;868.22&#x3002;</p>
+<p>&#x5982;&#x679C;&#x4F7F;&#x7528;<code>Index Scan Backward using user_gift_pkey</code>&#x7684;&#x65B9;&#x5F0F;&#x4F30;&#x7B97;&#xFF0C;&#x90A3;&#x4E48;<code>limit 1</code>&#x6210;&#x672C;&#x662F;415, <code>limit 2</code>&#x662F;415*2=830, <code>limit 3</code> &#x662F; 1245&#xFF0C;&#x5927;&#x4E8E;868&#xFF0C;&#x6240;&#x4EE5;&#x5F53;<code>limit 3</code>&#x7684;&#x65F6;&#x5019;&#x4F1A;&#x4F7F;&#x7528;<code>Index Scan using idx_user_type</code>&#x626B;&#x7D22;&#x5F15;&#x7684;&#x8BA1;&#x5212;&#x3002;</p>
+<p><strong>&#x9A8C;&#x8BC1;</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# explain  select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 2;</span><br><span class="line">                                                       QUERY PLAN</span><br><span class="line">-------------------------------------------------------------------------------------------------------------------------</span><br><span class="line"> Limit  (cost=0.43..831.95 rows=2 width=73)</span><br><span class="line">   -&gt;  Index Scan Backward using user_gift_pkey on user_gift  (cost=0.43..367528.67 rows=884 width=73)</span><br><span class="line">         Filter: ((user_id = 11695667) AND (user_type = &apos;default&apos;::user_type))</span><br><span class="line">(3 rows)</span><br><span class="line"> </span><br><span class="line">Time: 0.341 ms</span><br><span class="line"># explain  select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 3;</span><br><span class="line">                                                QUERY PLAN</span><br><span class="line">----------------------------------------------------------------------------------------------------------</span><br><span class="line"> Limit  (cost=866.19..866.20 rows=3 width=73)</span><br><span class="line">   -&gt;  Sort  (cost=866.19..868.40 rows=884 width=73)</span><br><span class="line">         Sort Key: id DESC</span><br><span class="line">         -&gt;  Index Scan using idx_user_type on user_gift  (cost=0.56..854.76 rows=884 width=73)</span><br><span class="line">               Index Cond: (user_id = 11695667)</span><br><span class="line">               Filter: (user_type = &apos;default&apos;::user_type)</span><br><span class="line">(6 rows)</span><br><span class="line"> </span><br><span class="line">Time: 0.352 ms</span><br></pre></td></tr></table></figure>
+
+<p>&#x7ED3;&#x679C;&#x663E;&#x793A;&#xFF1A;</p>
+<ul>
+<li>&#x5F53;<code>limit 2</code>&#x65F6;&#xFF0C;&#x6267;&#x884C;&#x8BA1;&#x5212;&#x662F;<code>Index Scan Backward using user_gift_pkey</code></li>
+<li>&#x5F53;<code>limit 3</code>&#x65F6;&#xFF0C;&#x5C31;&#x6539;&#x53D8;&#x8BA1;&#x5212;&#x4E86;&#xFF0C;<code>Index Scan using idx_user_type on user_gift</code></li>
+</ul>
+<h2 id="&#x5B9E;&#x9645;&#x6267;&#x884C;&#x65F6;&#x95F4;"><a href="#&#x5B9E;&#x9645;&#x6267;&#x884C;&#x65F6;&#x95F4;" class="headerlink" title="&#x5B9E;&#x9645;&#x6267;&#x884C;&#x65F6;&#x95F4;"></a>&#x5B9E;&#x9645;&#x6267;&#x884C;&#x65F6;&#x95F4;</h2><p><code>limit 1</code>&#x65F6;&#x6210;&#x672C;&#x4F30;&#x7B97;&#x7684;&#x662F;416.25&#xFF0C;&#x6BD4;<code>limit 10</code>&#x7684;<code>868.22</code>&#x8FD8;&#x662F;&#x8981;&#x5FEB;&#x7684;&#x3002;  </p>
+<p>&#x4F46;&#x662F;&#x5B9E;&#x9645;<code>limit 1</code>&#x6267;&#x884C;cost&#x662F;135.691 ms&#xFF0C;&#x800C;<code>limit 10</code>&#x6267;&#x884C;cost&#x662F;1.871 ms&#xFF0C;&#x6BD4;<code>limit 10</code>&#x6162;&#x4E86;70&#x500D;&#xFF01;&#xFF01;&#xFF01;</p>
+<p>&#x6211;&#x4EEC;&#x91CD;&#x65B0;&#x6267;&#x884C;&#x4E0B;explain&#xFF0C;&#x52A0;&#x4E0A;buffers&#x9009;&#x9879;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# explain (analyze, buffers, verbose)  select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 1;</span><br><span class="line">                                                                                QUERY PLAN</span><br><span class="line">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line"> Limit  (cost=0.43..416.29 rows=1 width=73) (actual time=451.542..451.544 rows=1 loops=1)</span><br><span class="line">   Output: xxx</span><br><span class="line">   Buffers: shared hit=214402 read=5280 dirtied=2302</span><br><span class="line">   I/O Timings: read=205.027</span><br><span class="line">   -&gt;  Index Scan Backward using user_gift_pkey on yay.user_gift  (cost=0.43..368032.94 rows=885 width=73) (actual time=451.540..451.540 rows=1 loops=1)</span><br><span class="line">         Output: xxx</span><br><span class="line">         Filter: ((user_gift.user_id = 11695667) AND (user_gift.user_type = &apos;default&apos;::user_type))</span><br><span class="line">         Rows Removed by Filter: 333462</span><br><span class="line">         Buffers: shared hit=214402 read=5280 dirtied=2302</span><br><span class="line">         I/O Timings: read=205.027</span><br><span class="line"> Planning Time: 1.106 ms</span><br><span class="line"> Execution Time: 451.594 ms</span><br><span class="line">(12 rows)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;# explain (analyze, buffers, verbose)  select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id desc limit 3;</span><br><span class="line">                                                                        QUERY PLAN</span><br><span class="line">-----------------------------------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line"> Limit  (cost=860.51..860.52 rows=3 width=73) (actual time=14.633..14.634 rows=3 loops=1)</span><br><span class="line">   Output: xxx</span><br><span class="line">   Buffers: shared hit=467 read=321</span><br><span class="line">   I/O Timings: read=10.112</span><br><span class="line">   -&gt;  Sort  (cost=860.51..862.72 rows=885 width=73) (actual time=14.632..14.632 rows=3 loops=1)</span><br><span class="line">         Output: xxx</span><br><span class="line">         Sort Key: user_gift.id DESC</span><br><span class="line">         Sort Method: top-N heapsort  Memory: 25kB</span><br><span class="line">         Buffers: shared hit=467 read=321</span><br><span class="line">         I/O Timings: read=10.112</span><br><span class="line">         -&gt;  Index Scan using idx_user_type on yay.user_gift  (cost=0.56..849.07 rows=885 width=73) (actual time=0.192..14.424 rows=775 loops=1)</span><br><span class="line">               Output: xxx</span><br><span class="line">               Index Cond: (user_gift.user_id = 11695667)</span><br><span class="line">               Filter: (user_gift.user_type = &apos;default&apos;::user_type)</span><br><span class="line">               Buffers: shared hit=464 read=321</span><br><span class="line">               I/O Timings: read=10.112</span><br><span class="line"> Planning Time: 0.111 ms</span><br><span class="line"> Execution Time: 14.658 ms</span><br><span class="line">(18 rows)</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF1A;</p>
+<ul>
+<li><code>limit 1</code>&#x65F6;&#x7684;IO&#x6210;&#x672C;<code>I/O Timings: read=205.027</code>&#xFF0C;<code>Rows Removed by Filter: 333462</code>&#x663E;&#x793A;&#x8FC7;&#x6EE4;&#x4E86;333462&#x884C;&#x8BB0;&#x5F55;</li>
+<li><code>limit 3</code>&#x65F6;IO&#x6210;&#x672C;<code>I/O Timings: read=10.112</code>&#xFF0C;</li>
+</ul>
+<p>&#x4ECE;&#x4E0A;&#x9762;&#x8F93;&#x51FA;<code>Buffers: shared hit=214402 read=5280 dirtied=2302</code>&#x53EF;&#x4EE5;&#x770B;&#x51FA;<code>limit 1</code>&#x7684;&#x8BA1;&#x5212;&#x4ECE;&#x78C1;&#x76D8;&#x8BFB;&#x53D6;&#x4E86;5280&#x4E2A;blocks(pages)&#x624D;&#x627E;&#x5230;&#x7B26;&#x5408;where&#x6761;&#x4EF6;&#x7684;&#x8BB0;&#x5F55;&#x3002;</p>
+<p>&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x8BFB;&#x53D6;&#x8FD9;&#x4E48;&#x591A;&#x6570;&#x636E;&#x5462;&#xFF1F;&#x6211;&#x4EEC;&#x6765;&#x770B;&#x770B;&#x7EDF;&#x8BA1;&#x4FE1;&#x606F;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">arduino&#x590D;&#x5236;&#x4EE3;&#x7801;schemaname             | yay</span><br><span class="line">tablename              | user_gift</span><br><span class="line">attname                | id</span><br><span class="line">inherited              | f</span><br><span class="line">null_frac              | 0</span><br><span class="line">avg_width              | 8</span><br><span class="line">n_distinct             | -1</span><br><span class="line">most_common_vals       | </span><br><span class="line">most_common_freqs      | </span><br><span class="line">histogram_bounds       | {93,9817,19893,28177,.......}</span><br><span class="line">correlation            | 0.788011</span><br><span class="line">most_common_elems      | </span><br><span class="line">most_common_elem_freqs | </span><br><span class="line">elem_count_histogram   | </span><br><span class="line"></span><br><span class="line">schemaname             | yay</span><br><span class="line">tablename              | user_gift</span><br><span class="line">attname                | user_id</span><br><span class="line">inherited              | f</span><br><span class="line">null_frac              | 0</span><br><span class="line">avg_width              | 4</span><br><span class="line">n_distinct             | -0.175761</span><br><span class="line">most_common_vals       | {11576819,10299480,14020501,.......,11695667,......}</span><br><span class="line">most_common_freqs      | {0.000353333,0.000326667,0.000246667,......,9.33333e-05,......}</span><br><span class="line">histogram_bounds       | {3,10002181,10005599,10009672,......,11693300,11698290,......}</span><br><span class="line">correlation            | 0.53375</span><br><span class="line">most_common_elems      | </span><br><span class="line">most_common_elem_freqs | </span><br><span class="line">elem_count_histogram   | </span><br><span class="line"></span><br><span class="line">schemaname             | yay</span><br><span class="line">tablename              | user_gift</span><br><span class="line">attname                | user_type</span><br><span class="line">inherited              | f</span><br><span class="line">null_frac              | 0</span><br><span class="line">avg_width              | 4</span><br><span class="line">n_distinct             | 3</span><br><span class="line">most_common_vals       | {default, invalid, deleted}</span><br><span class="line">most_common_freqs      | {0.997923,0.00194,0.000136667}</span><br><span class="line">histogram_bounds       | </span><br><span class="line">correlation            | 0.99763</span><br><span class="line">most_common_elems      | </span><br><span class="line">most_common_elem_freqs | </span><br><span class="line">elem_count_histogram   |</span><br></pre></td></tr></table></figure>
+
+<p>&#x4ECE;&#x7EDF;&#x8BA1;&#x4FE1;&#x606F;&#x91CC;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF1A;</p>
+<ul>
+<li><code>user_id</code>&#x5B57;&#x6BB5;&#x7684;<code>most_common_vals</code>&#x4E2D;&#x6709;11695667(user_id)&#x7684;&#x503C;&#xFF0C;&#x5219;&#x53EF;&#x4EE5;&#x76F4;&#x63A5;&#x901A;&#x8FC7;&#x5176;&#x5BF9;&#x5E94;&#x7684;<code>most_common_freqs</code>&#x6765;&#x5F97;&#x5230;&#x5176;selectivity&#x662F;9.33333e-05&#xFF1B;</li>
+<li><code>user_type</code>&#x5B57;&#x6BB5;&#x4E3A;<code>default</code>&#x5BF9;&#x5E94;&#x7684;selectivity&#x662F;0.997923&#x3002;</li>
+<li>&#x6240;&#x4EE5;<code>where user_id=11695667 and user_type=&apos;default&apos;</code>&#x7684;selectivity&#x662F;0.0000933333*0.997923 = 0.0000931394467359&#x3002;</li>
+</ul>
+<p>&#x90A3;&#x4E48;&#x53EF;&#x4EE5;&#x4F30;&#x7B97;&#x51FA;&#x6EE1;&#x8DB3;where&#x6761;&#x4EF6;&#x7684;&#x7528;&#x6237;&#x6570;&#x662F;0.0000931394467359 * 9499740(&#x603B;&#x7528;&#x6237;&#x6570;) = 884.8&#xFF0C;&#x548C;&#x6267;&#x884C;&#x8BA1;&#x5212;<code>(cost=0.43..367528.67 rows=884 width=73)</code>&#x7684;884&#x884C;&#x4E00;&#x6837;&#x3002;</p>
+<p>&#x800C;&#x4F18;&#x5316;&#x5668;&#x7684;&#x4F30;&#x7B97;&#x662F;&#x57FA;&#x4E8E;&#x6570;&#x636E;&#x5206;&#x5E03;&#x5747;&#x5300;&#x8FD9;&#x4E2A;&#x5047;&#x8BBE;&#x7684;&#xFF1A;</p>
+<ul>
+<li>&#x4ECE;user_gift_pkey(&#x4E3B;&#x952E;id)&#x626B;&#x63CF;&#x7684;&#x8BDD;&#xFF1A;&#x53EA;&#x8981;&#x626B;&#x63CF;9499740/884=10746&#x884C;&#x5C31;&#x80FD;&#x627E;&#x5230;&#x6EE1;&#x8DB3;&#x6761;&#x4EF6;&#x7684;&#x8BB0;&#x5F55;&#xFF0C;&#x4E14;&#x65E0;&#x987B;&#x8FDB;&#x884C;&#x6392;&#x5E8F;(<code>order by id desc</code>)</li>
+<li>&#x4ECE;idx_user_type&#x7D22;&#x5F15;&#x626B;&#x63CF;&#x7684;&#x8BDD;&#xFF1A;&#x867D;&#x7136;&#x80FD;&#x5F88;&#x5FEB;&#x627E;&#x5230;&#x6B64;&#x7528;&#x6237;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x4F46;&#x662F;&#x9700;&#x8981;&#x7ED9;884&#x884C;&#x8FDB;&#x884C;&#x6392;&#x5E8F;&#xFF0C;&#x626B;&#x63CF;+&#x6392;&#x5E8F;&#x7684;cost&#x6BD4;&#x4ECE;&#x4E3B;&#x952E;&#x626B;&#x63CF;&#x8981;&#x9AD8;&#x3002;</li>
+</ul>
+<p>&#x90A3;&#x4E48;&#x6570;&#x636E;&#x5206;&#x5E03;&#x771F;&#x7684;&#x5747;&#x5300;&#x5417;&#xFF1F;&#x7EE7;&#x7EED;&#x67E5;&#x770B;&#x6570;&#x636E;&#x7684;&#x5B9E;&#x9645;&#x5206;&#x5E03;&#xFF1A;</p>
+<ul>
+<li>&#x8868;&#x6700;&#x5927;&#x7684;page=128709</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# select max(ctid) from user_gift;</span><br><span class="line">     max</span><br><span class="line">-------------</span><br><span class="line"> (128709,29)</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>user id=11695667&#x7684;&#x6700;&#x5927;page=124329</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;# select max(ctid), min(ctid) from user_gift where user_id=11695667;</span><br><span class="line">     max     |    min</span><br><span class="line">-------------+-----------</span><br><span class="line"> (124329,22) | (3951,64)</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x8868;&#x672C;&#x8EAB;&#x7684;pages&#x548C;tuples&#x6570;&#x91CF;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# SELECT relpages, reltuples FROM pg_class WHERE relname = &apos;user_gift&apos;;</span><br><span class="line"> relpages |  reltuples</span><br><span class="line">----------+-------------</span><br><span class="line">   128875 | 9.49974e+06</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<p>&#x6BCF;&#x4E2A;page&#x5B58;&#x50A8;&#x7684;&#x8BB0;&#x5F55;&#x6570;&#xFF1A;9.49974e+06 tuples / 128875 pages = 73.713 tuples/page&#x3002;</p>
+<p>&#x8BA1;&#x7B97;&#xFF1A;&#x8868;(main table)&#x7684;B+tree&#x7684;&#x6700;&#x5927;page&#x662F;128709&#xFF0C;&#x800C;&#x5B9E;&#x9645;&#x7528;&#x6237;11695667&#x7684;&#x6700;&#x5927;page&#x662F;124329&#xFF0C;128709 - 124329 = 4380&#xFF0C;&#x9700;&#x8981;&#x626B;&#x63CF;4380&#x4E2A;page&#x624D;&#x80FD;&#x627E;&#x5230;&#x7B26;&#x5408;where&#x6761;&#x4EF6;&#x7684;&#x8BB0;&#x5F55;&#x6240;&#x5728;&#x7684;page&#xFF0C;&#x6240;&#x4EE5;&#x8FC7;&#x6EE4;&#x7684;rows&#x662F;4380 pages * 73.713 tuples/page &#x2248; 322862&#x3002;</p>
+<p>&#x5B9E;&#x9645;<code>limit 1</code>&#x65F6;&#x626B;&#x63CF;&#x4E86;5280&#x4E2A;pages(&#x5305;&#x542B;&#x4E86;&#x4E3B;&#x952E;&#x7D22;&#x5F15;&#x7684;pages)&#xFF0C;&#x8FC7;&#x6EE4;&#x4E86;333462&#x4E07;&#x884C;&#x8BB0;&#x5F55;&#xFF0C;&#x548C;&#x4F30;&#x7B97;&#x7684;&#x57FA;&#x672C;&#x4E00;&#x6837;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;Rows Removed by Filter: 333462</span><br><span class="line">         Buffers: shared hit=214402 read=5280 dirtied=2302</span><br><span class="line">         I/O Timings: read=205.027</span><br></pre></td></tr></table></figure>
+
+<p>&#x6240;&#x4EE5;&#xFF0C;&#x6B64;&#x7528;&#x6237;&#x6570;&#x636E;&#x5206;&#x5E03;&#x503E;&#x659C;&#x4E86;&#xFF1A;</p>
+<ul>
+<li>&#x4F18;&#x5316;&#x5668;&#x5047;&#x8BBE;&#x6570;&#x636E;&#x5206;&#x5E03;&#x5747;&#x5300;&#xFF0C;&#x53EA;&#x9700;&#x8981;&#x626B;&#x63CF;10746&#x4E2A;&#x8BB0;&#x5F55;</li>
+<li>&#x800C;&#x5B9E;&#x9645;&#x9700;&#x8981;&#x626B;&#x63CF;322862&#x4E2A;&#x8BB0;&#x5F55;</li>
+</ul>
+<p><strong>&#x90A3;&#x4E48;&#x626B;&#x63CF;5280&#x4E2A;pages&#x8981;&#x591A;&#x4E45;&#xFF1F;</strong></p>
+<p>&#x9700;&#x8981;&#x8BFB;&#x53D6;&#x7684;&#x6570;&#x636E;&#x91CF;&#xFF1A;5280pages * 8KB/page = 41.2MB&#x7684;&#x6570;&#x636E;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;[root]$ fio -name iops -rw=read -bs=8k -runtime=10 -iodepth=1 -filename /dev/sdb -ioengine libaio -direct=1</span><br><span class="line">...</span><br><span class="line">Run status group 0 (all jobs):</span><br><span class="line">   READ: bw=193MiB/s (202MB/s), 193MiB/s-193MiB/s (202MB/s-202MB/s), io=1928MiB (2022MB), run=10001-10001msec</span><br></pre></td></tr></table></figure>
+
+<p>&#x4ECE;<code>fio</code>&#x7ED3;&#x679C;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x6B64;&#x6570;&#x636E;&#x5E93;&#x673A;&#x5668;&#x78C1;&#x76D8;&#x7684;&#x987A;&#x5E8F;&#x8BFB;&#x53D6;&#x901F;&#x5EA6;&#x7EA6;&#x4E3A; 200MB/s&#xFF0C;&#x90A3;&#x4E48;&#x626B;&#x63CF;40MB&#x6570;&#x636E;&#x9700;&#x8981;&#x7EA6;200ms&#xFF0C;<br>&#x4E0E;&#x5B9E;&#x9645;&#x9700;&#x8981;&#x7684;&#x65F6;&#x95F4;205ms&#x57FA;&#x672C;&#x76F8;&#x7B49;&#x3002;</p>
+<p>&#x5230;&#x8FD9;&#x91CC;&#x95EE;&#x9898;&#x57FA;&#x672C;&#x5B9A;&#x4F4D;&#x6E05;&#x695A;&#x4E86;&#xFF1A;</p>
+<blockquote>
+<p>postgreSQL&#x7684;&#x4F18;&#x5316;&#x5668;&#x8BA4;&#x4E3A;&#x6570;&#x636E;&#x5206;&#x5E03;&#x662F;&#x5747;&#x5300;&#x7684;&#xFF0C;&#x53EA;&#x9700;&#x8981;&#x5012;&#x5E8F;&#x626B;&#x63CF;&#x5F88;&#x5FEB;&#x5C31;&#x627E;&#x5230;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x7684;&#x8BB0;&#x5F55;&#xFF0C;&#x800C;&#x5B9E;&#x9645;&#x4E0A;&#x6B64;&#x7528;&#x6237;&#x7684;&#x6570;&#x636E;&#x5206;&#x5E03;&#x5728;&#x8868;&#x7684;&#x524D;&#x7AEF;&#xFF0C;&#x5C31;&#x5BFC;&#x81F4;&#x4E86;&#x5B9E;&#x9645;&#x6267;&#x884C;start-up time&#x5982;&#x6B64;&#x6162;&#x4E86;&#x3002;</p>
+</blockquote>
+<h2 id="&#x4ECE;&#x5185;&#x6838;&#x89C6;&#x89D2;&#x6765;&#x5206;&#x6790;"><a href="#&#x4ECE;&#x5185;&#x6838;&#x89C6;&#x89D2;&#x6765;&#x5206;&#x6790;" class="headerlink" title="&#x4ECE;&#x5185;&#x6838;&#x89C6;&#x89D2;&#x6765;&#x5206;&#x6790;"></a>&#x4ECE;&#x5185;&#x6838;&#x89C6;&#x89D2;&#x6765;&#x5206;&#x6790;</h2><p>&#x6211;&#x4EEC;&#x4ECE;postgreSQL&#x5185;&#x6838;&#x7684;&#x89D2;&#x5EA6;&#x6765;&#x7EE7;&#x7EED;&#x5206;&#x6790;&#x51E0;&#x4E2A;&#x95EE;&#x9898;&#xFF1A;</p>
+<ul>
+<li>&#x4F18;&#x5316;&#x5668;&#x5982;&#x4F55;&#x4F30;&#x7B97;cost</li>
+<li>&#x4F18;&#x5316;&#x5668;&#x5982;&#x4F55;&#x7EDF;&#x8BA1;actual time</li>
+</ul>
+<h3 id="&#x8868;&#x7684;&#x4FE1;&#x606F;"><a href="#&#x8868;&#x7684;&#x4FE1;&#x606F;" class="headerlink" title="&#x8868;&#x7684;&#x4FE1;&#x606F;"></a>&#x8868;&#x7684;&#x4FE1;&#x606F;</h3><ul>
+<li>&#x8868;&#x7ED3;&#x6784;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# \d user_gift;</span><br><span class="line">                                         Table &quot;yay.user_gift&quot;</span><br><span class="line">    Column    |           Type           | Collation | Nullable |                    Default</span><br><span class="line">--------------+--------------------------+-----------+----------+------------------------------------------------</span><br><span class="line"> id           | bigint                   |           | not null | nextval(&apos;user_gift_id_seq&apos;::regclass)</span><br><span class="line"> user_id      | integer                  |           | not null |</span><br><span class="line"> ug_name | character varying(100)   |           | not null |</span><br><span class="line"> expired_time | timestamp with time zone |           |          | now()</span><br><span class="line"> created_time | timestamp with time zone |           | not null | now()</span><br><span class="line"> updated_time | timestamp with time zone |           | not null | now()</span><br><span class="line"> user_type   | user_type               |           | not null | &apos;default&apos;::user_type</span><br><span class="line">Indexes:</span><br><span class="line">    &quot;user_gift_pkey&quot; PRIMARY KEY, btree (id)</span><br><span class="line">    &quot;idx_user_type&quot; btree (user_id, ug_name)</span><br><span class="line">    &quot;user_gift_ug_name_idx&quot; btree (ug_name)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x4E3B;&#x952E;&#x7D22;&#x5F15;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# SELECT relpages, reltuples FROM pg_class WHERE relname = &apos;user_gift_pkey&apos;;</span><br><span class="line"> relpages |  reltuples</span><br><span class="line">----------+-------------</span><br><span class="line">    40035 | 9.49974e+06</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>user_id &#x7D22;&#x5F15;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# SELECT relpages, reltuples FROM pg_class WHERE relname = &apos;idx_user_type&apos;;</span><br><span class="line"> relpages |  reltuples</span><br><span class="line">----------+-------------</span><br><span class="line">   113572 | 9.49974e+06</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x8868;&#x672C;&#x8EAB;&#x7684;pages&#x662F;128875</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# SELECT relpages, reltuples FROM pg_class WHERE relname = &apos;user_gift&apos;;</span><br><span class="line"> relpages |  reltuples</span><br><span class="line">----------+-------------</span><br><span class="line">   128875 | 9.49974e+06</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>user id=11695667&#x7684;&#x6570;&#x636E;775&#x884C;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;=# select count(1) from user_gift where user_id=11695667;</span><br><span class="line"> count</span><br><span class="line">-------</span><br><span class="line">   775</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line">=#  select count(1)  from user_gift where user_id=11695667 and user_type = &apos;default&apos; ;</span><br><span class="line"> count</span><br><span class="line">-------</span><br><span class="line">   775</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>&#x6811;&#x9AD8;&#x5EA6;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# &#x4E3B;&#x952E;&#x9AD8;&#x5EA6;</span><br><span class="line"># select * from  bt_metap(&apos;user_gift_pkey&apos;);</span><br><span class="line"> magic  | version | root | level | fastroot | fastlevel | oldest_xact | last_cleanup_num_tuples</span><br><span class="line">--------+---------+------+-------+----------+-----------+-------------+-------------------------</span><br><span class="line"> 340322 |       3 |  412 |     2 |      412 |         2 |           0 |             9.31928e+06</span><br><span class="line">(1 row)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// idx_user_type &#x9AD8;&#x5EA6;</span><br><span class="line"># select * from  bt_metap(&apos;idx_user_type&apos;);</span><br><span class="line"> magic  | version | root  | level | fastroot | fastlevel | oldest_xact | last_cleanup_num_tuples</span><br><span class="line">--------+---------+-------+-------+----------+-----------+-------------+-------------------------</span><br><span class="line"> 340322 |       3 | 15094 |     3 |    15094 |         3 |           0 |             9.49974e+06</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+
+<h3 id="&#x4F30;&#x7B97;cost"><a href="#&#x4F30;&#x7B97;cost" class="headerlink" title="&#x4F30;&#x7B97;cost"></a>&#x4F30;&#x7B97;cost</h3><h4 id="start-up-cost"><a href="#start-up-cost" class="headerlink" title="start-up cost"></a>start-up cost</h4><p>postgreSQL&#x5BF9;&#x4E8E;&#x6BCF;&#x79CD;&#x7D22;&#x5F15;&#x7684;&#x6210;&#x672C;&#x4F30;&#x7B97;&#x662F;&#x4E0D;&#x4E00;&#x6837;&#x7684;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x770B;B+tree&#x7684;start-up&#x6210;&#x672C;&#x662F;&#x5982;&#x4F55;&#x4F30;&#x7B97;&#x7684;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">C&#x590D;&#x5236;&#x4EE3;&#x7801;// selfuncs.c</span><br><span class="line">void</span><br><span class="line">btcostestimate(PlannerInfo *root, IndexPath *path, double loop_count,</span><br><span class="line">			   Cost *indexStartupCost, Cost *indexTotalCost,</span><br><span class="line">			   Selectivity *indexSelectivity, double *indexCorrelation,</span><br><span class="line">			   double *indexPages)</span><br><span class="line">{</span><br><span class="line">    ......</span><br><span class="line">    </span><br><span class="line">	descentCost = ceil(log(index-&gt;tuples) / log(2.0)) * cpu_operator_cost;</span><br><span class="line">	costs.indexStartupCost += descentCost;</span><br><span class="line"></span><br><span class="line">    ......</span><br><span class="line">    // This cost is somewhat arbitrarily set at 50x cpu_operator_cost per page touched</span><br><span class="line">    descentCost = (index-&gt;tree_height + 1) * 50.0 * cpu_operator_cost;</span><br><span class="line">	costs.indexStartupCost += descentCost;</span><br><span class="line">	</span><br><span class="line">	......</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5176;&#x5B9E;start-up cost&#x4F30;&#x7B97;&#x5F88;&#x7B80;&#x5355;&#xFF0C;&#x53EA;&#x8003;&#x8651;&#x4ECE;B+tree&#x7684;root page&#x904D;&#x5386;&#x5230;leaf page&#xFF0C;&#x4E14;&#x5C06;&#x8FD9;&#x4E2A;page&#x8BFB;&#x5165;&#x7B2C;&#x4E00;&#x4E2A;tuple(&#x8BB0;&#x5F55;)&#x7684;cost&#x3002;</p>
+<p>start-up&#x4F30;&#x7B97;&#x516C;&#x5F0F;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>{ceil(log&#x2061;2(Nindex,tuple))+(Heightindex+1)&#xD7;50} &#xD7;cpu_operator_cost\left { ceil({\log_2 (N_{index,tuple})}) + (Height_{index} + 1) \times 50 \right }\ \times cpu\_operator\_cost{ceil(log2&#x200B;(Nindex,tuple&#x200B;))+(Heightindex&#x200B;+1)&#xD7;50} &#xD7;cpu_operator_cost</p>
+<ul>
+<li>N(index,tuple) &#xFF1A;&#x7D22;&#x5F15;tuples(&#x8BB0;&#x5F55;)&#x6570;&#x91CF;</li>
+<li>Height(index) &#xFF1A; &#x7D22;&#x5F15;B+tree&#x7684;&#x9AD8;&#x5EA6;</li>
+<li>cpu_operator_cost : &#x9ED8;&#x8BA4;&#x503C;0.0025</li>
+</ul>
+<p><strong>&#x4F7F;&#x7528;user_gift_pkey&#x8BA1;&#x5212;&#x7684;start-up cost</strong></p>
+<p>&#x4ECE;&#x4E0A;&#x9762;&#x8868;&#x4FE1;&#x606F;&#x4E2D;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF1A;</p>
+<ul>
+<li>N(index,tuple) &#xFF1A;9.49974e+06&#xFF0C;</li>
+<li>Height(index) &#xFF1A; 2</li>
+</ul>
+<p>&#x6240;&#x4EE5;</p>
+<p>{ceil(log&#x2061;2(9499740))+(2+1)&#xD7;50} &#xD7;cpu_operator_cost=173&#xD7;0.0025=0.435\left { ceil({\log_2 (9499740)}) + (2 + 1) \times 50 \right }\ \times cpu\_operator\_cost = 173 \times 0.0025 = 0.435{ceil(log2&#x200B;(9499740))+(2+1)&#xD7;50} &#xD7;cpu_operator_cost=173&#xD7;0.0025=0.435<br>&#x548C;postgreSQL&#x4F30;&#x7B97;&#x7684;start-up cost=0.43 &#x4E00;&#x6837;&#x3002;</p>
+<p><strong>&#x4F7F;&#x7528;idx_user_type&#x8BA1;&#x5212;&#x7684;start-up cost</strong></p>
+<ul>
+<li>N(index,tuple) &#xFF1A;9.49974e+06&#xFF0C;</li>
+<li>Height(index) &#xFF1A; 3</li>
+</ul>
+<p>{ceil(log&#x2061;2(9499740))+(3+1)&#xD7;50} &#xD7;cpu_operator_cost=223&#xD7;0.0025=0.5575\left { ceil({\log_2 (9499740)}) + (3 + 1) \times 50 \right }\ \times cpu\_operator\_cost = 223 \times 0.0025 = 0.5575{ceil(log2&#x200B;(9499740))+(3+1)&#xD7;50} &#xD7;cpu_operator_cost=223&#xD7;0.0025=0.5575<br>&#x548C;postgreSQL&#x4F30;&#x7B97;&#x7684;start-up cost=0.56 &#x4E00;&#x6837;&#x3002;</p>
+<h4 id="run-cost"><a href="#run-cost" class="headerlink" title="run cost"></a>run cost</h4><p>run cost&#x7684;&#x4F30;&#x7B97;&#x662F;&#x6BD4;&#x8F83;&#x590D;&#x6742;&#x7684;&#xFF0C;&#x5224;&#x65AD;&#x7684;&#x6761;&#x4EF6;&#x975E;&#x5E38;&#x591A;&#xFF0C;&#x65E0;&#x6CD5;&#x7528;&#x4E00;&#x4E2A;&#x56FA;&#x5B9A;&#x7684;&#x516C;&#x5F0F;&#x8BA1;&#x7B97;&#x51FA;&#x6765;&#xFF0C;&#x6240;&#x4EE5;&#x8FD9;&#x91CC;&#x5C31;&#x4E0D;&#x505A;&#x8BA1;&#x7B97;&#xFF0C;&#x6709;&#x5174;&#x8DA3;&#x7684;&#x53EF;&#x4EE5;&#x770B;postgreSQL&#x6E90;&#x7801;<code>src/backend/optimizer/path/costsize.c</code>&#x7684;<code>cost_index</code>&#x51FD;&#x6570;&#x3002;</p>
+<p><strong>actual start-up time vs estimated start-up cost</strong></p>
+<p>&#x521A;&#x521A;&#x7684;&#x5206;&#x6790;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x7591;&#x95EE;&#x88AB;&#x5FFD;&#x7565;&#x4E86;&#xFF1A;estimated start-up cost&#x662F;&#x5F00;&#x59CB;&#x6267;&#x884C;&#x8BA1;&#x5212;&#x5230;&#x4ECE;&#x8868;&#x4E2D;&#x8BFB;&#x5230;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;tuple&#x7684;cost(cost is an arbitrary unit)&#xFF1B;&#x800C;actual start-up time&#x5219;&#x662F;&#x5F00;&#x59CB;&#x6267;&#x884C;&#x8BA1;&#x5212;&#x5230;&#x4ECE;&#x8868;&#x4E2D;&#x8BFB;&#x53D6;&#x5230;&#x7B2C;&#x4E00;&#x4E2A;&#x7B26;&#x5408;where&#x6761;&#x4EF6;&#x7684;tuple&#x7684;&#x65F6;&#x95F4;&#x3002;&#x8FD9;&#x662F;&#x4E3A;&#x4EC0;&#x4E48;&#x5462;&#xFF1F;</p>
+<p>SQL&#x5904;&#x7406;&#x6D41;&#x7A0B;&#xFF1A;postgreSQL&#x5C06;SQL&#x8F6C;&#x5316;&#x6210;AST&#xFF0C;&#x7136;&#x540E;&#x8FDB;&#x884C;&#x4F18;&#x5316;&#xFF0C;&#x518D;&#x5C06;AST&#x8F6C;&#x6210;&#x6267;&#x884C;&#x5668;(executor)&#x6765;&#x5B9E;&#x73B0;&#x5177;&#x4F53;&#x7684;&#x64CD;&#x4F5C;&#x3002;&#x4E0D;&#x8FDB;&#x884C;&#x4F18;&#x5316;&#x7684;&#x6267;&#x884C;&#x5668;&#x662F;&#x8FD9;&#x6837;&#x7684;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;  &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span><br><span class="line">  &#x2502;  projection  &#x2502;</span><br><span class="line">  &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span><br><span class="line">         &#x2502;</span><br><span class="line">         &#x2502;</span><br><span class="line">  &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x25BC;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span><br><span class="line">  &#x2502;    limit    &#x2502;</span><br><span class="line">  &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span><br><span class="line">         &#x2502;</span><br><span class="line">         &#x2502;</span><br><span class="line">  &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x25BC;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span><br><span class="line">  &#x2502;  selection  &#x2502;</span><br><span class="line">  &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span><br><span class="line">         &#x2502;</span><br><span class="line">         &#x2502;</span><br><span class="line">  &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x25BC;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span><br><span class="line">  &#x2502; index scan  &#x2502;</span><br><span class="line">  &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span><br></pre></td></tr></table></figure>
+
+<p>&#x7B80;&#x5316;&#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#x5982;&#x4E0B;&#xFF1A;</p>
+<ul>
+<li>index scan executor&#xFF1A;&#x626B;&#x63CF;&#x5230;&#x4E00;&#x4E2A;tuple&#xFF0C;&#x5C31;&#x8FD4;&#x56DE;&#x7ED9;selection executor</li>
+<li>selection executor&#xFF1A;&#x5BF9;tuple&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#xFF0C;&#x5982;&#x679C;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x5219;&#x8FD4;&#x56DE;&#x7ED9;limit executor&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x7B26;&#x5408;&#x5219;&#x7EE7;&#x7EED;&#x8C03;&#x7528;index scan executor</li>
+<li>limit executor&#xFF1A;&#x5F53;&#x8FBE;&#x5230;limit&#x9650;&#x5236;&#x5219;&#x5C06;&#x6570;&#x636E;&#x8FD4;&#x56DE;&#x7ED9;projection executor</li>
+<li>projection executor&#xFF1A;&#x8FC7;&#x6EE4;&#x6389;&#x975E;<code>select</code>&#x5217;&#x7684;&#x6570;&#x636E;</li>
+</ul>
+<p>&#x90A3;&#x4E48;&#x5982;&#x679C;&#x8FDB;&#x884C;&#x4F18;&#x5316;&#xFF0C;&#x4E00;&#x822C;&#x4F1A;&#x5C06;<code>selection executor</code>&#x548C;<code>projection executor</code>&#x5408;&#x5E76;&#x5230;<code>index scan executor</code>&#x4E2D;&#x6267;&#x884C;&#xFF0C;&#x4EE5;&#x51CF;&#x5C11;&#x6570;&#x636E;&#x5728;executor&#x4E4B;&#x95F4;&#x7684;&#x4F20;&#x9012;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span><br><span class="line">&#x2502;    limit    &#x2502;</span><br><span class="line">&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span><br><span class="line">       &#x2502;</span><br><span class="line">       &#x2502;</span><br><span class="line">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x25BC;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span><br><span class="line">&#x2502; index scan  &#x2502;</span><br><span class="line">&#x2502;             &#x2502;</span><br><span class="line">&#x2502; + selection &#x2502;</span><br><span class="line">&#x2502; + projection&#x2502;</span><br><span class="line">&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F18;&#x5316;&#x540E;&#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#xFF1A;</p>
+<ul>
+<li>index scan executor&#xFF1A;&#x626B;&#x63CF;&#x5230;tuple&#xFF0C;&#x7136;&#x540E;&#x8FDB;&#x884C;selection&#x8FC7;&#x6EE4;&#xFF0C;&#x5982;&#x679C;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x5C31;&#x8FDB;&#x884C;projection&#x518D;&#x8FD4;&#x56DE;&#x7ED9;limit&#xFF0C;&#x5982;&#x679C;&#x4E0D;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#xFF0C;&#x5219;&#x7EE7;&#x7EED;&#x626B;&#x63CF;</li>
+<li>limit executor&#xFF1A;&#x5F53;&#x8FBE;&#x5230;limit&#x9650;&#x5236;&#x5219;&#x5C06;&#x6570;&#x636E;&#x8FD4;&#x56DE;</li>
+</ul>
+<p>&#x800C;&#x901A;&#x8FC7;&#x4E0B;&#x9762;&#x4EE3;&#x7801;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;postgreSQL&#x5BF9;&#x4E8E;&#x6267;&#x884C;&#x65F6;&#x95F4;&#x7684;&#x7EDF;&#x8BA1;&#x662F;&#x57FA;&#x4E8E;executor&#x7684;&#xFF0C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;// src/backend/executor/execProcnode.c</span><br><span class="line">static TupleTableSlot *</span><br><span class="line">ExecProcNodeInstr(PlanState *node)</span><br><span class="line">{</span><br><span class="line">	TupleTableSlot *result;</span><br><span class="line">	InstrStartNode(node-&gt;instrument);</span><br><span class="line">	result = node-&gt;ExecProcNodeReal(node);</span><br><span class="line">	</span><br><span class="line">	// &#x7EDF;&#x8BA1;&#x6267;&#x884C;&#x6307;&#x6807;</span><br><span class="line">	InstrStopNode(node-&gt;instrument, TupIsNull(result) ? 0.0 : 1.0);</span><br><span class="line">	return result;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6240;&#x4EE5;actual time&#x7684;start-up&#x662F;&#x4ECE;&#x542F;&#x52A8;executor&#x76F4;&#x5230;&#x626B;&#x63CF;&#x5230;&#x7B26;&#x5408;<code>where</code>&#x8BED;&#x53E5;&#x7684;&#x7B2C;&#x4E00;&#x6761;&#x7ED3;&#x679C;&#x4E3A;&#x6B62;&#x3002;</p>
+<p>&#x518D;&#x770B;&#x770B;&#x5B9E;&#x9645;&#x7684;&#x51FD;&#x6570;&#x8C03;&#x7528;&#x6808;&#xFF0C;<code>user_id=xxx</code>&#x7684;&#x8FC7;&#x6EE4;&#x5DF2;&#x7ECF;&#x4E0B;&#x6C89;&#x5230;<code>index scan executor</code>&#x91CC;&#x9762;&#x4E86;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ruby&#x590D;&#x5236;&#x4EE3;&#x7801;---&gt;    int4eq(FunctionCallInfo fcinfo) (/home/ken/cpp/postgres/src/backend/utils/adt/int.c:379)</span><br><span class="line">        ExecInterpExpr(ExprState * state, ExprContext * econtext, _Bool * isnull) (/home/ken/cpp/postgres/src/backend/executor/execExprInterp.c:704)</span><br><span class="line">        ExecInterpExprStillValid(ExprState * state, ExprContext * econtext, _Bool * isNull) (/home/ken/cpp/postgres/src/backend/executor/execExprInterp.c:1807)</span><br><span class="line">        ExecEvalExprSwitchContext(ExprState * state, ExprContext * econtext, _Bool * isNull) (/home/ken/cpp/postgres/src/include/executor/executor.h:322)</span><br><span class="line">---&gt;    ExecQual(ExprState * state, ExprContext * econtext) (/home/ken/cpp/postgres/src/include/executor/executor.h:391)</span><br><span class="line">        ExecScan(ScanState * node, ExecScanAccessMtd accessMtd, ExecScanRecheckMtd recheckMtd) (/home/ken/cpp/postgres/src/backend/executor/execScan.c:227)</span><br><span class="line">---&gt;    ExecIndexScan(PlanState * pstate) (/home/ken/cpp/postgres/src/backend/executor/nodeIndexscan.c:537)</span><br><span class="line">        ExecProcNodeInstr(PlanState * node) (/home/ken/cpp/postgres/src/backend/executor/execProcnode.c:466)</span><br><span class="line">        ExecProcNodeFirst(PlanState * node) (/home/ken/cpp/postgres/src/backend/executor/execProcnode.c:450)</span><br><span class="line">        ExecProcNode(PlanState * node) (/home/ken/cpp/postgres/src/include/executor/executor.h:248)</span><br><span class="line">---&gt;    ExecLimit(PlanState * pstate) (/home/ken/cpp/postgres/src/backend/executor/nodeLimit.c:96)</span><br><span class="line">        ExecProcNodeInstr(PlanState * node) (/home/ken/cpp/postgres/src/backend/executor/execProcnode.c:466)</span><br><span class="line">        ExecProcNodeFirst(PlanState * node) (/home/ken/cpp/postgres/src/backend/executor/execProcnode.c:450)</span><br><span class="line">        ExecProcNode(PlanState * node) (/home/ken/cpp/postgres/src/include/executor/executor.h:248)</span><br><span class="line">        ExecutePlan(EState * estate, PlanState * planstate, _Bool use_parallel_mode, CmdType operation, _Bool sendTuples, uint64 numberTuples, ScanDirection direction, DestReceiver * dest, _Bool execute_once) (/home/ken/cpp/postgres/src/backend/executor/execMain.c:1632)</span><br><span class="line">        standard_ExecutorRun(QueryDesc * queryDesc, ScanDirection direction, uint64 count, _Bool execute_once) (/home/ken/cpp/postgres/src/backend/executor/execMain.c:350)</span><br><span class="line">        ExecutorRun(QueryDesc * queryDesc, ScanDirection direction, uint64 count, _Bool execute_once) (/home/ken/cpp/postgres/src/backend/executor/execMain.c:294)</span><br><span class="line">        ExplainOnePlan(PlannedStmt * plannedstmt, IntoClause * into, ExplainState * es, const char * queryString, ParamListInfo params, QueryEnvironment * queryEnv, const instr_time * planduration, const BufferUsage * bufusage) (/home/ken/cpp/postgres/src/backend/commands/explain.c:571)</span><br><span class="line">        ExplainOneQuery(Query * query, int cursorOptions, IntoClause * into, ExplainState * es, const char * queryString, ParamListInfo params, QueryEnvironment * queryEnv) (/home/ken/cpp/postgres/src/backend/commands/explain.c:404)</span><br><span class="line">        ExplainQuery(ParseState * pstate, ExplainStmt * stmt, ParamListInfo params, DestReceiver * dest) (/home/ken/cpp/postgres/src/backend/commands/explain.c:275)</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0B;&#x9762;&#x4EE3;&#x7801;&#x662F;scan&#x7684;&#x5B9E;&#x73B0;&#xFF0C;&#x5176;&#x4E2D;&#x7684;<code>ExecQual(qual, econtext)</code>&#x662F;&#x5BF9;tuple&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#xFF0C;&#x56E0;&#x4E3A;selection&#x5DF2;&#x7ECF;&#x5408;&#x5E76;&#x5230;scan&#x4E2D;&#x4E86;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;TupleTableSlot *</span><br><span class="line">ExecScan(ScanState *node, ExecScanAccessMtd accessMtd, ExecScanRecheckMtd recheckMtd)</span><br><span class="line">{</span><br><span class="line">    ......</span><br><span class="line">	for (;;)</span><br><span class="line">	{</span><br><span class="line">		TupleTableSlot *slot;</span><br><span class="line">		slot = ExecScanFetch(node, accessMtd, recheckMtd);</span><br><span class="line">        ......</span><br><span class="line">		econtext-&gt;ecxt_scantuple = slot;</span><br><span class="line">		</span><br><span class="line">        // Note : selection&#x5224;&#x65AD;</span><br><span class="line">		if (qual == NULL || ExecQual(qual, econtext))</span><br><span class="line">		{</span><br><span class="line">			if (projInfo)</span><br><span class="line">			{</span><br><span class="line">				return ExecProject(projInfo);</span><br><span class="line">			}</span><br><span class="line">			else</span><br><span class="line">			{</span><br><span class="line">				return slot;</span><br><span class="line">			}</span><br><span class="line">		}</span><br><span class="line">		else</span><br><span class="line">			InstrCountFiltered1(node, 1);</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h1 id="&#x89E3;&#x51B3;&#x65B9;&#x6848;"><a href="#&#x89E3;&#x51B3;&#x65B9;&#x6848;" class="headerlink" title="&#x89E3;&#x51B3;&#x65B9;&#x6848;"></a>&#x89E3;&#x51B3;&#x65B9;&#x6848;</h1><h2 id="&#x7981;&#x7528;&#x8D70;&#x4E3B;&#x952E;&#x626B;&#x63CF;"><a href="#&#x7981;&#x7528;&#x8D70;&#x4E3B;&#x952E;&#x626B;&#x63CF;" class="headerlink" title="&#x7981;&#x7528;&#x8D70;&#x4E3B;&#x952E;&#x626B;&#x63CF;"></a>&#x7981;&#x7528;&#x8D70;&#x4E3B;&#x952E;&#x626B;&#x63CF;</h2><p>&#x65E2;&#x7136;&#x8BA1;&#x5212;&#x8D70;&#x7684;&#x662F;user_gift_pkey&#x5012;&#x5E8F;&#x626B;&#x63CF;&#xFF0C;&#x90A3;&#x4E48;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x624B;&#x52A8;&#x907F;&#x514D;&#x4F18;&#x5316;&#x5668;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;&#x7D22;&#x5F15;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sql&#x590D;&#x5236;&#x4EE3;&#x7801;# explain analyze verbose select xxx from user_gift where user_id=11695667 and user_type = &apos;default&apos; order by id+0 desc limit 1;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5C06;<code>order by id</code>&#x6539;&#x6210;<code>order by id+0</code>&#xFF0C;&#x7531;&#x4E8E;<code>id+0</code>&#x662F;&#x4E2A;&#x8868;&#x8FBE;&#x5F0F;&#x6240;&#x4EE5;&#x4F18;&#x5316;&#x5668;&#x5C31;&#x5C31;&#x4E0D;&#x4F1A;&#x4F7F;&#x7528;user_gift_pkey&#x8FD9;&#x4E2A;&#x7D22;&#x5F15;&#x4E86;&#x3002;</p>
+<p>&#x8FD9;&#x4E2A;&#x65B9;&#x6848;&#x4E0D;&#x9002;&#x5408;&#x6240;&#x6709;&#x573A;&#x666F;&#xFF0C;&#x5982;&#x679C;&#x6570;&#x636E;&#x5206;&#x5E03;&#x5747;&#x5300;&#x7684;&#x8BDD;&#x5219;&#x67D0;&#x4E9B;&#x60C5;&#x51B5;&#x4E0B;&#x4F7F;&#x7528;user_gift_pkey&#x626B;&#x63CF;&#x66F4;&#x52A0;&#x5408;&#x7406;&#x3002;</p>
+<h2 id="&#x589E;&#x52A0;-user-id-id-&#x7D22;&#x5F15;"><a href="#&#x589E;&#x52A0;-user-id-id-&#x7D22;&#x5F15;" class="headerlink" title="&#x589E;&#x52A0;(user_id, id)&#x7D22;&#x5F15;"></a>&#x589E;&#x52A0;(user_id, id)&#x7D22;&#x5F15;</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">csharp&#x590D;&#x5236;&#x4EE3;&#x7801;create index idx_user_id on user_gift(user_id, id);</span><br></pre></td></tr></table></figure>
+
+<p>&#x901A;&#x8FC7;&#x589E;&#x52A0;where&#x6761;&#x4EF6;&#x5217;&#x548C;&#x6392;&#x5E8F;&#x952E;&#x7684;&#x590D;&#x5408;&#x7D22;&#x5F15;&#xFF0C;&#x6765;&#x907F;&#x514D;&#x8D70;&#x4E3B;&#x952E;&#x626B;&#x63CF;&#x3002;</p>
+<h1 id="&#x5199;&#x5728;&#x6700;&#x540E;"><a href="#&#x5199;&#x5728;&#x6700;&#x540E;" class="headerlink" title="&#x5199;&#x5728;&#x6700;&#x540E;"></a>&#x5199;&#x5728;&#x6700;&#x540E;</h1><p>&#x4ECE;&#x6392;&#x9664;&#x7F13;&#x5B58;&#x56E0;&#x7D20;&#xFF0C;&#x5206;&#x6790;&#x67E5;&#x8BE2;&#x8BA1;&#x5212;&#xFF0C;&#x5B9A;&#x4F4D;&#x6570;&#x636E;&#x5206;&#x5E03;&#x503E;&#x659C;&#xFF0C;&#x5230;&#x8C03;&#x8BD5;&#x5185;&#x6838;&#x6E90;&#x7801;&#x6765;&#x8FDB;&#x4E00;&#x6B65;&#x786E;&#x5B9A;&#x539F;&#x56E0;&#xFF0C;&#x6700;&#x7EC8;&#x6210;&#x529F;&#x89E3;&#x51B3;&#x6027;&#x80FD;&#x95EE;&#x9898;&#x3002;&#x901A;&#x8FC7;&#x8FD9;&#x4E2A;&#x6709;&#x8DA3;&#x7684;SQL&#x4F18;&#x5316;&#x7ECF;&#x5386;&#xFF0C;&#x76F8;&#x4FE1;&#x80FD;&#x7ED9;&#x5927;&#x5BB6;&#x5E26;&#x6765;&#x6536;&#x83B7;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/adb7a227e05fc55d04c32ca9561bd492.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/数据库/" rel="tag"># 数据库</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7027010419600392228.html" rel="next" title="MySQL：互联网公司常用分库分表方案汇总!">
+                <i class="fa fa-chevron-left"></i> MySQL：互联网公司常用分库分表方案汇总!
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7027112885381922829.html" rel="prev" title="ELK 部署与使用">
+                ELK 部署与使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#执行计划"><span class="nav-number">2.1.</span> <span class="nav-text">执行计划</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实际执行时间"><span class="nav-number">2.2.</span> <span class="nav-text">实际执行时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从内核视角来分析"><span class="nav-number">2.3.</span> <span class="nav-text">从内核视角来分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#表的信息"><span class="nav-number">2.3.1.</span> <span class="nav-text">表的信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#估算cost"><span class="nav-number">2.3.2.</span> <span class="nav-text">估算cost</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#start-up-cost"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">start-up cost</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#run-cost"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">run cost</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决方案"><span class="nav-number">3.</span> <span class="nav-text">解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#禁用走主键扫描"><span class="nav-number">3.1.</span> <span class="nav-text">禁用走主键扫描</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#增加-user-id-id-索引"><span class="nav-number">3.2.</span> <span class="nav-text">增加(user_id, id)索引</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写在最后"><span class="nav-number">4.</span> <span class="nav-text">写在最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

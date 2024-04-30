@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="volatile &amp;#x7981;&amp;#x6B62;&amp;#x6307;&amp;#x4EE4;&amp;#x91CD;&amp;#x6392;&amp;#x672C;&amp;#x6587;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E0B;volatile&amp;#x7981;&amp;#x6B62;&amp;#x6307;&amp;#x4EE4;&amp;#x91CD;&amp;#x6392;&amp;#x7684;&amp;#x80CC;&amp;#x666F;&amp;#x53CA;&amp;#x6700;&amp;#x7EC8">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码通俗易懂的讲解 volatile 禁止指令重排原理 vo">
+<meta property="og:url" content="https://dev.newban.cn/6927160026029096967.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="volatile &amp;#x7981;&amp;#x6B62;&amp;#x6307;&amp;#x4EE4;&amp;#x91CD;&amp;#x6392;&amp;#x672C;&amp;#x6587;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E0B;volatile&amp;#x7981;&amp;#x6B62;&amp;#x6307;&amp;#x4EE4;&amp;#x91CD;&amp;#x6392;&amp;#x7684;&amp;#x80CC;&amp;#x666F;&amp;#x53CA;&amp;#x6700;&amp;#x7EC8">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-30T05:58:16.231Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="代码通俗易懂的讲解 volatile 禁止指令重排原理 vo">
+<meta name="twitter:description" content="volatile &amp;#x7981;&amp;#x6B62;&amp;#x6307;&amp;#x4EE4;&amp;#x91CD;&amp;#x6392;&amp;#x672C;&amp;#x6587;&amp;#x4ECB;&amp;#x7ECD;&amp;#x4E0B;volatile&amp;#x7981;&amp;#x6B62;&amp;#x6307;&amp;#x4EE4;&amp;#x91CD;&amp;#x6392;&amp;#x7684;&amp;#x80CC;&amp;#x666F;&amp;#x53CA;&amp;#x6700;&amp;#x7EC8">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/6927160026029096967.html">
+
+
+
+
+
+  <title>代码通俗易懂的讲解 volatile 禁止指令重排原理 vo | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">代码通俗易懂的讲解 volatile 禁止指令重排原理 vo</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-09T15:19:43+08:00">
+                2021-02-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="volatile-&#x7981;&#x6B62;&#x6307;&#x4EE4;&#x91CD;&#x6392;"><a href="#volatile-&#x7981;&#x6B62;&#x6307;&#x4EE4;&#x91CD;&#x6392;" class="headerlink" title="volatile &#x7981;&#x6B62;&#x6307;&#x4EE4;&#x91CD;&#x6392;"></a>volatile &#x7981;&#x6B62;&#x6307;&#x4EE4;&#x91CD;&#x6392;</h1><p>&#x672C;&#x6587;&#x4ECB;&#x7ECD;&#x4E0B;volatile&#x7981;&#x6B62;&#x6307;&#x4EE4;&#x91CD;&#x6392;&#x7684;&#x80CC;&#x666F;&#x53CA;&#x6700;&#x7EC8;&#x6548;&#x679C;&#x3002;</p>
+<h2 id="volatile-&#x53EF;&#x89C1;&#x6027;&#x4FDD;&#x8BC1;"><a href="#volatile-&#x53EF;&#x89C1;&#x6027;&#x4FDD;&#x8BC1;" class="headerlink" title="volatile &#x53EF;&#x89C1;&#x6027;&#x4FDD;&#x8BC1;"></a>volatile &#x53EF;&#x89C1;&#x6027;&#x4FDD;&#x8BC1;</h2><p>&#x6211;&#x4EEC;&#x90FD;&#x77E5;&#x9053; volatile &#x4F1A;&#x4FDD;&#x8BC1;&#x8BFB;&#x5199;&#x4FEE;&#x9970;&#x7684;&#x53D8;&#x91CF;&#x65F6;&#x4F1A;&#x5C06;&#x5BF9;&#x5E94;&#x53D8;&#x91CF;&#x540C;&#x6B65;&#x7ED9;&#x4E3B;&#x5B58;&#x3002;</p>
+<p>&#x4F46;&#x662F;&#x5B9E;&#x9645;&#x4E0A;&#xFF0C; volatile &#x4FEE;&#x9970;&#x7684;&#x53D8;&#x91CF;&#x4E0D;&#x4EC5;&#x4FDD;&#x8BC1;&#x81EA;&#x8EAB;&#xFF0C;&#x8FD8;&#x4F1A;&#x4FDD;&#x8BC1;&#x5176;&#x4ED6;&#x5C40;&#x90E8;&#x53D8;&#x91CF;&#x7684;&#x53EF;&#x89C1;&#x6027;&#x3002;</p>
+<p>&#x4EE5;&#x4E0B;&#x7ED3;&#x5408;&#x4F8B;&#x5B50;&#x8BB2;&#x89E3;&#x4E0B;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">public class MyClass {</span><br><span class="line">    private int years;</span><br><span class="line">    private int months;</span><br><span class="line">    private volatile int days;</span><br><span class="line"></span><br><span class="line">    // &#x8BFB;&#x4E3B;&#x5B58;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x4F1A;&#x628A;&#x540E;&#x8FB9;&#x7684;&#x53D8;&#x91CF;&#x4E00;&#x8D77;&#x987A;&#x5E26;&#x8BFB;&#x51FA;&#x6765;</span><br><span class="line">    public int totalDays() {</span><br><span class="line">        int total = this.days;</span><br><span class="line">        total += months * 30;</span><br><span class="line">        total += years * 365;</span><br><span class="line">        return total;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    // &#x5199;&#x4E3B;&#x5B58;&#x7684;&#x65F6;&#x5019;&#xFF0C; &#x4F1A;&#x628A;&#x524D;&#x8FB9;&#x7684;&#x53D8;&#x91CF;&#x4E00;&#x8D77;&#x987A;&#x5E26;&#x5199;&#x8FDB;&#x53BB;</span><br><span class="line">    public void update(int years, int months, int days){</span><br><span class="line">        this.years  = years;</span><br><span class="line">        this.months = months;</span><br><span class="line">        this.days   = days;</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="Reordinrg-&#x6307;&#x4EE4;&#x91CD;&#x6392;&#x7684;&#x6311;&#x6218;"><a href="#Reordinrg-&#x6307;&#x4EE4;&#x91CD;&#x6392;&#x7684;&#x6311;&#x6218;" class="headerlink" title="Reordinrg &#x6307;&#x4EE4;&#x91CD;&#x6392;&#x7684;&#x6311;&#x6218;"></a>Reordinrg &#x6307;&#x4EE4;&#x91CD;&#x6392;&#x7684;&#x6311;&#x6218;</h2><p>&#x6307;&#x4EE4;&#x91CD;&#x6392;&#x524D;&#x7684;&#x4EE3;&#x7801;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;int a = 1;</span><br><span class="line">int b = 2;</span><br><span class="line"></span><br><span class="line">a++;</span><br><span class="line">b++;</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x80FD;&#x7684;&#x91CD;&#x6392;&#x540E;&#x4EE3;&#x7801;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;// &#x4F30;&#x8BA1;&#x662F;&#x4E3A;&#x4E86;&#x8BFB;&#x5199;&#x64CD;&#x4F5C;&#x4E00;&#x8D77;&#xFF0C;&#x51CF;&#x5C11;&#x5185;&#x5B58;&#x7F3A;&#x9875;&#x7387;</span><br><span class="line">int a = 1;</span><br><span class="line">a++;</span><br><span class="line"></span><br><span class="line">int b = 2;</span><br><span class="line">b++;</span><br></pre></td></tr></table></figure>
+
+<p>&#x5BF9;volatile&#x53EF;&#x89C1;&#x6027;&#x4FDD;&#x8BC1;&#x7684;&#x5F71;&#x54CD;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;</span><br><span class="line">// &#x6307;&#x4EE4;&#x91CD;&#x6392;&#x524D;&#xFF0C;&#x5199;&#x4E3B;&#x5B58;&#x7684;&#x65F6;&#x5019;&#xFF0C; &#x4F1A;&#x628A;&#x524D;&#x8FB9;&#x7684;&#x53D8;&#x91CF;&#x4E00;&#x8D77;&#x5199;&#x8FDB;&#x53BB;</span><br><span class="line">public void update(int years, int months, int days){</span><br><span class="line">    this.years  = years;</span><br><span class="line">    this.months = months;</span><br><span class="line">    this.days   = days;</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">// &#x6307;&#x4EE4;&#x91CD;&#x6392;&#x540E;&#xFF0C;&#x5199;&#x4E3B;&#x5B58;&#x7684;&#x65F6;&#x5019;&#xFF0C; &#x672C;&#x6765;&#x8BE5;&#x987A;&#x5E26;&#x5199;&#x7684;&#x53D8;&#x91CF;&#x4E0D;&#x5199;&#x4E86;</span><br><span class="line">public void update(int years, int months, int days){</span><br><span class="line">    this.days   = days;</span><br><span class="line">    this.years  = years;</span><br><span class="line">    this.months = months;</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="hanppens-before-&#x53D1;&#x751F;&#x524D;&#x4FDD;&#x8BC1;"><a href="#hanppens-before-&#x53D1;&#x751F;&#x524D;&#x4FDD;&#x8BC1;" class="headerlink" title="hanppens-before &#x53D1;&#x751F;&#x524D;&#x4FDD;&#x8BC1;"></a>hanppens-before &#x53D1;&#x751F;&#x524D;&#x4FDD;&#x8BC1;</h2><p>&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1; vaolatile &#x5BF9;&#x5176;&#x4ED6;&#x53D8;&#x91CF;&#x53EF;&#x89C1;&#x6027;&#x7684;&#x4FDD;&#x8BC1; &#x89C4;&#x5219;&#xFF0C; volatile &#x7684; happens-before &#x89C4;&#x5B9A;&#x5BF9;&#x6307;&#x4EE4;&#x91CD;&#x6392;&#x7684;&#x9650;&#x5236;&#x3002;</p>
+<blockquote>
+<p>&#x8BFB;&#x5199;&#x5176;&#x4ED6;&#x53D8;&#x91CF;&#x5982;&#x679C;&#x672C;&#x8EAB;&#x5728;&#x5199;volatile&#x53D8;&#x91CF;&#x4E4B;&#x524D;&#x7684;&#xFF0C; &#x7981;&#x6B62;&#x91CD;&#x6392;&#x5230;&#x5199;volatile&#x53D8;&#x91CF;&#x4E4B;&#x540E;&#x3002;</p>
+</blockquote>
+<blockquote>
+<p>&#x8BFB;&#x5199;&#x5176;&#x4ED6;&#x53D8;&#x91CF;&#x5982;&#x679C;&#x672C;&#x8EAB;&#x5728;&#x8BFB;volatile&#x53D8;&#x91CF;&#x4E4B;&#x540E;&#x7684;&#xFF0C; &#x7981;&#x6B62;&#x91CD;&#x6392;&#x5230;&#x8BFB;volatile&#x53D8;&#x91CF;&#x4E4B;&#x524D;&#x3002;</p>
+</blockquote>
+<p>&#x636E;&#x8BF4; happens-before &#x662F; JSR-133 &#x7684;&#x89C4;&#x8303;&#x8D28;&#x7591;&#xFF0C;&#x5185;&#x5B58;&#x5C4F;&#x969C;&#x662F; CPU &#x7684;&#x6307;&#x4EE4;&#x3002;</p>
+<p>&#x524D;&#x8005;&#x662F;&#x76EE;&#x7684;&#xFF0C; &#x540E;&#x8005;&#x662F;&#x5B9E;&#x73B0;&#x76EE;&#x7684;&#x7684;&#x624B;&#x6BB5;&#x3002;</p>
+<p>&#x672C;&#x6587;&#x4E3B;&#x8981;&#x53C2;&#x8003;</p>
+<p><a href="/external_links/d694b5ae329e6d4f711cf5a885f321d0.html" target="blank" rel="noopener">tutorials.jenkov.com/java-concur&#x2026;</a></p>
+<p><a href="/external_links/5ea9b57db4bd90c0117dca5c40dfa101.html" target="blank" rel="noopener">mp.weixin.qq.com/s/DZkGRTan2&#x2026;</a></p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/fc525f1c9252d2ca914f6fee377393ef.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="6926779957540732935.html" rel="next" title="要想用活Redis，Lua脚本是绕不过去的坎 前言 发布与订">
+                <i class="fa fa-chevron-left"></i> 要想用活Redis，Lua脚本是绕不过去的坎 前言 发布与订
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="6927454591483117582.html" rel="prev" title="SQL子查询总结：相关子查询与非相关子查询有什么区别">
+                SQL子查询总结：相关子查询与非相关子查询有什么区别 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#volatile-禁止指令重排"><span class="nav-number">1.</span> <span class="nav-text">volatile 禁止指令重排</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#volatile-可见性保证"><span class="nav-number">1.1.</span> <span class="nav-text">volatile 可见性保证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reordinrg-指令重排的挑战"><span class="nav-number">1.2.</span> <span class="nav-text">Reordinrg 指令重排的挑战</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hanppens-before-发生前保证"><span class="nav-number">1.3.</span> <span class="nav-text">hanppens-before 发生前保证</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,性能优化,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x80CC;&amp;#x666F;&amp;#x6700;&amp;#x8FD1;&amp;#x8D1F;&amp;#x8D23;&amp;#x7684;&amp;#x4E00;&amp;#x4E2A;&amp;#x81EA;&amp;#x7814;&amp;#x7684; Dubbo &amp;#x6CE8;&amp;#x518C;&amp;#x4E2D;&amp;#x5FC3;&amp;#x7ECF;&amp;#x5E38;&amp;#x6536;&amp;#x5230; CPU &amp;#x4F7F;&amp;#x7528;&amp;#x7387;&amp;#x7">
+<meta name="keywords" content="后端,性能优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次提升18倍的性能优化">
+<meta property="og:url" content="https://dev.newban.cn/7032886589910941732.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x80CC;&amp;#x666F;&amp;#x6700;&amp;#x8FD1;&amp;#x8D1F;&amp;#x8D23;&amp;#x7684;&amp;#x4E00;&amp;#x4E2A;&amp;#x81EA;&amp;#x7814;&amp;#x7684; Dubbo &amp;#x6CE8;&amp;#x518C;&amp;#x4E2D;&amp;#x5FC3;&amp;#x7ECF;&amp;#x5E38;&amp;#x6536;&amp;#x5230; CPU &amp;#x4F7F;&amp;#x7528;&amp;#x7387;&amp;#x7">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/452d3bd718474249ec233cc41dc94c96a466d6d082bfbb2e9ba07ed0301df82c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ebbb61773285ab0f878d295c07c2ad52282f97513bd88545ae0d773abab53c57">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/dc527e127c9ae8b33a780782d86f4977259dd88126df4eeb5a791557b32b493b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/a3aa16765fa1552d19eb2c9ac6b1dda160685bfe48ca7cd390bf9129706a19d0">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/0b6c4db4263ed136ba7d6c5e771634d562765990465a9a0e5a06b30f52925728">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d61f59c64bd44efb3795513574ff96c2caa5e2d30ceacf839946e463095764b7">
+<meta property="og:updated_time" content="2024-04-29T13:02:19.896Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次提升18倍的性能优化">
+<meta name="twitter:description" content="&amp;#x80CC;&amp;#x666F;&amp;#x6700;&amp;#x8FD1;&amp;#x8D1F;&amp;#x8D23;&amp;#x7684;&amp;#x4E00;&amp;#x4E2A;&amp;#x81EA;&amp;#x7814;&amp;#x7684; Dubbo &amp;#x6CE8;&amp;#x518C;&amp;#x4E2D;&amp;#x5FC3;&amp;#x7ECF;&amp;#x5E38;&amp;#x6536;&amp;#x5230; CPU &amp;#x4F7F;&amp;#x7528;&amp;#x7387;&amp;#x7">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/452d3bd718474249ec233cc41dc94c96a466d6d082bfbb2e9ba07ed0301df82c">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7032886589910941732.html">
+
+
+
+
+
+  <title>记一次提升18倍的性能优化 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">记一次提升18倍的性能优化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-21T13:13:12+08:00">
+                2021-11-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="&#x80CC;&#x666F;"><a href="#&#x80CC;&#x666F;" class="headerlink" title="&#x80CC;&#x666F;"></a>&#x80CC;&#x666F;</h3><p>&#x6700;&#x8FD1;&#x8D1F;&#x8D23;&#x7684;&#x4E00;&#x4E2A;&#x81EA;&#x7814;&#x7684; Dubbo &#x6CE8;&#x518C;&#x4E2D;&#x5FC3;&#x7ECF;&#x5E38;&#x6536;&#x5230; CPU &#x4F7F;&#x7528;&#x7387;&#x7684;&#x544A;&#x8B66;&#xFF0C;&#x4E8E;&#x662F;&#x8FDB;&#x884C;&#x4E86;&#x4E00;&#x6CE2;&#x4F18;&#x5316;&#xFF0C;&#x6548;&#x679C;&#x8FD8;&#x4E0D;&#x9519;&#xFF0C;&#x4E8E;&#x662F;&#x6253;&#x7B97;&#x5206;&#x4EAB;&#x4E0B;&#x601D;&#x8003;&#x3001;&#x4F18;&#x5316;&#x8FC7;&#x7A0B;&#xFF0C;&#x5E0C;&#x671B;&#x5BF9;&#x5927;&#x5BB6;&#x6709;&#x4E00;&#x4E9B;&#x5E2E;&#x52A9;&#x3002;</p>
+<p>&#x81EA;&#x7814; Dubbo &#x6CE8;&#x518C;&#x4E2D;&#x5FC3;&#x662F;&#x4E2A;&#x4EC0;&#x4E48;&#x4E1C;&#x897F;&#xFF0C;&#x6211;&#x753B;&#x4E2A;&#x7B80;&#x56FE;&#x5927;&#x5BB6;&#x7A0D;&#x5FAE;&#x611F;&#x53D7;&#x4E00;&#x4E0B;&#x5C31;&#x597D;&#xFF0C;&#x770B;&#x4E0D;&#x61C2;&#x4E5F;&#x6CA1;&#x5173;&#x7CFB;&#xFF0C;&#x4E0D;&#x5F71;&#x54CD;&#x540E;&#x7EED;&#x7684;&#x7406;&#x89E3;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/452d3bd718474249ec233cc41dc94c96a466d6d082bfbb2e9ba07ed0301df82c" alt></p>
+<ul>
+<li>Consumer &#x548C; Provider &#x7684;&#x670D;&#x52A1;&#x53D1;&#x73B0;&#x8BF7;&#x6C42;&#xFF08;&#x6CE8;&#x518C;&#x3001;&#x6CE8;&#x9500;&#x3001;&#x8BA2;&#x9605;&#xFF09;&#x90FD;&#x53D1;&#x7ED9; Agent&#xFF0C;&#x7531;&#x5B83;&#x5168;&#x6743;&#x4EE3;&#x7406;</li>
+<li>Registry &#x548C; Agent &#x4FDD;&#x6301; Grpc &#x957F;&#x94FE;&#x63A5;&#xFF0C;&#x957F;&#x94FE;&#x63A5;&#x7684;&#x76EE;&#x7684;&#x4E3B;&#x8981;&#x662F; Provider &#x65B9;&#x6709;&#x53D8;&#x66F4;&#x65F6;&#xFF0C;&#x80FD;&#x53CA;&#x65F6;&#x63A8;&#x9001;&#x7ED9;&#x76F8;&#x5E94;&#x7684; Consumer&#x3002;&#x4E3A;&#x4E86;&#x4FDD;&#x8BC1;&#x6570;&#x636E;&#x7684;&#x6B63;&#x786E;&#x6027;&#xFF0C;&#x505A;&#x4E86;&#x63A8;&#x62C9;&#x7ED3;&#x5408;&#x7684;&#x673A;&#x5236;&#xFF0C;Agent &#x4F1A;&#x6BCF;&#x9694;&#x4E00;&#x6BB5;&#x65F6;&#x95F4;&#x53BB; Registry &#x62C9;&#x53D6;&#x8BA2;&#x9605;&#x7684;&#x670D;&#x52A1;&#x5217;&#x8868;</li>
+<li>Agent &#x548C;&#x4E1A;&#x52A1;&#x670D;&#x52A1;&#x90E8;&#x7F72;&#x5728;&#x540C;&#x4E00;&#x53F0;&#x673A;&#x5668;&#x4E0A;&#xFF0C;&#x7C7B;&#x4F3C; Service Mesh &#x7684;&#x601D;&#x8DEF;&#xFF0C;&#x5C3D;&#x91CF;&#x51CF;&#x5C11;&#x5BF9;&#x4E1A;&#x52A1;&#x7684;&#x5165;&#x4FB5;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x80FD;&#x5FEB;&#x901F;&#x7684;&#x8FED;&#x4EE3;&#x4E86;</li>
+</ul>
+<p>&#x56DE;&#x5230;&#x4ECA;&#x5929;&#x7684;&#x91CD;&#x70B9;&#xFF0C;&#x8FD9;&#x4E2A;&#x6CE8;&#x518C;&#x4E2D;&#x5FC3;&#x6700;&#x8FD1; CPU &#x4F7F;&#x7528;&#x7387;&#x957F;&#x671F;&#x5904;&#x4E8E;&#x4E2D;&#x9AD8;&#x6C34;&#x4F4D;&#xFF0C;&#x5076;&#x5C14;&#x6709;&#x5E94;&#x7528;&#x53D1;&#x5E03;&#xFF0C;&#x63A8;&#x9001;&#x91CF;&#x5927;&#x65F6;&#xFF0C;CPU &#x751A;&#x81F3;&#x4F1A;&#x88AB;&#x6253;&#x6EE1;&#x3002;</p>
+<p>&#x4EE5;&#x524D;&#x6CA1;&#x611F;&#x89C9;&#x5230;&#xFF0C;&#x662F;&#x56E0;&#x4E3A;&#x63A5;&#x5165;&#x7684;&#x5E94;&#x7528;&#x4E0D;&#x591A;&#xFF0C;&#x6700;&#x8FD1;&#x51E0;&#x4E2A;&#x6708;&#x5E94;&#x7528;&#x8D8A;&#x63A5;&#x8D8A;&#x591A;&#xFF0C;&#x6162;&#x6162;&#x5C31;&#x8FBE;&#x5230;&#x4E86;&#x544A;&#x8B66;&#x9608;&#x503C;&#x3002;</p>
+<h3 id="&#x5BFB;&#x627E;&#x4F18;&#x5316;&#x70B9;"><a href="#&#x5BFB;&#x627E;&#x4F18;&#x5316;&#x70B9;" class="headerlink" title="&#x5BFB;&#x627E;&#x4F18;&#x5316;&#x70B9;"></a>&#x5BFB;&#x627E;&#x4F18;&#x5316;&#x70B9;</h3><p>&#x7531;&#x4E8E;&#x8FD9;&#x9879;&#x76EE;&#x662F; Go &#x5199;&#x7684;&#xFF08;&#x4E0D;&#x61C2; Go &#x7684;&#x670B;&#x53CB;&#x4E5F;&#x6CA1;&#x5173;&#x7CFB;&#xFF0C;&#x672C;&#x6587;&#x91CD;&#x70B9;&#x5728;&#x7B97;&#x6CD5;&#x7684;&#x4F18;&#x5316;&#xFF0C;&#x4E0D;&#x5728;&#x5DE5;&#x5177;&#x7684;&#x4F7F;&#x7528;&#x4E0A;&#xFF09;&#xFF0C; &#x627E;&#x5230;&#x54EA;&#x91CC;&#x8017; CPU &#x8FD8;&#x662F;&#x633A;&#x7B80;&#x5355;&#x7684;&#xFF1A;&#x6253;&#x5F00; pprof &#x5373;&#x53EF;&#xFF0C;&#x53BB;&#x7EBF;&#x4E0A;&#x91C7;&#x96C6;&#x4E00;&#x6BB5;&#x65F6;&#x95F4;&#x5373;&#x53EF;&#x3002;</p>
+<p>&#x5177;&#x4F53;&#x600E;&#x4E48;&#x64CD;&#x4F5C;&#x53EF;&#x4EE5;&#x53C2;&#x8003;&#x6211;&#x4E4B;&#x524D;&#x7684;<a href="/external_links/de6af39420552360b82727381385126d.html" target="blank" rel="noopener">&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;</a>&#xFF0C;&#x4ECA;&#x5929;&#x6587;&#x7AE0;&#x4E2D;&#x7528;&#x5230;&#x7684;&#x77E5;&#x8BC6;&#x548C;&#x5DE5;&#x5177;&#xFF0C;&#x8FD9;&#x7BC7;&#x6587;&#x7AE0;&#x90FD;&#x80FD;&#x627E;&#x5230;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/ebbb61773285ab0f878d295c07c2ad52282f97513bd88545ae0d773abab53c57" alt></p>
+<p>CPU profile &#x622A;&#x4E86;&#x90E8;&#x5206;&#x56FE;&#xFF0C;&#x5176;&#x4ED6;&#x7684;&#x4E0D;&#x592A;&#x91CD;&#x8981;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x6D88;&#x8017; CPU &#x591A;&#x7684;&#x662F; <code>AssembleCategoryProviders</code>&#x65B9;&#x6CD5;&#xFF0C;&#x4E0E;&#x5176;&#x76F4;&#x63A5;&#x5173;&#x8054;&#x7684;&#x662F;</p>
+<ul>
+<li>2&#x4E2A; redis &#x76F8;&#x5173;&#x7684;&#x65B9;&#x6CD5;</li>
+<li>1&#x4E2A;&#x53EB;<code>assembleUrlWeight</code>&#x7684;&#x65B9;&#x6CD5;</li>
+</ul>
+<p>&#x7A0D;&#x5FAE;&#x89E3;&#x91CA;&#x4E0B;&#xFF0C;AssembleCategoryProviders &#x65B9;&#x6CD5;&#x662F;&#x6784;&#x9020;&#x8FD4;&#x56DE; Dubbo provider &#x7684; url&#xFF0C;&#x7531;&#x4E8E;&#x4F1A;&#x5728;&#x8FD4;&#x56DE; url &#x65F6;&#x5BF9;&#x5176;&#x505A;&#x4E00;&#x4E9B;&#x5904;&#x7406;&#xFF08;&#x6BD4;&#x5982;&#x8C03;&#x6574;&#x6743;&#x91CD;&#x7B49;&#xFF09;&#xFF0C;&#x4F1A;&#x6D89;&#x53CA;&#x5230;&#x5BF9;&#x8FD9;&#x4E2A; Dubbo url &#x7684;&#x89E3;&#x6790;&#x3002;&#x53C8;&#x7531;&#x4E8E;&#x63A8;&#x62C9;&#x7ED3;&#x5408;&#x7684;&#x6A21;&#x5F0F;&#xFF0C;&#x7EBF;&#x4E0A;&#x670D;&#x52A1;&#x4F7F;&#x7528;&#x65B9;&#x8D8A;&#x591A;&#xFF0C;&#x8FD9;&#x4E2A;&#x5904;&#x7406;&#x7684; QPS &#x5C31;&#x8D8A;&#x5927;&#xFF0C;&#x6240;&#x4EE5;&#x5B83;&#x5360;&#x7528;&#x4E86;&#x5927;&#x90E8;&#x5206; CPU &#x4E00;&#x70B9;&#x4E5F;&#x4E0D;&#x5947;&#x602A;&#x3002;</p>
+<p>&#x8FD9;&#x4E24;&#x4E2A; redis &#x64CD;&#x4F5C;&#x53EF;&#x80FD;&#x662F;&#x5E8F;&#x5217;&#x5316;&#x5360;&#x7528;&#x4E86; CPU&#xFF0C;&#x66F4;&#x5927;&#x5934;&#x5728; assembleUrlWeight&#xFF0C;&#x6709;&#x70B9;&#x7422;&#x78E8;&#x4E0D;&#x900F;&#x3002;</p>
+<p>&#x63A5;&#x4E0B;&#x6765;&#x6211;&#x4EEC;&#x5C31;&#x5206;&#x6790;&#x4E0B; assembleUrlWeight &#x5982;&#x4F55;&#x4F18;&#x5316;&#xFF0C;&#x56E0;&#x4E3A;&#x4ED6;&#x5360;&#x7528; CPU &#x6700;&#x591A;&#xFF0C;&#x4F18;&#x5316;&#x6548;&#x679C;&#x80AF;&#x5B9A;&#x6700;&#x597D;&#x3002;</p>
+<p>&#x4E0B;&#x9762;&#x662F; assembleUrlWeight &#x7684;&#x4F2A;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func AssembleUrlWeight(rawurl string, lidcWeight int) string {</span><br><span class="line">	u, err := url.Parse(rawurl)</span><br><span class="line">	if err != nil {</span><br><span class="line">		return rawurl</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	values, err := url.ParseQuery(u.RawQuery)</span><br><span class="line">	if err != nil {</span><br><span class="line">		return rawurl</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	if values.Get(&quot;lidc_weight&quot;) != &quot;&quot; {</span><br><span class="line">		return rawurl</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	endpointWeight := 100</span><br><span class="line">	if values.Get(&quot;weight&quot;) != &quot;&quot; {</span><br><span class="line">		endpointWeight, err = strconv.Atoi(values.Get(&quot;weight&quot;))</span><br><span class="line">		if err != nil {</span><br><span class="line">			endpointWeight = 100</span><br><span class="line">		}</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	values.Set(&quot;weight&quot;, strconv.Itoa(lidcWeight*endpointWeight))</span><br><span class="line"></span><br><span class="line">	u.RawQuery = values.Encode()</span><br><span class="line">	return u.String()</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4F20;&#x53C2; rawurl &#x662F; Dubbo provider &#x7684;url&#xFF0C;lidcWeight &#x662F;&#x673A;&#x623F;&#x6743;&#x91CD;&#x3002;&#x6839;&#x636E;&#x914D;&#x7F6E;&#x7684;&#x673A;&#x623F;&#x6743;&#x91CD;&#xFF0C;&#x5C06; url &#x4E2D;&#x7684; weight &#x8FDB;&#x884C;&#x91CD;&#x65B0;&#x8BA1;&#x7B97;&#xFF0C;&#x5B9E;&#x73B0;&#x591A;&#x673A;&#x623F;&#x6D41;&#x91CF;&#x6309;&#x6743;&#x91CD;&#x7684;&#x5206;&#x914D;&#x3002;</p>
+<p>&#x8FD9;&#x4E2A;&#x8FC7;&#x7A0B;&#x6D89;&#x53CA;&#x5230; url &#x53C2;&#x6570;&#x7684;&#x89E3;&#x6790;&#xFF0C;&#x518D;&#x8FDB;&#x884C; weight &#x7684;&#x8BA1;&#x7B97;&#xFF0C;&#x6700;&#x540E;&#x518D;&#x8FD8;&#x539F;&#x4E3A;&#x4E00;&#x4E2A; url</p>
+<p>Dubbo &#x7684; url &#x7ED3;&#x6784;&#x548C;&#x666E;&#x901A; url &#x7ED3;&#x6784;&#x4E00;&#x81F4;&#xFF0C;&#x5176;&#x7279;&#x70B9;&#x662F;&#x53C2;&#x6570;&#x53EF;&#x80FD;&#x6BD4;&#x8F83;&#x591A;&#xFF0C;&#x6CA1;&#x6709; <code>#</code>&#x540E;&#x9762;&#x7684;&#x7247;&#x6BB5;&#x90E8;&#x5206;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/dc527e127c9ae8b33a780782d86f4977259dd88126df4eeb5a791557b32b493b" alt></p>
+<p>CPU &#x4E3B;&#x8981;&#x5C31;&#x6D88;&#x8017;&#x5728;&#x8FD9;&#x4E24;&#x6B21;&#x89E3;&#x6790;&#x548C;&#x6700;&#x540E;&#x7684;&#x8FD8;&#x539F;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x770B;&#x8FD9;&#x4E24;&#x6B21;&#x89E3;&#x6790;&#x7684;&#x76EE;&#x7684;&#x5C31;&#x662F;&#x4E3A;&#x4E86;&#x62FF;&#x5230; url &#x4E2D;&#x7684; <code>lidc_weight</code> &#x548C; <code>weight</code> &#x53C2;&#x6570;&#x3002;</p>
+<p>url.Parse &#x548C; url.ParseQuery &#x90FD;&#x662F; Go &#x5B98;&#x65B9;&#x63D0;&#x4F9B;&#x7684;&#x5E93;&#xFF0C;&#x5404;&#x4E2A;&#x8BED;&#x8A00;&#x4E5F;&#x90FD;&#x6709;&#x5B9E;&#x73B0;&#xFF0C;&#x5176;&#x6838;&#x5FC3;&#x662F;&#x89E3;&#x6790; url &#x4E3A;&#x4E00;&#x4E2A;&#x5BF9;&#x8C61;&#xFF0C;&#x65B9;&#x4FBF;&#x5730;&#x83B7;&#x53D6; url &#x7684;&#x5404;&#x4E2A;&#x90E8;&#x5206;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x4E86;&#x89E3;&#x4FE1;&#x606F;&#x71B5;&#x8FD9;&#x4E2A;&#x6982;&#x5FF5;&#xFF0C;&#x5176;&#x5B9E;&#x4F60;&#x5C31;&#x5927;&#x6982;&#x77E5;&#x9053;&#x8FD9;&#x91CC;&#x9762;&#x4E00;&#x5B9A;&#x662F;&#x53EF;&#x4EE5;&#x4F18;&#x5316;&#x7684;&#x3002;<code>Shannon&#xFF08;&#x9999;&#x519C;&#xFF09;</code> &#x501F;&#x9274;&#x4E86;&#x70ED;&#x529B;&#x5B66;&#x7684;&#x6982;&#x5FF5;&#xFF0C;&#x628A;&#x4FE1;&#x606F;&#x4E2D;&#x6392;&#x9664;&#x4E86;&#x5197;&#x4F59;&#x540E;&#x7684;&#x5E73;&#x5747;&#x4FE1;&#x606F;&#x91CF;&#x79F0;&#x4E3A;<code>&#x4FE1;&#x606F;&#x71B5;</code>&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/a3aa16765fa1552d19eb2c9ac6b1dda160685bfe48ca7cd390bf9129706a19d0" alt></p>
+<p>url.Parse &#x548C; url.ParseQuery &#x5728;&#x8FD9;&#x4E2A;&#x573A;&#x666F;&#x4E0B;&#x89E3;&#x6790;&#x80AF;&#x5B9A;&#x5B58;&#x5728;&#x5197;&#x4F59;&#xFF0C;&#x5197;&#x4F59;&#x610F;&#x5473;&#x7740; CPU &#x5728;&#x505A;&#x591A;&#x4F59;&#x7684;&#x4E8B;&#x60C5;&#x3002;</p>
+<p>&#x56E0;&#x4E3A;&#x4E00;&#x4E2A; Dubbo url &#x53C2;&#x6570;&#x901A;&#x5E38;&#x662F;&#x5F88;&#x591A;&#x7684;&#xFF0C;&#x6211;&#x4EEC;&#x53EA;&#x9700;&#x8981;&#x62FF;&#x8FD9;&#x4E24;&#x4E2A;&#x53C2;&#x6570;&#xFF0C;&#x800C; url.Parse &#x89E3;&#x6790;&#x4E86;&#x6240;&#x6709;&#x7684;&#x53C2;&#x6570;&#x3002;</p>
+<p>&#x4E3E;&#x4E2A;&#x4F8B;&#x5B50;&#xFF0C;&#x7ED9;&#x5B9A;&#x4E00;&#x4E2A;&#x6570;&#x7EC4;&#xFF0C;&#x6C42;&#x5176;&#x4E2D;&#x7684;&#x6700;&#x5927;&#x503C;&#xFF0C;&#x5982;&#x679C;&#x5148;&#x5BF9;&#x6570;&#x7EC4;&#x8FDB;&#x884C;&#x6392;&#x5E8F;&#xFF0C;&#x518D;&#x53D6;&#x6700;&#x5927;&#x503C;&#x663E;&#x7136;&#x662F;&#x5B58;&#x5728;&#x5197;&#x4F59;&#x64CD;&#x4F5C;&#x7684;&#x3002;</p>
+<p>&#x6392;&#x5E8F;&#x540E;&#x7684;&#x6570;&#x7EC4;&#x4E0D;&#x4EC5;&#x80FD;&#x53D6;&#x6700;&#x5927;&#x503C;&#xFF0C;&#x8FD8;&#x80FD;&#x53D6;&#x7B2C;&#x4E8C;&#x5927;&#x503C;&#x3001;&#x7B2C;&#x4E09;&#x5927;&#x503C;&#x2026;&#x6700;&#x5C0F;&#x503C;&#xFF0C;&#x4FE1;&#x606F;&#x5B58;&#x5728;&#x5197;&#x4F59;&#x4E86;&#xFF0C;&#x6240;&#x4EE5;&#x5148;&#x6392;&#x5E8F;&#x80AF;&#x5B9A;&#x4E0D;&#x662F;&#x6C42;&#x6700;&#x5927;&#x503C;&#x7684;&#x6700;&#x4F18;&#x89E3;&#x3002;</p>
+<h3 id="&#x4F18;&#x5316;"><a href="#&#x4F18;&#x5316;" class="headerlink" title="&#x4F18;&#x5316;"></a>&#x4F18;&#x5316;</h3><h4 id="&#x4F18;&#x5316;&#x83B7;&#x53D6;-url-&#x53C2;&#x6570;&#x6027;&#x80FD;"><a href="#&#x4F18;&#x5316;&#x83B7;&#x53D6;-url-&#x53C2;&#x6570;&#x6027;&#x80FD;" class="headerlink" title="&#x4F18;&#x5316;&#x83B7;&#x53D6; url &#x53C2;&#x6570;&#x6027;&#x80FD;"></a>&#x4F18;&#x5316;&#x83B7;&#x53D6; url &#x53C2;&#x6570;&#x6027;&#x80FD;</h4><p>&#x7B2C;&#x4E00;&#x60F3;&#x6CD5;&#x662F;&#xFF0C;&#x4E0D;&#x8981;&#x89E3;&#x6790;&#x5168;&#x90E8; url&#xFF0C;&#x53EA;&#x62FF;&#x76F8;&#x5E94;&#x7684;&#x53C2;&#x6570;&#xFF0C;&#x8FD9;&#x5C31;&#x5F88;&#x50CF;&#x6211;&#x4EEC;&#x5199;&#x7684;&#x7B97;&#x6CD5;&#x9898;&#xFF0C;&#x6BD4;&#x5982;&#x83B7;&#x53D6; weight &#x53C2;&#x6570;&#xFF0C;&#x5B83;&#x53EA;&#x53EF;&#x80FD;&#x662F;&#x8FD9;&#x4E24;&#x79CD;&#x60C5;&#x51B5;&#xFF08;&#x4E0D;&#x5B58;&#x5728; #&#xFF0C;&#x6240;&#x4EE5;&#x7B80;&#x5355;&#x5F88;&#x591A;&#xFF09;&#xFF1A;</p>
+<ul>
+<li>dubbo://127.0.0.1:20880/org.newboo.basic.MyDemoService?weight=100&amp;&#x2026;</li>
+<li>dubbo://127.0.0.1:20880/org.newboo.basic.MyDemoService?xx=yy&amp;weight=100&amp;&#x2026;</li>
+</ul>
+<p>&#x8981;&#x4E48;&#x662F; <code>&amp;weight=</code>&#xFF0C;&#x8981;&#x4E48;&#x662F; <code>?weight=</code>&#xFF0C;&#x7ED3;&#x675F;&#x8981;&#x4E48;&#x662F;<code>&amp;</code>&#xFF0C;&#x8981;&#x4E48;&#x76F4;&#x63A5;&#x5230;&#x5B57;&#x7B26;&#x4E32;&#x5C3E;&#xFF0C;&#x4EE3;&#x7801;&#x5C31;&#x5F88;&#x597D;&#x5199;&#x4E86;&#xFF0C;&#x5148;&#x624B;&#x5199;&#x4E2A;&#x89E3;&#x6790;&#x53C2;&#x6570;&#x7684;&#x7B97;&#x6CD5;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func GetUrlQueryParam(u string, key string) (string, error) {</span><br><span class="line">	sb := strings.Builder{}</span><br><span class="line">	sb.WriteString(key)</span><br><span class="line">	sb.WriteString(&quot;=&quot;)</span><br><span class="line">	index := strings.Index(u, sb.String())</span><br><span class="line">	if (index == -1) || (index+len(key)+1 &gt; len(u)) {</span><br><span class="line">		return &quot;&quot;, UrlParamNotExist</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	var value = strings.Builder{}</span><br><span class="line">	for i := index + len(key) + 1; i &lt; len(u); i++ {</span><br><span class="line">		if i+1 &gt; len(u) {</span><br><span class="line">			break</span><br><span class="line">		}</span><br><span class="line">		if u[i:i+1] == &quot;&amp;&quot; {</span><br><span class="line">			break</span><br><span class="line">		}</span><br><span class="line">		value.WriteString(u[i : i+1])</span><br><span class="line">	}</span><br><span class="line">	return value.String(), nil</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x539F;&#x5148;&#x83B7;&#x53D6;&#x53C2;&#x6570;&#x7684;&#x65B9;&#x6CD5;&#x53EF;&#x4EE5;&#x6458;&#x51FA;&#x6765;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func getParamByUrlParse(ur string, key string) string {</span><br><span class="line">	u, err := url.Parse(ur)</span><br><span class="line">	if err != nil {</span><br><span class="line">		return &quot;&quot;</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	values, err := url.ParseQuery(u.RawQuery)</span><br><span class="line">	if err != nil {</span><br><span class="line">		return &quot;&quot;</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	return values.Get(key)</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x5148;&#x5BF9;&#x8FD9;&#x4E24;&#x4E2A;&#x51FD;&#x6570;&#x8FDB;&#x884C; benchmark&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func BenchmarkGetQueryParam(b *testing.B) {</span><br><span class="line">	for i := 0; i &lt; b.N; i++ {</span><br><span class="line">		getParamByUrlParse(u, &quot;anyhost&quot;)</span><br><span class="line">		getParamByUrlParse(u, &quot;version&quot;)</span><br><span class="line">		getParamByUrlParse(u, &quot;not_exist&quot;)</span><br><span class="line">	}</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func BenchmarkGetQueryParamNew(b *testing.B) {</span><br><span class="line">	for i := 0; i &lt; b.N; i++ {</span><br><span class="line">		GetUrlQueryParam(u, &quot;anyhost&quot;)</span><br><span class="line">		GetUrlQueryParam(u, &quot;version&quot;)</span><br><span class="line">		GetUrlQueryParam(u, &quot;not_exist&quot;)</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>Benchmark &#x7ED3;&#x679C;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;BenchmarkGetQueryParam-4          103412              9708 ns/op</span><br><span class="line">BenchmarkGetQueryParam-4          111794              9685 ns/op</span><br><span class="line">BenchmarkGetQueryParam-4          115699              9818 ns/op</span><br><span class="line">BenchmarkGetQueryParamNew-4      2961254               409 ns/op</span><br><span class="line">BenchmarkGetQueryParamNew-4      2944274               406 ns/op</span><br><span class="line">BenchmarkGetQueryParamNew-4      2895690               405 ns/op</span><br></pre></td></tr></table></figure>
+
+<p>&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x6027;&#x80FD;&#x5927;&#x6982;&#x63D0;&#x5347;&#x4E86;20&#x591A;&#x500D;</p>
+<p>&#x65B0;&#x5199;&#x7684;&#x8FD9;&#x4E2A;&#x65B9;&#x6CD5;&#xFF0C;&#x6709;&#x4E24;&#x4E2A;&#x5C0F;&#x7EC6;&#x8282;&#xFF0C;&#x7B2C;&#x4E00;&#x662F;&#x8FD4;&#x56DE;&#x503C;&#x4E2D;&#x533A;&#x5206;&#x4E86;&#x53C2;&#x6570;&#x662F;&#x5426;&#x5B58;&#x5728;&#xFF0C;&#x8FD9;&#x4E2A;&#x540E;&#x9762;&#x4F1A;&#x7528;&#x5230;&#xFF1B;&#x7B2C;&#x4E8C;&#x662F;&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x64CD;&#x4F5C;&#x7528;&#x5230;&#x4E86; <code>strings.Builder</code>&#xFF0C;&#x8FD9;&#x4E5F;&#x662F;&#x5B9E;&#x9645;&#x6D4B;&#x8BD5;&#x7684;&#x7ED3;&#x679C;&#xFF0C;&#x4F7F;&#x7528; <code>+</code>&#x6216;&#x8005; <code>fmt.Springf</code> &#x6027;&#x80FD;&#x90FD;&#x6CA1;&#x8FD9;&#x4E2A;&#x597D;&#xFF0C;&#x611F;&#x5174;&#x8DA3;&#x53EF;&#x4EE5;&#x6D4B;&#x8BD5;&#x4E0B;&#x770B;&#x770B;&#x3002;</p>
+<h4 id="&#x4F18;&#x5316;-url-&#x5199;&#x5165;&#x53C2;&#x6570;&#x6027;&#x80FD;"><a href="#&#x4F18;&#x5316;-url-&#x5199;&#x5165;&#x53C2;&#x6570;&#x6027;&#x80FD;" class="headerlink" title="&#x4F18;&#x5316; url &#x5199;&#x5165;&#x53C2;&#x6570;&#x6027;&#x80FD;"></a>&#x4F18;&#x5316; url &#x5199;&#x5165;&#x53C2;&#x6570;&#x6027;&#x80FD;</h4><p>&#x8BA1;&#x7B97;&#x51FA; weight &#x540E;&#x518D;&#x628A; weight &#x5199;&#x5165; url &#x4E2D;&#xFF0C;&#x8FD9;&#x91CC;&#x76F4;&#x63A5;&#x7ED9;&#x51FA;&#x4F18;&#x5316;&#x540E;&#x7684;&#x4EE3;&#x7801;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func AssembleUrlWeightNew(rawurl string, lidcWeight int) string {</span><br><span class="line">	if lidcWeight == 1 {</span><br><span class="line">		return rawurl</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	lidcWeightStr, err1 := GetUrlQueryParam(rawurl, &quot;lidc_weight&quot;)</span><br><span class="line">	if err1 == nil &amp;&amp; lidcWeightStr != &quot;&quot; {</span><br><span class="line">		return rawurl</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	var err error</span><br><span class="line">	endpointWeight := 100</span><br><span class="line">	weightStr, err2 := GetUrlQueryParam(rawurl, &quot;weight&quot;)</span><br><span class="line">	if weightStr != &quot;&quot; {</span><br><span class="line">		endpointWeight, err = strconv.Atoi(weightStr)</span><br><span class="line">		if err != nil {</span><br><span class="line">			endpointWeight = 100</span><br><span class="line">		}</span><br><span class="line">	}</span><br><span class="line"></span><br><span class="line">	if err2 != nil { // url&#x4E2D;&#x4E0D;&#x5B58;&#x5728;weight</span><br><span class="line">		finUrl := strings.Builder{}</span><br><span class="line">		finUrl.WriteString(rawurl)</span><br><span class="line">		if strings.Contains(rawurl, &quot;?&quot;) {</span><br><span class="line">			finUrl.WriteString(&quot;&amp;weight=&quot;)</span><br><span class="line">			finUrl.WriteString(strconv.Itoa(lidcWeight * endpointWeight))</span><br><span class="line">			return finUrl.String()</span><br><span class="line">		} else {</span><br><span class="line">			finUrl.WriteString(&quot;?weight=&quot;)</span><br><span class="line">			finUrl.WriteString(strconv.Itoa(lidcWeight * endpointWeight))</span><br><span class="line">			return finUrl.String()</span><br><span class="line">		}</span><br><span class="line">	} else { // url&#x4E2D;&#x5B58;&#x5728;weight</span><br><span class="line">		oldWeightStr := strings.Builder{}</span><br><span class="line">		oldWeightStr.WriteString(&quot;weight=&quot;)</span><br><span class="line">		oldWeightStr.WriteString(weightStr)</span><br><span class="line"></span><br><span class="line">		newWeightStr := strings.Builder{}</span><br><span class="line">		newWeightStr.WriteString(&quot;weight=&quot;)</span><br><span class="line">		newWeightStr.WriteString(strconv.Itoa(lidcWeight * endpointWeight))</span><br><span class="line">		return strings.ReplaceAll(rawurl, oldWeightStr.String(), newWeightStr.String())</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E3B;&#x8981;&#x5C31;&#x662F;&#x5206;&#x4E3A; url &#x4E2D;&#x662F;&#x5426;&#x5B58;&#x5728; weight &#x4E24;&#x79CD;&#x60C5;&#x51B5;&#x6765;&#x8BA8;&#x8BBA;&#xFF1A;</p>
+<ul>
+<li>url &#x672C;&#x8EAB;&#x4E0D;&#x5B58;&#x5728; weight &#x53C2;&#x6570;&#xFF0C;&#x5219;&#x76F4;&#x63A5;&#x5728; url &#x540E;&#x62FC;&#x63A5;&#x4E00;&#x4E2A; weight &#x53C2;&#x6570;&#xFF0C;&#x5F53;&#x7136;&#x8981;&#x6CE8;&#x610F;&#x662F;&#x5426;&#x5B58;&#x5728; <code>?</code></li>
+<li>url &#x672C;&#x8EAB;&#x5B58;&#x5728; weight &#x53C2;&#x6570;&#xFF0C;&#x5219;&#x76F4;&#x63A5;&#x8FDB;&#x884C;&#x5B57;&#x7B26;&#x4E32;&#x66FF;&#x6362;</li>
+</ul>
+<p>&#x7EC6;&#x5FC3;&#x7684;&#x4F60;&#x80AF;&#x5B9A;&#x53C8;&#x53D1;&#x73B0;&#x4E86;&#xFF0C;&#x5F53; <code>lidcWeight = 1</code> &#x65F6;&#xFF0C;&#x76F4;&#x63A5;&#x8FD4;&#x56DE;&#xFF0C;&#x56E0;&#x4E3A; <code>lidcWeight = 1</code> &#x65F6;&#xFF0C;&#x540E;&#x9762;&#x7684;&#x8BA1;&#x7B97;&#x5176;&#x5B9E;&#x90FD;&#x4E0D;&#x8D77;&#x4F5C;&#x7528;&#xFF08;Dubbo &#x6743;&#x91CD;&#x9ED8;&#x8BA4;&#x4E3A;100&#xFF09;&#xFF0C;&#x7D22;&#x6027;&#x522B;&#x64CD;&#x4F5C;&#xFF0C;&#x7701;&#x70B9; CPU&#x3002;</p>
+<p>&#x5168;&#x90E8;&#x4F18;&#x5316;&#x5B8C;&#xFF0C;&#x603B;&#x4F53;&#x505A;&#x4E00;&#x4E0B; benchmark&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;func BenchmarkAssembleUrlWeight(b *testing.B) {</span><br><span class="line">	for i := 0; i &lt; b.N; i++ {</span><br><span class="line">		for _, ut := range []string{u, u1, u2, u3} {</span><br><span class="line">			AssembleUrlWeight(ut, 60)</span><br><span class="line">		}</span><br><span class="line">	}</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">func BenchmarkAssembleUrlWeightNew(b *testing.B) {</span><br><span class="line">	for i := 0; i &lt; b.N; i++ {</span><br><span class="line">		for _, ut := range []string{u, u1, u2, u3} {</span><br><span class="line">			AssembleUrlWeightNew(ut, 60)</span><br><span class="line">		}</span><br><span class="line">	}</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x7ED3;&#x679C;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;BenchmarkAssembleUrlWeight-4               34275             33289 ns/op</span><br><span class="line">BenchmarkAssembleUrlWeight-4               36646             32432 ns/op</span><br><span class="line">BenchmarkAssembleUrlWeight-4               36702             32740 ns/op</span><br><span class="line">BenchmarkAssembleUrlWeightNew-4           573684              1851 ns/op</span><br><span class="line">BenchmarkAssembleUrlWeightNew-4           646952              1832 ns/op</span><br><span class="line">BenchmarkAssembleUrlWeightNew-4           563392              1896 ns/op</span><br></pre></td></tr></table></figure>
+
+<p>&#x5927;&#x6982;&#x63D0;&#x5347; 18 &#x500D;&#x6027;&#x80FD;&#xFF0C;&#x800C;&#x4E14;&#x8FD9;&#x53EF;&#x80FD;&#x8FD8;&#x662F;&#x6BD4;&#x8F83;&#x5DEE;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x5982;&#x679C;&#x4F20;&#x5165; lidcWeight = 1&#xFF0C;&#x6548;&#x679C;&#x66F4;&#x597D;&#x3002;</p>
+<h3 id="&#x6548;&#x679C;"><a href="#&#x6548;&#x679C;" class="headerlink" title="&#x6548;&#x679C;"></a>&#x6548;&#x679C;</h3><p>&#x4F18;&#x5316;&#x5B8C;&#xFF0C;&#x5BF9;&#x6539;&#x52A8;&#x65B9;&#x6CD5;&#x5199;&#x4E86;&#x76F8;&#x5E94;&#x7684;&#x5355;&#x5143;&#x6D4B;&#x8BD5;&#xFF0C;&#x786E;&#x8BA4;&#x6CA1;&#x95EE;&#x9898;&#x540E;&#xFF0C;&#x4E0A;&#x7EBF;&#x8FDB;&#x884C;&#x89C2;&#x5BDF;&#xFF0C;CPU Idle&#xFF08;&#x7A7A;&#x95F2;&#x7387;&#xFF09; &#x63D0;&#x5347;&#x4E86;10%&#x4EE5;&#x4E0A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/0b6c4db4263ed136ba7d6c5e771634d562765990465a9a0e5a06b30f52925728" alt></p>
+<h3 id="&#x6700;&#x540E;"><a href="#&#x6700;&#x540E;" class="headerlink" title="&#x6700;&#x540E;"></a>&#x6700;&#x540E;</h3><p>&#x5176;&#x5B9E;&#x672C;&#x6587;&#x5C55;&#x793A;&#x7684;&#x662F;&#x4E00;&#x4E2A; Go &#x7A0B;&#x5E8F;&#x975E;&#x5E38;&#x5E38;&#x89C4;&#x7684;&#x6027;&#x80FD;&#x4F18;&#x5316;&#xFF0C;&#x4E5F;&#x662F;&#x76F8;&#x5BF9;&#x6765;&#x8BF4;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x770B;&#x5B8C;&#x540E;&#xFF0C;&#x5927;&#x5BB6;&#x53EF;&#x80FD;&#x8FD8;&#x6709;&#x7591;&#x95EE;&#xFF1A;</p>
+<ul>
+<li>&#x4E3A;&#x4EC0;&#x4E48;&#x8981;&#x5728;&#x63A8;&#x9001;&#x548C;&#x62C9;&#x53D6;&#x7684;&#x65F6;&#x5019;&#x53BB;&#x89E3;&#x6790; url &#x5462;&#xFF1F;&#x4E0D;&#x80FD;&#x4E8B;&#x5148;&#x7B97;&#x597D;&#x5B58;&#x8D77;&#x6765;&#x5417;&#xFF1F;</li>
+<li>&#x4E3A;&#x4EC0;&#x4E48;&#x53EA;&#x4F18;&#x5316;&#x4E86;&#x8FD9;&#x70B9;&#xFF0C;&#x5176;&#x4ED6;&#x7684;&#x70B9;&#x662F;&#x5426;&#x4E5F;&#x53EF;&#x4EE5;&#x4F18;&#x5316;&#x5462;&#xFF1F;</li>
+</ul>
+<p>&#x9488;&#x5BF9;&#x7B2C;&#x4E00;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x5176;&#x5B9E;&#x8FD9;&#x662F;&#x4E2A;&#x5386;&#x53F2;&#x95EE;&#x9898;&#xFF0C;&#x5F53;&#x4F60;&#x63A5;&#x624B;&#x7CFB;&#x7EDF;&#x65F6;&#x4ED6;&#x5C31;&#x662F;&#x8FD9;&#x6837;&#xFF0C;&#x5982;&#x679C;&#x7A0B;&#x5E8F;&#x51FA;&#x95EE;&#x9898;&#xFF0C;&#x4F60;&#x53BB;&#x6539;&#x6574;&#x4E2A;&#x673A;&#x5236;&#xFF0C;&#x53EF;&#x80FD;&#x5468;&#x671F;&#x6BD4;&#x8F83;&#x957F;&#xFF0C;&#x800C;&#x4E14;&#x5BB9;&#x6613;&#x51FA;&#x95EE;&#x9898;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/d61f59c64bd44efb3795513574ff96c2caa5e2d30ceacf839946e463095764b7" alt></p>
+<p>&#x7B2C;&#x4E8C;&#x4E2A;&#x95EE;&#x9898;&#xFF0C;&#x5176;&#x5B9E;&#x521A;&#x4E5F;&#x987A;&#x5E26;&#x56DE;&#x7B54;&#x4E86;&#xFF0C;&#x8FD9;&#x6837;&#x4F18;&#x5316;&#xFF0C;&#x6539;&#x52A8;&#x6700;&#x5C0F;&#xFF0C;&#x6536;&#x76CA;&#x6700;&#x5927;&#xFF0C;&#x522B;&#x7684;&#x70B9;&#x6CA1;&#x8FD9;&#x4E48;&#x597D;&#x6539;&#xFF0C;&#x77ED;&#x671F;&#x6765;&#x8BF4;&#xFF0C;&#x62FF;&#x6536;&#x76CA;&#x6700;&#x91CD;&#x8981;&#x3002;&#x5F53;&#x7136;&#x6211;&#x4EEC;&#x540E;&#x7EED;&#x4E5F;&#x6253;&#x7B97;&#x5BF9;&#x8FD9;&#x4E2A;&#x7CFB;&#x7EDF;&#x8FDB;&#x884C;&#x91CD;&#x6784;&#xFF0C;&#x4F46;&#x91CD;&#x6784;&#x4E4B;&#x524D;&#xFF0C;&#x8FD9;&#x6837;&#x4F18;&#x5316;&#xFF0C;&#x8DB3;&#x4EE5;&#x89E3;&#x51B3;&#x95EE;&#x9898;&#x3002;</p>
+<hr>
+<blockquote>
+<p>&#x641C;&#x7D22;&#x5173;&#x6CE8;&#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7;&#x201D;&#x6349;&#x866B;&#x5927;&#x5E08;&#x201D;&#xFF0C;&#x540E;&#x7AEF;&#x6280;&#x672F;&#x5206;&#x4EAB;&#xFF0C;&#x67B6;&#x6784;&#x8BBE;&#x8BA1;&#x3001;&#x6027;&#x80FD;&#x4F18;&#x5316;&#x3001;&#x6E90;&#x7801;&#x9605;&#x8BFB;&#x3001;&#x95EE;&#x9898;&#x6392;&#x67E5;&#x3001;&#x8E29;&#x5751;&#x5B9E;&#x8DF5;&#x3002;&#x4E5F;&#x6B22;&#x8FCE;&#x52A0;&#x6211;&#x4E2A;&#x4EBA;&#x5FAE;&#x4FE1;<code>MrRoshi</code>&#xFF0C;&#x56F4;&#x89C2;&#x670B;&#x53CB;&#x5708;&#x3002;</p>
+</blockquote>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/6161a5fc92879b3a8f720e24d68ccc11.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端-性能优化/" rel="tag"># 后端,性能优化</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7032885787515420708.html" rel="next" title="Redis篇：事务和lua脚本的使用 前言 参考文章">
+                <i class="fa fa-chevron-left"></i> Redis篇：事务和lua脚本的使用 前言 参考文章
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7032900670332076045.html" rel="prev" title="小码农教你堆排序 堆排序">
+                小码农教你堆排序 堆排序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#寻找优化点"><span class="nav-number">2.</span> <span class="nav-text">寻找优化点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化"><span class="nav-number">3.</span> <span class="nav-text">优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#优化获取-url-参数性能"><span class="nav-number">3.1.</span> <span class="nav-text">优化获取 url 参数性能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#优化-url-写入参数性能"><span class="nav-number">3.2.</span> <span class="nav-text">优化 url 写入参数性能</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#效果"><span class="nav-number">4.</span> <span class="nav-text">效果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最后"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

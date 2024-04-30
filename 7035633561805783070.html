@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="go run main.go &amp;#x4E00;&amp;#x4E2A; Go &amp;#x7A0B;&amp;#x5E8F;&amp;#x5C31;&amp;#x542F;&amp;#x52A8;&amp;#x4E86;&amp;#x3002;&amp;#x7136;&amp;#x800C;&amp;#x8FD9;&amp;#x80CC;&amp;#x540E;&amp;#x64CD;&amp;#x4F5C;&amp;#x7CFB;&amp;#x7EDF;&amp;#x5982;&amp;#x4F55;&amp;#x6267;&amp;#x884C;&amp;#x5">
+<meta name="keywords" content="后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang 程序启动过程">
+<meta property="og:url" content="https://dev.newban.cn/7035633561805783070.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="go run main.go &amp;#x4E00;&amp;#x4E2A; Go &amp;#x7A0B;&amp;#x5E8F;&amp;#x5C31;&amp;#x542F;&amp;#x52A8;&amp;#x4E86;&amp;#x3002;&amp;#x7136;&amp;#x800C;&amp;#x8FD9;&amp;#x80CC;&amp;#x540E;&amp;#x64CD;&amp;#x4F5C;&amp;#x7CFB;&amp;#x7EDF;&amp;#x5982;&amp;#x4F55;&amp;#x6267;&amp;#x884C;&amp;#x5">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2024-04-29T12:38:09.514Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Golang 程序启动过程">
+<meta name="twitter:description" content="go run main.go &amp;#x4E00;&amp;#x4E2A; Go &amp;#x7A0B;&amp;#x5E8F;&amp;#x5C31;&amp;#x542F;&amp;#x52A8;&amp;#x4E86;&amp;#x3002;&amp;#x7136;&amp;#x800C;&amp;#x8FD9;&amp;#x80CC;&amp;#x540E;&amp;#x64CD;&amp;#x4F5C;&amp;#x7CFB;&amp;#x7EDF;&amp;#x5982;&amp;#x4F55;&amp;#x6267;&amp;#x884C;&amp;#x5">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7035633561805783070.html">
+
+
+
+
+
+  <title>Golang 程序启动过程 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Golang 程序启动过程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-28T22:51:52+08:00">
+                2021-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p><code>go run main.go</code> &#x4E00;&#x4E2A; Go &#x7A0B;&#x5E8F;&#x5C31;&#x542F;&#x52A8;&#x4E86;&#x3002;&#x7136;&#x800C;&#x8FD9;&#x80CC;&#x540E;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5982;&#x4F55;&#x6267;&#x884C;&#x5230; Go &#x4EE3;&#x7801;&#x7684;&#xFF0C;Go &#x4E3A;&#x4E86;&#x8FD0;&#x884C;&#x7528;&#x6237; main &#x51FD;&#x6570;&#xFF0C;&#x53C8;&#x505A;&#x4E86;&#x4EC0;&#x4E48;&#xFF1F;</p>
+</blockquote>
+<h3 id="&#x4E00;-&#x7F16;&#x8BD1;"><a href="#&#x4E00;-&#x7F16;&#x8BD1;" class="headerlink" title="&#x4E00; &#x7F16;&#x8BD1;"></a>&#x4E00; &#x7F16;&#x8BD1;</h3><ul>
+<li><code>go build main.go</code></li>
+</ul>
+<p>&#x6211;&#x4EEC;&#x5199;&#x7684; go &#x4EE3;&#x7801;&#x90FD;&#x662F;&#x7F16;&#x8BD1;&#x6210;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x53BB;&#x673A;&#x5668;&#x4E0A;&#x76F4;&#x63A5;&#x6267;&#x884C;&#x7684;&#xFF0C;&#x5728; linux &#x5E73;&#x53F0;&#x4E0A;&#x662F; <a href="/external_links/7a11c3635e4b628dba618c95e1216d67.html" target="blank" rel="noopener">ELF</a> &#x683C;&#x5F0F;&#x7684;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#xFF0C;linux &#x80FD;&#x76F4;&#x63A5;&#x6267;&#x884C;&#x8FD9;&#x4E2A;&#x6587;&#x4EF6;&#x3002;</p>
+<ul>
+<li>&#x7F16;&#x8BD1;&#x5668;&#xFF1A;&#x5C06; go &#x4EE3;&#x7801;&#x751F;&#x6210; .s &#x6C47;&#x7F16;&#x4EE3;&#x7801;&#xFF0C;go &#x4E2D;&#x4F7F;&#x7528;&#x7684;&#x662F; plan9 &#x6C47;&#x7F16;</li>
+<li>&#x6C47;&#x7F16;&#x8D77;&#xFF1A;&#x5C06;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#x8F6C;&#x6210;&#x673A;&#x5668;&#x4EE3;&#x7801;&#xFF0C;&#x5373;&#x76EE;&#x6807;&#x7A0B;&#x5E8F; .o &#x6587;&#x4EF6;</li>
+<li>&#x94FE;&#x63A5;&#x5668;&#xFF1A;&#x5C06;&#x591A;&#x4E2A; .o &#x6587;&#x4EF6;&#x5408;&#x5E76;&#x94FE;&#x63A5;&#x5F97;&#x5230;&#x6700;&#x7EC8;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;</li>
+</ul>
+<p>go&#x7A0B;&#x5E8F;&#x6C47;&#x7F16;&#x4EE3;&#x7801;.o&#x76EE;&#x6807;&#x7A0B;&#x5E8F;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x5199;&#x4EE3;&#x7801;&#x7F16;&#x8BD1;&#x5668;&#x6C47;&#x7F16;&#x5668;&#x94FE;&#x63A5;&#x5668;&#x7ED3;&#x675F;<br>&#x4E8C; &#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x52A0;&#x8F7D;</p>
+<hr>
+<ul>
+<li><code>./main</code></li>
+</ul>
+<p>&#x7ECF;&#x4E0A;&#x8FF0;&#x51E0;&#x4E2A;&#x6B65;&#x9AA4;&#x751F;&#x6210;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x540E;&#xFF0C;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x5728;&#x88AB;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x52A0;&#x8F7D;&#x8D77;&#x6765;&#x8FD0;&#x884C;&#x65F6;&#x4F1A;&#x7ECF;&#x8FC7;&#x5982;&#x4E0B;&#x51E0;&#x4E2A;&#x9636;&#x6BB5;&#xFF1A;</p>
+<ol>
+<li>&#x4ECE;&#x78C1;&#x76D8;&#x4E0A;&#x628A;&#x53EF;&#x6267;&#x884C;&#x7A0B;&#x5E8F;&#x8BFB;&#x5165;&#x5185;&#x5B58;&#xFF1B;</li>
+<li>&#x521B;&#x5EFA;&#x8FDB;&#x7A0B;&#x548C;&#x4E3B;&#x7EBF;&#x7A0B;&#xFF1B;</li>
+<li>&#x4E3A;&#x4E3B;&#x7EBF;&#x7A0B;&#x5206;&#x914D;&#x6808;&#x7A7A;&#x95F4;&#xFF1B;</li>
+<li>&#x628A;&#x7531;&#x7528;&#x6237;&#x5728;&#x547D;&#x4EE4;&#x884C;&#x8F93;&#x5165;&#x7684;&#x53C2;&#x6570;&#x62F7;&#x8D1D;&#x5230;&#x4E3B;&#x7EBF;&#x7A0B;&#x7684;&#x6808;&#xFF1B;</li>
+<li>&#x628A;&#x4E3B;&#x7EBF;&#x7A0B;&#x653E;&#x5165;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7684;&#x8FD0;&#x884C;&#x961F;&#x5217;&#x7B49;&#x5F85;&#x88AB;&#x8C03;&#x5EA6;&#x6267;&#x8D77;&#x6765;&#x8FD0;&#x884C;&#xFF1B;</li>
+</ol>
+<p><code>START_THREAD(elf_ex, regs, elf_entry, bprm-&gt;p)</code> &#x542F;&#x52A8;&#x7EBF;&#x7A0B;&#x4F20;&#x5165;&#x4E86; <code>elf_entry</code> &#x53C2;&#x6570;&#xFF0C;&#x8FD9;&#x662F;&#x7A0B;&#x5E8F;&#x7684;&#x5165;&#x53E3;&#x5730;&#x5740;&#x3002;</p>
+<p>&#x8FD9;&#x4E2A; <code>elf_entry</code> &#x88AB;&#x5199;&#x5728; elf &#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x7684; header &#x4E2D;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">bash&#x590D;&#x5236;&#x4EE3;&#x7801;$ readelf -h main</span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00</span><br><span class="line">  Class:                             ELF64</span><br><span class="line">  Data:                              2&apos;s complement, little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              EXEC (Executable file)</span><br><span class="line">  Machine:                           Advanced Micro Devices X86-64</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x45d430</span><br><span class="line">  Start of program headers:          64 (bytes into file)</span><br><span class="line">  Start of section headers:          456 (bytes into file)</span><br><span class="line">  Flags:                             0x0</span><br><span class="line">  Size of this header:               64 (bytes)</span><br><span class="line">  Size of program headers:           56 (bytes)</span><br><span class="line">  Number of program headers:         7</span><br><span class="line">  Size of section headers:           64 (bytes)</span><br><span class="line">  Number of section headers:         25</span><br><span class="line">  Section header string table index: 3</span><br></pre></td></tr></table></figure>
+
+<p>&#x5E76;&#x4E14;&#x901A;&#x8FC7;&#x53CD;&#x7F16;&#x8BD1; &#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#xFF0C;&#x53EF;&#x4EE5;&#x770B;&#x5230;&#x8FD9;&#x4E2A;&#x5730;&#x5740;&#x5BF9;&#x5E94;&#x7684;&#x5C31;&#x662F; _rt0_amd64_linux&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">shell&#x590D;&#x5236;&#x4EE3;&#x7801;$ objdump ./main -D &gt; tmp</span><br><span class="line">$ grep tmp &apos;45d430&apos;</span><br><span class="line">000000000045d430 &lt;_rt0_amd64_linux&gt;:</span><br><span class="line">  45d430:	e9 2b c4 ff ff       	jmpq   459860 &lt;_rt0_amd64&gt;</span><br></pre></td></tr></table></figure>
+
+<p>&#x4ECE;&#x6B64;&#x8FDB;&#x5165;&#x4E86; Go &#x7A0B;&#x5E8F;&#x7684;&#x542F;&#x52A8;&#x8FC7;&#x7A0B;</p>
+<h2 id="Go-&#x7A0B;&#x5E8F;&#x542F;&#x52A8;"><a href="#Go-&#x7A0B;&#x5E8F;&#x542F;&#x52A8;" class="headerlink" title="Go &#x7A0B;&#x5E8F;&#x542F;&#x52A8;"></a>Go &#x7A0B;&#x5E8F;&#x542F;&#x52A8;</h2><p>Go &#x7A0B;&#x5E8F;<a href="/external_links/1e90241c973e6adc78d5e835a83f0b97.html" target="blank" rel="noopener">&#x542F;&#x52A8;&#x4F4D;&#x7F6E;</a>, &#x628A;&#x6808;&#x4E0A;&#x7684;&#x5165;&#x53E3;&#x53C2;&#x6570;&#x5B58;&#x5230;&#x5BC4;&#x5B58;&#x5668;&#x4E2D;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x8DF3;&#x8F6C;&#x5230; <code>rt0_go</code> &#x542F;&#x52A8;&#x51FD;&#x6570;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;TEXT _rt0_amd64(SB),NOSPLIT,$-8</span><br><span class="line">	MOVQ	0(SP), DI	// argc</span><br><span class="line">	LEAQ	8(SP), SI	// argv</span><br><span class="line">	JMP	runtime&#xB7;rt0_go(SB)</span><br></pre></td></tr></table></figure>
+
+<p><code>rt0_go</code> &#x4EE3;&#x7801;&#x6BD4;&#x8F83;&#x957F;&#xFF0C;&#x53EF;&#x5206;&#x4E3A;&#x4E24;&#x4E2A;&#x90E8;&#x5206;&#xFF0C;&#x7B2C;&#x4E00;&#x90E8;&#x5206;&#x662F;&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x83B7;&#x53D6;&#x548C;&#x8FD0;&#x884C;&#x65F6;&#x68C0;&#x67E5;&#x3002;&#x7B2C;&#x4E8C;&#x90E8;&#x5206;&#x662F; go &#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x7684;&#x6838;&#x5FC3;&#xFF0C;&#x8FD9;&#x91CC;&#x53EA;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x7B2C;&#x4E8C;&#x90E8;&#x5206;&#xFF0C;&#x603B;&#x4F53;&#x542F;&#x52A8;&#x6D41;&#x7A0B;&#x5982;&#x4E0B;</p>
+<p>rt0_gogo runtime &#x6838;&#x5FC3;schedinitnewprocmstartruntime.main&#x5165;&#x53E3;&#x53C2;&#x6570;&#x590D;&#x5236;tls &#x7EBF;&#x7A0B;&#x672C;&#x5730;&#x5B58;&#x50A8;&#x521D;&#x59CB;&#x5316;,&#x5173;&#x8054;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;,m0&#x4E0E;g0check:&#x8FD0;&#x884C;&#x65F6;&#x7C7B;&#x578B;&#x68C0;&#x67E5;args:argc,argv,&#x5185;&#x5B58;&#x7269;&#x7406;&#x9875;&#x7CFB;&#x7EDF;&#x53C2;&#x6570;&#x7684;&#x83B7;&#x53D6;osinit:cpu&#x6838;&#x5FC3;&#x83B7;&#x53D6;schedinit:&#x8C03;&#x5EA6;&#x5668;&#x521D;&#x59CB;&#x5316;newproc:&#x521B;&#x5EFA;&#x65B0;&#x7684; goroutinemstart:&#x5F00;&#x59CB;&#x8C03;&#x5EA6;&#x6808;&#x7684;&#x521D;&#x59CB;&#x5316;&#x5806;&#x5185;&#x5B58;&#x5206;&#x914D;&#x7684;&#x521D;&#x59CB;&#x5316;&#x5F53;&#x524D;G&#x7CFB;&#x7EDF;&#x7EBF;&#x7A0B;&#x521D;&#x59CB;&#x5316;&#x5783;&#x573E;&#x56DE;&#x6536;&#x5668;&#x53C2;&#x6570;&#x521D;&#x59CB;&#x5316;&#x901A;&#x8FC7;cpu&#x6838;&#x5FC3;&#x6570;&#x548C;gomaxprocs&#x521B;&#x5EFA;P&#x521B;&#x5EFA;&#x65B0;&#x7684;&#x534F;&#x7A0B;,&#x5165;&#x53E3;&#x5730;&#x5740; runtime.main&#x653E;&#x5230;P&#x7684;&#x961F;&#x5217;&#x4E2D;,&#x7B49;&#x5F85;&#x8C03;&#x5EA6;&#x521D;&#x59CB;&#x5316;M,&#x5F00;&#x59CB;&#x8C03;&#x5EA6;&#x8C03;&#x5EA6;&#x83B7;&#x53D6;&#x5230;newproc&#x521B;&#x5EFA;&#x7684;G, &#x5165;&#x53E3;&#x65B9;&#x6CD5;:runtime.main&#x65B0;&#x5EFA;sysmon&#x76D1;&#x89C6;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x6240;&#x6709;runtime init&#x65B9;&#x6CD5;&#x542F;&#x52A8; gc &#x6536;&#x96C6;&#x5668;&#x6267;&#x884C;&#x6240;&#x6709;&#x7528;&#x6237;&#x5305;&#x4F9D;&#x8D56;&#x7684;init&#x65B9;&#x6CD5;&#x6267;&#x884C;main.main<br>go runtime &#x6838;&#x5FC3;&#xFF1A;</p>
+<ol>
+<li><code>schedinit</code>&#xFF1A;&#x8FDB;&#x884C;&#x5404;&#x79CD;&#x8FD0;&#x884C;&#x65F6;&#x7EC4;&#x4EF6;&#x521D;&#x59CB;&#x5316;&#x5DE5;&#x4F5C;&#xFF0C;&#x8FD9;&#x5305;&#x62EC;&#x6211;&#x4EEC;&#x7684;&#x8C03;&#x5EA6;&#x5668;&#x4E0E;&#x5185;&#x5B58;&#x5206;&#x914D;&#x5668;&#x3001;&#x56DE;&#x6536;&#x5668;&#x7684;&#x521D;&#x59CB;&#x5316;</li>
+<li><code>newproc</code>&#xFF1A;&#x8D1F;&#x8D23;&#x6839;&#x636E;&#x4E3B; goroutine&#xFF08;&#x5373; main&#xFF09;&#x5165;&#x53E3;&#x5730;&#x5740;&#x521B;&#x5EFA;&#x53EF;&#x88AB;&#x8FD0;&#x884C;&#x65F6;&#x8C03;&#x5EA6;&#x7684;&#x6267;&#x884C;&#x5355;&#x5143;&#xFF0C;&#x8FD9;&#x91CC;&#x7684;main&#x8FD8;&#x4E0D;&#x662F;&#x7528;&#x6237;&#x7684;main&#x51FD;&#x6570;&#xFF0C;&#x662F; <code>runtime.main</code></li>
+<li><code>mstart</code>&#xFF1A;&#x5F00;&#x59CB;&#x542F;&#x52A8;&#x8C03;&#x5EA6;&#x5668;&#x7684;&#x8C03;&#x5EA6;&#x5FAA;&#x73AF;, &#x6267;&#x884C;&#x961F;&#x5217;&#x4E2D; &#x5165;&#x53E3;&#x65B9;&#x6CD5;&#x662F; <code>runtime.main</code> &#x7684; G</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">c&#x590D;&#x5236;&#x4EE3;&#x7801;TEXT runtime&#xB7;rt0_go(SB),NOSPLIT,$0</span><br><span class="line">	(...)</span><br><span class="line">	// &#x8C03;&#x5EA6;&#x5668;&#x521D;&#x59CB;&#x5316;</span><br><span class="line">	CALL	runtime&#xB7;schedinit(SB)</span><br><span class="line"></span><br><span class="line">	// &#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x65B0;&#x7684; goroutine &#x6765;&#x542F;&#x52A8;&#x7A0B;&#x5E8F;</span><br><span class="line">	MOVQ	$runtime&#xB7;mainPC(SB), AX</span><br><span class="line">	PUSHQ	AX</span><br><span class="line">	PUSHQ	$0			// &#x53C2;&#x6570;&#x5927;&#x5C0F;</span><br><span class="line">	CALL	runtime&#xB7;newproc(SB)</span><br><span class="line">	POPQ	AX</span><br><span class="line">	POPQ	AX</span><br><span class="line"></span><br><span class="line">	// &#x542F;&#x52A8;&#x8FD9;&#x4E2A; M&#xFF0C;mstart &#x5E94;&#x8BE5;&#x6C38;&#x4E0D;&#x8FD4;&#x56DE;</span><br><span class="line">	CALL	runtime&#xB7;mstart(SB)</span><br><span class="line">	(...)</span><br><span class="line">	RET</span><br></pre></td></tr></table></figure>
+
+<p><code>shedinit</code>&#x5305;&#x62EC;&#x4E86;&#x6240;&#x6709;&#x6838;&#x5FC3;&#x7EC4;&#x4EF6;&#x7684;&#x521D;&#x59CB;&#x5316;&#x5DE5;&#x4F5C;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;// src/runtime/proc.go</span><br><span class="line">func schedinit() {</span><br><span class="line">	_g_ := getg()</span><br><span class="line">	(...)</span><br><span class="line"></span><br><span class="line">	// &#x6808;&#x3001;&#x5185;&#x5B58;&#x5206;&#x914D;&#x5668;&#x3001;&#x8C03;&#x5EA6;&#x5668;&#x76F8;&#x5173;&#x521D;&#x59CB;&#x5316;</span><br><span class="line">	sched.maxmcount = 10000	// &#x9650;&#x5236;&#x6700;&#x5927;&#x7CFB;&#x7EDF;&#x7EBF;&#x7A0B;&#x6570;&#x91CF;</span><br><span class="line">	stackinit()			// &#x521D;&#x59CB;&#x5316;&#x6267;&#x884C;&#x6808;</span><br><span class="line">	mallocinit()		// &#x521D;&#x59CB;&#x5316;&#x5185;&#x5B58;&#x5206;&#x914D;&#x5668;</span><br><span class="line">	mcommoninit(_g_.m)	// &#x521D;&#x59CB;&#x5316;&#x5F53;&#x524D;&#x7CFB;&#x7EDF;&#x7EBF;&#x7A0B;</span><br><span class="line">	(...)</span><br><span class="line"></span><br><span class="line">	gcinit()	// &#x5783;&#x573E;&#x56DE;&#x6536;&#x5668;&#x521D;&#x59CB;&#x5316;</span><br><span class="line">	(...)</span><br><span class="line"></span><br><span class="line">	// &#x521B;&#x5EFA; P</span><br><span class="line">	// &#x901A;&#x8FC7; CPU &#x6838;&#x5FC3;&#x6570;&#x548C; GOMAXPROCS &#x73AF;&#x5883;&#x53D8;&#x91CF;&#x786E;&#x5B9A; P &#x7684;&#x6570;&#x91CF;</span><br><span class="line">	procs := ncpu</span><br><span class="line">	if n, ok := atoi32(gogetenv(&quot;GOMAXPROCS&quot;)); ok &amp;&amp; n &gt; 0 {</span><br><span class="line">		procs = n</span><br><span class="line">	}</span><br><span class="line">	procresize(procs)</span><br><span class="line">	(...)</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x6267;&#x884C; <code>runtime.main</code>, &#x4E3B;&#x8981;&#x8FDB;&#x884C;&#x4E86;</p>
+<ol>
+<li>&#x542F;&#x52A8;&#x7CFB;&#x7EDF;&#x540E;&#x53F0;&#x76D1;&#x63A7;sysmon &#x7EBF;&#x7A0B;</li>
+<li>&#x6267;&#x884C; runtime &#x5305;&#x5185; init</li>
+<li>&#x542F;&#x52A8;gc</li>
+<li>&#x7528;&#x6237;&#x5305;&#x4F9D;&#x8D56; init &#x7684;&#x6267;&#x884C;</li>
+<li>&#x6267;&#x884C;&#x7528;&#x6237;main.mian &#x65B9;&#x6CD5;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">go&#x590D;&#x5236;&#x4EE3;&#x7801;// The main goroutine.</span><br><span class="line">func main() {</span><br><span class="line">    g := getg()</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    // &#x6267;&#x884C;&#x6808;&#x6700;&#x5927;&#x9650;&#x5236;&#xFF1A;1GB&#xFF08;64&#x4F4D;&#x7CFB;&#x7EDF;&#xFF09;&#x6216;&#x8005; 250MB&#xFF08;32&#x4F4D;&#x7CFB;&#x7EDF;&#xFF09;</span><br><span class="line">    if sys.PtrSize == 8 {</span><br><span class="line">        maxstacksize = 1000000000</span><br><span class="line">    } else {</span><br><span class="line">        maxstacksize = 250000000</span><br><span class="line">    }</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    // &#x542F;&#x52A8;&#x7CFB;&#x7EDF;&#x540E;&#x53F0;&#x76D1;&#x63A7;&#xFF08;&#x5B9A;&#x671F;&#x5783;&#x573E;&#x56DE;&#x6536;&#x3001;&#x62A2;&#x5360;&#x8C03;&#x5EA6;&#x7B49;&#x7B49;&#xFF09;</span><br><span class="line">    systemstack(func() {</span><br><span class="line">        newm(sysmon, nil)</span><br><span class="line">    })</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    // &#x8BA9;goroute&#x72EC;&#x5360;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#xFF0C; </span><br><span class="line">    // runtime.lockOSThread&#x7684;&#x7528;&#x6CD5;&#x8BE6;&#x89C1;http://xiaorui.cc/archives/5320</span><br><span class="line">    lockOSThread()</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    // runtime&#x5305;&#x5185;&#x90E8;&#x7684;init&#x51FD;&#x6570;&#x6267;&#x884C;</span><br><span class="line">    runtime_init() // must be before defer</span><br><span class="line"></span><br><span class="line">    // Defer unlock so that runtime.Goexit during init does the unlock too.</span><br><span class="line">    needUnlock := true</span><br><span class="line">    defer func() {</span><br><span class="line">        if needUnlock {</span><br><span class="line">                unlockOSThread()</span><br><span class="line">        }</span><br><span class="line">    }()</span><br><span class="line">    // &#x542F;&#x52A8;GC</span><br><span class="line">    gcenable()</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    // &#x7528;&#x6237;&#x5305;&#x7684;init&#x6267;&#x884C;</span><br><span class="line">    main_init()</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    needUnlock = false</span><br><span class="line">    unlockOSThread()</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    // &#x6267;&#x884C;&#x7528;&#x6237;&#x7684;main&#x4E3B;&#x51FD;&#x6570;</span><br><span class="line">    main_main()</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">    // &#x9000;&#x51FA;</span><br><span class="line">    exit(0)</span><br><span class="line">    for {</span><br><span class="line">        var x *int32</span><br><span class="line">        *x = 0</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<h2 id="&#x603B;&#x7ED3;"><a href="#&#x603B;&#x7ED3;" class="headerlink" title="&#x603B;&#x7ED3;"></a>&#x603B;&#x7ED3;</h2><p>&#x542F;&#x52A8;&#x4E00;&#x4E2A; Go &#x7A0B;&#x5E8F;&#x65F6;&#xFF0C;&#x9996;&#x5148;&#x8981;&#x7ECF;&#x8FC7;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x7684;&#x52A0;&#x8F7D;&#xFF0C;&#x901A;&#x8FC7;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x4E2D; <code>Entry point address</code> &#x8BB0;&#x5F55;&#x7684;&#x5730;&#x5740;&#xFF0C;&#x627E;&#x5230; go &#x7A0B;&#x5E8F;&#x542F;&#x52A8;&#x5165;&#x53E3;: <code>_rt0_amd64</code> -&gt; <code>rt0_go</code>&#x3002;<code>rt0_go</code> &#x4E2D; &#x5148;&#x8FDB;&#x884C;&#x4E86; go &#x7A0B;&#x5E8F;&#x7684; runtime &#x7684;&#x521D;&#x59CB;&#x5316;&#xFF0C;&#x5176;&#x4E2D;&#x5305;&#x62EC;:&#x8C03;&#x5EA6;&#x5668;&#xFF0C;&#x6808;&#xFF0C;&#x5806;&#x5185;&#x5B58;&#x7A7A;&#x95F4;&#x521D;&#x59CB;&#x5316;&#xFF0C;&#x5783;&#x573E;&#x56DE;&#x6536;&#x5668;&#x7684;&#x521D;&#x59CB;&#x5316;&#xFF0C;&#x6700;&#x540E;&#x6700;&#x540E;&#x901A;&#x8FC7;<code>newproc</code>&#x548C;<code>mstart</code>&#x8C03;&#x5EA6;&#x6267;&#x884C;<code>runtime.main</code>,&#x5B8C;&#x6210;&#x4E00;&#x7CFB;&#x5217;&#x521D;&#x59CB;&#x5316;&#x8FC7;&#x7A0B;&#xFF0C;&#x518D;&#x7136;&#x540E;&#x624D;&#x662F;&#x6267;&#x884C;&#x7528;&#x6237;&#x7684;&#x4E3B;&#x51FD;&#x6570;&#x3002;</p>
+<h2 id="&#x53C2;&#x8003;"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</h2><ol>
+<li><a href="/external_links/05bd56e8018457291bd264cb7d2b7f23.html" target="blank" rel="noopener">www.bookstack.cn/read/qcrao-&#x2026;</a></li>
+<li><a href="/external_links/baf1b6f9882758f2a628709863aa22bd.html" target="blank" rel="noopener">eddycjy.com/posts/go/go&#x2026;</a></li>
+<li><a href="/external_links/f4cb3d039759ea37b600643680034495.html" target="blank" rel="noopener">loulan.me/post/golang&#x2026;</a></li>
+<li><a href="https://dev.newban.cn/6942509882281033764">juejin.cn/post/694250&#x2026;</a></li>
+</ol>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/e25fbac18cb08c37513a8fa5a9d3c86e.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/后端/" rel="tag"># 后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7035630644797390856.html" rel="next" title="Netty之HelloWorld 〇 准备工作 一 Se">
+                <i class="fa fa-chevron-left"></i> Netty之HelloWorld 〇 准备工作 一 Se
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7035634252397936671.html" rel="prev" title="MySQL锁机制">
+                MySQL锁机制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一-编译"><span class="nav-number">1.</span> <span class="nav-text">一 编译</span></a></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-程序启动"><span class="nav-number"></span> <span class="nav-text">Go 程序启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number"></span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number"></span> <span class="nav-text">参考</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

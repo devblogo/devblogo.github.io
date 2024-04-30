@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,后端,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x4F20;&amp;#x7EDF;&amp;#x7684; System Call I/O   &amp;#x5728; Linux &amp;#x7CFB;&amp;#x7EDF;&amp;#x4E2D;&amp;#xFF0C;&amp;#x4F20;&amp;#x7EDF;&amp;#x7684;&amp;#x8BBF;&amp;#x95EE;&amp;#x65B9;&amp;#x5F0F;&amp;#x662F;&amp;#x901A;&amp;#x8FC7; write() &amp;#x548C; read() &amp;#x4E">
+<meta name="keywords" content="Linux,后端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解 Linux I&#x2F;O 系统">
+<meta property="og:url" content="https://dev.newban.cn/7026960486138642445.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x4F20;&amp;#x7EDF;&amp;#x7684; System Call I/O   &amp;#x5728; Linux &amp;#x7CFB;&amp;#x7EDF;&amp;#x4E2D;&amp;#xFF0C;&amp;#x4F20;&amp;#x7EDF;&amp;#x7684;&amp;#x8BBF;&amp;#x95EE;&amp;#x65B9;&amp;#x5F0F;&amp;#x662F;&amp;#x901A;&amp;#x8FC7; write() &amp;#x548C; read() &amp;#x4E">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/bf1ce682b2a3a7de38a63a3e2293d12d7ef0935b73e325dc3b8a71adb98cea6b">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/27b64b29913a6c16bc42413bb93df433f9fdc1d34c2a8da7c003e3b756a5dfe5">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/1dbaf4421e9ffb0f2b83c2c4334cc4b631a735c2c57e20462ae3a9203616be5c">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/02ea216dfdd85bd549787c0b6f43880e81038c906ffc48e4f65cf2e5fd3a4f22">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/dec71b42454441bb75d46ce1f83686c81b502f5656ac703fc8a59e0ca5740440">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/84e4f6f50903c6c592b85081aef902df2a3df69eaa0a5fe68557522157d841ef">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/5134f7535316711f83b29667dd0ebbfa7da3529490a97a123c09c24b2aab2460">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/5f8897e28df5836b9da5df3c5403de4b9cb3c5119fe6f2028d5c372fe587ccf7">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e65660c4e3c29acc69547bf445f0797c73ae3a0ebf763bf4856ca5909eae0c01">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/84d6db90fa6478acbb562889b94c569684a33ea17eb3e6d2da9dff542f4e7eed">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fa21b267e54adf4d16e93df8caf942d6084b18d0f1beb15142c02245a21e66b8">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9af8988b0efca1ddf08a2bb1019738c24aa1fc72d506e0b45b51a5b0b804091d">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fb703caaf8a7a2d660a397abea32b0c2b392ba40901e523d3cf3cecbbd576f01">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9898c9ef99429ce031a1f6e156ddd311c8759aac657351f1fe07308dc7bb669e">
+<meta property="og:updated_time" content="2024-04-30T04:21:26.429Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解 Linux I&#x2F;O 系统">
+<meta name="twitter:description" content="&amp;#x4F20;&amp;#x7EDF;&amp;#x7684; System Call I/O   &amp;#x5728; Linux &amp;#x7CFB;&amp;#x7EDF;&amp;#x4E2D;&amp;#xFF0C;&amp;#x4F20;&amp;#x7EDF;&amp;#x7684;&amp;#x8BBF;&amp;#x95EE;&amp;#x65B9;&amp;#x5F0F;&amp;#x662F;&amp;#x901A;&amp;#x8FC7; write() &amp;#x548C; read() &amp;#x4E">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/bf1ce682b2a3a7de38a63a3e2293d12d7ef0935b73e325dc3b8a71adb98cea6b">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7026960486138642445.html">
+
+
+
+
+
+  <title>深入理解 Linux I/O 系统 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深入理解 Linux I/O 系统</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-05T13:57:06+08:00">
+                2021-11-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x4F20;&#x7EDF;&#x7684; System Call I/O  </p>
+<p>&#x5728; Linux &#x7CFB;&#x7EDF;&#x4E2D;&#xFF0C;&#x4F20;&#x7EDF;&#x7684;&#x8BBF;&#x95EE;&#x65B9;&#x5F0F;&#x662F;&#x901A;&#x8FC7; write() &#x548C; read() &#x4E24;&#x4E2A;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x5B9E;&#x73B0;&#x7684;&#xFF0C;&#x901A;&#x8FC7; read() &#x51FD;&#x6570;&#x8BFB;&#x53D6;&#x6587;&#x4EF6;&#x5230;&#x5230;&#x7F13;&#x5B58;&#x533A;&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x901A;&#x8FC7; write() &#x65B9;&#x6CD5;&#x628A;&#x7F13;&#x5B58;&#x4E2D;&#x7684;&#x6570;&#x636E;&#x8F93;&#x51FA;&#x5230;&#x7F51;&#x7EDC;&#x7AEF;&#x53E3;&#x3002;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lua&#x590D;&#x5236;&#x4EE3;&#x7801;read(file_fd, tmp_buf, len);</span><br><span class="line">write(socket_fd, tmp_buf, len);</span><br></pre></td></tr></table></figure>
+
+<p>&#x4E0B;&#x56FE;&#x5206;&#x522B;&#x5BF9;&#x5E94;&#x4F20;&#x7EDF; I/O &#x64CD;&#x4F5C;&#x7684;&#x6570;&#x636E;&#x8BFB;&#x5199;&#x6D41;&#x7A0B;&#xFF0C;&#x6574;&#x4E2A;&#x8FC7;&#x7A0B;&#x6D89;&#x53CA; 2 &#x6B21; CPU &#x62F7;&#x8D1D;&#x3001;2 &#x6B21; DMA &#x62F7;&#x8D1D;&#xFF0C;&#x603B;&#x5171; 4 &#x6B21;&#x62F7;&#x8D1D;&#xFF0C;&#x4EE5;&#x53CA; 4 &#x6B21;&#x4E0A;&#x4E0B;&#x6587;&#x5207;&#x6362;&#x3002;</p>
+<p>CPU &#x62F7;&#x8D1D;&#xFF1A;&#x7531; CPU &#x76F4;&#x63A5;&#x5904;&#x7406;&#x6570;&#x636E;&#x7684;&#x4F20;&#x9001;&#xFF0C;&#x6570;&#x636E;&#x62F7;&#x8D1D;&#x65F6;&#x4F1A;&#x4E00;&#x76F4;&#x5360;&#x7528; CPU &#x7684;&#x8D44;&#x6E90;&#x3002;</p>
+<p>DMA &#x62F7;&#x8D1D;&#xFF1A;&#x7531; CPU &#x5411;DMA&#x78C1;&#x76D8;&#x63A7;&#x5236;&#x5668;&#x4E0B;&#x8FBE;&#x6307;&#x4EE4;&#xFF0C;&#x8BA9; DMA &#x63A7;&#x5236;&#x5668;&#x6765;&#x5904;&#x7406;&#x6570;&#x636E;&#x7684;&#x4F20;&#x9001;&#xFF0C;&#x6570;&#x636E;&#x4F20;&#x9001;&#x5B8C;&#x6BD5;&#x518D;&#x628A;&#x4FE1;&#x606F;&#x53CD;&#x9988;&#x7ED9; CPU&#xFF0C;&#x4ECE;&#x800C;&#x51CF;&#x8F7B;&#x4E86; CPU &#x8D44;&#x6E90;&#x7684;&#x5360;&#x6709;&#x7387;&#x3002;</p>
+<p>&#x4E0A;&#x4E0B;&#x6587;&#x5207;&#x6362;&#xFF1A;&#x5F53;&#x7528;&#x6237;&#x7A0B;&#x5E8F;&#x5411;&#x5185;&#x6838;&#x53D1;&#x8D77;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x65F6;&#xFF0C;CPU &#x5C06;&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x4ECE;&#x7528;&#x6237;&#x6001;&#x5207;&#x6362;&#x5230;&#x5185;&#x6838;&#x6001;&#xFF1B;&#x5F53;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x8FD4;&#x56DE;&#x65F6;&#xFF0C;CPU &#x5C06;&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x4ECE;&#x5185;&#x6838;&#x6001;&#x5207;&#x6362;&#x56DE;&#x7528;&#x6237;&#x6001;&#x3002;</p>
+<p>&#x8BFB;&#x64CD;&#x4F5C;  </p>
+<p>&#x5F53;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x6267;&#x884C; read &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x8BFB;&#x53D6;&#x4E00;&#x5757;&#x6570;&#x636E;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x5982;&#x679C;&#x8FD9;&#x5757;&#x6570;&#x636E;&#x5DF2;&#x7ECF;&#x5B58;&#x5728;&#x4E8E;&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x7684;&#x9875;&#x5185;&#x5B58;&#x4E2D;&#xFF0C;&#x5C31;&#x76F4;&#x63A5;&#x4ECE;&#x5185;&#x5B58;&#x4E2D;&#x8BFB;&#x53D6;&#x6570;&#x636E;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x6570;&#x636E;&#x4E0D;&#x5B58;&#x5728;&#xFF0C;&#x5219;&#x5148;&#x5C06;&#x6570;&#x636E;&#x4ECE;&#x78C1;&#x76D8;&#x52A0;&#x8F7D;&#x6570;&#x636E;&#x5230;&#x5185;&#x6838;&#x7A7A;&#x95F4;&#x7684;&#x8BFB;&#x7F13;&#x5B58;&#xFF08;Read Buffer&#xFF09;&#x4E2D;&#xFF0C;&#x518D;&#x4ECE;&#x8BFB;&#x7F13;&#x5B58;&#x62F7;&#x8D1D;&#x5230;&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x7684;&#x9875;&#x5185;&#x5B58;&#x4E2D;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/bf1ce682b2a3a7de38a63a3e2293d12d7ef0935b73e325dc3b8a71adb98cea6b" alt>)<img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/27b64b29913a6c16bc42413bb93df433f9fdc1d34c2a8da7c003e3b756a5dfe5" alt></p>
+<p><code>read(file_fd, tmp_buf, len);</code>  </p>
+<p>&#x57FA;&#x4E8E;&#x4F20;&#x7EDF;&#x7684; I/O &#x8BFB;&#x53D6;&#x65B9;&#x5F0F;&#xFF0C;read &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x4F1A;&#x89E6;&#x53D1; 2 &#x6B21;&#x4E0A;&#x4E0B;&#x6587;&#x5207;&#x6362;&#xFF0C;1 &#x6B21; DMA &#x62F7;&#x8D1D;&#x548C; 1 &#x6B21; CPU &#x62F7;&#x8D1D;&#x3002;</p>
+<p>&#x53D1;&#x8D77;&#x6570;&#x636E;&#x8BFB;&#x53D6;&#x7684;&#x6D41;&#x7A0B;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x901A;&#x8FC7; read() &#x51FD;&#x6570;&#x5411; Kernel &#x53D1;&#x8D77; System Call&#xFF0C;&#x4E0A;&#x4E0B;&#x6587;&#x4ECE; user space &#x5207;&#x6362;&#x4E3A; kernel space&#x3002;</p>
+<p>CPU &#x5229;&#x7528; DMA &#x63A7;&#x5236;&#x5668;&#x5C06;&#x6570;&#x636E;&#x4ECE;&#x4E3B;&#x5B58;&#x6216;&#x786C;&#x76D8;&#x62F7;&#x8D1D;&#x5230; kernel space &#x7684;&#x8BFB;&#x7F13;&#x51B2;&#x533A;&#xFF08;Read Buffer&#xFF09;&#x3002;</p>
+<p>CPU &#x5C06;&#x8BFB;&#x7F13;&#x51B2;&#x533A;&#xFF08;Read Buffer&#xFF09;&#x4E2D;&#x7684;&#x6570;&#x636E;&#x62F7;&#x8D1D;&#x5230; user space &#x7684;&#x7528;&#x6237;&#x7F13;&#x51B2;&#x533A;&#xFF08;User Buffer&#xFF09;&#x3002;</p>
+<p>&#x4E0A;&#x4E0B;&#x6587;&#x4ECE; kernel space &#x5207;&#x6362;&#x56DE;&#x7528;&#x6237;&#x6001;&#xFF08;User Space&#xFF09;&#xFF0C;read &#x8C03;&#x7528;&#x6267;&#x884C;&#x8FD4;&#x56DE;&#x3002;</p>
+<p>&#x5199;&#x64CD;&#x4F5C;  </p>
+<p>&#x5F53;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x51C6;&#x5907;&#x597D;&#x6570;&#x636E;&#xFF0C;&#x6267;&#x884C; write &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x53D1;&#x9001;&#x7F51;&#x7EDC;&#x6570;&#x636E;&#x65F6;&#xFF0C;&#x5148;&#x5C06;&#x6570;&#x636E;&#x4ECE;&#x7528;&#x6237;&#x7A7A;&#x95F4;&#x7684;&#x9875;&#x7F13;&#x5B58;&#x62F7;&#x8D1D;&#x5230;&#x5185;&#x6838;&#x7A7A;&#x95F4;&#x7684;&#x7F51;&#x7EDC;&#x7F13;&#x51B2;&#x533A;&#xFF08;Socket Buffer&#xFF09;&#x4E2D;&#xFF0C;&#x7136;&#x540E;&#x518D;&#x5C06;&#x5199;&#x7F13;&#x5B58;&#x4E2D;&#x7684;&#x6570;&#x636E;&#x62F7;&#x8D1D;&#x5230;&#x7F51;&#x5361;&#x8BBE;&#x5907;&#x5B8C;&#x6210;&#x6570;&#x636E;&#x53D1;&#x9001;&#x3002;</p>
+<p>write(socket_fd, tmp_buf, len);  </p>
+<p>&#x57FA;&#x4E8E;&#x4F20;&#x7EDF;&#x7684; I/O &#x5199;&#x5165;&#x65B9;&#x5F0F;&#xFF0C;write() &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x4F1A;&#x89E6;&#x53D1; 2 &#x6B21;&#x4E0A;&#x4E0B;&#x6587;&#x5207;&#x6362;&#xFF0C;1 &#x6B21; CPU &#x62F7;&#x8D1D;&#x548C; 1 &#x6B21; DMA &#x62F7;&#x8D1D;&#x3002;</p>
+<p>&#x7528;&#x6237;&#x7A0B;&#x5E8F;&#x53D1;&#x9001;&#x7F51;&#x7EDC;&#x6570;&#x636E;&#x7684;&#x6D41;&#x7A0B;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p>&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x901A;&#x8FC7; write() &#x51FD;&#x6570;&#x5411; kernel &#x53D1;&#x8D77; System Call&#xFF0C;&#x4E0A;&#x4E0B;&#x6587;&#x4ECE; user space &#x5207;&#x6362;&#x4E3A; kernel space&#x3002;</p>
+<p>CPU &#x5C06;&#x7528;&#x6237;&#x7F13;&#x51B2;&#x533A;&#xFF08;User Buffer&#xFF09;&#x4E2D;&#x7684;&#x6570;&#x636E;&#x62F7;&#x8D1D;&#x5230; kernel space &#x7684;&#x7F51;&#x7EDC;&#x7F13;&#x51B2;&#x533A;&#xFF08;Socket Buffer&#xFF09;&#x3002;</p>
+<p>CPU &#x5229;&#x7528; DMA &#x63A7;&#x5236;&#x5668;&#x5C06;&#x6570;&#x636E;&#x4ECE;&#x7F51;&#x7EDC;&#x7F13;&#x51B2;&#x533A;&#xFF08;Socket Buffer&#xFF09;&#x62F7;&#x8D1D;&#x5230; NIC &#x8FDB;&#x884C;&#x6570;&#x636E;&#x4F20;&#x8F93;&#x3002;</p>
+<p>&#x4E0A;&#x4E0B;&#x6587;&#x4ECE; kernel space &#x5207;&#x6362;&#x56DE; user space&#xFF0C;write &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x6267;&#x884C;&#x8FD4;&#x56DE;&#x3002;</p>
+<p>&#x7F51;&#x7EDC; I/O</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/1dbaf4421e9ffb0f2b83c2c4334cc4b631a735c2c57e20462ae3a9203616be5c" alt>)<img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/02ea216dfdd85bd549787c0b6f43880e81038c906ffc48e4f65cf2e5fd3a4f22" alt></p>
+<p>&#x78C1;&#x76D8; I/O</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/dec71b42454441bb75d46ce1f83686c81b502f5656ac703fc8a59e0ca5740440" alt>)<img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/84e4f6f50903c6c592b85081aef902df2a3df69eaa0a5fe68557522157d841ef" alt></p>
+<p>&#x9AD8;&#x6027;&#x80FD;&#x4F18;&#x5316;&#x7684; I/O  </p>
+<p>&#x96F6;&#x62F7;&#x8D1D;&#x6280;&#x672F;&#x3002;</p>
+<p>&#x591A;&#x8DEF;&#x590D;&#x7528;&#x6280;&#x672F;&#x3002;</p>
+<p>&#x9875;&#x7F13;&#x5B58;&#xFF08;PageCache&#xFF09;&#x6280;&#x672F;&#x3002;</p>
+<p>&#x5176;&#x4E2D;&#xFF0C;&#x9875;&#x7F13;&#x5B58;&#xFF08;PageCache&#xFF09;&#x662F;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x5BF9;&#x6587;&#x4EF6;&#x7684;&#x7F13;&#x5B58;&#xFF0C;&#x7528;&#x6765;&#x51CF;&#x5C11;&#x5BF9;&#x78C1;&#x76D8;&#x7684; I/O &#x64CD;&#x4F5C;&#xFF0C;&#x4EE5;&#x9875;&#x4E3A;&#x5355;&#x4F4D;&#x7684;&#xFF0C;&#x5185;&#x5BB9;&#x5C31;&#x662F;&#x78C1;&#x76D8;&#x4E0A;&#x7684;&#x7269;&#x7406;&#x5757;&#xFF0C;&#x9875;&#x7F13;&#x5B58;&#x80FD;&#x5E2E;&#x52A9;&#x7A0B;&#x5E8F;&#x5BF9;&#x6587;&#x4EF6;&#x8FDB;&#x884C;&#x987A;&#x5E8F;&#x8BFB;&#x5199;&#x7684;&#x901F;&#x5EA6;&#x51E0;&#x4E4E;&#x63A5;&#x8FD1;&#x4E8E;&#x5185;&#x5B58;&#x7684;&#x8BFB;&#x5199;&#x901F;&#x5EA6;&#xFF0C;&#x4E3B;&#x8981;&#x539F;&#x56E0;&#x5C31;&#x662F;&#x7531;&#x4E8E; OS &#x4F7F;&#x7528; PageCache &#x673A;&#x5236;&#x5BF9;&#x8BFB;&#x5199;&#x8BBF;&#x95EE;&#x64CD;&#x4F5C;&#x8FDB;&#x884C;&#x4E86;&#x6027;&#x80FD;&#x4F18;&#x5316;&#x3002;</p>
+<p>&#x9875;&#x7F13;&#x5B58;&#x8BFB;&#x53D6;&#x7B56;&#x7565;&#xFF1A;&#x5F53;&#x8FDB;&#x7A0B;&#x53D1;&#x8D77;&#x4E00;&#x4E2A;&#x8BFB;&#x64CD;&#x4F5C; &#xFF08;&#x6BD4;&#x5982;&#xFF0C;&#x8FDB;&#x7A0B;&#x53D1;&#x8D77;&#x4E00;&#x4E2A; read() &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#xFF09;&#xFF0C;&#x5B83;&#x9996;&#x5148;&#x4F1A;&#x68C0;&#x67E5;&#x9700;&#x8981;&#x7684;&#x6570;&#x636E;&#x662F;&#x5426;&#x5728;&#x9875;&#x7F13;&#x5B58;&#x4E2D;&#xFF1A;</p>
+<p>&#x5982;&#x679C;&#x5728;&#xFF0C;&#x5219;&#x653E;&#x5F03;&#x8BBF;&#x95EE;&#x78C1;&#x76D8;&#xFF0C;&#x800C;&#x76F4;&#x63A5;&#x4ECE;&#x9875;&#x7F13;&#x5B58;&#x4E2D;&#x8BFB;&#x53D6;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x4E0D;&#x5728;&#xFF0C;&#x5219;&#x5185;&#x6838;&#x8C03;&#x5EA6;&#x5757; I/O &#x64CD;&#x4F5C;&#x4ECE;&#x78C1;&#x76D8;&#x53BB;&#x8BFB;&#x53D6;&#x6570;&#x636E;&#xFF0C;&#x5E76;&#x8BFB;&#x5165;&#x7D27;&#x968F;&#x5176;&#x540E;&#x7684;&#x5C11;&#x6570;&#x51E0;&#x4E2A;&#x9875;&#x9762;&#xFF08;&#x4E0D;&#x5C11;&#x4E8E;&#x4E00;&#x4E2A;&#x9875;&#x9762;&#xFF0C;&#x901A;&#x5E38;&#x662F;&#x4E09;&#x4E2A;&#x9875;&#x9762;&#xFF09;&#xFF0C;&#x7136;&#x540E;&#x5C06;&#x6570;&#x636E;&#x653E;&#x5165;&#x9875;&#x7F13;&#x5B58;&#x4E2D;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/5134f7535316711f83b29667dd0ebbfa7da3529490a97a123c09c24b2aab2460" alt>)<img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/5f8897e28df5836b9da5df3c5403de4b9cb3c5119fe6f2028d5c372fe587ccf7" alt></p>
+<p>&#x9875;&#x7F13;&#x5B58;&#x5199;&#x7B56;&#x7565;&#xFF1A;&#x5F53;&#x8FDB;&#x7A0B;&#x53D1;&#x8D77; write &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x5199;&#x6570;&#x636E;&#x5230;&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x5148;&#x5199;&#x5230;&#x9875;&#x7F13;&#x5B58;&#xFF0C;&#x7136;&#x540E;&#x65B9;&#x6CD5;&#x8FD4;&#x56DE;&#x3002;&#x6B64;&#x65F6;&#x6570;&#x636E;&#x8FD8;&#x6CA1;&#x6709;&#x771F;&#x6B63;&#x7684;&#x4FDD;&#x5B58;&#x5230;&#x6587;&#x4EF6;&#x4E2D;&#x53BB;&#xFF0C;Linux &#x4EC5;&#x4EC5;&#x5C06;&#x9875;&#x7F13;&#x5B58;&#x4E2D;&#x7684;&#x8FD9;&#x4E00;&#x9875;&#x6570;&#x636E;&#x6807;&#x8BB0;&#x4E3A; &#x201C;&#x810F;&#x201D;&#xFF0C;&#x5E76;&#x4E14;&#x88AB;&#x52A0;&#x5165;&#x5230;&#x810F;&#x9875;&#x94FE;&#x8868;&#x4E2D;&#x3002;</p>
+<p>&#x7136;&#x540E;&#xFF0C;&#x7531; flusher &#x56DE;&#x5199;&#x7EBF;&#x7A0B;&#x5468;&#x671F;&#x6027;&#x5C06;&#x810F;&#x9875;&#x94FE;&#x8868;&#x4E2D;&#x7684;&#x9875;&#x5199;&#x5230;&#x78C1;&#x76D8;&#xFF0C;&#x8BA9;&#x78C1;&#x76D8;&#x4E2D;&#x7684;&#x6570;&#x636E;&#x548C;&#x5185;&#x5B58;&#x4E2D;&#x4FDD;&#x6301;&#x4E00;&#x81F4;&#xFF0C;&#x6700;&#x540E;&#x6E05;&#x7406;&#x201C;&#x810F;&#x201D;&#x6807;&#x8BC6;&#x3002;&#x5728;&#x4EE5;&#x4E0B;&#x4E09;&#x79CD;&#x60C5;&#x51B5;&#x4E0B;&#xFF0C;&#x810F;&#x9875;&#x4F1A;&#x88AB;&#x5199;&#x56DE;&#x78C1;&#x76D8;&#xFF1A;</p>
+<p>&#x7A7A;&#x95F2;&#x5185;&#x5B58;&#x4F4E;&#x4E8E;&#x4E00;&#x4E2A;&#x7279;&#x5B9A;&#x9608;&#x503C;&#x3002;</p>
+<p>&#x810F;&#x9875;&#x5728;&#x5185;&#x5B58;&#x4E2D;&#x9A7B;&#x7559;&#x8D85;&#x8FC7;&#x4E00;&#x4E2A;&#x7279;&#x5B9A;&#x7684;&#x9608;&#x503C;&#x65F6;&#x3002;</p>
+<p>&#x5F53;&#x7528;&#x6237;&#x8FDB;&#x7A0B;&#x8C03;&#x7528; sync() &#x548C; fsync() &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x65F6;&#x3002;</p>
+<p>&#x5B58;&#x50A8;&#x8BBE;&#x5907;&#x7684; I/O &#x6808;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e65660c4e3c29acc69547bf445f0797c73ae3a0ebf763bf4856ca5909eae0c01" alt>)<img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/84d6db90fa6478acbb562889b94c569684a33ea17eb3e6d2da9dff542f4e7eed" alt></p>
+<p>&#x7531;&#x56FE;&#x53EF;&#x89C1;&#xFF0C;&#x4ECE;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x7684;&#x63A5;&#x53E3;&#x518D;&#x5F80;&#x4E0B;&#xFF0C;Linux &#x4E0B;&#x7684; IO &#x6808;&#x81F4;&#x5927;&#x81F4;&#x6709;&#x4E09;&#x4E2A;&#x5C42;&#x6B21;&#xFF1A;</p>
+<p>&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5C42;&#xFF0C;&#x4EE5; write &#x4E3A;&#x4F8B;&#xFF0C;&#x5185;&#x6838;&#x62F7;&#x8D1D;&#x4E86; write &#x53C2;&#x6570;&#x6307;&#x5B9A;&#x7684;&#x7528;&#x6237;&#x6001;&#x6570;&#x636E;&#x5230;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF; Cache &#x4E2D;&#xFF0C;&#x5E76;&#x9002;&#x65F6;&#x5411;&#x4E0B;&#x5C42;&#x540C;&#x6B65;&#x3002;</p>
+<p>&#x5757;&#x5C42;&#xFF0C;&#x7BA1;&#x7406;&#x5757;&#x8BBE;&#x5907;&#x7684; IO &#x961F;&#x5217;&#xFF0C;&#x5BF9; IO &#x8BF7;&#x6C42;&#x8FDB;&#x884C;&#x5408;&#x5E76;&#x3001;&#x6392;&#x5E8F;&#xFF08;&#x8FD8;&#x8BB0;&#x5F97;&#x64CD;&#x4F5C;&#x7CFB;&#x7EDF;&#x8BFE;&#x7A0B;&#x5B66;&#x4E60;&#x8FC7;&#x7684; IO &#x8C03;&#x5EA6;&#x7B97;&#x6CD5;&#x5417;&#xFF1F;)&#x3002;</p>
+<p>&#x8BBE;&#x5907;&#x5C42;&#xFF0C;&#x901A;&#x8FC7; DMA &#x4E0E;&#x5185;&#x5B58;&#x76F4;&#x63A5;&#x4EA4;&#x4E92;&#xFF0C;&#x5B8C;&#x6210;&#x6570;&#x636E;&#x548C;&#x5177;&#x4F53;&#x8BBE;&#x5907;&#x4E4B;&#x95F4;&#x7684;&#x4EA4;&#x4E92;&#x3002;</p>
+<p>&#x7ED3;&#x5408;&#x8FD9;&#x4E2A;&#x56FE;&#xFF0C;&#x60F3;&#x60F3; Linux &#x7CFB;&#x7EDF;&#x7F16;&#x7A0B;&#x91CC;&#x7528;&#x5230;&#x7684; Buffered IO&#x3001;mmap&#x3001;Direct IO&#xFF0C;&#x8FD9;&#x4E9B;&#x673A;&#x5236;&#x600E;&#x4E48;&#x548C; Linux I/O &#x6808;&#x8054;&#x7CFB;&#x8D77;&#x6765;&#x5462;&#xFF1F;&#x4E0A;&#x9762;&#x7684;&#x56FE;&#x6709;&#x70B9;&#x590D;&#x6742;&#xFF0C;&#x6211;&#x753B;&#x4E00;&#x5E45;&#x7B80;&#x56FE;&#xFF0C;&#x628A;&#x8FD9;&#x4E9B;&#x673A;&#x5236;&#x6240;&#x5728;&#x7684;&#x4F4D;&#x7F6E;&#x6DFB;&#x52A0;&#x8FDB;&#x53BB;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fa21b267e54adf4d16e93df8caf942d6084b18d0f1beb15142c02245a21e66b8" alt>)<img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9af8988b0efca1ddf08a2bb1019738c24aa1fc72d506e0b45b51a5b0b804091d" alt></p>
+<p>&#x8FD9;&#x4E0B;&#x4E00;&#x76EE;&#x4E86;&#x7136;&#x4E86;&#x5427;&#xFF1F;&#x4F20;&#x7EDF;&#x7684; Buffered IO &#x4F7F;&#x7528; read &#x8BFB;&#x53D6;&#x6587;&#x4EF6;&#x7684;&#x8FC7;&#x7A0B;&#x4EC0;&#x4E48;&#x6837;&#x7684;&#xFF1F;&#x5047;&#x8BBE;&#x8981;&#x53BB;&#x8BFB;&#x4E00;&#x4E2A;&#x51B7;&#x6587;&#x4EF6;&#xFF08;Cache &#x4E2D;&#x4E0D;&#x5B58;&#x5728;&#xFF09;&#xFF0C;open &#x6253;&#x5F00;&#x6587;&#x4EF6;&#x5185;&#x6838;&#x540E;&#x5EFA;&#x7ACB;&#x4E86;&#x4E00;&#x7CFB;&#x5217;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;&#x63A5;&#x4E0B;&#x6765;&#x8C03;&#x7528; read&#xFF0C;&#x5230;&#x8FBE;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x8FD9;&#x4E00;&#x5C42;&#xFF0C;&#x53D1;&#x73B0; Page Cache &#x4E2D;&#x4E0D;&#x5B58;&#x5728;&#x8BE5;&#x4F4D;&#x7F6E;&#x7684;&#x78C1;&#x76D8;&#x6620;&#x5C04;&#xFF0C;&#x7136;&#x540E;&#x521B;&#x5EFA;&#x76F8;&#x5E94;&#x7684; Page Cache &#x5E76;&#x548C;&#x76F8;&#x5173;&#x7684;&#x6247;&#x533A;&#x5173;&#x8054;&#x3002;&#x7136;&#x540E;&#x8BF7;&#x6C42;&#x7EE7;&#x7EED;&#x5230;&#x8FBE;&#x5757;&#x8BBE;&#x5907;&#x5C42;&#xFF0C;&#x5728; IO &#x961F;&#x5217;&#x91CC;&#x6392;&#x961F;&#xFF0C;&#x63A5;&#x53D7;&#x4E00;&#x7CFB;&#x5217;&#x7684;&#x8C03;&#x5EA6;&#x540E;&#x5230;&#x8FBE;&#x8BBE;&#x5907;&#x9A71;&#x52A8;&#x5C42;&#xFF0C;&#x6B64;&#x65F6;&#x4E00;&#x822C;&#x4F7F;&#x7528; DMA &#x65B9;&#x5F0F;&#x8BFB;&#x53D6;&#x76F8;&#x5E94;&#x7684;&#x78C1;&#x76D8;&#x6247;&#x533A;&#x5230; Cache &#x4E2D;&#xFF0C;&#x7136;&#x540E; read &#x62F7;&#x8D1D;&#x6570;&#x636E;&#x5230;&#x7528;&#x6237;&#x63D0;&#x4F9B;&#x7684;&#x7528;&#x6237;&#x6001; buffer &#x4E2D;&#x53BB;&#xFF08;read &#x7684;&#x53C2;&#x6570;&#x6307;&#x51FA;&#x7684;&#xFF09;&#x3002;</p>
+<p>&#x6574;&#x4E2A;&#x8FC7;&#x7A0B;&#x6709;&#x51E0;&#x6B21;&#x62F7;&#x8D1D;&#xFF1F;&#x4ECE;&#x78C1;&#x76D8;&#x5230; Page Cache &#x7B97;&#x7B2C;&#x4E00;&#x6B21;&#x7684;&#x8BDD;&#xFF0C;&#x4ECE; Page Cache &#x5230;&#x7528;&#x6237;&#x6001; buffer &#x5C31;&#x662F;&#x7B2C;&#x4E8C;&#x6B21;&#x4E86;&#x3002;&#x800C; mmap &#x505A;&#x4E86;&#x4EC0;&#x4E48;&#xFF1F;mmap &#x76F4;&#x63A5;&#x628A; Page Cache &#x6620;&#x5C04;&#x5230;&#x4E86;&#x7528;&#x6237;&#x6001;&#x7684;&#x5730;&#x5740;&#x7A7A;&#x95F4;&#x91CC;&#x4E86;&#xFF0C;&#x6240;&#x4EE5; mmap &#x7684;&#x65B9;&#x5F0F;&#x8BFB;&#x6587;&#x4EF6;&#x662F;&#x6CA1;&#x6709;&#x7B2C;&#x4E8C;&#x6B21;&#x62F7;&#x8D1D;&#x8FC7;&#x7A0B;&#x7684;&#x3002;</p>
+<p>&#x90A3; Direct IO &#x505A;&#x4E86;&#x4EC0;&#x4E48;&#xFF1F;&#x8FD9;&#x4E2A;&#x673A;&#x5236;&#x66F4;&#x72E0;&#xFF0C;&#x76F4;&#x63A5;&#x8BA9;&#x7528;&#x6237;&#x6001;&#x548C;&#x5757; IO &#x5C42;&#x5BF9;&#x63A5;&#xFF0C;&#x76F4;&#x63A5;&#x653E;&#x5F03; Page Cache&#xFF0C;&#x4ECE;&#x78C1;&#x76D8;&#x76F4;&#x63A5;&#x548C;&#x7528;&#x6237;&#x6001;&#x62F7;&#x8D1D;&#x6570;&#x636E;&#x3002;&#x597D;&#x5904;&#x662F;&#x4EC0;&#x4E48;&#xFF1F;&#x5199;&#x64CD;&#x4F5C;&#x76F4;&#x63A5;&#x6620;&#x5C04;&#x8FDB;&#x7A0B;&#x7684;buffer&#x5230;&#x78C1;&#x76D8;&#x6247;&#x533A;&#xFF0C;&#x4EE5; DMA &#x7684;&#x65B9;&#x5F0F;&#x4F20;&#x8F93;&#x6570;&#x636E;&#xFF0C;&#x51CF;&#x5C11;&#x4E86;&#x539F;&#x672C;&#x9700;&#x8981;&#x5230; Page Cache &#x5C42;&#x7684;&#x4E00;&#x6B21;&#x62F7;&#x8D1D;&#xFF0C;&#x63D0;&#x5347;&#x4E86;&#x5199;&#x7684;&#x6548;&#x7387;&#x3002;&#x5BF9;&#x4E8E;&#x8BFB;&#x800C;&#x8A00;&#xFF0C;&#x7B2C;&#x4E00;&#x6B21;&#x80AF;&#x5B9A;&#x4E5F;&#x662F;&#x5FEB;&#x4E8E;&#x4F20;&#x7EDF;&#x7684;&#x65B9;&#x5F0F;&#x7684;&#xFF0C;&#x4F46;&#x662F;&#x4E4B;&#x540E;&#x7684;&#x8BFB;&#x5C31;&#x4E0D;&#x5982;&#x4F20;&#x7EDF;&#x65B9;&#x5F0F;&#x4E86;&#xFF08;&#x5F53;&#x7136;&#x4E5F;&#x53EF;&#x4EE5;&#x5728;&#x7528;&#x6237;&#x6001;&#x81EA;&#x5DF1;&#x505A; Cache&#xFF0C;&#x6709;&#x4E9B;&#x5546;&#x7528;&#x6570;&#x636E;&#x5E93;&#x5C31;&#x662F;&#x8FD9;&#x4E48;&#x505A;&#x7684;&#xFF09;&#x3002;</p>
+<p>&#x9664;&#x4E86;&#x4F20;&#x7EDF;&#x7684; Buffered IO &#x53EF;&#x4EE5;&#x6BD4;&#x8F83;&#x81EA;&#x7531;&#x7684;&#x7528;&#x504F;&#x79FB;+&#x957F;&#x5EA6;&#x7684;&#x65B9;&#x5F0F;&#x8BFB;&#x5199;&#x6587;&#x4EF6;&#x4E4B;&#x5916;&#xFF0C;mmap &#x548C; Direct IO &#x5747;&#x6709;&#x6570;&#x636E;&#x6309;&#x9875;&#x5BF9;&#x9F50;&#x7684;&#x8981;&#x6C42;&#xFF0C;Direct IO &#x8FD8;&#x9650;&#x5236;&#x8BFB;&#x5199;&#x5FC5;&#x987B;&#x662F;&#x5E95;&#x5C42;&#x5B58;&#x50A8;&#x8BBE;&#x5907;&#x5757;&#x5927;&#x5C0F;&#x7684;&#x6574;&#x6570;&#x500D;&#xFF08;&#x751A;&#x81F3; Linux 2.4 &#x8FD8;&#x8981;&#x6C42;&#x662F;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x903B;&#x8F91;&#x5757;&#x7684;&#x6574;&#x6570;&#x500D;&#xFF09;&#x3002;&#x6240;&#x4EE5;&#x63A5;&#x53E3;&#x8D8A;&#x6765;&#x8D8A;&#x5E95;&#x5C42;&#xFF0C;&#x6362;&#x6765;&#x8868;&#x9762;&#x4E0A;&#x7684;&#x6548;&#x7387;&#x63D0;&#x5347;&#x7684;&#x80CC;&#x540E;&#xFF0C;&#x9700;&#x8981;&#x5728;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x8FD9;&#x4E00;&#x5C42;&#x505A;&#x66F4;&#x591A;&#x7684;&#x4E8B;&#x60C5;&#x3002;&#x6240;&#x4EE5;&#x60F3;&#x7528;&#x597D;&#x8FD9;&#x4E9B;&#x9AD8;&#x7EA7;&#x7279;&#x6027;&#xFF0C;&#x9664;&#x4E86;&#x6DF1;&#x523B;&#x7406;&#x89E3;&#x5176;&#x80CC;&#x540E;&#x7684;&#x673A;&#x5236;&#x4E4B;&#x5916;&#xFF0C;&#x4E5F;&#x8981;&#x5728;&#x7CFB;&#x7EDF;&#x8BBE;&#x8BA1;&#x4E0A;&#x4E0B;&#x4E00;&#x756A;&#x529F;&#x592B;&#x3002;</p>
+<p>I/O Buffering</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fb703caaf8a7a2d660a397abea32b0c2b392ba40901e523d3cf3cecbbd576f01" alt>)<img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/9898c9ef99429ce031a1f6e156ddd311c8759aac657351f1fe07308dc7bb669e" alt></p>
+<p>&#x5982;&#x56FE;&#xFF0C;&#x5F53;&#x7A0B;&#x5E8F;&#x8C03;&#x7528;&#x5404;&#x7C7B;&#x6587;&#x4EF6;&#x64CD;&#x4F5C;&#x51FD;&#x6570;&#x540E;&#xFF0C;&#x7528;&#x6237;&#x6570;&#x636E;&#xFF08;User Data&#xFF09;&#x5230;&#x8FBE;&#x78C1;&#x76D8;&#xFF08;Disk&#xFF09;&#x7684;&#x6D41;&#x7A0B;&#x5982;&#x56FE;&#x6240;&#x793A;&#x3002;</p>
+<p>&#x56FE;&#x4E2D;&#x63CF;&#x8FF0;&#x4E86; Linux &#x4E0B;&#x6587;&#x4EF6;&#x64CD;&#x4F5C;&#x51FD;&#x6570;&#x7684;&#x5C42;&#x7EA7;&#x5173;&#x7CFB;&#x548C;&#x5185;&#x5B58;&#x7F13;&#x5B58;&#x5C42;&#x7684;&#x5B58;&#x5728;&#x4F4D;&#x7F6E;&#x3002;&#x4E2D;&#x95F4;&#x7684;&#x9ED1;&#x8272;&#x5B9E;&#x7EBF;&#x662F;&#x7528;&#x6237;&#x6001;&#x548C;&#x5185;&#x6838;&#x6001;&#x7684;&#x5206;&#x754C;&#x7EBF;&#x3002;</p>
+<p>&#x4ECE;&#x4E0A;&#x5F80;&#x4E0B;&#x5206;&#x6790;&#x8FD9;&#x5F20;&#x56FE;&#xFF1A;</p>
+<p>1.&#x9996;&#x5148;&#x662F; C &#x8BED;&#x8A00; stdio &#x5E93;&#x5B9A;&#x4E49;&#x7684;&#x76F8;&#x5173;&#x6587;&#x4EF6;&#x64CD;&#x4F5C;&#x51FD;&#x6570;&#xFF0C;&#x8FD9;&#x4E9B;&#x90FD;&#x662F;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#x7684;&#x8DE8;&#x5E73;&#x53F0;&#x5C01;&#x88C5;&#x51FD;&#x6570;&#x3002;stdio &#x4E2D;&#x5B9E;&#x73B0;&#x7684;&#x6587;&#x4EF6;&#x64CD;&#x4F5C;&#x51FD;&#x6570;&#x6709;&#x81EA;&#x5DF1;&#x7684; stdio buffer&#xFF0C;&#x8FD9;&#x662F;&#x5728;&#x7528;&#x6237;&#x6001;&#x5B9E;&#x73B0;&#x7684;&#x7F13;&#x5B58;&#x3002;&#x6B64;&#x5904;&#x4F7F;&#x7528;&#x7F13;&#x5B58;&#x7684;&#x539F;&#x56E0;&#x5F88;&#x7B80;&#x5355; &#x2014; &#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x603B;&#x662F;&#x6602;&#x8D35;&#x7684;&#x3002;&#x5982;&#x679C;&#x7528;&#x6237;&#x4EE3;&#x7801;&#x4EE5;&#x8F83;&#x5C0F;&#x7684; size &#x4E0D;&#x65AD;&#x7684;&#x8BFB;&#x6216;&#x5199;&#x6587;&#x4EF6;&#x7684;&#x8BDD;&#xFF0C;stdio &#x5E93;&#x5C06;&#x591A;&#x6B21;&#x7684;&#x8BFB;&#x6216;&#x8005;&#x5199;&#x64CD;&#x4F5C;&#x901A;&#x8FC7; buffer &#x8FDB;&#x884C;&#x805A;&#x5408;&#x662F;&#x53EF;&#x4EE5;&#x63D0;&#x9AD8;&#x7A0B;&#x5E8F;&#x8FD0;&#x884C;&#x6548;&#x7387;&#x7684;&#x3002;stdio &#x5E93;&#x540C;&#x65F6;&#x4E5F;&#x652F;&#x6301; fflush &#x51FD;&#x6570;&#x6765;&#x4E3B;&#x52A8;&#x7684;&#x5237;&#x65B0; buffer&#xFF0C;&#x4E3B;&#x52A8;&#x7684;&#x8C03;&#x7528;&#x5E95;&#x5C42;&#x7684;&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x7ACB;&#x5373;&#x66F4;&#x65B0; buffer &#x91CC;&#x7684;&#x6570;&#x636E;&#x3002;&#x7279;&#x522B;&#x5730;&#xFF0C;setbuf &#x51FD;&#x6570;&#x53EF;&#x4EE5;&#x5BF9; stdio &#x5E93;&#x7684;&#x7528;&#x6237;&#x6001; buffer &#x8FDB;&#x884C;&#x8BBE;&#x7F6E;&#xFF0C;&#x751A;&#x81F3;&#x53D6;&#x6D88; buffer &#x7684;&#x4F7F;&#x7528;&#x3002;</p>
+<p>2.&#x7CFB;&#x7EDF;&#x8C03;&#x7528;&#x7684; read/write &#x548C;&#x771F;&#x5B9E;&#x7684;&#x78C1;&#x76D8;&#x8BFB;&#x5199;&#x4E4B;&#x95F4;&#x4E5F;&#x5B58;&#x5728;&#x4E00;&#x5C42; buffer&#xFF0C;&#x8FD9;&#x91CC;&#x7528;&#x672F;&#x8BED; Kernel buffer cache &#x6765;&#x6307;&#x4EE3;&#x8FD9;&#x4E00;&#x5C42;&#x7F13;&#x5B58;&#x3002;&#x5728; Linux &#x4E0B;&#xFF0C;&#x6587;&#x4EF6;&#x7684;&#x7F13;&#x5B58;&#x4E60;&#x60EF;&#x6027;&#x7684;&#x79F0;&#x4E4B;&#x4E3A; Page Cache&#xFF0C;&#x800C;&#x66F4;&#x4F4E;&#x4E00;&#x7EA7;&#x7684;&#x8BBE;&#x5907;&#x7684;&#x7F13;&#x5B58;&#x79F0;&#x4E4B;&#x4E3A; Buffer Cache&#x3002;&#x8FD9;&#x4E24;&#x4E2A;&#x6982;&#x5FF5;&#x5F88;&#x5BB9;&#x6613;&#x6DF7;&#x6DC6;&#xFF0C;&#x8FD9;&#x91CC;&#x7B80;&#x5355;&#x7684;&#x4ECB;&#x7ECD;&#x4E0B;&#x6982;&#x5FF5;&#x4E0A;&#x7684;&#x533A;&#x522B;&#xFF1A;Page Cache &#x7528;&#x4E8E;&#x7F13;&#x5B58;&#x6587;&#x4EF6;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x548C;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6BD4;&#x8F83;&#x76F8;&#x5173;&#x3002;&#x6587;&#x4EF6;&#x7684;&#x5185;&#x5BB9;&#x9700;&#x8981;&#x6620;&#x5C04;&#x5230;&#x5B9E;&#x9645;&#x7684;&#x7269;&#x7406;&#x78C1;&#x76D8;&#xFF0C;&#x8FD9;&#x79CD;&#x6620;&#x5C04;&#x5173;&#x7CFB;&#x7531;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x6765;&#x5B8C;&#x6210;&#xFF1B;Buffer Cache &#x7528;&#x4E8E;&#x7F13;&#x5B58;&#x5B58;&#x50A8;&#x8BBE;&#x5907;&#x5757;&#xFF08;&#x6BD4;&#x5982;&#x78C1;&#x76D8;&#x6247;&#x533A;&#xFF09;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x800C;&#x4E0D;&#x5173;&#x5FC3;&#x662F;&#x5426;&#x6709;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x5B58;&#x5728;&#xFF08;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;&#x5143;&#x6570;&#x636E;&#x7F13;&#x5B58;&#x5728; Buffer Cache &#x4E2D;&#xFF09;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/354de2586265249434e0c8f7b06ff3d3.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/Linux-后端/" rel="tag"># Linux,后端</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7026958618717061134.html" rel="next" title="Spring Boot+Vue实现汽车租赁系统（毕设）">
+                <i class="fa fa-chevron-left"></i> Spring Boot+Vue实现汽车租赁系统（毕设）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7026966948189569054.html" rel="prev" title="idea jvm调优">
+                idea jvm调优 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="never">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="云原生,分布式,">
+
+
+
+
+
+  <link rel="alternate" href="atom.xml" title="开发者博客 – IT技术 尽在开发者博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="&amp;#x7B80;&amp;#x4ECB;&amp;#xFF1A;&amp;#x672C;&amp;#x6587;&amp;#x91CD;&amp;#x70B9;&amp;#x5728;&amp;#x4EE3;&amp;#x7406;&amp;#x7F51;&amp;#x5173;&amp;#x672C;&amp;#x8EAB;&amp;#x7684;&amp;#x8BBE;&amp;#x8BA1;&amp;#x4E0E;&amp;#x5B9E;&amp;#x73B0;&amp;#xFF0C;&amp;#x800C;&amp;#x975E;&amp;#x4EE3;&amp;#x7406;">
+<meta name="keywords" content="云原生,分布式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代理网关设计与实现（基于NETTY） 一 问题背景 二 技术">
+<meta property="og:url" content="https://dev.newban.cn/7034715997445554184.html">
+<meta property="og:site_name" content="开发者博客 – IT技术 尽在开发者博客">
+<meta property="og:description" content="&amp;#x7B80;&amp;#x4ECB;&amp;#xFF1A;&amp;#x672C;&amp;#x6587;&amp;#x91CD;&amp;#x70B9;&amp;#x5728;&amp;#x4EE3;&amp;#x7406;&amp;#x7F51;&amp;#x5173;&amp;#x672C;&amp;#x8EAB;&amp;#x7684;&amp;#x8BBE;&amp;#x8BA1;&amp;#x4E0E;&amp;#x5B9E;&amp;#x73B0;&amp;#xFF0C;&amp;#x800C;&amp;#x975E;&amp;#x4EE3;&amp;#x7406;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e2688aea85248121c5b01d2f43d6da2744a2073fdaa303ee5d25d85bce9c0e3e">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fd35aefbc5c6b2f7100a3e7b80c50ba86c3f0309b139d3ce6053fae3303abd66">
+<meta property="og:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/2b5e1ab9b7c5948dc3cc2b482d03f3c22beb15ef625c720863ff7eb888e3a97a">
+<meta property="og:updated_time" content="2024-04-29T13:03:51.258Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="代理网关设计与实现（基于NETTY） 一 问题背景 二 技术">
+<meta name="twitter:description" content="&amp;#x7B80;&amp;#x4ECB;&amp;#xFF1A;&amp;#x672C;&amp;#x6587;&amp;#x91CD;&amp;#x70B9;&amp;#x5728;&amp;#x4EE3;&amp;#x7406;&amp;#x7F51;&amp;#x5173;&amp;#x672C;&amp;#x8EAB;&amp;#x7684;&amp;#x8BBE;&amp;#x8BA1;&amp;#x4E0E;&amp;#x5B9E;&amp;#x73B0;&amp;#xFF0C;&amp;#x800C;&amp;#x975E;&amp;#x4EE3;&amp;#x7406;">
+<meta name="twitter:image" content="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e2688aea85248121c5b01d2f43d6da2744a2073fdaa303ee5d25d85bce9c0e3e">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+<!--谷歌广告验证代码-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2626449904708114",
+          enable_page_level_ads: true
+     });
+</script>
+<!--谷歌广告验证代码-->
+
+
+
+  <link rel="canonical" href="https://dev.newban.cn/7034715997445554184.html">
+
+
+
+
+
+  <title>代理网关设计与实现（基于NETTY） 一 问题背景 二 技术 | 开发者博客 – IT技术 尽在开发者博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">开发者博客 – IT技术 尽在开发者博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">开发者博客 – 科技是第一生产力</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="http://dev.newban.cn/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="https://dev.newban.cn/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dev.newban.cn">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="开发者博客">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="开发者博客 – IT技术 尽在开发者博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">代理网关设计与实现（基于NETTY） 一 问题背景 二 技术</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-26T11:32:56+08:00">
+                2021-11-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&#x7B80;&#x4ECB;&#xFF1A;&#x672C;&#x6587;&#x91CD;&#x70B9;&#x5728;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x672C;&#x8EAB;&#x7684;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;&#xFF0C;&#x800C;&#x975E;&#x4EE3;&#x7406;&#x8D44;&#x6E90;&#x7684;&#x7BA1;&#x7406;&#x4E0E;&#x7EF4;&#x62A4;&#x3002;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/e2688aea85248121c5b01d2f43d6da2744a2073fdaa303ee5d25d85bce9c0e3e" alt></p>
+<p>&#x4F5C;&#x8005; | &#x65B0;&#x7136;  </p>
+<p>&#x6765;&#x6E90; | &#x963F;&#x91CC;&#x6280;&#x672F;&#x516C;&#x4F17;&#x53F7;</p>
+<h1 id="&#x4E00;-&#x95EE;&#x9898;&#x80CC;&#x666F;"><a href="#&#x4E00;-&#x95EE;&#x9898;&#x80CC;&#x666F;" class="headerlink" title="&#x4E00; &#x95EE;&#x9898;&#x80CC;&#x666F;"></a>&#x4E00; &#x95EE;&#x9898;&#x80CC;&#x666F;</h1><ol>
+<li>&#x5E73;&#x53F0;&#x7AEF;&#x8D2D;&#x7F6E;&#x4E00;&#x6279;&#x88F8;&#x4EE3;&#x7406;&#xFF0C;&#x6765;&#x505A;&#x5E7F;&#x544A;&#x5F02;&#x5730;&#x5C55;&#x73B0;&#x5BA1;&#x6838;&#x3002;&#x4ECE;&#x5916;&#x90E8;&#x8D2D;&#x7F6E;&#x7684;&#x4EE3;&#x7406;&#xFF0C;&#x4F7F;&#x7528;&#x65B9;&#x5F0F;&#x4E3A;&#xFF1A;</li>
+<li>&#x901A;&#x8FC7;&#x7ED9;&#x5B9A;&#x7684;HTTP &#x7684; API &#x63D0;&#x53D6;&#x4EE3;&#x7406; IP:PORT&#xFF0C;&#x8FD4;&#x56DE;&#x7684;&#x7ED3;&#x679C;&#x4F1A;&#x7ED9;&#x51FA;&#x4EE3;&#x7406;&#x7684;&#x6709;&#x6548;&#x65F6;&#x957F; 3~5 &#x5206;&#x949F;&#xFF0C;&#x4EE5;&#x53CA;&#x4EE3;&#x7406;&#x6240;&#x5C5E;&#x5730;&#x57DF;&#xFF1B;</li>
+</ol>
+<p>&#x4ECE;&#x63D0;&#x53D6;&#x7684;&#x4EE3;&#x7406;&#x4E2D;&#xFF0C;&#x9009;&#x53D6;&#x6307;&#x5B9A;&#x5730;&#x57DF;&#xFF0C;&#x6DFB;&#x52A0;&#x8BA4;&#x8BC1;&#x4FE1;&#x606F;&#xFF0C;&#x8BF7;&#x6C42;&#x83B7;&#x53D6;&#x7ED3;&#x679C;&#xFF1B;</p>
+<p>&#x672C;&#x6587;&#x8BBE;&#x8BA1;&#x5B9E;&#x73B0;&#x4E00;&#x4E2A;&#x901A;&#x8FC7;&#x7684;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#xFF1A;</p>
+<ol>
+<li>&#x7BA1;&#x7406;&#x7EF4;&#x62A4;&#x4EE3;&#x7406;&#x8D44;&#x6E90;&#xFF0C;&#x5E76;&#x505A;&#x4EE3;&#x7406;&#x7684;&#x8BA4;&#x8BC1;&#x9274;&#x6743;&#xFF1B;</li>
+<li>&#x5BF9;&#x5916;&#x66B4;&#x9732;&#x7EDF;&#x4E00;&#x7684;&#x4EE3;&#x7406;&#x5165;&#x53E3;&#xFF0C;&#x800C;&#x975E;&#x52A8;&#x6001;&#x53D8;&#x5316;&#x7684;&#x4EE3;&#x7406;IP:PORT&#xFF1B;</li>
+<li>&#x6D41;&#x91CF;&#x8FC7;&#x6EE4;&#x53CA;&#x9650;&#x6D41;&#xFF0C;&#x6BD4;&#x5982;&#xFF1A;&#x9759;&#x6001;&#x8D44;&#x6E90;&#x4E0D;&#x8D70;&#x4EE3;&#x7406;&#xFF1B;</li>
+</ol>
+<p>&#x672C;&#x6587;&#x91CD;&#x70B9;&#x5728;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x672C;&#x8EAB;&#x7684;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;&#xFF0C;&#x800C;&#x975E;&#x4EE3;&#x7406;&#x8D44;&#x6E90;&#x7684;&#x7BA1;&#x7406;&#x4E0E;&#x7EF4;&#x62A4;&#x3002;</p>
+<blockquote>
+<p>&#x6CE8;&#xFF1A;&#x672C;&#x6587;&#x5305;&#x542B;&#x5927;&#x91CF;&#x53EF;&#x6267;&#x884C;&#x7684;JAVA&#x4EE3;&#x7801;&#x4EE5;&#x89E3;&#x91CA;&#x4EE3;&#x7406;&#x76F8;&#x5173;&#x7684;&#x539F;&#x7406;</p>
+</blockquote>
+<h1 id="&#x4E8C;-&#x6280;&#x672F;&#x8DEF;&#x7EBF;"><a href="#&#x4E8C;-&#x6280;&#x672F;&#x8DEF;&#x7EBF;" class="headerlink" title="&#x4E8C; &#x6280;&#x672F;&#x8DEF;&#x7EBF;"></a>&#x4E8C; &#x6280;&#x672F;&#x8DEF;&#x7EBF;</h1><p>&#x672C;&#x6587;&#x7684;&#x6280;&#x672F;&#x8DEF;&#x7EBF;&#x3002;&#x5728;&#x5B9E;&#x73B0;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x4E4B;&#x524D;&#xFF0C;&#x9996;&#x5148;&#x4ECB;&#x7ECD;&#x4E0B;&#x4EE3;&#x7406;&#x76F8;&#x5173;&#x7684;&#x539F;&#x7406;&#x53CA;&#x5982;&#x4F55;&#x5B9E;&#x73B0;</p>
+<ol>
+<li>&#x900F;&#x660E;&#x4EE3;&#x7406;&#xFF1B;</li>
+<li>&#x975E;&#x900F;&#x660E;&#x4EE3;&#x7406;&#xFF1B;</li>
+<li>&#x900F;&#x660E;&#x7684;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#xFF1B;</li>
+<li>&#x975E;&#x900F;&#x660E;&#x7684;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#xFF1B;</li>
+</ol>
+<p>&#x6700;&#x540E;&#xFF0C;&#x672C;&#x6587;&#x8981;&#x6784;&#x5EFA;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#xFF0C;&#x672C;&#x8D28;&#x4E0A;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x975E;&#x900F;&#x660E;&#x7684;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#xFF0C;&#x5E76;&#x7ED9;&#x51FA;&#x8BE6;&#x7EC6;&#x7684;&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;&#x3002;</p>
+<p><strong>1 &#x900F;&#x660E;&#x4EE3;&#x7406;</strong></p>
+<p>&#x900F;&#x660E;&#x4EE3;&#x7406;&#x662F;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x7684;&#x57FA;&#x7840;&#xFF0C;&#x672C;&#x6587;&#x91C7;&#x7528;JAVA&#x539F;&#x751F;&#x7684;NIO&#x8FDB;&#x884C;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x3002;&#x5728;&#x5B9E;&#x73B0;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x65F6;&#xFF0C;&#x5B9E;&#x9645;&#x4F7F;&#x7528;&#x7684;&#x4E3A;NETTY&#x6846;&#x67B6;&#x3002;&#x539F;&#x751F;NIO&#x7684;&#x5B9E;&#x73B0;&#x5BF9;&#x7406;&#x89E3;NETTY&#x7684;&#x5B9E;&#x73B0;&#x6709;&#x5E2E;&#x52A9;&#x3002;</p>
+<p>&#x900F;&#x660E;&#x4EE3;&#x7406;&#x8BBE;&#x8BA1;&#x4E09;&#x4E2A;&#x4EA4;&#x4E92;&#x65B9;&#xFF0C;&#x5BA2;&#x6237;&#x7AEF;&#x3001;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x3001;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x5176;&#x539F;&#x7406;&#x662F;&#xFF1A;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/fd35aefbc5c6b2f7100a3e7b80c50ba86c3f0309b139d3ce6053fae3303abd66" alt></p>
+<ol>
+<li>&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x5728;&#x6536;&#x5230;&#x8FDE;&#x63A5;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x5224;&#x5B9A;&#xFF1A;&#x5982;&#x679C;&#x662F;CONNECT&#x8BF7;&#x6C42;&#xFF0C;&#x9700;&#x8981;&#x56DE;&#x5E94;&#x4EE3;&#x7406;&#x8FDE;&#x63A5;&#x6210;&#x529F;&#x6D88;&#x606F;&#x5230;&#x5BA2;&#x6237;&#x7AEF;&#xFF1B;</li>
+<li>CONNECT&#x8BF7;&#x6C42;&#x56DE;&#x5E94;&#x7ED3;&#x675F;&#x540E;&#xFF0C;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x9700;&#x8981;&#x8FDE;&#x63A5;&#x5230;CONNECT&#x6307;&#x5B9A;&#x7684;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x7136;&#x540E;&#x76F4;&#x63A5;&#x8F6C;&#x53D1;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x901A;&#x4FE1;&#xFF1B;</li>
+<li>&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x5728;&#x6536;&#x5230;&#x975E;CONNECT&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x89E3;&#x6790;&#x51FA;&#x8BF7;&#x6C42;&#x7684;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x7136;&#x540E;&#x76F4;&#x63A5;&#x8F6C;&#x53D1;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x901A;&#x4FE1;&#xFF1B;</li>
+</ol>
+<p>&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x70B9;&#x662F;&#xFF1A;</p>
+<ol>
+<li>&#x901A;&#x5E38;HTTPS&#x8BF7;&#x6C42;&#xFF0C;&#x5728;&#x901A;&#x8FC7;&#x4EE3;&#x7406;&#x524D;&#xFF0C;&#x4F1A;&#x53D1;&#x9001;CONNECT&#x8BF7;&#x6C42;&#xFF1B;&#x8FDE;&#x63A5;&#x6210;&#x529F;&#x540E;&#xFF0C;&#x4F1A;&#x5728;&#x4FE1;&#x9053;&#x4E0A;&#x8FDB;&#x884C;&#x52A0;&#x5BC6;&#x901A;&#x4FE1;&#x7684;&#x63E1;&#x624B;&#x534F;&#x8BAE;&#xFF1B;&#x56E0;&#x6B64;&#x8FDE;&#x63A5;&#x8FDC;&#x7A0B;&#x7684;&#x65F6;&#x673A;&#x662F;&#x5728;CONNECT&#x8BF7;&#x6C42;&#x6536;&#x5230;&#x65F6;&#xFF0C;&#x56E0;&#x4E3A;&#x6B64;&#x540E;&#x662F;&#x52A0;&#x5BC6;&#x6570;&#x636E;&#xFF1B;</li>
+<li>&#x900F;&#x660E;&#x4EE3;&#x7406;&#x5728;&#x6536;&#x5230;CONNECT&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x4E0D;&#x9700;&#x8981;&#x4F20;&#x9012;&#x5230;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#xFF08;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x4E0D;&#x8BC6;&#x522B;&#x6B64;&#x8BF7;&#x6C42;&#xFF09;&#xFF1B;</li>
+<li>&#x900F;&#x660E;&#x4EE3;&#x7406;&#x5728;&#x6536;&#x5230;&#x975E;CONNECT&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x8981;&#x65E0;&#x6761;&#x4EF6;&#x8F6C;&#x53D1;&#xFF1B;</li>
+</ol>
+<p>&#x5B8C;&#x6574;&#x7684;&#x900F;&#x660E;&#x4EE3;&#x7406;&#x7684;&#x5B9E;&#x73B0;&#x4E0D;&#x5230;&#x7EA6;300&#x884C;&#x4EE3;&#x7801;&#xFF0C;&#x5B8C;&#x6574;&#x6458;&#x5F55;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Slf4j</span><br><span class="line">public class SimpleTransProxy {</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws IOException {</span><br><span class="line">        int port = 8006;</span><br><span class="line">        ServerSocketChannel localServer = ServerSocketChannel.open();</span><br><span class="line">        localServer.bind(new InetSocketAddress(port));</span><br><span class="line">        Reactor reactor = new Reactor();</span><br><span class="line">        // REACTOR&#x7EBF;&#x7A0B;</span><br><span class="line">        GlobalThreadPool.REACTOR_EXECUTOR.submit(reactor::run);</span><br><span class="line"></span><br><span class="line">        // WORKER&#x5355;&#x7EBF;&#x7A0B;&#x8C03;&#x8BD5;</span><br><span class="line">        while (localServer.isOpen()) {</span><br><span class="line">            // &#x6B64;&#x5904;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x8FDE;&#x63A5;</span><br><span class="line">            SocketChannel remoteClient = localServer.accept();</span><br><span class="line"></span><br><span class="line">            // &#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;</span><br><span class="line">            GlobalThreadPool.WORK_EXECUTOR.submit(new Runnable() {</span><br><span class="line">                @SneakyThrows</span><br><span class="line">                @Override</span><br><span class="line">                public void run() {</span><br><span class="line">                    // &#x4EE3;&#x7406;&#x5230;&#x8FDC;&#x7A0B;</span><br><span class="line">                    SocketChannel remoteServer = new ProxyHandler().proxy(remoteClient);</span><br><span class="line"></span><br><span class="line">                    // &#x900F;&#x660E;&#x4F20;&#x8F93;</span><br><span class="line">                    reactor.pipe(remoteClient, remoteServer)</span><br><span class="line">                            .pipe(remoteServer, remoteClient);</span><br><span class="line">                }</span><br><span class="line">            });</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">@Data</span><br><span class="line">class ProxyHandler {</span><br><span class="line">    private String method;</span><br><span class="line">    private String host;</span><br><span class="line">    private int port;</span><br><span class="line">    private SocketChannel remoteServer;</span><br><span class="line">    private SocketChannel remoteClient;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x539F;&#x59CB;&#x4FE1;&#x606F;</span><br><span class="line">     */</span><br><span class="line">    private List&lt;ByteBuffer&gt; buffers = new ArrayList&lt;&gt;();</span><br><span class="line">    private StringBuilder stringBuilder = new StringBuilder();</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x8FDE;&#x63A5;&#x5230;&#x8FDC;&#x7A0B;</span><br><span class="line">     * @param remoteClient</span><br><span class="line">     * @return</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    public SocketChannel proxy(SocketChannel remoteClient) throws IOException {</span><br><span class="line">        this.remoteClient = remoteClient;</span><br><span class="line">        connect();</span><br><span class="line">        return this.remoteServer;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public void connect() throws IOException {</span><br><span class="line">        // &#x89E3;&#x6790;METHOD, HOST&#x548C;PORT</span><br><span class="line">        beforeConnected();</span><br><span class="line"></span><br><span class="line">        // &#x94FE;&#x63A5;REMOTE SERVER</span><br><span class="line">        createRemoteServer();</span><br><span class="line"></span><br><span class="line">        // CONNECT&#x8BF7;&#x6C42;&#x56DE;&#x5E94;&#xFF0C;&#x5176;&#x4ED6;&#x8BF7;&#x6C42;WRITE THROUGH</span><br><span class="line">        afterConnected();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    protected void beforeConnected() throws IOException {</span><br><span class="line">        // &#x8BFB;&#x53D6;HEADER</span><br><span class="line">        readAllHeader();</span><br><span class="line"></span><br><span class="line">        // &#x89E3;&#x6790;HOST&#x548C;PORT</span><br><span class="line">        parseRemoteHostAndPort();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x521B;&#x5EFA;&#x8FDC;&#x7A0B;&#x8FDE;&#x63A5;</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    protected void createRemoteServer() throws IOException {</span><br><span class="line">        remoteServer = SocketChannel.open(new InetSocketAddress(host, port));</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x8FDE;&#x63A5;&#x5EFA;&#x7ACB;&#x540E;&#x9884;&#x5904;&#x7406;</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    protected void afterConnected() throws IOException {</span><br><span class="line">        // &#x5F53;CONNECT&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x9ED8;&#x8BA4;&#x5199;&#x5165;200&#x5230;CLIENT</span><br><span class="line">        if (&quot;CONNECT&quot;.equalsIgnoreCase(method)) {</span><br><span class="line">            // CONNECT&#x9ED8;&#x8BA4;&#x4E3A;443&#x7AEF;&#x53E3;&#xFF0C;&#x6839;&#x636E;HOST&#x518D;&#x89E3;&#x6790;</span><br><span class="line">            remoteClient.write(ByteBuffer.wrap(&quot;HTTP/1.0 200 Connection Established\r\nProxy-agent: nginx\r\n\r\n&quot;.getBytes()));</span><br><span class="line">        } else {</span><br><span class="line">            writeThrouth();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    protected void writeThrouth() {</span><br><span class="line">        buffers.forEach(byteBuffer -&gt; {</span><br><span class="line">            try {</span><br><span class="line">                remoteServer.write(byteBuffer);</span><br><span class="line">            } catch (IOException e) {</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            }</span><br><span class="line">        });</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x8BFB;&#x53D6;&#x8BF7;&#x6C42;&#x5185;&#x5BB9;</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    protected void readAllHeader() throws IOException {</span><br><span class="line">        while (true) {</span><br><span class="line">            ByteBuffer clientBuffer = newByteBuffer();</span><br><span class="line">            int read = remoteClient.read(clientBuffer);</span><br><span class="line">            clientBuffer.flip();</span><br><span class="line">            appendClientBuffer(clientBuffer);</span><br><span class="line">            if (read &lt; clientBuffer.capacity()) {</span><br><span class="line">                break;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x89E3;&#x6790;&#x51FA;HOST&#x548C;PROT</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    protected void parseRemoteHostAndPort() throws IOException {</span><br><span class="line">        // &#x8BFB;&#x53D6;&#x7B2C;&#x4E00;&#x6279;&#xFF0C;&#x83B7;&#x53D6;&#x5230;METHOD</span><br><span class="line">        method = parseRequestMethod(stringBuilder.toString());</span><br><span class="line"></span><br><span class="line">        // &#x9ED8;&#x8BA4;&#x4E3A;80&#x7AEF;&#x53E3;&#xFF0C;&#x6839;&#x636E;HOST&#x518D;&#x89E3;&#x6790;</span><br><span class="line">        port = 80;</span><br><span class="line">        if (&quot;CONNECT&quot;.equalsIgnoreCase(method)) {</span><br><span class="line">            port = 443;</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        this.host = parseHost(stringBuilder.toString());</span><br><span class="line"></span><br><span class="line">        URI remoteServerURI = URI.create(host);</span><br><span class="line">        host = remoteServerURI.getHost();</span><br><span class="line"></span><br><span class="line">        if (remoteServerURI.getPort() &gt; 0) {</span><br><span class="line">            port = remoteServerURI.getPort();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    protected void appendClientBuffer(ByteBuffer clientBuffer) {</span><br><span class="line">        buffers.add(clientBuffer);</span><br><span class="line">        stringBuilder.append(new String(clientBuffer.array(), clientBuffer.position(), clientBuffer.limit()));</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    protected static ByteBuffer newByteBuffer() {</span><br><span class="line">        // buffer&#x5FC5;&#x987B;&#x5927;&#x4E8E;7&#xFF0C;&#x4FDD;&#x8BC1;&#x80FD;&#x8BFB;&#x5230;method</span><br><span class="line">        return ByteBuffer.allocate(128);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private static String parseRequestMethod(String rawContent) {</span><br><span class="line">        // create uri</span><br><span class="line">        return rawContent.split(&quot;\r\n&quot;)[0].split(&quot; &quot;)[0];</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private static String parseHost(String rawContent) {</span><br><span class="line">        String[] headers = rawContent.split(&quot;\r\n&quot;);</span><br><span class="line">        String host = &quot;host:&quot;;</span><br><span class="line">        for (String header : headers) {</span><br><span class="line">            if (header.length() &gt; host.length()) {</span><br><span class="line">                String key = header.substring(0, host.length());</span><br><span class="line">                String value = header.substring(host.length()).trim();</span><br><span class="line">                if (host.equalsIgnoreCase(key)) {</span><br><span class="line">                    if (!value.startsWith(&quot;http://&quot;) &amp;&amp; !value.startsWith(&quot;https://&quot;)) {</span><br><span class="line">                        value = &quot;http://&quot; + value;</span><br><span class="line">                    }</span><br><span class="line">                    return value;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        return &quot;&quot;;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">@Slf4j</span><br><span class="line">@Data</span><br><span class="line">class Reactor {</span><br><span class="line"></span><br><span class="line">    private Selector selector;</span><br><span class="line"></span><br><span class="line">    private volatile boolean finish = false;</span><br><span class="line"></span><br><span class="line">    @SneakyThrows</span><br><span class="line">    public Reactor() {</span><br><span class="line">        selector = Selector.open();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @SneakyThrows</span><br><span class="line">    public Reactor pipe(SocketChannel from, SocketChannel to) {</span><br><span class="line">        from.configureBlocking(false);</span><br><span class="line">        from.register(selector, SelectionKey.OP_READ, new SocketPipe(this, from, to));</span><br><span class="line">        return this;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @SneakyThrows</span><br><span class="line">    public void run() {</span><br><span class="line">        try {</span><br><span class="line">            while (!finish) {</span><br><span class="line">                if (selector.selectNow() &gt; 0) {</span><br><span class="line">                    Iterator&lt;SelectionKey&gt; it = selector.selectedKeys().iterator();</span><br><span class="line">                    while (it.hasNext()) {</span><br><span class="line">                        SelectionKey selectionKey = it.next();</span><br><span class="line">                        if (selectionKey.isValid() &amp;&amp; selectionKey.isReadable()) {</span><br><span class="line">                            ((SocketPipe) selectionKey.attachment()).pipe();</span><br><span class="line">                        }</span><br><span class="line">                        it.remove();</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        } finally {</span><br><span class="line">            close();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @SneakyThrows</span><br><span class="line">    public synchronized void close() {</span><br><span class="line">        if (finish) {</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        finish = true;</span><br><span class="line">        if (!selector.isOpen()) {</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        for (SelectionKey key : selector.keys()) {</span><br><span class="line">            closeChannel(key.channel());</span><br><span class="line">            key.cancel();</span><br><span class="line">        }</span><br><span class="line">        if (selector != null) {</span><br><span class="line">            selector.close();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public void cancel(SelectableChannel channel) {</span><br><span class="line">        SelectionKey key = channel.keyFor(selector);</span><br><span class="line">        if (Objects.isNull(key)) {</span><br><span class="line">            return;</span><br><span class="line">        }</span><br><span class="line">        key.cancel();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    @SneakyThrows</span><br><span class="line">    public void closeChannel(Channel channel) {</span><br><span class="line">        SocketChannel socketChannel = (SocketChannel)channel;</span><br><span class="line">        if (socketChannel.isConnected() &amp;&amp; socketChannel.isOpen()) {</span><br><span class="line">            socketChannel.shutdownOutput();</span><br><span class="line">            socketChannel.shutdownInput();</span><br><span class="line">        }</span><br><span class="line">        socketChannel.close();</span><br><span class="line">    }</span><br><span class="line">}</span><br><span class="line"></span><br><span class="line">@Data</span><br><span class="line">@AllArgsConstructor</span><br><span class="line">class SocketPipe {</span><br><span class="line"></span><br><span class="line">    private Reactor reactor;</span><br><span class="line"></span><br><span class="line">    private SocketChannel from;</span><br><span class="line"></span><br><span class="line">    private SocketChannel to;</span><br><span class="line"></span><br><span class="line">    @SneakyThrows</span><br><span class="line">    public void pipe() {</span><br><span class="line">        // &#x53D6;&#x6D88;&#x76D1;&#x542C;</span><br><span class="line">        clearInterestOps();</span><br><span class="line"></span><br><span class="line">        GlobalThreadPool.PIPE_EXECUTOR.submit(new Runnable() {</span><br><span class="line">            @SneakyThrows</span><br><span class="line">            @Override</span><br><span class="line">            public void run() {</span><br><span class="line">                int totalBytesRead = 0;</span><br><span class="line">                ByteBuffer byteBuffer = ByteBuffer.allocate(1024);</span><br><span class="line">                while (valid(from) &amp;&amp; valid(to)) {</span><br><span class="line">                    byteBuffer.clear();</span><br><span class="line">                    int bytesRead = from.read(byteBuffer);</span><br><span class="line">                    totalBytesRead = totalBytesRead + bytesRead;</span><br><span class="line">                    byteBuffer.flip();</span><br><span class="line">                    to.write(byteBuffer);</span><br><span class="line">                    if (bytesRead &lt; byteBuffer.capacity()) {</span><br><span class="line">                        break;</span><br><span class="line">                    }</span><br><span class="line">                }</span><br><span class="line">                if (totalBytesRead &lt; 0) {</span><br><span class="line">                    reactor.closeChannel(from);</span><br><span class="line">                    reactor.cancel(from);</span><br><span class="line">                } else {</span><br><span class="line">                    // &#x91CD;&#x7F6E;&#x76D1;&#x542C;</span><br><span class="line">                    resetInterestOps();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        });</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    protected void clearInterestOps() {</span><br><span class="line">        from.keyFor(reactor.getSelector()).interestOps(0);</span><br><span class="line">        to.keyFor(reactor.getSelector()).interestOps(0);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    protected void resetInterestOps() {</span><br><span class="line">        from.keyFor(reactor.getSelector()).interestOps(SelectionKey.OP_READ);</span><br><span class="line">        to.keyFor(reactor.getSelector()).interestOps(SelectionKey.OP_READ);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private boolean valid(SocketChannel channel) {</span><br><span class="line">        return channel.isConnected() &amp;&amp; channel.isRegistered() &amp;&amp; channel.isOpen();</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#xFF0C;&#x501F;&#x9274;NETTY&#xFF1A;</p>
+<ol>
+<li>&#x9996;&#x5148;&#x521D;&#x59CB;&#x5316;REACTOR&#x7EBF;&#x7A0B;&#xFF0C;&#x7136;&#x540E;&#x5F00;&#x542F;&#x4EE3;&#x7406;&#x76D1;&#x542C;&#xFF0C;&#x5F53;&#x6536;&#x5230;&#x4EE3;&#x7406;&#x8BF7;&#x6C42;&#x65F6;&#x5904;&#x7406;&#x3002;</li>
+<li>&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x5728;&#x6536;&#x5230;&#x4EE3;&#x7406;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x9996;&#x5148;&#x505A;&#x4EE3;&#x7406;&#x7684;&#x9884;&#x5904;&#x7406;&#xFF0C;&#x7136;&#x540E;&#x53C8;SocketPipe&#x505A;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#x53CC;&#x5411;&#x8F6C;&#x53D1;&#x3002;</li>
+<li>&#x4EE3;&#x7406;&#x9884;&#x5904;&#x7406;&#xFF0C;&#x9996;&#x5148;&#x8BFB;&#x53D6;&#x7B2C;&#x4E00;&#x4E2A;HTTP&#x8BF7;&#x6C42;&#xFF0C;&#x89E3;&#x6790;&#x51FA;METHOD, HOST, PORT&#x3002;</li>
+<li>&#x5982;&#x679C;&#x662F;CONNECT&#x8BF7;&#x6C42;&#xFF0C;&#x53D1;&#x9001;&#x56DE;&#x5E94;Connection Established&#xFF0C;&#x7136;&#x540E;&#x8FDE;&#x63A5;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x5E76;&#x8FD4;&#x56DE;SocketChannel</li>
+<li>&#x5982;&#x679C;&#x662F;&#x975E;CONNECT&#x8BF7;&#x6C42;&#xFF0C;&#x8FDE;&#x63A5;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x5199;&#x5165;&#x539F;&#x59CB;&#x8BF7;&#x6C42;&#xFF0C;&#x5E76;&#x8FD4;&#x56DE;SocketChannel</li>
+<li>SocketPipe&#x5728;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x505A;&#x53CC;&#x5411;&#x7684;&#x8F6C;&#x53D1;&#xFF1B;&#x5176;&#x672C;&#x8EAB;&#x662F;&#x5C06;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x670D;&#x52A1;&#x7AEF;&#x7684;SocketChannel&#x6CE8;&#x518C;&#x5230;REACTOR</li>
+<li>REACTOR&#x5728;&#x76D1;&#x6D4B;&#x5230;READABLE&#x7684;CHANNEL&#xFF0C;&#x6D3E;&#x53D1;&#x7ED9;SocketPipe&#x505A;&#x53CC;&#x5411;&#x8F6C;&#x53D1;&#x3002;</li>
+</ol>
+<p>&#x6D4B;&#x8BD5;</p>
+<p>&#x4EE3;&#x7406;&#x7684;&#x6D4B;&#x8BD5;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF0C;&#x6307;&#x5411;&#x4EE3;&#x7801;&#x540E;&#xFF0C;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x76D1;&#x542C;8006&#x7AEF;&#x53E3;&#xFF0C;&#x6B64;&#x65F6;&#xFF1A;</p>
+<p>curl -x &#x2018;localhost:8006&#x2019; <a href="/external_links/60d2b3d297e5a27b0b711e9ec74a92b4.html" target="blank" rel="noopener">httpbin.org/get&#x6D4B;&#x8BD5;HTTP&#x8BF7;&#x6C42;</a></p>
+<p>curl -x &#x2018;localhost:8006&#x2019; <a href="/external_links/8cb584ffb6ec5b28fcefd3cc8354f965.html" target="blank" rel="noopener">httpbin.org/get&#x6D4B;&#x8BD5;HTTPS&#x8BF7;&#x2026;</a></p>
+<p>&#x6CE8;&#x610F;&#xFF0C;&#x6B64;&#x65F6;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x4EE3;&#x7406;&#x4E86;HTTPS&#x8BF7;&#x6C42;&#xFF0C;&#x4F46;&#x662F;&#x5E76;&#x4E0D;&#x9700;&#x8981;-k&#x9009;&#x9879;&#xFF0C;&#x6307;&#x793A;&#x975E;&#x5B89;&#x5168;&#x7684;&#x4EE3;&#x7406;&#x3002;&#x56E0;&#x4E3A;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x672C;&#x8EAB;&#x5E76;&#x6CA1;&#x6709;&#x4F5C;&#x4E3A;&#x4E00;&#x4E2A;&#x4E2D;&#x95F4;&#x4EBA;&#xFF0C;&#x5E76;&#x6CA1;&#x6709;&#x89E3;&#x6790;&#x51FA;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#x901A;&#x4FE1;&#x7684;&#x5185;&#x5BB9;&#x3002;&#x5728;&#x975E;&#x900F;&#x660E;&#x4EE3;&#x7406;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x89E3;&#x51B3;&#x8FD9;&#x4E2A;&#x95EE;&#x9898;&#x3002;</p>
+<p><strong>2 &#x975E;&#x900F;&#x660E;&#x4EE3;&#x7406;</strong></p>
+<p>&#x975E;&#x900F;&#x660E;&#x4EE3;&#x7406;&#xFF0C;&#x9700;&#x8981;&#x89E3;&#x6790;&#x51FA;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#x4F20;&#x8F93;&#x7684;&#x5185;&#x5BB9;&#xFF0C;&#x5E76;&#x505A;&#x76F8;&#x5E94;&#x7684;&#x5904;&#x7406;&#x3002;</p>
+<p>&#x5F53;&#x4F20;&#x8F93;&#x4E3A;HTTP&#x534F;&#x8BAE;&#x65F6;&#xFF0C;SocketPipe&#x4F20;&#x8F93;&#x7684;&#x6570;&#x636E;&#x5373;&#x4E3A;&#x660E;&#x6587;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x53EF;&#x4EE5;&#x62E6;&#x622A;&#x540E;&#x76F4;&#x63A5;&#x505A;&#x5904;&#x7406;&#x3002;</p>
+<p>&#x5F53;&#x4F20;&#x8F93;&#x4E3A;HTTPS&#x534F;&#x8BAE;&#x65F6;&#xFF0C;SocketPipe&#x4F20;&#x8F93;&#x7684;&#x6709;&#x6548;&#x6570;&#x636E;&#x4E3A;&#x52A0;&#x5BC6;&#x6570;&#x636E;&#xFF0C;&#x5E76;&#x4E0D;&#x80FD;&#x900F;&#x660E;&#x5904;&#x7406;&#x3002;  </p>
+<p>&#x53E6;&#x5916;&#xFF0C;&#x65E0;&#x8BBA;&#x662F;&#x4F20;&#x8F93;&#x7684;HTTP&#x534F;&#x8BAE;&#x8FD8;&#x662F;HTTPS&#x534F;&#x8BAE;&#xFF0C;SocketPipe&#x8BFB;&#x5230;&#x7684;&#x90FD;&#x4E3A;&#x975E;&#x5B8C;&#x6574;&#x7684;&#x6570;&#x636E;&#xFF0C;&#x9700;&#x8981;&#x505A;&#x805A;&#x6279;&#x7684;&#x5904;&#x7406;&#x3002;</p>
+<ol>
+<li>SocketPipe&#x805A;&#x6279;&#x95EE;&#x9898;&#xFF0C;&#x53EF;&#x4EE5;&#x91C7;&#x7528;&#x7C7B;&#x4F3C;BufferedInputStream&#x5BF9;InputStream&#x505A;Decorate&#x7684;&#x6A21;&#x5F0F;&#x6765;&#x5B9E;&#x73B0;&#xFF0C;&#x76F8;&#x5BF9;&#x6BD4;&#x8F83;&#x7B80;&#x5355;&#xFF1B;&#x8BE6;&#x7EC6;&#x53EF;&#x4EE5;&#x53C2;&#x8003;NETTY&#x7684;HttpObjectAggregator&#xFF1B;</li>
+<li>HTTPS&#x539F;&#x59CB;&#x8BF7;&#x6C42;&#x548C;&#x7ED3;&#x679C;&#x6570;&#x636E;&#x7684;&#x52A0;&#x5BC6;&#x548C;&#x89E3;&#x5BC6;&#x7684;&#x5904;&#x7406;&#xFF0C;&#x9700;&#x8981;&#x5B9E;&#x73B0;&#x7684;NIO&#x7684;SOCKET CHANNEL&#xFF1B;</li>
+</ol>
+<p><strong>SslSocketChannel&#x5C01;&#x88C5;&#x539F;&#x7406;</strong></p>
+<p>&#x8003;&#x8651;&#x5230;&#x76EE;&#x524D;JDK&#x81EA;&#x5E26;&#x7684;NIO&#x7684;SocketChannel&#x5E76;&#x4E0D;&#x652F;&#x6301;SSL&#xFF1B;&#x5DF2;&#x6709;&#x7684;SSLSocket&#x662F;&#x963B;&#x585E;&#x7684;OIO&#x3002;&#x5982;&#x56FE;&#xFF1A;</p>
+<p>&#x53EF;&#x4EE5;&#x770B;&#x51FA;</p>
+<ol>
+<li>&#x6BCF;&#x6B21;&#x5165;&#x7AD9;&#x6570;&#x636E;&#x548C;&#x51FA;&#x7AD9;&#x6570;&#x636E;&#x90FD;&#x9700;&#x8981; SSL SESSION &#x505A;&#x63E1;&#x624B;&#xFF1B;</li>
+<li>&#x5165;&#x7AD9;&#x6570;&#x636E;&#x505A;&#x89E3;&#x5BC6;&#xFF0C;&#x51FA;&#x7AD9;&#x6570;&#x636E;&#x505A;&#x52A0;&#x5BC6;&#xFF1B;</li>
+<li>&#x63E1;&#x624B;&#xFF0C;&#x6570;&#x636E;&#x52A0;&#x5BC6;&#x548C;&#x6570;&#x636E;&#x89E3;&#x5BC6;&#x662F;&#x7EDF;&#x4E00;&#x7684;&#x4E00;&#x5957;&#x72B6;&#x6001;&#x673A;&#xFF1B;</li>
+</ol>
+<p>&#x4EE5;&#x4E0B;&#xFF0C;&#x4EE3;&#x7801;&#x5B9E;&#x73B0; SslSocketChannel</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br></pre></td><td class="code"><pre><span class="line">ini&#x590D;&#x5236;&#x4EE3;&#x7801;public class SslSocketChannel {</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x63E1;&#x624B;&#x52A0;&#x89E3;&#x5BC6;&#x9700;&#x8981;&#x7684;&#x56DB;&#x4E2A;&#x5B58;&#x50A8;</span><br><span class="line">     */</span><br><span class="line">    protected ByteBuffer myAppData; // &#x660E;&#x6587;</span><br><span class="line">    protected ByteBuffer myNetData; // &#x5BC6;&#x6587;</span><br><span class="line">    protected ByteBuffer peerAppData; // &#x660E;&#x6587;</span><br><span class="line">    protected ByteBuffer peerNetData; // &#x5BC6;&#x6587;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x63E1;&#x624B;&#x52A0;&#x89E3;&#x5BC6;&#x8FC7;&#x7A0B;&#x4E2D;&#x7528;&#x5230;&#x7684;&#x5F02;&#x6B65;&#x6267;&#x884C;&#x5668;</span><br><span class="line">     */</span><br><span class="line">    protected ExecutorService executor = Executors.newSingleThreadExecutor();</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x539F;NIO &#x7684; CHANNEL</span><br><span class="line">     */</span><br><span class="line">    protected SocketChannel socketChannel;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * SSL &#x5F15;&#x64CE;</span><br><span class="line">     */</span><br><span class="line">    protected SSLEngine engine;</span><br><span class="line"></span><br><span class="line">    public SslSocketChannel(SSLContext context, SocketChannel socketChannel, boolean clientMode) throws Exception {</span><br><span class="line">        // &#x539F;&#x59CB;&#x7684;NIO SOCKET</span><br><span class="line">        this.socketChannel = socketChannel;</span><br><span class="line"></span><br><span class="line">        // &#x521D;&#x59CB;&#x5316;BUFFER</span><br><span class="line">        SSLSession dummySession = context.createSSLEngine().getSession();</span><br><span class="line">        myAppData = ByteBuffer.allocate(dummySession.getApplicationBufferSize());</span><br><span class="line">        myNetData = ByteBuffer.allocate(dummySession.getPacketBufferSize());</span><br><span class="line">        peerAppData = ByteBuffer.allocate(dummySession.getApplicationBufferSize());</span><br><span class="line">        peerNetData = ByteBuffer.allocate(dummySession.getPacketBufferSize());</span><br><span class="line">        dummySession.invalidate();</span><br><span class="line"></span><br><span class="line">        engine = context.createSSLEngine();</span><br><span class="line">        engine.setUseClientMode(clientMode);</span><br><span class="line">        engine.beginHandshake();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x53C2;&#x8003; https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html</span><br><span class="line">     * &#x5B9E;&#x73B0;&#x7684; SSL &#x7684;&#x63E1;&#x624B;&#x534F;&#x8BAE;</span><br><span class="line">     * @return</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    protected boolean doHandshake() throws IOException {</span><br><span class="line">        SSLEngineResult result;</span><br><span class="line">        HandshakeStatus handshakeStatus;</span><br><span class="line"></span><br><span class="line">        int appBufferSize = engine.getSession().getApplicationBufferSize();</span><br><span class="line">        ByteBuffer myAppData = ByteBuffer.allocate(appBufferSize);</span><br><span class="line">        ByteBuffer peerAppData = ByteBuffer.allocate(appBufferSize);</span><br><span class="line">        myNetData.clear();</span><br><span class="line">        peerNetData.clear();</span><br><span class="line"></span><br><span class="line">        handshakeStatus = engine.getHandshakeStatus();</span><br><span class="line">        while (handshakeStatus != HandshakeStatus.FINISHED &amp;&amp; handshakeStatus != HandshakeStatus.NOT_HANDSHAKING) {</span><br><span class="line">            switch (handshakeStatus) {</span><br><span class="line">                case NEED_UNWRAP:</span><br><span class="line">                    if (socketChannel.read(peerNetData) &lt; 0) {</span><br><span class="line">                        if (engine.isInboundDone() &amp;&amp; engine.isOutboundDone()) {</span><br><span class="line">                            return false;</span><br><span class="line">                        }</span><br><span class="line">                        try {</span><br><span class="line">                            engine.closeInbound();</span><br><span class="line">                        } catch (SSLException e) {</span><br><span class="line">                            log.debug(&quot;&#x6536;&#x5230;END OF STREAM&#xFF0C;&#x5173;&#x95ED;&#x8FDE;&#x63A5;.&quot;, e);</span><br><span class="line">                        }</span><br><span class="line">                        engine.closeOutbound();</span><br><span class="line">                        handshakeStatus = engine.getHandshakeStatus();</span><br><span class="line">                        break;</span><br><span class="line">                    }</span><br><span class="line">                    peerNetData.flip();</span><br><span class="line">                    try {</span><br><span class="line">                        result = engine.unwrap(peerNetData, peerAppData);</span><br><span class="line">                        peerNetData.compact();</span><br><span class="line">                        handshakeStatus = result.getHandshakeStatus();</span><br><span class="line">                    } catch (SSLException sslException) {</span><br><span class="line">                        engine.closeOutbound();</span><br><span class="line">                        handshakeStatus = engine.getHandshakeStatus();</span><br><span class="line">                        break;</span><br><span class="line">                    }</span><br><span class="line">                    switch (result.getStatus()) {</span><br><span class="line">                        case OK:</span><br><span class="line">                            break;</span><br><span class="line">                        case BUFFER_OVERFLOW:</span><br><span class="line">                            peerAppData = enlargeApplicationBuffer(engine, peerAppData);</span><br><span class="line">                            break;</span><br><span class="line">                        case BUFFER_UNDERFLOW:</span><br><span class="line">                            peerNetData = handleBufferUnderflow(engine, peerNetData);</span><br><span class="line">                            break;</span><br><span class="line">                        case CLOSED:</span><br><span class="line">                            if (engine.isOutboundDone()) {</span><br><span class="line">                                return false;</span><br><span class="line">                            } else {</span><br><span class="line">                                engine.closeOutbound();</span><br><span class="line">                                handshakeStatus = engine.getHandshakeStatus();</span><br><span class="line">                                break;</span><br><span class="line">                            }</span><br><span class="line">                        default:</span><br><span class="line">                            throw new IllegalStateException(&quot;&#x65E0;&#x6548;&#x7684;&#x63E1;&#x624B;&#x72B6;&#x6001;: &quot; + result.getStatus());</span><br><span class="line">                    }</span><br><span class="line">                    break;</span><br><span class="line">                case NEED_WRAP:</span><br><span class="line">                    myNetData.clear();</span><br><span class="line">                    try {</span><br><span class="line">                        result = engine.wrap(myAppData, myNetData);</span><br><span class="line">                        handshakeStatus = result.getHandshakeStatus();</span><br><span class="line">                    } catch (SSLException sslException) {</span><br><span class="line">                        engine.closeOutbound();</span><br><span class="line">                        handshakeStatus = engine.getHandshakeStatus();</span><br><span class="line">                        break;</span><br><span class="line">                    }</span><br><span class="line">                    switch (result.getStatus()) {</span><br><span class="line">                        case OK :</span><br><span class="line">                            myNetData.flip();</span><br><span class="line">                            while (myNetData.hasRemaining()) {</span><br><span class="line">                                socketChannel.write(myNetData);</span><br><span class="line">                            }</span><br><span class="line">                            break;</span><br><span class="line">                        case BUFFER_OVERFLOW:</span><br><span class="line">                            myNetData = enlargePacketBuffer(engine, myNetData);</span><br><span class="line">                            break;</span><br><span class="line">                        case BUFFER_UNDERFLOW:</span><br><span class="line">                            throw new SSLException(&quot;&#x52A0;&#x5BC6;&#x540E;&#x6D88;&#x606F;&#x5185;&#x5BB9;&#x4E3A;&#x7A7A;&#xFF0C;&#x62A5;&#x9519;&quot;);</span><br><span class="line">                        case CLOSED:</span><br><span class="line">                            try {</span><br><span class="line">                                myNetData.flip();</span><br><span class="line">                                while (myNetData.hasRemaining()) {</span><br><span class="line">                                    socketChannel.write(myNetData);</span><br><span class="line">                                }</span><br><span class="line">                                peerNetData.clear();</span><br><span class="line">                            } catch (Exception e) {</span><br><span class="line">                                handshakeStatus = engine.getHandshakeStatus();</span><br><span class="line">                            }</span><br><span class="line">                            break;</span><br><span class="line">                        default:</span><br><span class="line">                            throw new IllegalStateException(&quot;&#x65E0;&#x6548;&#x7684;&#x63E1;&#x624B;&#x72B6;&#x6001;: &quot; + result.getStatus());</span><br><span class="line">                    }</span><br><span class="line">                    break;</span><br><span class="line">                case NEED_TASK:</span><br><span class="line">                    Runnable task;</span><br><span class="line">                    while ((task = engine.getDelegatedTask()) != null) {</span><br><span class="line">                        executor.execute(task);</span><br><span class="line">                    }</span><br><span class="line">                    handshakeStatus = engine.getHandshakeStatus();</span><br><span class="line">                    break;</span><br><span class="line">                case FINISHED:</span><br><span class="line">                    break;</span><br><span class="line">                case NOT_HANDSHAKING:</span><br><span class="line">                    break;</span><br><span class="line">                default:</span><br><span class="line">                    throw new IllegalStateException(&quot;&#x65E0;&#x6548;&#x7684;&#x63E1;&#x624B;&#x72B6;&#x6001;: &quot; + handshakeStatus);</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        return true;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x53C2;&#x8003; https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html</span><br><span class="line">     * &#x5B9E;&#x73B0;&#x7684; SSL &#x7684;&#x4F20;&#x8F93;&#x8BFB;&#x53D6;&#x534F;&#x8BAE;</span><br><span class="line">     * @param consumer</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    public void read(Consumer&lt;ByteBuffer&gt; consumer) throws IOException {</span><br><span class="line">        // BUFFER&#x521D;&#x59CB;&#x5316;</span><br><span class="line">        peerNetData.clear();</span><br><span class="line">        int bytesRead = socketChannel.read(peerNetData);</span><br><span class="line">        if (bytesRead &gt; 0) {</span><br><span class="line">            peerNetData.flip();</span><br><span class="line">            while (peerNetData.hasRemaining()) {</span><br><span class="line">                peerAppData.clear();</span><br><span class="line">                SSLEngineResult result = engine.unwrap(peerNetData, peerAppData);</span><br><span class="line">                switch (result.getStatus()) {</span><br><span class="line">                    case OK:</span><br><span class="line">                        log.debug(&quot;&#x6536;&#x5230;&#x8FDC;&#x7A0B;&#x7684;&#x8FD4;&#x56DE;&#x7ED3;&#x679C;&#x6D88;&#x606F;&#x4E3A;&#xFF1A;&quot; + new String(peerAppData.array(), 0, peerAppData.position()));</span><br><span class="line">                        consumer.accept(peerAppData);</span><br><span class="line">                        peerAppData.flip();</span><br><span class="line">                        break;</span><br><span class="line">                    case BUFFER_OVERFLOW:</span><br><span class="line">                        peerAppData = enlargeApplicationBuffer(engine, peerAppData);</span><br><span class="line">                        break;</span><br><span class="line">                    case BUFFER_UNDERFLOW:</span><br><span class="line">                        peerNetData = handleBufferUnderflow(engine, peerNetData);</span><br><span class="line">                        break;</span><br><span class="line">                    case CLOSED:</span><br><span class="line">                        log.debug(&quot;&#x6536;&#x5230;&#x8FDC;&#x7A0B;&#x8FDE;&#x63A5;&#x5173;&#x95ED;&#x6D88;&#x606F;.&quot;);</span><br><span class="line">                        closeConnection();</span><br><span class="line">                        return;</span><br><span class="line">                    default:</span><br><span class="line">                        throw new IllegalStateException(&quot;&#x65E0;&#x6548;&#x7684;&#x63E1;&#x624B;&#x72B6;&#x6001;: &quot; + result.getStatus());</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        } else if (bytesRead &lt; 0) {</span><br><span class="line">            log.debug(&quot;&#x6536;&#x5230;END OF STREAM&#xFF0C;&#x5173;&#x95ED;&#x8FDE;&#x63A5;.&quot;);</span><br><span class="line">            handleEndOfStream();</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public void write(String message) throws IOException {</span><br><span class="line">        write(ByteBuffer.wrap(message.getBytes()));</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x53C2;&#x8003; https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html</span><br><span class="line">     * &#x5B9E;&#x73B0;&#x7684; SSL &#x7684;&#x4F20;&#x8F93;&#x5199;&#x5165;&#x534F;&#x8BAE;</span><br><span class="line">     * @param message</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    public void write(ByteBuffer message) throws IOException {</span><br><span class="line">        myAppData.clear();</span><br><span class="line">        myAppData.put(message);</span><br><span class="line">        myAppData.flip();</span><br><span class="line">        while (myAppData.hasRemaining()) {</span><br><span class="line">            myNetData.clear();</span><br><span class="line">            SSLEngineResult result = engine.wrap(myAppData, myNetData);</span><br><span class="line">            switch (result.getStatus()) {</span><br><span class="line">                case OK:</span><br><span class="line">                    myNetData.flip();</span><br><span class="line">                    while (myNetData.hasRemaining()) {</span><br><span class="line">                        socketChannel.write(myNetData);</span><br><span class="line">                    }</span><br><span class="line">                    log.debug(&quot;&#x5199;&#x5165;&#x8FDC;&#x7A0B;&#x7684;&#x6D88;&#x606F;&#x4E3A;: {}&quot;, message);</span><br><span class="line">                    break;</span><br><span class="line">                case BUFFER_OVERFLOW:</span><br><span class="line">                    myNetData = enlargePacketBuffer(engine, myNetData);</span><br><span class="line">                    break;</span><br><span class="line">                case BUFFER_UNDERFLOW:</span><br><span class="line">                    throw new SSLException(&quot;&#x52A0;&#x5BC6;&#x540E;&#x6D88;&#x606F;&#x5185;&#x5BB9;&#x4E3A;&#x7A7A;.&quot;);</span><br><span class="line">                case CLOSED:</span><br><span class="line">                    closeConnection();</span><br><span class="line">                    return;</span><br><span class="line">                default:</span><br><span class="line">                    throw new IllegalStateException(&quot;&#x65E0;&#x6548;&#x7684;&#x63E1;&#x624B;&#x72B6;&#x6001;: &quot; + result.getStatus());</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x5173;&#x95ED;&#x8FDE;&#x63A5;</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    public void closeConnection() throws IOException  {</span><br><span class="line">        engine.closeOutbound();</span><br><span class="line">        doHandshake();</span><br><span class="line">        socketChannel.close();</span><br><span class="line">        executor.shutdown();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * END OF STREAM(-1)&#x9ED8;&#x8BA4;&#x662F;&#x5173;&#x95ED;&#x8FDE;&#x63A5;</span><br><span class="line">     * @throws IOException</span><br><span class="line">     */</span><br><span class="line">    protected void handleEndOfStream() throws IOException  {</span><br><span class="line">        try {</span><br><span class="line">            engine.closeInbound();</span><br><span class="line">        } catch (Exception e) {</span><br><span class="line">            log.error(&quot;END OF STREAM &#x5173;&#x95ED;&#x5931;&#x8D25;.&quot;, e);</span><br><span class="line">        }</span><br><span class="line">        closeConnection();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#xFF1A;</p>
+<ol>
+<li>&#x57FA;&#x4E8E; SSL &#x534F;&#x8BAE;&#xFF0C;&#x5B9E;&#x73B0;&#x7EDF;&#x4E00;&#x7684;&#x63E1;&#x624B;&#x52A8;&#x4F5C;&#xFF1B;</li>
+<li>&#x5206;&#x522B;&#x5B9E;&#x73B0;&#x8BFB;&#x53D6;&#x7684;&#x89E3;&#x5BC6;&#xFF0C;&#x548C;&#x5199;&#x5165;&#x7684;&#x52A0;&#x5BC6;&#x65B9;&#x6CD5;&#xFF1B;</li>
+<li>&#x5C06; SslSocketChannel &#x5B9E;&#x73B0;&#x4E3A; SocketChannel&#x7684;Decorator&#xFF1B;</li>
+</ol>
+<p><strong>SslSocketChannel&#x6D4B;&#x8BD5;&#x670D;&#x52A1;&#x7AEF;</strong></p>
+<p>&#x57FA;&#x4E8E;&#x4EE5;&#x4E0A;&#x5C01;&#x88C5;&#xFF0C;&#x7B80;&#x5355;&#x6D4B;&#x8BD5;&#x670D;&#x52A1;&#x7AEF;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;@Slf4j</span><br><span class="line">public class NioSslServer {</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception {</span><br><span class="line">        NioSslServer sslServer = new NioSslServer(&quot;127.0.0.1&quot;, 8006);</span><br><span class="line">        sslServer.start();</span><br><span class="line">        // &#x4F7F;&#x7528; curl -vv -k &apos;https://localhost:8006&apos; &#x8FDE;&#x63A5;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private SSLContext context;</span><br><span class="line"></span><br><span class="line">    private Selector selector;</span><br><span class="line"></span><br><span class="line">    public NioSslServer(String hostAddress, int port) throws Exception {</span><br><span class="line">        // &#x521D;&#x59CB;&#x5316;SSL Context</span><br><span class="line">        context = serverSSLContext();</span><br><span class="line"></span><br><span class="line">        // &#x6CE8;&#x518C;&#x76D1;&#x542C;&#x5668;</span><br><span class="line">        selector = SelectorProvider.provider().openSelector();</span><br><span class="line">        ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();</span><br><span class="line">        serverSocketChannel.configureBlocking(false);</span><br><span class="line">        serverSocketChannel.socket().bind(new InetSocketAddress(hostAddress, port));</span><br><span class="line">        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public void start() throws Exception {</span><br><span class="line"></span><br><span class="line">        log.debug(&quot;&#x7B49;&#x5F85;&#x8FDE;&#x63A5;&#x4E2D;.&quot;);</span><br><span class="line"></span><br><span class="line">        while (true) {</span><br><span class="line">            selector.select();</span><br><span class="line">            Iterator&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys().iterator();</span><br><span class="line">            while (selectedKeys.hasNext()) {</span><br><span class="line">                SelectionKey key = selectedKeys.next();</span><br><span class="line">                selectedKeys.remove();</span><br><span class="line">                if (!key.isValid()) {</span><br><span class="line">                    continue;</span><br><span class="line">                }</span><br><span class="line">                if (key.isAcceptable()) {</span><br><span class="line">                    accept(key);</span><br><span class="line">                } else if (key.isReadable()) {</span><br><span class="line">                    ((SslSocketChannel)key.attachment()).read(buf-&gt;{});</span><br><span class="line">                    // &#x76F4;&#x63A5;&#x56DE;&#x5E94;&#x4E00;&#x4E2A;OK</span><br><span class="line">                    ((SslSocketChannel)key.attachment()).write(&quot;HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nOK\r\n\r\n&quot;);</span><br><span class="line">                    ((SslSocketChannel)key.attachment()).closeConnection();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private void accept(SelectionKey key) throws Exception {</span><br><span class="line">        log.debug(&quot;&#x63A5;&#x6536;&#x65B0;&#x7684;&#x8BF7;&#x6C42;.&quot;);</span><br><span class="line"></span><br><span class="line">        SocketChannel socketChannel = ((ServerSocketChannel)key.channel()).accept();</span><br><span class="line">        socketChannel.configureBlocking(false);</span><br><span class="line"></span><br><span class="line">        SslSocketChannel sslSocketChannel = new SslSocketChannel(context, socketChannel, false);</span><br><span class="line">        if (sslSocketChannel.doHandshake()) {</span><br><span class="line">            socketChannel.register(selector, SelectionKey.OP_READ, sslSocketChannel);</span><br><span class="line">        } else {</span><br><span class="line">            socketChannel.close();</span><br><span class="line">            log.debug(&quot;&#x63E1;&#x624B;&#x5931;&#x8D25;&#xFF0C;&#x5173;&#x95ED;&#x8FDE;&#x63A5;.&quot;);</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#xFF1A;</p>
+<ol>
+<li>&#x7531;&#x4E8E;&#x662F;NIO&#xFF0C;&#x7B80;&#x5355;&#x7684;&#x6D4B;&#x8BD5;&#x9700;&#x8981;&#x7528;&#x5230;NIO&#x7684;&#x57FA;&#x7840;&#x7EC4;&#x4EF6;Selector&#x8FDB;&#x884C;&#x6D4B;&#x8BD5;&#xFF1B;</li>
+<li>&#x9996;&#x5148;&#x521D;&#x59CB;&#x5316;ServerSocketChannel&#xFF0C;&#x76D1;&#x542C;8006&#x7AEF;&#x53E3;&#xFF1B;</li>
+<li>&#x63A5;&#x6536;&#x5230;&#x8BF7;&#x6C42;&#x540E;&#xFF0C;&#x5C06;SocketChannel&#x5C01;&#x88C5;&#x4E3A;SslSocketChannel&#xFF0C;&#x6CE8;&#x518C;&#x5230;Selector</li>
+<li>&#x63A5;&#x6536;&#x5230;&#x6570;&#x636E;&#x540E;&#xFF0C;&#x901A;&#x8FC7;SslSocketChannel&#x505A;read&#x548C;write&#xFF1B;</li>
+</ol>
+<p><strong>SslSocketChannel&#x6D4B;&#x8BD5;&#x5BA2;&#x6237;&#x7AEF;</strong></p>
+<p>&#x57FA;&#x4E8E;&#x4EE5;&#x4E0A;&#x670D;&#x52A1;&#x7AEF;&#x5C01;&#x88C5;&#xFF0C;&#x7B80;&#x5355;&#x6D4B;&#x8BD5;&#x5BA2;&#x6237;&#x7AEF;&#x5982;&#x4E0B;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;@Slf4j</span><br><span class="line">public class NioSslClient {</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception {</span><br><span class="line">        NioSslClient sslClient = new NioSslClient(&quot;httpbin.org&quot;, 443);</span><br><span class="line">        sslClient.connect();</span><br><span class="line">        // &#x8BF7;&#x6C42; &apos;https://httpbin.org/get&apos;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    private String remoteAddress;</span><br><span class="line"></span><br><span class="line">    private int port;</span><br><span class="line"></span><br><span class="line">    private SSLEngine engine;</span><br><span class="line"></span><br><span class="line">    private SocketChannel socketChannel;</span><br><span class="line"></span><br><span class="line">    private SSLContext context;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * &#x9700;&#x8981;&#x8FDC;&#x7A0B;&#x7684;HOST&#x548C;PORT</span><br><span class="line">     * @param remoteAddress</span><br><span class="line">     * @param port</span><br><span class="line">     * @throws Exception</span><br><span class="line">     */</span><br><span class="line">    public NioSslClient(String remoteAddress, int port) throws Exception {</span><br><span class="line">        this.remoteAddress = remoteAddress;</span><br><span class="line">        this.port = port;</span><br><span class="line"></span><br><span class="line">        context = clientSSLContext();</span><br><span class="line">        engine = context.createSSLEngine(remoteAddress, port);</span><br><span class="line">        engine.setUseClientMode(true);</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public boolean connect() throws Exception {</span><br><span class="line">        socketChannel = SocketChannel.open();</span><br><span class="line">        socketChannel.configureBlocking(false);</span><br><span class="line">        socketChannel.connect(new InetSocketAddress(remoteAddress, port));</span><br><span class="line">        while (!socketChannel.finishConnect()) {</span><br><span class="line">            // &#x901A;&#x8FC7;REACTOR&#xFF0C;&#x4E0D;&#x4F1A;&#x51FA;&#x73B0;&#x7B49;&#x5F85;&#x60C5;&#x51B5;</span><br><span class="line">            //log.debug(&quot;&#x8FDE;&#x63A5;&#x4E2D;..&quot;);</span><br><span class="line">        }</span><br><span class="line"></span><br><span class="line">        SslSocketChannel sslSocketChannel = new SslSocketChannel(context, socketChannel, true);</span><br><span class="line">        sslSocketChannel.doHandshake();</span><br><span class="line"></span><br><span class="line">        // &#x63E1;&#x624B;&#x5B8C;&#x6210;&#x540E;&#xFF0C;&#x5F00;&#x542F;SELECTOR</span><br><span class="line">        Selector selector = SelectorProvider.provider().openSelector();</span><br><span class="line">        socketChannel.register(selector, SelectionKey.OP_READ, sslSocketChannel);</span><br><span class="line"></span><br><span class="line">        // &#x5199;&#x5165;&#x8BF7;&#x6C42;</span><br><span class="line">        sslSocketChannel.write(&quot;GET /get HTTP/1.1\r\n&quot;</span><br><span class="line">            + &quot;Host: httpbin.org:443\r\n&quot;</span><br><span class="line">            + &quot;User-Agent: curl/7.62.0\r\n&quot;</span><br><span class="line">            + &quot;Accept: */*\r\n&quot;</span><br><span class="line">            + &quot;\r\n&quot;);</span><br><span class="line"></span><br><span class="line">        // &#x8BFB;&#x53D6;&#x7ED3;&#x679C;</span><br><span class="line">        while (true) {</span><br><span class="line">            selector.select();</span><br><span class="line">            Iterator&lt;SelectionKey&gt; selectedKeys = selector.selectedKeys().iterator();</span><br><span class="line">            while (selectedKeys.hasNext()) {</span><br><span class="line">                SelectionKey key = selectedKeys.next();</span><br><span class="line">                selectedKeys.remove();</span><br><span class="line">                if (key.isValid() &amp;&amp; key.isReadable()) {</span><br><span class="line">                    ((SslSocketChannel)key.attachment()).read(buf-&gt;{</span><br><span class="line">                        log.info(&quot;{}&quot;, new String(buf.array(), 0, buf.position()));</span><br><span class="line">                    });</span><br><span class="line">                    ((SslSocketChannel)key.attachment()).closeConnection();</span><br><span class="line">                    return true;</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#xFF1A;</p>
+<ol>
+<li>&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x5C01;&#x88C5;&#x6D4B;&#x8BD5;&#xFF0C;&#x662F;&#x4E3A;&#x4E86;&#x9A8C;&#x8BC1;&#x5C01;&#x88C5; SSL &#x534F;&#x8BAE;&#x53CC;&#x5411;&#x90FD;&#x662F;OK&#x7684;&#xFF0C;</li>
+<li>&#x5728;&#x540E;&#x6587;&#x7684;&#x975E;&#x900F;&#x660E;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#x4E2D;&#xFF0C;&#x4F1A;&#x540C;&#x65F6;&#x4F7F;&#x7528; SslSocketChannel&#x505A;&#x670D;&#x52A1;&#x7AEF;&#x548C;&#x5BA2;&#x6237;&#x7AEF;</li>
+<li>&#x4EE5;&#x4E0A;&#x5C01;&#x88C5;&#x4E0E;&#x670D;&#x52A1;&#x7AEF;&#x5C01;&#x88C5;&#x7C7B;&#x4F3C;&#xFF0C;&#x4E0D;&#x540C;&#x7684;&#x662F;&#x521D;&#x59CB;&#x5316; SocketChannel&#xFF0C;&#x505A;connect&#x800C;&#x975E;bind</li>
+</ol>
+<p><strong>&#x603B;&#x7ED3;</strong></p>
+<p>&#x4EE5;&#x4E0A;&#xFF1A;</p>
+<ol>
+<li>&#x975E;&#x900F;&#x660E;&#x4EE3;&#x7406;&#x9700;&#x8981;&#x62FF;&#x5230;&#x5B8C;&#x6574;&#x7684;&#x8BF7;&#x6C42;&#x6570;&#x636E;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7; Decorator&#x6A21;&#x5F0F;&#xFF0C;&#x805A;&#x6279;&#x5B9E;&#x73B0;&#xFF1B;</li>
+<li>&#x975E;&#x900F;&#x660E;&#x4EE3;&#x7406;&#x9700;&#x8981;&#x62FF;&#x5230;&#x89E3;&#x5BC6;&#x540E;&#x7684;HTTPS&#x8BF7;&#x6C42;&#x6570;&#x636E;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;SslSocketChannel&#x5BF9;&#x539F;&#x59CB;&#x7684;SocketChannel&#x505A;&#x5C01;&#x88C5;&#x5B9E;&#x73B0;&#xFF1B;</li>
+<li>&#x6700;&#x540E;&#xFF0C;&#x62FF;&#x5230;&#x8BF7;&#x6C42;&#x540E;&#xFF0C;&#x505A;&#x76F8;&#x5E94;&#x7684;&#x5904;&#x7406;&#xFF0C;&#x6700;&#x7EC8;&#x5B9E;&#x73B0;&#x975E;&#x900F;&#x660E;&#x7684;&#x4EE3;&#x7406;&#x3002;</li>
+</ol>
+<p><strong>3 &#x900F;&#x660E;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;</strong></p>
+<p>&#x900F;&#x660E;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#x76F8;&#x6BD4;&#x900F;&#x660E;&#x4EE3;&#x7406;&#x8981;&#x7B80;&#x5355;&#xFF0C;&#x533A;&#x522B;&#x662F;</p>
+<ol>
+<li>&#x900F;&#x660E;&#x4EE3;&#x7406;&#x9700;&#x8981;&#x54CD;&#x5E94; CONNECT&#x8BF7;&#x6C42;&#xFF0C;&#x900F;&#x660E;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#x4E0D;&#x9700;&#x8981;&#xFF0C;&#x76F4;&#x63A5;&#x8F6C;&#x53D1;&#x5373;&#x53EF;&#xFF1B;</li>
+<li>&#x900F;&#x660E;&#x4EE3;&#x7406;&#x9700;&#x8981;&#x89E3;&#x6790;CONNECT&#x8BF7;&#x6C42;&#x4E2D;&#x7684;HOST&#x548C;PORT&#xFF0C;&#x5E76;&#x8FDE;&#x63A5;&#x670D;&#x52A1;&#x7AEF;&#xFF1B;&#x900F;&#x660E;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#x53EA;&#x9700;&#x8981;&#x8FDE;&#x63A5;&#x4E0B;&#x6E38;&#x4EE3;&#x7406;&#x7684;IP:PORT&#xFF0C;&#x76F4;&#x63A5;&#x8F6C;&#x53D1;&#x8BF7;&#x6C42;&#x5373;&#x53EF;&#xFF1B;</li>
+<li>&#x900F;&#x660E;&#x7684;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#xFF0C;&#x53EA;&#x662F;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684;SocketChannel&#x7BA1;&#x9053;&#xFF1B;&#x786E;&#x5B9A;&#x4E0B;&#x6E38;&#x7684;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x8FDE;&#x63A5;&#x8F6C;&#x53D1;&#x8BF7;&#x6C42;&#xFF1B;</li>
+</ol>
+<p>&#x53EA;&#x9700;&#x8981;&#x5BF9;&#x900F;&#x660E;&#x4EE3;&#x7406;&#x505A;&#x4EE5;&#x4E0A;&#x7B80;&#x5355;&#x7684;&#x4FEE;&#x6539;&#xFF0C;&#x5373;&#x53EF;&#x5B9E;&#x73B0;&#x900F;&#x660E;&#x7684;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#x3002;</p>
+<p><strong>4 &#x975E;&#x900F;&#x660E;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;</strong></p>
+<p>&#x975E;&#x900F;&#x660E;&#x7684;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#xFF0C;&#x76F8;&#x6BD4;&#x975E;&#x900F;&#x660E;&#x7684;&#x4EE3;&#x7406;&#x8981;&#x590D;&#x6742;&#x4E00;&#x4E9B;</p>
+<p><img src="https://gitee.com/songjianzaina/juejin_p7/raw/master/img/2b5e1ab9b7c5948dc3cc2b482d03f3c22beb15ef625c720863ff7eb888e3a97a" alt></p>
+<p>&#x4EE5;&#x4E0A;&#xFF0C;&#x5206;&#x4E3A;&#x56DB;&#x4E2A;&#x7EC4;&#x4EF6;&#xFF1A;&#x5BA2;&#x6237;&#x7AEF;&#xFF0C;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#xFF08;ServerHandler&#xFF09;&#xFF0C;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#xFF08;ClientHandler&#xFF09;&#xFF0C;&#x670D;&#x52A1;&#x7AEF;</p>
+<ol>
+<li>&#x5982;&#x679C;&#x662F;HTTP&#x7684;&#x8BF7;&#x6C42;&#xFF0C;&#x6570;&#x636E;&#x76F4;&#x63A5;&#x901A;&#x8FC7; &#x5BA2;&#x6237;&#x7AEF;&lt;-&gt;ServerHandler&lt;-&gt;ClientHandler&lt;-&gt;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x53EA;&#x9700;&#x8981;&#x505A;&#x7B80;&#x5355;&#x7684;&#x8BF7;&#x6C42;&#x805A;&#x6279;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x5E94;&#x7528;&#x76F8;&#x5E94;&#x7684;&#x7BA1;&#x7406;&#x7B56;&#x7565;&#xFF1B;</li>
+<li>&#x5982;&#x679C;&#x662F;HTTPS&#x8BF7;&#x6C42;&#xFF0C;&#x4EE3;&#x7406;&#x4F5C;&#x4E3A;&#x5BA2;&#x6237;&#x7AEF;&#x548C;&#x670D;&#x52A1;&#x7AEF;&#x7684;&#x4E2D;&#x95F4;&#x4EBA;&#xFF0C;&#x53EA;&#x80FD;&#x62FF;&#x5230;&#x52A0;&#x5BC6;&#x7684;&#x6570;&#x636E;&#xFF1B;&#x56E0;&#x6B64;&#xFF0C;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x9700;&#x8981;&#x4F5C;&#x4E3A;HTTPS&#x7684;&#x670D;&#x52A1;&#x65B9;&#x4E0E;&#x5BA2;&#x6237;&#x7AEF;&#x901A;&#x4FE1;&#xFF1B;&#x7136;&#x540E;&#x4F5C;&#x4E3A;HTTPS&#x7684;&#x5BA2;&#x6237;&#x7AEF;&#x4E0E;&#x670D;&#x52A1;&#x7AEF;&#x901A;&#x4FE1;&#xFF1B;</li>
+<li>&#x4EE3;&#x7406;&#x4F5C;&#x4E3A;HTTPS&#x670D;&#x52A1;&#x65B9;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x8003;&#x8651;&#x5230;&#x5176;&#x672C;&#x8EAB;&#x662F;&#x4E2A;&#x975E;&#x900F;&#x660E;&#x7684;&#x4EE3;&#x7406;&#xFF0C;&#x9700;&#x8981;&#x5B9E;&#x73B0;&#x975E;&#x900F;&#x660E;&#x4EE3;&#x7406;&#x76F8;&#x5173;&#x7684;&#x534F;&#x8BAE;&#xFF1B;</li>
+<li>&#x4EE3;&#x7406;&#x4F5C;&#x4E3A;HTTPS&#x5BA2;&#x6237;&#x7AEF;&#x65F6;&#xFF0C;&#x9700;&#x8981;&#x8003;&#x8651;&#x5230;&#x5176;&#x4E0B;&#x6E38;&#x662F;&#x4E2A;&#x900F;&#x660E;&#x7684;&#x4EE3;&#x7406;&#xFF0C;&#x771F;&#x6B63;&#x7684;&#x670D;&#x52A1;&#x65B9;&#x662F;&#x5BA2;&#x6237;&#x7AEF;&#x8BF7;&#x6C42;&#x7684;&#x670D;&#x52A1;&#x65B9;&#xFF1B;</li>
+</ol>
+<h1 id="&#x4E09;-&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;"><a href="#&#x4E09;-&#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;" class="headerlink" title="&#x4E09; &#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;"></a>&#x4E09; &#x8BBE;&#x8BA1;&#x4E0E;&#x5B9E;&#x73B0;</h1><p>&#x672C;&#x6587;&#x9700;&#x8981;&#x6784;&#x5EFA;&#x7684;&#x662F;&#x975E;&#x900F;&#x660E;&#x4E0A;&#x6E38;&#x4EE3;&#x7406;&#xFF0C;&#x4EE5;&#x4E0B;&#x91C7;&#x7528;NETTY&#x6846;&#x67B6;&#x7ED9;&#x51FA;&#x8BE6;&#x7EC6;&#x7684;&#x8BBE;&#x8BA1;&#x5B9E;&#x73B0;&#x3002;&#x4E0A;&#x6587;&#x5C06;&#x7EDF;&#x4E00;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x5206;&#x4E3A;&#x4E24;&#x5927;&#x90E8;&#x5206;&#xFF0C;ServerHandler&#x548C;ClientHandler&#xFF0C;&#x4EE5;&#x4E0B;</p>
+<ol>
+<li>&#x4ECB;&#x7ECD;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x670D;&#x52A1;&#x7AEF;&#x76F8;&#x5173;&#x5B9E;&#x73B0;&#xFF1B;</li>
+<li>&#x4ECB;&#x7ECD;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x5BA2;&#x6237;&#x7AEF;&#x76F8;&#x5173;&#x5B9E;&#x73B0;&#xFF1B;</li>
+</ol>
+<p><strong>1 &#x4EE3;&#x7406;&#x7F51;&#x5173;&#x670D;&#x52A1;&#x7AEF;</strong></p>
+<p>&#x4E3B;&#x8981;&#x5305;&#x62EC;</p>
+<ol>
+<li>&#x521D;&#x59CB;&#x5316;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x670D;&#x52A1;&#x7AEF;</li>
+<li>&#x521D;&#x59CB;&#x5316;&#x670D;&#x52A1;&#x7AEF;&#x5904;&#x7406;&#x5668;</li>
+<li>&#x670D;&#x52A1;&#x7AEF;&#x534F;&#x8BAE;&#x5347;&#x7EA7;&#x4E0E;&#x5904;&#x7406;</li>
+</ol>
+<p>&#x521D;&#x59CB;&#x5316;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x670D;&#x52A1;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;    public void start() {</span><br><span class="line">        HookedExecutors.newSingleThreadExecutor().submit(() -&gt;{</span><br><span class="line">            log.info(&quot;&#x5F00;&#x59CB;&#x542F;&#x52A8;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x5668;&#xFF0C;&#x76D1;&#x542C;&#x7AEF;&#x53E3;&#xFF1A;{}&quot;, auditProxyConfig.getProxyServerPort());</span><br><span class="line">            EventLoopGroup bossGroup = new NioEventLoopGroup(auditProxyConfig.getBossThreadCount());</span><br><span class="line">            EventLoopGroup workerGroup = new NioEventLoopGroup(auditProxyConfig.getWorkThreadCount());</span><br><span class="line">            try {</span><br><span class="line">                ServerBootstrap b = new ServerBootstrap();</span><br><span class="line">                b.group(bossGroup, workerGroup)</span><br><span class="line">                    .channel(NioServerSocketChannel.class)</span><br><span class="line">                    .handler(new LoggingHandler(LogLevel.DEBUG))</span><br><span class="line">                    .childHandler(new ServerChannelInitializer(auditProxyConfig))</span><br><span class="line">                    .bind(auditProxyConfig.getProxyServerPort()).sync().channel().closeFuture().sync();</span><br><span class="line">            } catch (InterruptedException e) {</span><br><span class="line">                log.error(&quot;&#x4EE3;&#x7406;&#x670D;&#x52A1;&#x5668;&#x88AB;&#x4E2D;&#x65AD;.&quot;, e);</span><br><span class="line">                Thread.currentThread().interrupt();</span><br><span class="line">            } finally {</span><br><span class="line">                bossGroup.shutdownGracefully();</span><br><span class="line">                workerGroup.shutdownGracefully();</span><br><span class="line">            }</span><br><span class="line">        });</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x521D;&#x59CB;&#x5316;&#x76F8;&#x5BF9;&#x7B80;&#x5355;&#xFF0C;</p>
+<ol>
+<li>bossGroup&#x7EBF;&#x7A0B;&#x7EC4;&#xFF0C;&#x8D1F;&#x8D23;&#x63A5;&#x6536;&#x8BF7;&#x6C42;</li>
+<li>workerGroup&#x7EBF;&#x7A0B;&#x7EC4;&#xFF0C;&#x8D1F;&#x8D23;&#x5904;&#x7406;&#x63A5;&#x6536;&#x7684;&#x8BF7;&#x6C42;&#x6570;&#x636E;&#xFF0C;&#x5177;&#x4F53;&#x5904;&#x7406;&#x903B;&#x8F91;&#x5C01;&#x88C5;&#x5728;ServerChannelInitializer&#x4E2D;&#x3002;</li>
+</ol>
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x670D;&#x52A1;&#x7684;&#x8BF7;&#x6C42;&#x5904;&#x7406;&#x5668;&#x5728; ServerChannelInitializer&#x4E2D;&#x5B9A;&#x4E49;&#x4E3A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">java&#x590D;&#x5236;&#x4EE3;&#x7801;    @Override</span><br><span class="line">    protected void initChannel(SocketChannel ch) throws Exception {</span><br><span class="line">        ch.pipeline()</span><br><span class="line">            .addLast(new HttpRequestDecoder())</span><br><span class="line">            .addLast(new HttpObjectAggregator(auditProxyConfig.getMaxRequestSize()))</span><br><span class="line">            .addLast(new ServerChannelHandler(auditProxyConfig));</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x9996;&#x5148;&#x89E3;&#x6790;HTTP&#x8BF7;&#x6C42;&#xFF0C;&#x7136;&#x540E;&#x505A;&#x805A;&#x6279;&#x7684;&#x5904;&#x7406;&#xFF0C;&#x6700;&#x540E;ServerChannelHandler&#x5B9E;&#x73B0;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x534F;&#x8BAE;&#xFF1B;</p>
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x534F;&#x8BAE;&#xFF1A;</p>
+<ol>
+<li>&#x5224;&#x5B9A;&#x662F;&#x5426;&#x662F;CONNECT&#x8BF7;&#x6C42;&#xFF0C;&#x5982;&#x679C;&#x662F;&#xFF0C;&#x4F1A;&#x5B58;&#x50A8;CONNECT&#x8BF7;&#x6C42;&#xFF1B;&#x6682;&#x505C;&#x8BFB;&#x53D6;&#xFF0C;&#x53D1;&#x9001;&#x4EE3;&#x7406;&#x6210;&#x529F;&#x7684;&#x54CD;&#x5E94;&#xFF0C;&#x5E76;&#x5728;&#x56DE;&#x5E94;&#x6210;&#x529F;&#x540E;&#xFF0C;&#x5347;&#x7EA7;&#x534F;&#x8BAE;&#xFF1B;</li>
+<li>&#x5347;&#x7EA7;&#x5F15;&#x64CE;&#xFF0C;&#x672C;&#x8D28;&#x4E0A;&#x662F;&#x91C7;&#x7528;SslSocketChannel&#x5BF9;&#x539F;SocketChannel&#x505A;&#x900F;&#x660E;&#x7684;&#x5C01;&#x88C5;&#xFF1B;</li>
+<li>&#x6700;&#x540E;&#x6839;&#x636E;CONNECT&#x8BF7;&#x6C42;&#x8FDE;&#x63A5;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#xFF1B;</li>
+</ol>
+<p>&#x8BE6;&#x7EC6;&#x5B9E;&#x73B0;&#x4E3A;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;    @Override</span><br><span class="line">    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {</span><br><span class="line">        FullHttpRequest request = (FullHttpRequest)msg;</span><br><span class="line"></span><br><span class="line">        try {</span><br><span class="line">            if (isConnectRequest(request)) {</span><br><span class="line">                // CONNECT &#x8BF7;&#x6C42;&#xFF0C;&#x5B58;&#x50A8;&#x5F85;&#x5904;&#x7406;</span><br><span class="line">                saveConnectRequest(ctx, request);</span><br><span class="line"></span><br><span class="line">                // &#x7981;&#x6B62;&#x8BFB;&#x53D6;</span><br><span class="line">                ctx.channel().config().setAutoRead(false);</span><br><span class="line"></span><br><span class="line">                // &#x53D1;&#x9001;&#x56DE;&#x5E94;</span><br><span class="line">                connectionEstablished(ctx, ctx.newPromise().addListener(future -&gt; {</span><br><span class="line">                    if (future.isSuccess()) {</span><br><span class="line">                        // &#x5347;&#x7EA7;</span><br><span class="line">                        if (isSslRequest(request) &amp;&amp; !isUpgraded(ctx)) {</span><br><span class="line">                            upgrade(ctx);</span><br><span class="line">                        }</span><br><span class="line"></span><br><span class="line">                        // &#x5F00;&#x653E;&#x6D88;&#x606F;&#x8BFB;&#x53D6;</span><br><span class="line">                        ctx.channel().config().setAutoRead(true);</span><br><span class="line">                        ctx.read();</span><br><span class="line">                    }</span><br><span class="line">                }));</span><br><span class="line"></span><br><span class="line">            } else {</span><br><span class="line">                // &#x5176;&#x4ED6;&#x8BF7;&#x6C42;&#xFF0C;&#x5224;&#x5B9A;&#x662F;&#x5426;&#x5DF2;&#x5347;&#x7EA7;</span><br><span class="line">                if (!isUpgraded(ctx)) {</span><br><span class="line"></span><br><span class="line">                    // &#x5347;&#x7EA7;&#x5F15;&#x64CE;</span><br><span class="line">                    upgrade(ctx);</span><br><span class="line">                }</span><br><span class="line"></span><br><span class="line">                // &#x8FDE;&#x63A5;&#x8FDC;&#x7A0B;</span><br><span class="line">                connectRemote(ctx, request);</span><br><span class="line">            }</span><br><span class="line">        } finally {</span><br><span class="line">            ctx.fireChannelRead(msg);</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p><strong>2 &#x4EE3;&#x7406;&#x7F51;&#x5173;&#x5BA2;&#x6237;&#x7AEF;</strong></p>
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x670D;&#x52A1;&#x7AEF;&#x9700;&#x8981;&#x8FDE;&#x63A5;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#xFF0C;&#x8FDB;&#x5165;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x5BA2;&#x6237;&#x7AEF;&#x90E8;&#x5206;&#x3002;</p>
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x5BA2;&#x6237;&#x7AEF;&#x521D;&#x59CB;&#x5316;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;    /**</span><br><span class="line">     * &#x521D;&#x59CB;&#x5316;&#x8FDC;&#x7A0B;&#x8FDE;&#x63A5;</span><br><span class="line">     * @param ctx</span><br><span class="line">     * @param httpRequest</span><br><span class="line">     */</span><br><span class="line">    protected void connectRemote(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {</span><br><span class="line">        Bootstrap b = new Bootstrap();</span><br><span class="line">        b.group(ctx.channel().eventLoop()) // use the same EventLoop</span><br><span class="line">            .channel(ctx.channel().getClass())</span><br><span class="line">            .handler(new ClientChannelInitializer(auditProxyConfig, ctx, safeCopy(httpRequest)));</span><br><span class="line"></span><br><span class="line">        // &#x52A8;&#x6001;&#x8FDE;&#x63A5;&#x4EE3;&#x7406;</span><br><span class="line">        FullHttpRequest originRequest = ctx.channel().attr(CONNECT_REQUEST).get();</span><br><span class="line">        if (originRequest == null) {</span><br><span class="line">            originRequest = httpRequest;</span><br><span class="line">        }</span><br><span class="line">        ChannelFuture cf = b.connect(new InetSocketAddress(calculateHost(originRequest), calculatePort(originRequest)));</span><br><span class="line">        Channel cch = cf.channel();</span><br><span class="line">        ctx.channel().attr(CLIENT_CHANNEL).set(cch);    </span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#xFF1A;</p>
+<ol>
+<li>&#x590D;&#x7528;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x670D;&#x52A1;&#x7AEF;&#x7684;workerGroup&#x7EBF;&#x7A0B;&#x7EC4;&#xFF1B;</li>
+<li>&#x8BF7;&#x6C42;&#x548C;&#x7ED3;&#x679C;&#x7684;&#x5904;&#x7406;&#x5C01;&#x88C5;&#x5728;ClientChannelInitializer&#xFF1B;</li>
+<li>&#x8FDE;&#x63A5;&#x7684;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#x7684;HOST&#x548C;PORT&#x5728;&#x670D;&#x52A1;&#x7AEF;&#x6536;&#x5230;&#x7684;&#x8BF7;&#x6C42;&#x4E2D;&#x53EF;&#x4EE5;&#x89E3;&#x6790;&#x5230;&#x3002;</li>
+</ol>
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x5BA2;&#x6237;&#x7AEF;&#x7684;&#x5904;&#x7406;&#x5668;&#x7684;&#x521D;&#x59CB;&#x5316;&#x903B;&#x8F91;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">scss&#x590D;&#x5236;&#x4EE3;&#x7801;    @Override</span><br><span class="line">    protected void initChannel(SocketChannel ch) throws Exception {</span><br><span class="line">        SocketAddress socketAddress = calculateProxy();</span><br><span class="line">        if (!Objects.isNull(socketAddress)) {</span><br><span class="line">            ch.pipeline().addLast(new HttpProxyHandler(calculateProxy(), auditProxyConfig.getUserName(), auditProxyConfig</span><br><span class="line">                .getPassword()));</span><br><span class="line">        }</span><br><span class="line">        if (isSslRequest()) {</span><br><span class="line">            String host = host();</span><br><span class="line">            int port = port();</span><br><span class="line">            if (StringUtils.isNoneBlank(host) &amp;&amp; port &gt; 0) {</span><br><span class="line">                ch.pipeline().addLast(new SslHandler(sslEngine(host, port)));</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">        ch.pipeline().addLast(new ClientChannelHandler(clientContext, httpRequest));</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+
+<p>&#x4EE5;&#x4E0A;&#xFF1A;</p>
+<ol>
+<li>&#x5982;&#x679C;&#x4E0B;&#x6E38;&#x662F;&#x4EE3;&#x7406;&#xFF0C;&#x90A3;&#x4E48;&#x4F1A;&#x91C7;&#x7528;HttpProxyHandler&#xFF0C;&#x7ECF;&#x7531;&#x4E0B;&#x6E38;&#x4EE3;&#x7406;&#x4E0E;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#x901A;&#x4FE1;&#xFF1B;</li>
+<li>&#x5982;&#x679C;&#x5F53;&#x524D;&#x9700;&#x8981;&#x5347;&#x7EA7;&#x4E3A;SSL&#x534F;&#x8BAE;&#xFF0C;&#x4F1A;&#x5BF9;SocketChannel&#x505A;&#x900F;&#x660E;&#x7684;&#x5C01;&#x88C5;&#xFF0C;&#x5B9E;&#x73B0;SSL&#x901A;&#x4FE1;&#x3002;</li>
+<li>&#x6700;&#x540E;&#xFF0C;ClientChannelHandler&#x53EA;&#x662F;&#x7B80;&#x5355;&#x6D88;&#x606F;&#x7684;&#x8F6C;&#x53D1;&#xFF1B;&#x552F;&#x4E00;&#x7684;&#x4E0D;&#x540C;&#x662F;&#xFF0C;&#x7531;&#x4E8E;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x62E6;&#x622A;&#x4E86;&#x7B2C;&#x4E00;&#x4E2A;&#x8BF7;&#x6C42;&#xFF0C;&#x6B64;&#x65F6;&#x9700;&#x8981;&#x5C06;&#x62E6;&#x622A;&#x7684;&#x8BF7;&#x6C42;&#xFF0C;&#x8F6C;&#x53D1;&#x5230;&#x670D;&#x52A1;&#x7AEF;&#x3002;</li>
+</ol>
+<h1 id="&#x56DB;-&#x5176;&#x4ED6;&#x95EE;&#x9898;"><a href="#&#x56DB;-&#x5176;&#x4ED6;&#x95EE;&#x9898;" class="headerlink" title="&#x56DB; &#x5176;&#x4ED6;&#x95EE;&#x9898;"></a>&#x56DB; &#x5176;&#x4ED6;&#x95EE;&#x9898;</h1><p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x5B9E;&#x73B0;&#x53EF;&#x80FD;&#x9762;&#x4E34;&#x7684;&#x95EE;&#x9898;&#xFF1A;</p>
+<p><strong>1 &#x5185;&#x5B58;&#x95EE;&#x9898;</strong></p>
+<p>&#x4EE3;&#x7406;&#x901A;&#x5E38;&#x9762;&#x4E34;&#x7684;&#x95EE;&#x9898;&#x662F;OOM&#x3002;&#x672C;&#x6587;&#x5728;&#x5B9E;&#x73B0;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x65F6;&#x4FDD;&#x8BC1;&#x5185;&#x5B58;&#x4E2D;&#x7F13;&#x5B58;&#x65F6;&#x5F53;&#x524D;&#x6B63;&#x5728;&#x5904;&#x7406;&#x7684;HTTP/HTTPS&#x8BF7;&#x6C42;&#x4F53;&#x3002;&#x5185;&#x5B58;&#x4F7F;&#x7528;&#x7684;&#x4E0A;&#x9650;&#x7406;&#x8BBA;&#x4E0A;&#x4E3A;&#x5B9E;&#x65F6;&#x5904;&#x7406;&#x7684;&#x8BF7;&#x6C42;&#x6570;&#x91CF;*&#x8BF7;&#x6C42;&#x4F53;&#x7684;&#x5E73;&#x5747;&#x5927;&#x5C0F;&#xFF0C;HTTP/HTTPS&#x7684;&#x8BF7;&#x6C42;&#x7ED3;&#x679C;&#xFF0C;&#x76F4;&#x63A5;&#x4F7F;&#x7528;&#x5806;&#x5916;&#x5185;&#x5B58;&#xFF0C;&#x96F6;&#x62F7;&#x8D1D;&#x8F6C;&#x53D1;&#x3002;</p>
+<p><strong>2 &#x6027;&#x80FD;&#x95EE;&#x9898;</strong></p>
+<p>&#x6027;&#x80FD;&#x95EE;&#x9898;&#x4E0D;&#x5E94;&#x63D0;&#x65E9;&#x8003;&#x8651;&#x3002;&#x672C;&#x6587;&#x4F7F;&#x7528;NETTY&#x6846;&#x67B6;&#x5B9E;&#x73B0;&#x7684;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#xFF0C;&#x5185;&#x90E8;&#x5927;&#x91CF;&#x4F7F;&#x7528;&#x5806;&#x5916;&#x5185;&#x5B58;&#xFF0C;&#x96F6;&#x62F7;&#x8D1D;&#x8F6C;&#x53D1;&#xFF0C;&#x907F;&#x514D;&#x4E86;&#x6027;&#x80FD;&#x95EE;&#x9898;&#x3002;</p>
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x4E00;&#x671F;&#x4E0A;&#x7EBF;&#x540E;&#x66FE;&#x9762;&#x4E34;&#x4E00;&#x4E2A;&#x957F;&#x8FDE;&#x63A5;&#x5BFC;&#x81F4;&#x7684;&#x6027;&#x80FD;&#x95EE;&#x9898;&#xFF0C;</p>
+<ol>
+<li>CLIENT&#x548C;SERVER&#x5EFA;&#x7ACB;TCP&#x957F;&#x8FDE;&#x63A5;&#x540E;&#xFF08;&#x6BD4;&#x5982;&#xFF0C;TCP&#x5FC3;&#x8DF3;&#x68C0;&#x6D4B;&#xFF09;&#xFF0C;&#x901A;&#x5E38;&#x8981;&#x4E48;&#x662F;CLIENT&#x5173;&#x95ED;TCP&#x8FDE;&#x63A5;&#xFF0C;&#x6216;&#x8005;&#x662F;SERVER&#x5173;&#x95ED;&#xFF1B;</li>
+<li>&#x5982;&#x679C;&#x53CC;&#x65B9;&#x957F;&#x65F6;&#x95F4;&#x5360;&#x7528;TCP&#x8FDE;&#x63A5;&#x8D44;&#x6E90;&#x800C;&#x4E0D;&#x5173;&#x95ED;&#xFF0C;&#x5C31;&#x4F1A;&#x5BFC;&#x81F4;SOCKET&#x8D44;&#x6E90;&#x6CC4;&#x6F0F;&#xFF1B;&#x73B0;&#x8C61;&#x662F;&#xFF1A;CPU&#x8D44;&#x6E90;&#x7206;&#x6EE1;&#xFF0C;&#x5904;&#x7406;&#x7A7A;&#x95F2;&#x8FDE;&#x63A5;&#xFF1B;&#x65B0;&#x8FDE;&#x63A5;&#x65E0;&#x6CD5;&#x5EFA;&#x7ACB;&#xFF1B;</li>
+</ol>
+<p>&#x4F7F;&#x7528;IdleStateHandler&#x5B9A;&#x65F6;&#x76D1;&#x63A7;&#x7A7A;&#x95F2;&#x7684;TCP&#x8FDE;&#x63A5;&#xFF0C;&#x5F3A;&#x5236;&#x5173;&#x95ED;&#xFF1B;&#x89E3;&#x51B3;&#x4E86;&#x8BE5;&#x95EE;&#x9898;&#x3002;</p>
+<h1 id="&#x4E94;-&#x603B;&#x7ED3;"><a href="#&#x4E94;-&#x603B;&#x7ED3;" class="headerlink" title="&#x4E94; &#x603B;&#x7ED3;"></a>&#x4E94; &#x603B;&#x7ED3;</h1><p>&#x672C;&#x6587;&#x805A;&#x7126;&#x4E8E;&#x7EDF;&#x4E00;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x7684;&#x6838;&#x5FC3;&#xFF0C;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x4E86;&#x4EE3;&#x7406;&#x76F8;&#x5173;&#x7684;&#x6280;&#x672F;&#x539F;&#x7406;&#x3002;</p>
+<p>&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x7684;&#x7BA1;&#x7406;&#x90E8;&#x5206;&#xFF0C;&#x53EF;&#x4EE5;&#x5728;ServerHandler&#x90E8;&#x5206;&#x7EF4;&#x62A4;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x5728;ClientHandler&#x90E8;&#x5206;&#x7EF4;&#x62A4;&#xFF1B;</p>
+<ol>
+<li>ServerHandler&#x53EF;&#x4EE5;&#x62E6;&#x622A;&#x8F6C;&#x6362;&#x8BF7;&#x6C42;</li>
+<li>ClientHanlder&#x53EF;&#x63A7;&#x5236;&#x8BF7;&#x6C42;&#x7684;&#x51FA;&#x53E3;</li>
+</ol>
+<p>&#x6CE8;&#xFF1A;&#x672C;&#x6587;&#x4F7F;&#x7528;Netty&#x7684;&#x96F6;&#x62F7;&#x8D1D;&#xFF1B;&#x5B58;&#x50A8;&#x8BF7;&#x6C42;&#x4EE5;&#x89E3;&#x6790;&#x5904;&#x7406;&#xFF1B;&#x4F46;&#x5E76;&#x672A;&#x5B9E;&#x73B0;&#x5BF9;RESPONSE&#x7684;&#x5904;&#x7406;&#xFF1B;&#x4E5F;&#x5C31;&#x662F;RESPONSE&#x662F;&#x76F4;&#x63A5;&#x901A;&#x8FC7;&#x7F51;&#x5173;&#xFF0C;&#x6B64;&#x65B9;&#x9762;&#x907F;&#x514D;&#x4E86;&#x5E38;&#x89C1;&#x7684;&#x4EE3;&#x7406;&#x5B9E;&#x73B0;&#xFF0C;&#x5185;&#x5B58;&#x6CC4;&#x6F0F;OOM&#x76F8;&#x5173;&#x95EE;&#x9898;&#xFF1B;</p>
+<p>&#x6700;&#x540E;&#xFF0C;&#x672C;&#x6587;&#x5B9E;&#x73B0;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x540E;&#xFF0C;&#x9488;&#x5BF9;&#x4EE3;&#x7406;&#x7684;&#x8D44;&#x6E90;&#x548C;&#x6D41;&#x7ECF;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x7684;&#x8BF7;&#x6C42;&#x505A;&#x4E86;&#x76F8;&#x5E94;&#x7684;&#x63A7;&#x5236;&#xFF0C;&#x4E3B;&#x8981;&#x5305;&#x62EC;&#xFF1A;</p>
+<ol>
+<li>&#x5F53;&#x9047;&#x5230;&#x9759;&#x6001;&#x8D44;&#x6E90;&#x7684;&#x8BF7;&#x6C42;&#x65F6;&#xFF0C;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x4F1A;&#x76F4;&#x63A5;&#x8BF7;&#x6C42;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;&#xFF0C;&#x4E0D;&#x4F1A;&#x901A;&#x8FC7;&#x4E0B;&#x6E38;&#x4EE3;&#x7406;</li>
+<li>&#x5F53;&#x8BF7;&#x6C42;HEADER&#x4E2D;&#x5305;&#x542B;&#x5730;&#x57DF;&#x6807;&#x8BC6;&#x65F6;&#xFF0C;&#x4EE3;&#x7406;&#x7F51;&#x5173;&#x4F1A;&#x5C3D;&#x529B;&#x4FDD;&#x8BC1;&#x8BF7;&#x6C42;&#x6253;&#x5165;&#x6307;&#x5B9A;&#x7684;&#x5730;&#x57DF;&#x4EE3;&#x7406;&#xFF0C;&#x7ECF;&#x7531;&#x5730;&#x57DF;&#x4EE3;&#x7406;&#x8BBF;&#x95EE;&#x8FDC;&#x7A0B;&#x670D;&#x52A1;&#x7AEF;</li>
+</ol>
+<p><a href="/external_links/3259e15ec2e83a4a451a2620ac29ecb7.html" target="blank" rel="noopener">&#x539F;&#x6587;&#x94FE;&#x63A5;</a></p>
+<p>&#x672C;&#x6587;&#x4E3A;&#x963F;&#x91CC;&#x4E91;&#x539F;&#x521B;&#x5185;&#x5BB9;&#xFF0C;&#x672A;&#x7ECF;&#x5141;&#x8BB8;&#x4E0D;&#x5F97;&#x8F6C;&#x8F7D;&#x3002;</p>
+<p><strong>&#x672C;&#x6587;&#x8F6C;&#x8F7D;&#x81EA;:</strong> <a href="/external_links/469e6faca2efefe2fac69d0f4bb6a7a8.html" target="blank" rel="noopener">&#x6398;&#x91D1;</a></p>
+<p><em><a href="https://dev.newban.cn/">&#x5F00;&#x53D1;&#x8005;&#x535A;&#x5BA2; &#x2013; &#x548C;&#x5F00;&#x53D1;&#x76F8;&#x5173;&#x7684; &#x8FD9;&#x91CC;&#x5168;&#x90FD;&#x6709;</a></em></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="tags/云原生-分布式/" rel="tag"># 云原生,分布式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="7034713368988975140.html" rel="next" title="Springboot异步任务执行及监控 1 开启异步支持 2">
+                <i class="fa fa-chevron-left"></i> Springboot异步任务执行及监控 1 开启异步支持 2
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="7034717398494101535.html" rel="prev" title="【BUG日记】【MySQL】多个排序字段，是有优先级的，先来">
+                【BUG日记】【MySQL】多个排序字段，是有优先级的，先来 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    <!-- 有瓣音频文章内嵌广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6145016388"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+  <!-- 有瓣音频信息流广告 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-6t+ed+2i-1n-4w" data-ad-client="ca-pub-2626449904708114" data-ad-slot="6455528644"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">开发者博客</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="https://dev.newban.cn/archives/">
+              
+                  <span class="site-state-item-count">3990</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1304</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一-问题背景"><span class="nav-number">1.</span> <span class="nav-text">一 问题背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二-技术路线"><span class="nav-number">2.</span> <span class="nav-text">二 技术路线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三-设计与实现"><span class="nav-number">3.</span> <span class="nav-text">三 设计与实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四-其他问题"><span class="nav-number">4.</span> <span class="nav-text">四 其他问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五-总结"><span class="nav-number">5.</span> <span class="nav-text">五 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">开发者博客</span>
+  <div>
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+  </div>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+  <script type="text/javascript" async src="js/src/mermaid.min.js"></script>
+  <script>
+  if (window.mermaid) {
+        var mermaid_config = {
+            startOnLoad: true,
+            theme: 'default',
+            flowchart:{
+                useMaxWidth: false,
+                htmlLabels: true
+            }                
+        }
+        mermaid.initialize(mermaid_config);
+  }
+  </script>
+  
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
